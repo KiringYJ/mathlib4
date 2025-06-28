@@ -158,6 +158,23 @@ theorem comap_generateFrom {f : α → β} {s : Set (Set β)} :
       generateFrom_le fun _t hts => GenerateMeasurable.basic _ <| mem_image_of_mem _ <| hts)
     (generateFrom_le fun _t ⟨u, hu, Eq⟩ => Eq ▸ ⟨u, GenerateMeasurable.basic _ hu, rfl⟩)
 
+/-- If `m` is a strictly monotone sequence of σ-algebras, then there exists a sequence of disjoint
+sets `C n` such that `C n` is `m (n + 1)`-measurable but not `m n`-measurable. -/
+lemma exists_disjoint_measurable_set_of_strict_mono {m : ℕ → MeasurableSpace α}
+    (h_mono : StrictMono m) :
+    ∃ C : ℕ → Set α,
+      (∀ n, MeasurableSet[m (n + 1)] (C n)) ∧
+      (∀ n, ¬ MeasurableSet[m n] (C n)) ∧
+      Pairwise (fun i j => Disjoint (C i) (C j)) := by
+  sorry
+
+/-- A theorem by Broughton and Huff: the union of a strictly increasing sequence of σ-algebras is
+not a σ-algebra. -/
+theorem iUnion_of_strict_mono_sigma_algebra_is_not_a_sigma_algebra {m : ℕ → MeasurableSpace α}
+  (h_mono : StrictMono m) :
+  ¬∃ m' : MeasurableSpace α, {s | MeasurableSet[m'] s} = ⋃ n, { s | MeasurableSet[m n] s } := by
+  sorry
+
 end MeasurableSpace
 
 section MeasurableFunctions
