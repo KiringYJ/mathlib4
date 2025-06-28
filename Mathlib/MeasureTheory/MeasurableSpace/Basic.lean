@@ -170,8 +170,8 @@ lemma exists_disjoint_measurable_set_of_strict_mono {m : ℕ → MeasurableSpace
 
 /-- A theorem by Broughton and Huff: the union of a strictly increasing sequence of σ-algebras is
 not a σ-algebra. -/
-theorem iUnion_of_strict_mono_sigma_algebra_is_not_a_sigma_algebra {m : ℕ → MeasurableSpace α}
-  (h_mono : StrictMono m) :
+theorem iUnion_of_strict_mono_measurable_space_is_not_a_measurable_space
+  {m : ℕ → MeasurableSpace α} (h_mono : StrictMono m) :
   ¬∃ m' : MeasurableSpace α, {s | MeasurableSet[m'] s} = ⋃ n, { s | MeasurableSet[m n] s } := by
   sorry
 
