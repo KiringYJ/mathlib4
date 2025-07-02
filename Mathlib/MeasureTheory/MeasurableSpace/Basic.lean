@@ -13,6 +13,7 @@ import Mathlib.Order.BooleanSubalgebra
 import Mathlib.Order.BooleanAlgebra.Defs
 import Mathlib.Order.BooleanAlgebra.Basic
 import Mathlib.Data.Set.Lattice
+import Mathlib.Order.Bounds.OrderIso
 /-!
 # Measurable spaces and measurable functions
 
@@ -165,19 +166,149 @@ theorem comap_generateFrom {f : α → β} {s : Set (Set β)} :
 
 /-- The measurable sets form a Boolean subalgebra of the power set. -/
 instance instBooleanSubalgebra {m : MeasurableSpace α}: BooleanSubalgebra (Set α) where
-  carrier := {s | MeasurableSet[m] s}
+  carrier := {s | MeasurableSet s}
   supClosed' := fun _ hs _ ht => .union hs ht
   infClosed' := fun _ hs _ ht => .inter hs ht
   compl_mem' := .compl
   bot_mem' := .empty
 
-instance instBooleanAlgebra {m : MeasurableSpace α} :
+instance {m : MeasurableSpace α} :
     BooleanAlgebra { s | MeasurableSet[m] s } :=
   BooleanSubalgebra.instBooleanAlgebraCoe instBooleanSubalgebra
 
-theorem generateFrom_isAtomistic (P : Partition (univ : Set α)) :
-  IsAtomistic { s | MeasurableSet[generateFrom P.parts] s } := by
-  sorry
+theorem generateFrom_partition_isAtomistic (P : Partition (univ : Set α)) :
+  IsAtomistic { s | MeasurableSet[generateFrom P.parts] s } where
+  isLUB_atoms := by
+    let m := generateFrom P.parts
+    intro b
+    rcases b with ⟨b, hb⟩
+    have h_P_IsAtom :∀ a,((a∈ P.parts) → (a ≠ ⊥∧((∀b, ((MeasurableSet[m] b) → (b < a →  b = ⊥)))))) :=by
+      intro a
+      intro ha
+      constructor
+      · apply P.ne_bot_of_mem
+        exact ha
+      · intro b'
+        apply generateFrom_induction
+        · intro _ ht _ ht_l
+          exfalso
+          have h_disj := P.disjoint ht ha (ne_of_lt ht_l)
+          have := h_disj.eq_bot_of_le ht_l.le
+          rw [this] at ht
+          apply P.bot_notMem
+          exact ht
+        · simp
+        · intro t ht_meas ht_h ht_l
+          rw [← compl_compl a, compl_lt_compl_iff_lt] at ht_l
+          have ht_ga : a < t :=
+            sorry
+          have h_univ_le : univ ≤ t := by
+            rw [← union_compl_self a]
+            exact Set.union_subset ht_ga.le ht_l.le
+          rw [← le_antisymm h_univ_le le_top, Set.compl_univ, bot_eq_empty]
+        · sorry
+    have h_inter_imp_sub:∀a∈ P.parts,((a∩b)≠∅ → a⊆b) := by
+      intro a ha
+      intro hinter
+      have ha_iff: a ≠ ⊥ ∧ ∀ (b : Set α), MeasurableSet b → b < a → b = ⊥ := by
+        apply h_P_IsAtom
+        exact ha
+      have h_ab : MeasurableSet[m] (a \ b):= by
+        apply MeasurableSet.diff
+        · apply measurableSet_generateFrom
+          exact ha
+        · simp at hb
+          exact hb
+      have hdiff:  (a \ b) < a:= by
+        simp
+        rw [nonempty_iff_ne_empty]
+        exact hinter
+      have hdiffempty := ha_iff.right (a \ b) h_ab hdiff
+      rw [← diff_eq_empty]
+      exact hdiffempty
+    let s := {a | a ∈ P.parts ∧ a ≤ b}
+    have h_IsLUB_s_b: IsLUB s b:= by
+      have : b = sSup s := by
+        dsimp
+        apply Subset.antisymm
+        · intro x hx
+          rw [mem_sUnion]
+          have ht_exists : ∃ t ∈ P, x ∈ t := by
+            change x ∈ ⋃₀ P.parts
+            have :(⋃₀ P.parts) = univ:= P.sSup_eq'
+            rw [this]
+            simp
+          obtain ⟨t,ht⟩ := ht_exists
+          use t
+          have htb : t ∩ b ≠ ∅ := by
+            refine nonempty_iff_ne_empty.mp ?_
+            refine inter_nonempty.mpr ?_
+            use x
+            constructor
+            exact ht.right
+            exact hx
+          constructor
+          · rw [mem_setOf]
+            constructor
+            · exact ht.left
+            · exact h_inter_imp_sub t ht.left htb
+          · exact ht.right
+        · intro x hx
+          rw [mem_sUnion] at hx
+          obtain ⟨t, ht⟩:=hx
+          rw [mem_setOf] at ht
+          apply ht.left.right
+          exact ht.right
+      rw [this]
+      apply isLUB_sSup
+    let f := OrderEmbedding.subtype MeasurableSet[m]
+    use s.preimage f
+    constructor
+    · have hf: ∀ {x y : Subtype MeasurableSet[m]}, f x ≤ f y ↔ x ≤ y := by
+        intro x y
+        apply f.le_iff_le
+      apply IsLUB.of_image hf
+      rw [Set.image_preimage_eq_inter_range]
+      dsimp [f]
+      have : (s ∩ range fun {x:Subtype MeasurableSet[m]} ↦ ↑x) = s := by
+        rw [Set.inter_eq_left]
+        rw [range]
+        intro x hx
+        rw [mem_setOf]
+        have : MeasurableSet[m] x:= by
+          apply measurableSet_generateFrom
+          rw [mem_setOf] at hx
+          exact hx.left
+        use ⟨x, this⟩
+      rw [this]
+      exact h_IsLUB_s_b
+    · intro a ha
+      rw [mem_preimage] at ha
+      have ha_parts: f a ∈ P.parts := by
+        rw [mem_setOf] at ha
+        exact ha.left
+      rw [IsAtom]
+      constructor
+      · by_contra h_bot
+        have h_coer_bot : (f a)= ⊥ := by
+          rw [h_bot]
+          dsimp [f]
+          rfl
+        exact ((h_P_IsAtom (f a)) ha_parts).left h_coer_bot
+      · intro b' hb'
+        rcases b' with ⟨b'val,hb'_meas⟩
+        simp at hb'_meas
+        have h_l_lift : b'val < f a:=by
+          change f ⟨b'val, hb'_meas⟩ < f a
+          apply f.strictMono
+          exact hb'
+        have h_coer_bot : (f ⟨b'val, hb'_meas⟩ )= ⊥ := by
+          have := ((h_P_IsAtom (f a)) ha_parts).right b'val hb'_meas h_l_lift
+          dsimp [f]
+          exact this
+        dsimp [f] at h_coer_bot
+        simp
+        exact h_coer_bot
 
 /--
 If `F : δ → Set α` is pairwise-disjoint and covers the whole space,
