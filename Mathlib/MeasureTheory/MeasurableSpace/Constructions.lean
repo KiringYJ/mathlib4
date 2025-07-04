@@ -329,7 +329,7 @@ Then the measurable atom of a point `x` (with respect to `m`) is already
 the intersection of **generator** sets in `C` that contain `x`. -/
 lemma measurableAtom_generateFrom {C : Set (Set β)} (hC : MeasureTheory.IsSetAlgebra C) {x : β} :
     (@measurableAtom β (MeasurableSpace.generateFrom C) x) =
-      ⋂₀ {s : Set β | s ∈ C ∧ x ∈ s} := by
+      ⋂ (s ∈ C) (x ∈ s), s := by
   sorry
 
 end Atoms
