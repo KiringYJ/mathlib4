@@ -1,0 +1,29 @@
+source:
+  repo: KiringYJ/agent-workbench
+  branch: main
+
+profile: research
+
+modules:
+  - base
+  - prompting
+  - git
+  - repository-workspace
+  - security
+  - testing
+  - review
+  - workflows
+  - domains/research
+
+targets:
+  guide: true
+  claude: true
+  codex: true
+  gemini: true
+  opencode: true
+  portable_prompts: true
+  portable_skills: true
+
+preserve:
+  project_file: AI_AGENT_PROJECT.md
+  manual_blocks: true
