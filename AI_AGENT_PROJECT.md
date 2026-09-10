@@ -2,10 +2,10 @@
 
 ## Purpose
 
-This fork is a personal downstream distribution of mathlib. It uses the
-upstream implementation and theorem base while developing an independent,
-mathematician-facing library whose public API prioritizes mathematical fidelity
-and quality of life.
+This fork is a personal, maintainer-curated downstream distribution of mathlib.
+It uses the upstream implementation and theorem base while developing an
+independent, mathematician-facing library whose public API prioritizes
+mathematical fidelity and quality of life.
 
 Fork-only changes are not intended for submission to upstream. Do not preserve,
 split, or rewrite them for pull-request acceptability. Upstream remains a source
@@ -43,7 +43,7 @@ Keep logically independent changes in separate, semantically coherent commits
 on `dev`. This makes long-term upstream reconciliation, review, and rollback
 auditable even when the personal branch has accumulated many changes.
 
-## Upstream Reconciliation Workflow
+## Mathlib Baseline Reconciliation Workflow
 
 1. Fetch `upstream`, switch to `master`, and run
    `git merge --ff-only upstream/master`.
@@ -59,6 +59,34 @@ auditable even when the personal branch has accumulated many changes.
 
 After an explicitly authorized publication, push only to `origin`. Never open
 or prepare an upstream pull request, and never push to `upstream`.
+
+## Curated External Source Intake
+
+This repository does not use an open pull-request contribution model. The
+maintainer may discover and select material from multiple external
+formalization repositories. Suggestions are pointers, not admission promises;
+there is no contributor entitlement, completeness promise, review deadline, or
+permanent backlog obligation.
+
+Do not reject mathematically valid and legally ingestible content merely because
+it is small, niche, or presently uses a poor API. Separate admission from
+canonicalization: audit the mathematical content and provenance first, then
+migrate selected material to this fork's faithful API and conventions. API,
+namespace, import, or proof-style defects are maintainer integration work. They
+do not justify preserving a second noncanonical public interface.
+
+Before copying or adapting external material, verify the exact source revision,
+license and redistribution conditions, per-file authorship, third-party content,
+`NOTICE` obligations, axioms, `sorry`s, generated artifacts, mathematical
+status, and overlap with existing declarations. Record the source and every
+integration in `UPSTREAMS.md`. If permission is absent or unclear, retain only a
+reference until a separate license review establishes an authorized path.
+
+Multiple Git remotes may be used to track sources, but remotes do not imply
+admission or merge authority. Shared-history forks may support selective
+cherry-picks or ports. Independent repositories should normally remain Lake
+dependencies or be migrated through reviewed source integration; do not merge
+unrelated histories merely to ingest their content.
 
 ## Mathematician-Facing Design Commitments
 
@@ -162,6 +190,8 @@ or other project records.
 - `MathlibTest/`, `Archive/`, `Counterexamples/`, and `scripts/` provide tests,
   historical material, examples, and repository tooling.
 - `FORK_DESIGN.md` records the fork's design philosophy and deferred roadmap.
+- `UPSTREAMS.md` records external source identity, license evidence,
+  provenance, integration mode, and status.
 - `AI_AGENT_GUIDE.md` is generated shared agent policy.
 - `AI_AGENT_PROJECT.md` is the manually maintained policy for this fork and
   must be preserved verbatim by future workbench syncs.
@@ -189,9 +219,11 @@ and documentation checks when they remain applicable to the affected area.
 
 ## Important Files and Directories
 
-- `README.md`: upstream setup, build, and contribution entry points.
+- `README.md`: fork notice followed by retained upstream setup, build, and
+  contribution information.
 - `FORK_DESIGN.md`: fork purpose, API commitments, and deferred foundational
   migration plans.
+- `UPSTREAMS.md`: canonical source-repository and provenance registry.
 - `.github/CONTRIBUTING.md`: link to the current upstream contribution guide.
 - `lakefile.lean` and `lean-toolchain`: project and Lean toolchain definitions.
 - `.agent-workbench.yaml`: human-owned desired workbench configuration.
@@ -199,9 +231,15 @@ and documentation checks when they remain applicable to the affected area.
 
 ## Domain Terms
 
-- **upstream**: `leanprover-community/mathlib4`.
+- **mathlib baseline**: `leanprover-community/mathlib4`, tracked by the local
+  remote named `upstream`.
 - **origin**: the personal fork `KiringYJ/mathlib4`.
 - **daily driver**: `dev`, the complete preferred working version.
+- **source repository**: an external repository considered for reference,
+  dependency, or curated integration; it is not automatically an authority or
+  admitted dependency.
+- **curated integration**: selection, audit, deduplication, faithful API
+  migration, provenance capture, and final verification of external material.
 - **mathematician-facing facade**: a thin public interface that exposes a
   mathematical concept naturally while reusing a sound generic core.
 - **strict public API**: an interface whose ordinary mathematical operations
@@ -231,6 +269,13 @@ and the provenance ledger, but must never rewrite this project file.
   authority for mathematical claims or statements about the current source.
 - Verify current source and official documentation before asserting that an
   upstream API, theorem, or behavior still has a particular form.
+- Do not add source remotes, dependencies, or imported code merely because a
+  repository is mentioned. Require an explicit intake task and update
+  `UPSTREAMS.md` from verified evidence.
+- Never infer redistribution permission from a public repository alone. Keep
+  sources without a verified compatible license reference-only pending review,
+  and preserve all applicable authorship, license, modification, and `NOTICE`
+  records when integration is authorized.
 - Do not start the deferred total-inverse migration merely because its roadmap
   is recorded. It requires a separate explicit task and prototype evidence.
 - Do not stage, commit, push, open a PR, or modify remote settings unless the

@@ -97,10 +97,86 @@ semantically loose." It is a faithful mathematical API whose routine
 well-definedness work is handled by the library and whose genuine obligations
 remain explicit.
 
+## Curated Intake and Canonicalization
+
+This is a maintainer-curated library, not an open pull-request project. External
+formalizations are candidate sources from which the maintainer may choose to
+integrate material. A suggestion, a public repository, or even a valid result
+does not create an entitlement to admission, a review deadline, or a permanent
+backlog. Intake may slow or stop when the available audit and migration capacity
+is exhausted.
+
+Project scale, popularity, and subject fashion are not admission criteria. A
+small paper, a single theorem, or an obscure but reusable construction may be a
+complete ingestion unit. Prefer preserving and integrating already formalized
+mathematics over rebuilding it merely because it currently lives outside this
+tree.
+
+Evaluate candidate content separately from its current presentation. Admission
+requires evidence for:
+
+- a correct and faithful mathematical statement and proof, with assumptions,
+  axioms, `sorry`s, generated material, and conditional status made explicit;
+- a sufficiently identified source revision and provenance trail;
+- permission to copy, modify, and redistribute every imported part;
+- the absence of a materially equivalent canonical development, or a clear
+  deduplication plan; and
+- a technically credible route into the maintained library.
+
+Naming, namespace layout, imports, abstraction level, proof locality, or use of
+a noncanonical API are not by themselves reasons to discard valid mathematical
+content. They are migration work owned by the maintainer. Once selected, a
+development passes through mathematical audit, deduplication, faithful API
+migration, repository-wide consistency work, and final verification before it
+becomes canonical here. A raw external snapshot may be retained as evidence,
+but it is not a second public API.
+
+For an unfamiliar field, typechecking and general API taste do not establish
+the right mathematical abstraction. Compare the source literature and other
+formalizations, and obtain domain-appropriate review before canonicalizing the
+interface. The policy is:
+
+> Mathematical validity, provenance, and legal ingestibility determine
+> eligibility for admission; repository consistency determines migration, not
+> rejection. Actual admission remains a discretionary, evidence-based
+> curatorial decision.
+
+## Source Repositories and Provenance
+
+Many source repositories may feed one canonical editorial layer. Git supports
+multiple named remotes, but a remote is only a local mechanism for discovering
+and tracking refs. Adding or fetching a remote neither admits its content nor
+authorizes a merge, copy, dependency, or push.
+
+Choose an integration mode from the source relationship:
+
+- For another fork with shared Git ancestry, inspect and selectively
+  cherry-pick or port coherent commits.
+- For an independent repository, do not merge unrelated histories merely to
+  preserve its Git graph. Use a reviewed source port when the material is to
+  become canonical here, or a Lake dependency when it should remain an
+  independently versioned library.
+- For reference-only candidates, record the source without importing code.
+
+Every source and import must be recorded in `UPSTREAMS.md` with its exact
+repository identity, revision, history relationship, license evidence,
+integration mode, provenance, and status. Preserve applicable copyright,
+license, attribution, and `NOTICE` material, and mark modified files as required
+by the source license. A public GitHub repository without an explicit compatible
+license is reference material only until permission is established; public
+visibility is not an ingestion license.
+
+Provenance must survive refactoring. Record which declarations or files came
+from which source revision, what was rewritten, which mathematical or API
+changes were made, and how the integrated result was verified. Do not replace
+the original authorship record with the identity of the person performing the
+migration.
+
 ## Relationship to Upstream
 
-- `leanprover-community/mathlib4` is an upstream source, not the target audience
-  for fork-only changes.
+- `leanprover-community/mathlib4` is the baseline source currently tracked by
+  the local remote named `upstream`; it is not the target audience for fork-only
+  changes.
 - Reuse upstream definitions and theorems when they are mathematically and
   technically sound. The fork should differ for a reason, not merely for
   novelty.
@@ -111,6 +187,9 @@ remain explicit.
 - Keep changes logically separated and rebasable so upstream updates can be
   reconciled and design decisions can be reviewed. This discipline serves the
   fork itself; it is not preparation for upstream pull requests.
+- Additional source repositories do not become alternate design authorities.
+  Material becomes part of this library only through the same faithful,
+  canonicalizing integration process.
 
 ## Deferred Total-Inverse Roadmap
 

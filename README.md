@@ -1,5 +1,15 @@
 # mathlib4
 
+> [!IMPORTANT]
+> This branch belongs to a maintainer-curated downstream distribution of
+> mathlib. It does not use an open pull-request contribution model and its
+> fork-only changes are not prepared for submission to upstream. See
+> [Fork Design Philosophy and Roadmap](FORK_DESIGN.md) for the mathematical and
+> API principles, and [Source Repository Registry](UPSTREAMS.md) for external
+> source, license, provenance, and integration records. The upstream setup and
+> contribution information retained below describes
+> `leanprover-community/mathlib4`, not this fork's governance.
+
 ![GitHub CI](https://github.com/leanprover-community/mathlib4/actions/workflows/build.yml/badge.svg?branch=master)
 [![Bors enabled](https://raw.githubusercontent.com/bors-ng/bors-ng.github.io/refs/heads/master/images/badge_small.svg)](https://mathlib-bors-ca18eefec4cb.herokuapp.com/repositories/16)
 [![project chat](https://img.shields.io/badge/zulip-join_chat-brightgreen.svg)](https://leanprover.zulipchat.com)
