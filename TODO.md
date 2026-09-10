@@ -36,7 +36,7 @@ For every migration below:
 - [ ] **Correct the stale `Measure.map` module overview.**
   `Mathlib/MeasureTheory/Measure/Map.lean:17` says that a non-a.e.-measurable map yields zero, but
   `Measure.map` at lines 99--106 yields an arbitrary Dirac mass when the source measure is nonzero.
-  This documentation correction is independent of the XL API migration below.
+  This documentation correction is independent of the L API migration below.
 
 - [ ] **Require parabolicity for `GeneralLinearGroup.parabolicEigenvalue`.**
   `Mathlib/LinearAlgebra/Matrix/GeneralLinearGroup/FinTwo.lean:103` exposes `trace / 2` as an
@@ -315,6 +315,15 @@ For every migration below:
   uniqueness claims additionally need the appropriate separation and nontrivial-filter conditions.
   Migrate `IsDenseInducing.extend`/`extendFrom` consumers with the same boundary discipline.
 
+- [ ] **Make measure pushforward require a.e. measurability.**
+  `Measure.map` in `Mathlib/MeasureTheory/Measure/Map.lean:99` returns an arbitrary Dirac mass for a
+  non-a.e.-measurable function and nonzero source measure.  Its valid branch already uses an
+  a.e.-measurable representative at lines 101--102, and core results such as `map_apply` and
+  `map_map` already carry measurability evidence.  Promote that evidence to the construction
+  boundary, explicitly name any retained fallback, and migrate the roughly 100 qualified-use files
+  plus `FiniteMeasure.map`, `ProbabilityMeasure.map`, conditional-law, and kernel wrappers.  A new
+  strict facade is M-sized; making it canonical throughout the existing ecosystem is L-sized.
+
 - [ ] **Make `NormedSpace.exp` require its algebra and convergence context.**
   `Mathlib/Analysis/Normed/Algebra/Exponential.lean:127` returns one if no `Algebra ℚ 𝔸`
   exists and otherwise delegates to a power-series sum without encoding summability in the
@@ -443,13 +452,6 @@ For every migration below:
   Make `HasSum`/`HasProd` or summability/multipliability the ordinary boundary and migrate dependent
   series, products, and power-series evaluation in coherent slices.  Coordinate, rather than
   conflate, this work with the separate `finsum`-based Euler-characteristic task.
-
-- [ ] **Make measure pushforward require a.e. measurability.**
-  `Measure.map` in `Mathlib/MeasureTheory/Measure/Map.lean:99` returns an arbitrary Dirac mass for a
-  non-a.e.-measurable function and nonzero source measure; about 100 maintained Lean files mention
-  the qualified operation.  Promote the measurable/a.e.-measurable map boundary, preserve
-  probability-measure instances only for valid pushforwards, and migrate conditional-law and kernel
-  consumers.
 
 - [ ] **Split real and complex special functions from their silent extensions.**
   `Real.log` (`Mathlib/Analysis/SpecialFunctions/Log/Basic.lean:44`) is absolute-value log off zero
