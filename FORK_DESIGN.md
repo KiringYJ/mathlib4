@@ -74,6 +74,24 @@ manual work around them.
   them as settled. A facade is worthwhile when it restores a natural concept
   without creating a competing theorem ecosystem.
 
+### Proofs are API tests
+
+Design and revise APIs from the proofs that actually use them. Begin with a
+proof that is mathematically sound, faithful to the intended statement and its
+domains, and conceptually well organized. If expressing that proof in Lean is
+still complicated or tedious, treat the friction as an API design failure that
+must be diagnosed, not as a normal cost to impose on downstream formalizers.
+The defect may lie in the representation, theorem statements, normal forms,
+missing conceptual lemmas or facades, coercions, elaboration, diagnostics, or
+automation.
+
+Do not rewrite a good mathematical proof into a library-internal decomposition
+merely because the latter compiles. Adjust the API so the formal proof can
+follow the mathematical argument. This principle never licenses a shorter proof
+obtained by weakening the statement, hiding a hypothesis, erasing a domain
+condition, or relying on totalized fallback semantics: ease of use counts only
+after faithfulness has been preserved.
+
 The intended standard is therefore not "strict but painful" or "convenient but
 semantically loose." It is a faithful mathematical API whose routine
 well-definedness work is handled by the library and whose genuine obligations

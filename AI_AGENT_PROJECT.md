@@ -98,6 +98,15 @@ should be retained when deciding API boundaries. Prefer a useful concrete
 interface that has survived real use over premature generalization. Generalize
 after downstream cases demonstrate the reusable structure.
 
+Treat a mathematically sound, faithful, and conceptually natural proof as an
+API test. If such a proof remains complicated or tedious to express in Lean,
+that is an API design failure to diagnose and repair, not ordinary downstream
+cost. Change the representation, theorem shapes, normal forms, facades,
+coercions, elaboration, diagnostics, or automation as appropriate so the formal
+proof can follow the mathematics. A shorter proof does not count as an
+improvement if it weakens the statement, hides hypotheses or domains, or relies
+on totalized fallback semantics.
+
 Preserve strong upstream substrate when it is mathematically and technically
 sound. This fork is not different for the sake of being different; it changes
 interfaces where actual formalization exposes semantic or ergonomic friction.
