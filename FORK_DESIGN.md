@@ -5,13 +5,13 @@
 This document records the accepted direction of the personal fork. It is a
 design contract, not a claim that the described APIs already exist.
 
-The interface goals below are adopted. The hierarchy split, names,
-representation, automation, and migration sequence are candidates that require
-prototypes and downstream evaluation; they are not an implemented or validated
-API. The total-inverse migration is deferred, and this document does not
-authorize code changes. Begin that work only in a task that explicitly requests
-it, after inspecting the then-current dependency graph and establishing a small
-prototype.
+The interface goals below are adopted. The hierarchy split, proposed roadmap
+API names, representation, automation, and migration sequence are candidates
+that require prototypes and downstream evaluation; they are not an implemented
+or validated API. The total-inverse migration is deferred, and this document
+does not authorize code changes. Begin that work only in a task that explicitly
+requests it, after inspecting the then-current dependency graph and
+establishing a small prototype.
 
 ## Purpose
 
@@ -73,6 +73,101 @@ manual work around them.
 - Test abstractions against real downstream formalizations before treating
   them as settled. A facade is worthwhile when it restores a natural concept
   without creating a competing theorem ecosystem.
+
+### Mathematical vocabulary first; mechanical fallback second
+
+A public declaration name is part of the library's mathematical language.
+Prefer the terminology by which mathematicians actually identify a concept or
+theorem, even when that terminology is not a paraphrase of the formal
+statement. Determinism is a secondary constraint: it should govern the cases
+left open by mathematical usage and make the remaining editorial judgment
+explicit and auditable. It must not erase established vocabulary merely to
+make names easier to generate.
+
+Apply the following priority order:
+
+1. Use a registered standard mathematical name for a definition, theorem, or
+   theorem family.
+2. Use the owner namespace and a registered family-variant rule to distinguish
+   standard formulations of the named result.
+3. Only when no standard name exists, derive the name from the statement by the
+   mechanical fallback grammar.
+4. Record paper titles, theorem numbers, and textbook-local names only in
+   documentation or source cross-reference metadata.
+
+This is one rule for all mathematics, not a privilege reserved for a small list
+of famous results. Eponymous names, descriptive names such as monotone
+convergence, and symbolic names such as the π-λ theorem are treated alike when
+they are established mathematical vocabulary. Fame, contributor preference,
+and upstream precedent are not independent reasons to admit a name.
+
+Maintain a versioned terminology registry. Each entry records the canonical
+ASCII spelling, its mathematical scope, independently authored citations,
+established alternative names, the owner namespace, and whether current usage
+identifies a primary formulation or a family of coequal formulations. Ordinarily
+require two independent citable mathematical sources; a single paper's label
+or one textbook's local terminology remains source metadata. This confines the
+unavoidable human judgment to a reviewable mathematical question: what do
+mathematicians call this result?
+
+For a registered named theorem:
+
+- If the literature has a clear primary formulation, that declaration receives
+  the bare conventional name.
+- Other standard formulations use the same conventional prefix followed by a
+  mechanically derived result-shape suffix.
+- If there is no clear primary formulation, every formulation receives such a
+  suffix; none is arbitrarily granted the bare name.
+- An established alternative conventional name is a permanent exact alias to
+  the canonical declaration. The alias is attribute-free and does not grow a
+  parallel theorem family.
+
+Normalize conventional names by one table: ASCII transliteration,
+`snake_case`, punctuation removal, surname order, and standard abbreviations
+are repository data rather than decisions repeated at each declaration.
+Definitions use the same registry because introducing the conventional name of
+a mathematical object is part of their purpose. Do not manufacture an
+otherwise unnecessary named `Prop` merely to obtain the named-theorem rule.
+
+When no registered mathematical name exists, compile the canonical theorem
+name from its public signature:
+
+1. Start from the elaborated public type, then project it to a naming signature
+   by fixed erasure rules. Alpha-normalize binders; flatten leading `forall`
+   binders and implications; ignore universe and data binder names, instance
+   binders, implementation parameters, proof terms, and coercions listed in the
+   erasure table. Do not unfold definitions or simplify the proposition.
+2. Serialize the conclusion with the fixed token dictionary and
+   statement-pattern table, preserving the written order of operations,
+   relations, quantifiers, and connective branches.
+3. Append every non-instance propositional hypothesis, explicit or implicit,
+   in binder order using `_of_`. Omit one only through an enumerated family-wide
+   rule, never through a per-theorem judgment that it is obvious.
+4. Encode structural variants through registered tokens such as `left`,
+   `right`, `self`, `comp`, `map`, `image`, and `preimage`; remove only context
+   already supplied by the owner namespace.
+
+The terminology registry, token dictionary, erasure table, and pattern table
+are versioned policy. If a fallback rule cannot distinguish two signatures,
+extend the rule for the whole syntactic family rather than inventing a local
+suffix. Changing these tables requires a repository-wide collision and rename
+preview. Given the same registry, namespace, signature, and table version, the
+fallback name must be reproducible by an author, reviewer, and naming linter.
+
+For the π-λ theorem, mathematical usage therefore outranks the mechanical
+statement paraphrase. The usual textbook membership formulation keeps
+`SigmaAlgebra.DynkinSystem.pi_lambda`. The generated-structure equality should
+share the conventional family prefix, for example
+`SigmaAlgebra.DynkinSystem.pi_lambda_generateFrom_eq`, rather than remaining
+discoverable only as `generateFrom_eq`. If a literature review instead found
+the formulations genuinely coequal, both would receive mechanical suffixes;
+the registry would record that decision and its evidence.
+
+Adopt this policy prospectively and during explicitly authorized API
+canonicalization, not through an incidental repository-wide rename. The
+long-term enforcement target is a preview command and linter that validate
+registry membership, conventional prefixes, fallback compilation, aliases,
+and attribute ownership.
 
 ### Proofs are API tests
 
