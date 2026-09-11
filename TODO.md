@@ -1,12 +1,13 @@
-# Mathematical fidelity backlog
+# Mathematical fidelity and API hygiene backlog
 
 This file records public mathematical interfaces that should be audited or migrated under the
-strict-domain policy in `FORK_DESIGN.md`.  It is an implementation backlog, not a claim that Lean is
-unsound and not a claim that every total implementation is defective.  A documented fallback is
-still non-strict when the ordinary public operation erases its mathematical domain.  An explicitly
-named/default-taking extension is not a *silent-totalization* defect, but that fact alone does not
-make it mathematician-facing: it can still be the wrong primary interface if papers would instead
-state a domain condition, work on a constrained object, or pass to an a.e.-equivalence class.  An
+strict-domain, representation, and public-notation policies in `FORK_DESIGN.md`.  It is an
+implementation backlog, not a claim that Lean is unsound and not a claim that every total
+implementation or custom notation is defective.  A documented fallback is still non-strict when
+the ordinary public operation erases its mathematical domain.  An explicitly named/default-taking
+extension is not a *silent-totalization* defect, but that fact alone does not make it
+mathematician-facing: it can still be the wrong primary interface if papers would instead state a
+domain condition, work on a constrained object, or pass to an a.e.-equivalence class.  An
 unreachable implementation fallback is acceptable only when the public boundary proves it
 unreachable and exposes the actual mathematical object.
 
@@ -545,11 +546,95 @@ standard representation.
   natural-valued projection when theorem statements perform ordinary comparisons or arithmetic that
   would misread zero.  Keep explicitly identified zero-encoding APIs where useful.
 
+## Notation and term-structure hygiene -- valid terms with misleading surface syntax
+
+These entries are not mathematical-unsoundness or strict-partiality findings.  They track syntax
+that impersonates a general Lean application form, hides the declaration head or a meaningful
+mathematical choice, cannot be found through the apparent identifier, or requires noncompositional
+parser and delaborator behavior.  A notation is not defective merely because it uses brackets or
+Unicode: conventional mathematical operators and literals remain appropriate when their operands
+have stable roles and a searchable named declaration remains available.
+
+- [ ] **[S] Remove the unused `Integrable[𝓐]` explicit-instance escape hatch.**
+  `Mathlib/MeasureTheory/Function/L1Space/Integrable.lean:64` expands the identifier-shaped form
+  directly to `@Integrable _ _ _ _ 𝓐`, but the maintained Lean trees contain no consumer beyond the
+  declaration itself.  Give the anonymous σ-algebra binder a stable name if explicit application is
+  needed, use ordinary named-argument syntax, and add a negative syntax test before deleting the
+  notation.
+
+- [ ] **[S--M] Remove the `P[X]` expectation macro that competes with element lookup.**
+  `Mathlib/Probability/Notation.lean:48`--`:53` expands arbitrary adjacent terms `P[X]` to an
+  integral and explicitly warns that the grammar conflicts with Lean's `GetElem` notation.  Prefer
+  the already named integral API or the visibly symbolic `𝔼[X]` surface, then add a regression test
+  that an invalid list lookup is diagnosed as a lookup error rather than reconsidered as
+  expectation syntax.
+
+- [ ] **[M] Give `ordProj` and `ordCompl` searchable declaration heads.**
+  `Mathlib/Data/Nat/Factorization/Defs.lean:326`--`:334` introduces only the notations
+  `ordProj[p] n` and `ordCompl[p] n`, expanding to `p ^ n.factorization p` and
+  `n / ordProj[p] n`; there is no declaration with either apparent identifier.  Introduce named
+  `Nat` operations, migrate the roughly 37 notation occurrences across three maintained files, and
+  coordinate their mathematical domains with the separate factorization backlog.  Delete the
+  identifier-shaped bracket forms after migration; any genuinely conventional symbolic surface
+  should be proposed and justified separately.
+
+- [ ] **[M] Put affine-line notation over a named affine-line declaration.**
+  `Mathlib/LinearAlgebra/AffineSpace/AffineSubspace/Defs.lean:1075`--`:1077` defines
+  `line[k, p₁, p₂]` only as notation for the affine span of a generated pair.  The 154 textual uses
+  across 18 maintained files cannot search for or apply a declaration named by the apparent head.
+  Register the conventional owner/name under the naming policy, make the notation expand through
+  that declaration, and migrate canonical theorem statements to the named term.  Remove the bracket
+  form unless a downstream comparison shows that it is materially clearer than ordinary
+  application without reintroducing parser or discovery costs.
+
+- [ ] **[L] Replace expected-type-driven `↧X` category bundling with visible heads.**
+  `Mathlib/CategoryTheory/ConcreteCategory/Notation.lean:18`--`:35` and `:82`--`:101` infer a
+  declaration named `FooCat.of` from the expected type, assume that the carrier is its final explicit
+  argument, and elaborate the same visible `↧X` differently as `CommRingCat.of X`, `ModuleCat.of R X`,
+  or another environment-discovered head.  The spelling has roughly 919 textual hits across 259
+  maintained files.  Make the category-specific `.of` applications canonical, remove the generic
+  environment search, and retain only explicit category-specific assistance if a downstream
+  prototype shows that ordinary application cannot provide acceptable inference or diagnostics.
+
+- [ ] **[L] Replace bracketed explicit-instance facades with ordinary explicit structure APIs.**
+  The topology family in `Mathlib/Topology/Defs/Basic.lean:192`--`:210` and
+  `Mathlib/Topology/UniformSpace/Defs.lean:206`--`:212`, `:629`--`:637` includes `IsOpen[t]`,
+  `closure[t]`, `Continuous[t₁, t₂]`, `𝓤[u]`, and `UniformContinuous[u₁, u₂]`.  The measure-theory
+  family includes `Measurable[𝓐, 𝓑]` at
+  `Mathlib/MeasureTheory/SigmaAlgebra/Defs.lean:841`--`:845`, the strong and a.e. predicates at
+  `Mathlib/MeasureTheory/Function/StronglyMeasurable/Basic.lean:72`--`:73`,
+  `Mathlib/MeasureTheory/Function/StronglyMeasurable/AEStronglyMeasurable.lean:75`--`:77`, and
+  `Mathlib/MeasureTheory/Measure/MeasureSpaceDef.lean:409`--`:415`, plus the explicit `Measure` and
+  `Kernel` types at `Mathlib/MeasureTheory/Measure/MeasureSpaceDef.lean:77`--`:83` and
+  `Mathlib/Probability/Kernel/Defs.lean:51`--`:70`.  These forms expose meaningful structures but
+  encode them through a bespoke `Predicate[structure]` or `Type[structure]` application convention;
+  together the spellings have roughly 568 textual hits across 87 maintained files.  Give anonymous
+  instance binders stable names, choose ordinary named arguments, membership, projections, or
+  explicitly parameterized named relations/types as the canonical forms, and remove their custom
+  delaborators.  Preserve unsuffixed ambient predicates where one instance genuinely is ambient.
+
+- [ ] **[L] Disambiguate the two `R[M]` monoid-algebra parsers.**
+  `Mathlib/Algebra/MonoidAlgebra/Defs.lean:90`--`:123` installs the identical generic
+  `term noWs "[" term "]"` grammar for `AddMonoidAlgebra R M` and `MonoidAlgebra R M`, selected only
+  by scope.  Opening both scopes already produces the checked `Ambiguous term` failures in
+  `MathlibTest/Algebra/MonoidAlgebra/Defs.lean:4`--`:45`.  Keep the two named type constructors as
+  canonical heads; if conventional bracket notation remains, give it one deterministic elaboration
+  rule or two syntactically distinct forms rather than parallel hidden heads.
+
+- [ ] **[L] Retire the identifier-shaped manifold elaborator dialect.**
+  `Mathlib/Geometry/Manifold/Notation.lean:838`--`:1013` makes bracket punctuation switch apparent
+  heads such as `MDiffAt`, `MDiff`, `CMDiffAt`, `mfderiv`, `HasMFDerivAt`, `tangentMap`, and
+  `UniqueMDiff` to different `*Within*` or `*On` declarations, while a custom search inspects
+  expression types to recover the source and target models.  The bracketed forms alone have roughly
+  1,104 textual hits across 37 maintained files.  Migrate to the existing named manifold APIs and a
+  compositional mechanism for synthesizing routine model arguments; preserve their improved
+  diagnostics without making an alternate identifier language the primary public syntax.
+
 ## Classification audits before adding more migration tasks
 
-The following families contain total implementation values but are not yet established as public
-fidelity defects.  Resolve the stated distinction before promoting them into the effort-ranked
-backlog:
+The following families contain total implementation values or suspicious public syntax but are not
+yet established as public fidelity or API-hygiene defects.  Resolve the stated distinction before
+promoting them into the effort-ranked backlog:
 
 - [ ] **`finsum`/`finprod`:** decide whether their names and finite-support contract already identify
   the zero/one extension on infinite support.  Regardless of that decision, ordinary invariants such
@@ -579,6 +664,33 @@ backlog:
   or whether users are being asked to write a defaulted surrogate where ordinary mathematics uses a
   domain-bearing object.  `ContinuousMap.mkD` is promoted above because its integration-facing use
   falls in the latter category.
+- [ ] **Probability bracket grammar:** distinguish conventional, compositional conditional
+  expectation/probability notation from a parser mini-language.  In particular, audit the custom
+  macros and delaborators for `μ[f | 𝓐]` in
+  `Mathlib/MeasureTheory/Function/ConditionalExpectation/Basic.lean:95`--`:117` and for `μ[|s]` and
+  `μ[t | s]` in `Mathlib/Probability/ConditionalProbability.lean:79`--`:150`.  Do not remove a
+  standard mathematical surface merely because it has brackets, but compare it directly with the
+  named form: if the bracket-free API is at least as clear, migrate rather than preserving notation
+  by inertia.  Otherwise promote it if nesting, precedence, collision behavior, or the named API
+  fails the compositionality contract.  The concrete `P[X]`/`GetElem` collision is already promoted
+  above.
+- [ ] **Unicode and indexed shortcuts:** audit `πₓ`/`πₘ` in
+  `Mathlib/AlgebraicTopology/FundamentalGroupoid/Basic.lean:325`--`:334`, truncated simplex forms
+  based on `⦋m⦌ₙ` in `Mathlib/AlgebraicTopology/SimplexCategory/Defs.lean:176`--`:187`, generated
+  intermediate fields in `Mathlib/FieldTheory/IntermediateField/Adjoin/Defs.lean:515`--`:551`, and
+  `Mᵐ⁰` in `Mathlib/Algebra/GroupWithZero/WithZero.lean:352`--`:364`.  Check whether each notation
+  has a discoverable named head and whether it hides a proof, functor operation, set construction, or
+  representation change that theorem statements need to expose.  Their mathematical operands are
+  visible and several forms are conventional, so search inconvenience alone does not establish a
+  migration.
+- [ ] **Field-generation delimiters and local proof DSLs:** compare the generated-intermediate-field
+  macro in `Mathlib/FieldTheory/IntermediateField/Adjoin/Defs.lean:515`--`:551` with the independent
+  rational-function notation in `Mathlib/FieldTheory/RatFunc/Defs.lean:61`--`:72`, since both use
+  `⟮...⟯` around different hidden heads.  Separately review the `D∧`, `D∨`, `D∃`, and `D+`-style
+  notation cluster in `Mathlib/NumberTheory/Dioph.lean:489`--`:631`, whose current uses are confined
+  to that file and abbreviate named closure theorems.  Prefer `IntermediateField.adjoin`, `RatFunc`,
+  and the named `Dioph` lemmas whenever their ordinary applications are at least as readable; do not
+  preserve a parser dialect merely because it is already implemented.
 
 ## Audit coverage and limits
 
@@ -596,3 +708,11 @@ not a declaration-by-declaration proof of completeness: a mathematically mislead
 have no textual marker, and final migration order still needs dependency prototypes and real
 downstream formalizations.  New findings should be inserted by coherent migration effort, not by
 discovery date.
+
+A separate 2026-09-11 notation pass inspected 5,641 term-syntax declaration lines in the same 9,063
+Lean files and manually classified 52 identifier-attached bracket declarations, together with
+explicit-instance expansions, custom elaborators, delaborators, and representative consumers.  It
+promotes only families with a hidden ordinary/instance argument, a missing or ambiguous declaration
+head, or a concrete parser collision.  Conventional polynomial, algebraic-adjoin, tensor, valuation,
+expectation, variance, and literal notations were screened rather than added automatically when
+their operands and named APIs remained compositional and discoverable.

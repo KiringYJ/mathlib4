@@ -74,6 +74,42 @@ manual work around them.
   them as settled. A facade is worthwhile when it restores a natural concept
   without creating a competing theorem ecosystem.
 
+#### Notation and compositional term structure
+
+Notation is part of the public API, not merely a pretty-printing choice. Admit
+it when it expresses a stable mathematical operation more clearly than
+ordinary application and remains compositional: every visible operand has a
+stable mathematical role, nested uses parse uniformly, and the form does not
+depend on a custom elaborator consuming the surrounding application to recover
+which declaration and arguments were intended.
+
+- Keep a named declaration as the searchable, documented API head. Symbolic
+  notation may be its conventional secondary surface, but users must be able to
+  find, state, and inspect the same operation without first discovering a local
+  parser rule.
+- Prefer the bracket-free named application, membership, or projection whenever
+  it is at least as clear as the custom form. Existing call-site volume or local
+  familiarity does not justify retaining an otherwise inferior notation.
+- Do not attach bespoke delimiters to an existing identifier to smuggle an
+  ordinary, implicit, or instance argument into a form such as `P[c] x`. That
+  shape resembles special Lean application syntax while actually being a local
+  mini-language. Use ordinary application with named arguments, a projection,
+  membership, or a distinct named relation or type whose term structure exposes
+  the choice.
+- Let automation infer implementation data that is uniquely determined by the
+  visible mathematical operands. Do not use notation or elaborator search to
+  hide a mathematically meaningful choice of topology, sigma-algebra, model,
+  measure, or other ambient structure.
+- Literal, binder, and conventional operator notation may remain when it adds a
+  genuine compositional syntax rather than disguising ordinary application.
+  Such notation still needs a stable named expansion and documentation.
+
+The sigma-algebra interface is the boundary example. `MeasurableSet s` uses the
+ambient sigma-algebra; `s ∈ 𝓐` exposes an explicit sigma-algebra; and
+`MeasurableSet (𝓐 := 𝓐) s` retains the predicate head when elaboration
+or theorem search specifically needs it. The former `MeasurableSet[𝓐] s`
+escape hatch is deliberately not a fourth spelling.
+
 #### Predicates, membership, and proof-carrying domains
 
 Choose public syntax only after distinguishing the mathematical roles involved:
