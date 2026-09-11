@@ -104,6 +104,10 @@ current mathlib downstream registry or directly by repository identity.
 | [teorth/sendov](https://github.com/teorth/sendov) | Sendov and Phelps--Rodriguez statements and proofs | `master` |
 | [alonamaloh/schoenflies-lean](https://github.com/alonamaloh/schoenflies-lean) | Jordan--Schoenflies theorem | `main` |
 | [ARGO-LABORATORY/Wolstenholme_1862](https://github.com/ARGO-LABORATORY/Wolstenholme_1862) | Wolstenholme theorem | `main` |
+| [0stellensatz/MassFormula](https://github.com/0stellensatz/MassFormula) | Serre mass formulas for totally ramified local-field extensions and supporting finiteness/convergence infrastructure | `master` |
+| [ashvin-swaminathan/quartic-invariant](https://github.com/ashvin-swaminathan/quartic-invariant) | quartic invariant of odd-degree binary forms; distinguish paper claims, Lean statements, and computational verification | `main` |
+| [karlesmarin/godsil-gutman-lean](https://github.com/karlesmarin/godsil-gutman-lean) | matching polynomials, graph spectra, determinants, and real-rootedness infrastructure; audit theorem inventory and `MathlibPR` overlap | `main` |
+| [catskillsresearch/scott1964](https://github.com/catskillsresearch/scott1964) | Scott's measurement structures and linear inequalities; audit source correspondence, separately labelled modern extensions, and comparator proof-hole boundaries | `main` |
 | [yawara/odd-order](https://github.com/yawara/odd-order) | Feit--Thompson odd-order theorem; independently audit the claimed proof boundary | `main` |
 | [LionSR/TNLean](https://github.com/LionSR/TNLean) | tensor networks and the fundamental theorem of matrix product states | `main` |
 | [a-dangelo/Lean-AG](https://github.com/a-dangelo/Lean-AG) | algebraic geometry, including scheme and Krull-dimension material | `main` |
@@ -122,6 +126,14 @@ a repository's own clean-status label is not an admission verdict.
 
 | Candidate | Scope to investigate | Observed default ref |
 | --- | --- | --- |
+| [mattrobball/BridgelandStability](https://github.com/mattrobball/BridgelandStability) | AI-assisted Lean 4 formalization of Bridgeland stability conditions and claimed paper-result coverage; independently audit statement correspondence, trusted boundary, axioms, `sorry`s, and generated artifacts | `main` |
+| [marcmorningstar/lean4-ergodic-theory](https://github.com/marcmorningstar/lean4-ergodic-theory) | self-described smooth ergodic theory centered on Oseledets, with entropy and Livšic developments; audit theorem coverage and current-library overlap | `main` |
+| [will1491/RiemannDynamics](https://github.com/will1491/RiemannDynamics) | ongoing complex-dynamics, Riemann-surface, Teichmüller, and hyperbolic-geometry development; audit headline claims and vendored dependencies | `main` |
+| [MerLeanProver/ACMaxConjecture](https://github.com/MerLeanProver/ACMaxConjecture) | claimed ACMAX graph-conjecture formalization; independently audit source correspondence, exports, comparator, and trusted boundary | `main` |
+| [tadamcz/mean-value-problem](https://github.com/tadamcz/mean-value-problem) | AI-assisted claimed disproof of Smale's mean-value conjecture with `K = 1`; audit exact negation, witness, and comparator boundary | `main` |
+| [tadamcz/erdos548](https://github.com/tadamcz/erdos548) | AI-assisted claimed proof of Erdős Problem 548; audit source statement, mathematical fidelity, comparator, and provenance | `main` |
+| [tadamcz/erdos571](https://github.com/tadamcz/erdos571) | AI-assisted claimed proof of Erdős Problem 571; audit source statement, mathematical fidelity, comparator, and provenance | `main` |
+| [Yuren-Tang/erdos-306](https://github.com/Yuren-Tang/erdos-306) | claimed proof of Erdős Problem 306 conditional on two named Rosser--Schoenfeld axioms; preserve and independently audit that boundary | `main` |
 | [openai/NavierStokesAndEuler](https://github.com/openai/NavierStokesAndEuler) | Navier--Stokes and Euler statement/proof artifacts | `main` |
 | [openai/ten-proofs](https://github.com/openai/ten-proofs) | collection of ten mathematics and theoretical-CS formalizations | `main` |
 | [openai/cdc-lean](https://github.com/openai/cdc-lean) | cycle double cover formalization | `main` |
@@ -133,6 +145,17 @@ a repository's own clean-status label is not an admission verdict.
 | [gotrevor/lean-gallery](https://github.com/gotrevor/lean-gallery) | curated formalization collection; independently verify each included module | `main` |
 | [google-deepmind/formal-conjectures](https://github.com/google-deepmind/formal-conjectures) | statement and scaffold corpus; use primarily as a discovery source unless proofs are separately established | `main` |
 | [ImperialCollegeLondon/AnnalsChallenge](https://github.com/ImperialCollegeLondon/AnnalsChallenge) | formalized Annals theorem statements with proof obligations; catalogue rather than completed proof source | `main` |
+
+### Discovery feeds
+
+These repositories are indexes or aggregates, not proof authorities. Use them
+to find underlying projects, then resolve and audit the original repository and
+revision before adding it as a candidate source.
+
+| Feed | Use | Observed default ref |
+| --- | --- | --- |
+| [dzackgarza/formalization-corpus](https://github.com/dzackgarza/formalization-corpus) | searchable cross-repository formalization index for discovery and reuse checks | `main` |
+| [Vilin97/lean-pool](https://github.com/Vilin97/lean-pool) | aggregate of formalization projects with source provenance; follow each entry to its original source | `main` |
 
 ### Identity-resolution and discovery backlog
 
