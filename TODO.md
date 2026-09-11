@@ -630,6 +630,30 @@ have stable roles and a searchable named declaration remains available.
   compositional mechanism for synthesizing routine model arguments; preserve their improved
   diagnostics without making an alternate identifier language the primary public syntax.
 
+## Proof and API-boundary hygiene -- rewrites that depend on extra transparency
+
+`erw` is logically sound, but its success where `rw` fails can expose a missing public rewrite
+lemma, a coercion or representation boundary, or definitional-equality dependence in downstream
+proofs.  Treat each occurrence as API-debt evidence to classify, not as proof that every occurrence
+has the same root cause.  Repair the exposed interface or proof normal form before mechanically
+changing the tactic.
+
+- [ ] **[L] Eliminate `erw` invocations from maintained proofs.**
+  The current maintained Lean trees contain 430 tactic invocations across 191 files (426 across 189
+  `Mathlib/` files).  Several sites already identify an API or definitional-equality problem:
+  `Mathlib/AlgebraicGeometry/ValuativeCriterion.lean:167`--`:171` attributes its `erw` to a
+  `map_top` composition mismatch; `Mathlib/RingTheory/QuasiFinite/Weakly.lean:204` says its use
+  should disappear when `Ideal.map` stops taking hom classes; and
+  `Mathlib/RingTheory/Ideal/IsPrincipal.lean:110`--`:113` explains that the rewrite sees through an
+  equality between two subtype presentations.  Inventory the occurrences by missing lemma,
+  coercion/representation mismatch, category-composition defeq abuse, and genuine elaborator
+  limitation.  For each family, add the natural public lemma or stable normal form and migrate its
+  consumers to `rw`, `simp`, `change`, or an explicit equality transport that records the intended
+  boundary.  Use `Mathlib/Tactic/CategoryTheory/CheckCompositions.lean:20` where applicable to
+  diagnose composition discrepancies.  Finish with a repository-wide negative scan for tactic
+  invocations; documentation and the `erw?` diagnostic implementation are outside this migration
+  unless their own APIs become obsolete.
+
 ## Classification audits before adding more migration tasks
 
 The following families contain total implementation values or suspicious public syntax but are not
@@ -697,8 +721,9 @@ promoting them into the effort-ranked backlog:
 The 2026-09-11 pass searched the current working-tree source across 9,063 Lean files (about 1.93
 million lines) in `Mathlib/`, `MathlibTest/`, `Archive/`, `Counterexamples/`, and `Wanted/`.  Candidate
 generation included explicit junk/arbitrary-value language, choice without witnesses, lossy
-`.toNat`/`.toReal`/`.unzeroD` conversions, zero/one branches, conditional suprema/infima, and
-failure lemmas for summability, integrability, differentiability, measurability, and finiteness.
+`.toNat`/`.toReal`/`.unzeroD` conversions, zero/one branches, conditional suprema/infima, `erw`
+invocations, and failure lemmas for summability, integrability, differentiability, measurability,
+and finiteness.
 The public definitions above were then inspected by mathematical domain rather than accepted from
 keyword matches alone.
 
