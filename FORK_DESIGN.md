@@ -74,6 +74,37 @@ manual work around them.
   them as settled. A facade is worthwhile when it restores a natural concept
   without creating a competing theorem ecosystem.
 
+#### Predicates, membership, and proof-carrying domains
+
+Choose public syntax only after distinguishing the mathematical roles involved:
+
+- `x : T` is an arbitrary object in an ambient type;
+- `P x : Prop` asserts a property of that object; and
+- `a : {x : T // P x}` is a first-class object whose property should persist
+  through subsequent constructions.
+
+For a `SetLike` structure that mathematicians regard as a collection,
+membership is itself the carrier predicate applied to an object. Use `x ∈ C`
+when the collection `C` is explicit and the relation is the standard
+mathematical language. Retain an established named predicate when the relevant
+structure is ambient, when the adjectival form is the conventional entry
+point, or when theorem search and elaboration benefit from a recognizable
+predicate head.
+
+When both surfaces are public, make them definitionally equal when possible
+and assign one normal form to each context. A transparent bridge may support
+elaboration, but do not add a third notation or facade that merely restates the
+same proposition. For sigma-algebras, the ambient proposition is
+`MeasurableSet s`, explicit membership is `s ∈ 𝓐`, and a first-class measurable
+set is `A : 𝓐`.
+
+Promote a property to a proof-carrying domain only when it defines a stable
+mathematical object with useful closed operations. Give that domain exactly the
+closure its mathematics supports: finite Boolean closure does not imply
+arbitrary closure, and countable closure should be exposed through operations
+carrying the appropriate countability hypotheses rather than an unjustified
+complete-lattice instance.
+
 ### Abstract but semantically exact
 
 Faithfulness protects mathematical distinctions; it does not require a

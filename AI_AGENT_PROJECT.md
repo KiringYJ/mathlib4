@@ -182,6 +182,40 @@ claims about every mathlib module or maintainer. Keep criticism technical and
 specific; do not put personal attacks in repository history, commits, issues,
 or other project records.
 
+## Broad API Refactor Protocol
+
+For an explicitly authorized public-API canonicalization:
+
+1. Inventory the existing representations, notation, theorem families,
+   instances, automation, and structurally different downstream consumers.
+2. Separate ambient objects, propositions, and proof-carrying domains before
+   choosing canonical syntax. State one normal form for each intended context
+   and add regression tests for definitional equalities between retained
+   surfaces.
+3. Prototype the replacement in real consumers. Closure-heavy proofs should
+   use the operations of the structure that owns the invariant; cross a
+   predicate-membership bridge only at an interface that genuinely requires
+   the other form.
+4. When compatibility is explicitly out of scope, remove obsolete notation,
+   aliases, ambient-only instances, and legacy subtype spellings across the
+   repository. Do not preserve them merely to conceal an incomplete migration.
+5. Rename declarations when their mathematical category changes, not merely
+   their typography. Keep established terminology primary and implementation
+   class names out of the public mathematical language.
+6. During iteration, build the narrow affected modules. At the final source
+   state, run `lake build`,
+   `lake build MathlibTest Archive Counterexamples Wanted`, `lake test`,
+   `lake exe mk_all --check`, and `git diff --check` for a cross-cutting
+   refactor of this scale.
+7. Add repository-wide negative scans for every removed surface, obsolete
+   theorem name, compatibility shim, legacy representation, and newly added
+   `sorry` or `admit`. A later core edit or byte-level normalization invalidates
+   affected evidence and requires the relevant checks to be rerun.
+
+When a style tool traverses transitive imports, distinguish errors introduced
+by the current diff from pre-existing repository debt. Fix in-scope new errors
+and report inherited failures accurately without expanding the refactor.
+
 ## Architecture
 
 - `Mathlib/` contains library modules.
