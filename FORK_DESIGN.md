@@ -173,24 +173,24 @@ proved interface, retain the abstraction. The target is abstract but
 semantically exact, not convenience-driven totalization or
 faithfulness-driven foundationalization.
 
-### Mathematical vocabulary first; mechanical fallback second
+### Mathematical vocabulary first; mathlib convention otherwise
 
-A public declaration name is part of the library's mathematical language.
-Prefer the terminology by which mathematicians actually identify a concept or
-theorem, even when that terminology is not a paraphrase of the formal
-statement. Determinism is a secondary constraint: it should govern the cases
-left open by mathematical usage and make the remaining editorial judgment
-explicit and auditable. It must not erase established vocabulary merely to
-make names easier to generate.
+A public declaration name is part of the library's mathematical language. The
+existing mathlib4 naming convention remains the baseline; this fork does not
+replace it with a new statement-to-name compiler. The fork makes one priority
+explicit: established mathematical terminology outranks a paraphrase of the
+formal statement. Where mathematical usage leaves the name open, follow the
+ordinary mathlib4 convention and enforce it more consistently.
 
 Apply the following priority order:
 
 1. Use a registered standard mathematical name for a definition, theorem, or
    theorem family.
-2. Use the owner namespace and a registered family-variant rule to distinguish
-   standard formulations of the named result.
-3. Only when no standard name exists, derive the name from the statement by the
-   mechanical fallback grammar.
+2. Use the owner namespace and a consistent family-variant suffix to
+   distinguish standard formulations of the named result.
+3. When no standard name exists, follow the current mathlib4 conventions for
+   capitalization, namespace placement, conclusion-first descriptive names,
+   `_of_` hypotheses, symbol vocabulary, and established short forms.
 4. Record paper titles, theorem numbers, and textbook-local names only in
    documentation or source cross-reference metadata.
 
@@ -200,21 +200,21 @@ convergence, and symbolic names such as the π-λ theorem are treated alike when
 they are established mathematical vocabulary. Fame, contributor preference,
 and upstream precedent are not independent reasons to admit a name.
 
-Maintain a versioned terminology registry. Each entry records the canonical
-ASCII spelling, its mathematical scope, independently authored citations,
-established alternative names, the owner namespace, and whether current usage
-identifies a primary formulation or a family of coequal formulations. Ordinarily
-require two independent citable mathematical sources; a single paper's label
-or one textbook's local terminology remains source metadata. This confines the
-unavoidable human judgment to a reviewable mathematical question: what do
-mathematicians call this result?
+Maintain a versioned named-result terminology registry, not a registry of every
+declaration. Each entry records the canonical ASCII spelling, mathematical
+scope, independently authored citations, established alternative names, owner
+namespace, and whether current usage identifies a primary formulation or a
+family of coequal formulations. Ordinarily require two independent citable
+mathematical sources; a single paper's label or one textbook's local terminology
+remains source metadata. This confines the unavoidable human judgment to a
+reviewable mathematical question: what do mathematicians call this result?
 
 For a registered named theorem:
 
 - If the literature has a clear primary formulation, that declaration receives
   the bare conventional name.
 - Other standard formulations use the same conventional prefix followed by a
-  mechanically derived result-shape suffix.
+  consistent result-shape suffix.
 - If there is no clear primary formulation, every formulation receives such a
   suffix; none is arbitrarily granted the bare name.
 - An established alternative conventional name is a permanent exact alias to
@@ -228,45 +228,42 @@ Definitions use the same registry because introducing the conventional name of
 a mathematical object is part of their purpose. Do not manufacture an
 otherwise unnecessary named `Prop` merely to obtain the named-theorem rule.
 
-When no registered mathematical name exists, compile the canonical theorem
-name from its public signature:
+For ordinary declarations without a registered mathematical name, retain
+mathlib4's descriptive naming practice rather than attempting to serialize the
+entire elaborated signature. A linter may enforce objective parts such as
+casing, separators, registered vocabulary, namespace duplication, and the
+shape of established theorem families. Semantic choices such as which
+hypotheses a short name must mention remain review questions where mathlib4's
+convention does not determine a unique answer.
 
-1. Start from the elaborated public type, then project it to a naming signature
-   by fixed erasure rules. Alpha-normalize binders; flatten leading `forall`
-   binders and implications; ignore universe and data binder names, instance
-   binders, implementation parameters, proof terms, and coercions listed in the
-   erasure table. Do not unfold definitions or simplify the proposition.
-2. Serialize the conclusion with the fixed token dictionary and
-   statement-pattern table, preserving the written order of operations,
-   relations, quantifiers, and connective branches.
-3. Append every non-instance propositional hypothesis, explicit or implicit,
-   in binder order using `_of_`. Omit one only through an enumerated family-wide
-   rule, never through a per-theorem judgment that it is obvious.
-4. Encode structural variants through registered tokens such as `left`,
-   `right`, `self`, `comp`, `map`, `image`, and `preimage`; remove only context
-   already supplied by the owner namespace.
-
-The terminology registry, token dictionary, erasure table, and pattern table
-are versioned policy. If a fallback rule cannot distinguish two signatures,
-extend the rule for the whole syntactic family rather than inventing a local
-suffix. Changing these tables requires a repository-wide collision and rename
-preview. Given the same registry, namespace, signature, and table version, the
-fallback name must be reproducible by an author, reviewer, and naming linter.
-
-For the π-λ theorem, mathematical usage therefore outranks the mechanical
-statement paraphrase. The usual textbook membership formulation keeps
+For the π-λ theorem, mathematical usage therefore outranks the descriptive
+fallback. The usual textbook membership formulation keeps
 `SigmaAlgebra.DynkinSystem.pi_lambda`. The generated-structure equality should
 share the conventional family prefix, for example
 `SigmaAlgebra.DynkinSystem.pi_lambda_generateFrom_eq`, rather than remaining
 discoverable only as `generateFrom_eq`. If a literature review instead found
-the formulations genuinely coequal, both would receive mechanical suffixes;
+the formulations genuinely coequal, both would receive consistent suffixes;
 the registry would record that decision and its evidence.
 
-Adopt this policy prospectively and during explicitly authorized API
-canonicalization, not through an incidental repository-wide rename. The
-long-term enforcement target is a preview command and linter that validate
-registry membership, conventional prefixes, fallback compilation, aliases,
-and attribute ownership.
+Systematic repository-wide renaming is permitted only for the first priority:
+declarations for results that already have an established mathematical name
+but do not expose it consistently. That eligibility does not itself authorize a
+migration; an actual audit and rename still require an explicit task,
+dependency review, compatibility plan, and validation.
+
+All inherited upstream declarations and existing fork declarations are
+otherwise grandfathered. Adding or changing a proof, touching a file, moving a
+module, or reconciling upstream does not create a rename obligation. A changed
+public statement requires checking that its own name remains accurate, but it
+does not enroll neighboring declarations in a naming cleanup. Ordinary
+descriptive names may be improved when a focused API task includes them, but
+they are not candidates for a mechanical mass normalization.
+
+Enforcement is prospective and diff-scoped for new or deliberately renamed
+fork declarations. The long-term target is a linter that validates the
+objective mathlib4 rules and the named-result registry without attempting to
+reject the inherited baseline or compute a unique semantic name for every
+theorem.
 
 ### Proofs are API tests
 
