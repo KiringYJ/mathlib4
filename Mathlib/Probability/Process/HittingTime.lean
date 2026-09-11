@@ -403,11 +403,12 @@ theorem Adapted.isStoppingTime_hittingBtwn [ConditionallyCompleteLinearOrder ι]
   intro i
   rcases le_or_gt n' i with hi | hi
   · have h_le : ∀ ω, hittingBtwn u s n n' ω ≤ i := fun x => (hittingBtwn_le x).trans hi
-    simp [h_le]
+    simpa [h_le] using (f i).univ_mem
   · have h_set_eq_Union : {ω | hittingBtwn u s n n' ω ≤ i} = ⋃ j ∈ Set.Icc n i, u j ⁻¹' s := by
-      ext; simp [hittingBtwn_le_iff_of_lt _ hi]
-    simpa [h_set_eq_Union] using MeasurableSet.iUnion fun j =>
-      MeasurableSet.iUnion fun hj => f.mono hj.2 ((hu j) hs)
+      ext
+      simp [hittingBtwn_le_iff_of_lt _ hi]
+    simpa [h_set_eq_Union] using
+      (f i).iUnion_mem fun j => (f i).iUnion_mem fun hj => f.mono hj.2 ((hu j) hs)
 
 theorem Adapted.isStoppingTime_hittingAfter [ConditionallyCompleteLinearOrder ι]
     [WellFoundedLT ι] [Countable ι] {_ : SigmaAlgebra β} {f : Filtration ι m} {u : ι → Ω → β}
@@ -416,8 +417,8 @@ theorem Adapted.isStoppingTime_hittingAfter [ConditionallyCompleteLinearOrder ι
   intro i
   have h_set_eq_Union : {ω | hittingAfter u s n ω ≤ i} = ⋃ j ∈ Set.Icc n i, u j ⁻¹' s := by
     ext; simp [hittingAfter_le_iff]
-  simpa [h_set_eq_Union] using MeasurableSet.iUnion fun j =>
-    MeasurableSet.iUnion fun hj => f.mono hj.2 ((hu j) hs)
+  simpa [h_set_eq_Union] using
+    (f i).iUnion_mem fun j => (f i).iUnion_mem fun hj => f.mono hj.2 ((hu j) hs)
 
 theorem stoppedValue_hittingBtwn_mem [ConditionallyCompleteLinearOrder ι] [WellFoundedLT ι]
     {u : ι → Ω → β} {s : Set β} {n m : ι} {ω : Ω} (h : ∃ j ∈ Set.Icc n m, u j ω ∈ s) :
@@ -458,8 +459,8 @@ theorem Adapted.isStoppingTime_hittingBtwn_isStoppingTime [ConditionallyComplete
     rw [hτ] at hτbdd
     exact mod_cast hτbdd
   simp only [WithTop.coe_le_coe, h₁, h₂, Set.union_empty]
-  refine MeasurableSet.iUnion fun i => MeasurableSet.iUnion fun hi =>
-    MeasurableSet.inter (f.mono hi (hτ.measurableSet_eq i)) ?_
+  refine (f n).iUnion_mem fun i => (f n).iUnion_mem fun hi =>
+    (f n).inter_mem (f.mono hi (hτ.measurableSet_eq i)) ?_
   simpa using hf.isStoppingTime_hittingBtwn hs n
 
 section CompleteLattice

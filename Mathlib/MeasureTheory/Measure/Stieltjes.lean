@@ -446,7 +446,7 @@ theorem outer_Ioc [DenselyOrdered R] (a b : R) : f.outer (Ioc a b) = ofReal (f b
     _ = ∑' i : ℕ, f.length (s i) + ε := by simp [δ, add_assoc, ENNReal.add_halves]
 
 omit [OrderTopology R] [CompactIccSpace R] in
-theorem measurableSet_Ioi {c : R} : MeasurableSet[f.outer.caratheodory] (Ioi c) := by
+theorem measurableSet_Ioi {c : R} : Ioi c ∈ f.outer.caratheodory := by
   refine OuterMeasure.ofFunction_caratheodory fun t => ?_
   have : Nonempty R := ⟨c⟩
   simp only [length_eq]
@@ -510,7 +510,7 @@ theorem borel_le_measurable [SecondCountableTopology R] :
   rw [borel_eq_generateFrom_Ioi]
   refine SigmaAlgebra.generateFrom_le fun s ⟨c, hc⟩ ↦ ?_
   subst s
-  exact measurableSet_iff_mem.mp f.measurableSet_Ioi
+  exact f.measurableSet_Ioi
 
 /-! ### The measure associated to a Stieltjes function -/
 

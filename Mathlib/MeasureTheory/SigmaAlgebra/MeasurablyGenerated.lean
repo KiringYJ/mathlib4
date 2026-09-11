@@ -51,8 +51,8 @@ end SigmaAlgebra
 
 namespace MeasureTheory
 
-theorem measurableSet_generateFrom_singleton_iff {s t : Set α} :
-    MeasurableSet[SigmaAlgebra.generateFrom {s}] t ↔ t = ∅ ∨ t = s ∨ t = sᶜ ∨ t = univ := by
+theorem mem_generateFrom_singleton_iff {s t : Set α} :
+    t ∈ SigmaAlgebra.generateFrom {s} ↔ t = ∅ ∨ t = s ∨ t = sᶜ ∨ t = univ := by
   simp_rw +instances [SigmaAlgebra.generateFrom_singleton]
   change (∃ x : Set Prop, x ∈ (⊤ : SigmaAlgebra Prop) ∧ (· ∈ s) ⁻¹' x = t) ↔ _
   have top_mem (x : Set Prop) : x ∈ (⊤ : SigmaAlgebra Prop) := by
@@ -183,115 +183,6 @@ protected theorem iInter_of_antitone {ι : Type*} [Preorder ι] [IsDirectedOrder
     (hsm : Antitone s) (hs : ∀ i, MeasurableSet (s i)) : MeasurableSet (⋂ i, s i) := by
   rw [← compl_iff, compl_iInter]
   exact .iUnion_of_monotone (compl_anti.comp hsm) fun i ↦ (hs i).compl
-
-/-!
-### Typeclasses on `Subtype MeasurableSet`
--/
-
-instance Subtype.instMembership : Membership α (Subtype (MeasurableSet : Set α → Prop)) :=
-  ⟨fun s a => a ∈ (s : Set α)⟩
-
-@[simp]
-theorem mem_coe (a : α) (s : Subtype (MeasurableSet : Set α → Prop)) : a ∈ (s : Set α) ↔ a ∈ s :=
-  Iff.rfl
-
-instance Subtype.instEmptyCollection : EmptyCollection (Subtype (MeasurableSet : Set α → Prop)) :=
-  ⟨⟨∅, MeasurableSet.empty⟩⟩
-
-@[simp]
-theorem coe_empty : ↑(∅ : Subtype (MeasurableSet : Set α → Prop)) = (∅ : Set α) :=
-  rfl
-
-instance Subtype.instInsert [MeasurableSingletonClass α] :
-    Insert α (Subtype (MeasurableSet : Set α → Prop)) :=
-  ⟨fun a s => ⟨insert a (s : Set α), s.prop.insert a⟩⟩
-
-@[simp]
-theorem coe_insert [MeasurableSingletonClass α] (a : α)
-    (s : Subtype (MeasurableSet : Set α → Prop)) :
-    ↑(Insert.insert a s) = (Insert.insert a s : Set α) :=
-  rfl
-
-instance Subtype.instSingleton [MeasurableSingletonClass α] :
-    Singleton α (Subtype (MeasurableSet : Set α → Prop)) :=
-  ⟨fun a => ⟨{a}, .singleton _⟩⟩
-
-@[simp] theorem coe_singleton [MeasurableSingletonClass α] (a : α) :
-    ↑({a} : Subtype (MeasurableSet : Set α → Prop)) = ({a} : Set α) :=
-  rfl
-
-instance Subtype.instLawfulSingleton [MeasurableSingletonClass α] :
-    LawfulSingleton α (Subtype (MeasurableSet : Set α → Prop)) :=
-  ⟨fun _ => Subtype.ext <| insert_empty_eq _⟩
-
-instance Subtype.instCompl : Compl (Subtype (MeasurableSet : Set α → Prop)) :=
-  ⟨fun x => ⟨xᶜ, x.prop.compl⟩⟩
-
-@[simp]
-theorem coe_compl (s : Subtype (MeasurableSet : Set α → Prop)) : ↑sᶜ = (sᶜ : Set α) :=
-  rfl
-
-instance Subtype.instUnion : Union (Subtype (MeasurableSet : Set α → Prop)) :=
-  ⟨fun x y => ⟨(x : Set α) ∪ y, x.prop.union y.prop⟩⟩
-
-@[simp]
-theorem coe_union (s t : Subtype (MeasurableSet : Set α → Prop)) : ↑(s ∪ t) = (s ∪ t : Set α) :=
-  rfl
-
-instance Subtype.instSup : Max (Subtype (MeasurableSet : Set α → Prop)) :=
-  ⟨fun x y => x ∪ y⟩
-
-@[simp]
-protected theorem sup_eq_union (s t : {s : Set α // MeasurableSet s}) : s ⊔ t = s ∪ t := rfl
-
-instance Subtype.instInter : Inter (Subtype (MeasurableSet : Set α → Prop)) :=
-  ⟨fun x y => ⟨x ∩ y, x.prop.inter y.prop⟩⟩
-
-@[simp]
-theorem coe_inter (s t : Subtype (MeasurableSet : Set α → Prop)) : ↑(s ∩ t) = (s ∩ t : Set α) :=
-  rfl
-
-instance Subtype.instInf : Min (Subtype (MeasurableSet : Set α → Prop)) :=
-  ⟨fun x y => x ∩ y⟩
-
-@[simp]
-protected theorem inf_eq_inter (s t : {s : Set α // MeasurableSet s}) : s ⊓ t = s ∩ t := rfl
-
-instance Subtype.instSDiff : SDiff (Subtype (MeasurableSet : Set α → Prop)) :=
-  ⟨fun x y => ⟨x \ y, x.prop.diff y.prop⟩⟩
-
--- TODO: Why does it complain that `x ⇨ y` is noncomputable?
-noncomputable instance Subtype.instHImp : HImp (Subtype (MeasurableSet : Set α → Prop)) where
-  himp x y := ⟨x ⇨ y, x.prop.himp y.prop⟩
-
-@[simp]
-theorem coe_sdiff (s t : Subtype (MeasurableSet : Set α → Prop)) : ↑(s \ t) = (s : Set α) \ t :=
-  rfl
-
-@[simp]
-lemma coe_himp (s t : Subtype (MeasurableSet : Set α → Prop)) : ↑(s ⇨ t) = (s ⇨ t : Set α) := rfl
-
-instance Subtype.instBot : Bot (Subtype (MeasurableSet : Set α → Prop)) := ⟨∅⟩
-
-@[simp]
-theorem coe_bot : ↑(⊥ : Subtype (MeasurableSet : Set α → Prop)) = (⊥ : Set α) :=
-  rfl
-
-@[simp]
-theorem subtype_bot_eq : (⟨∅, .empty⟩ : Subtype (MeasurableSet : Set α → Prop)) = ⊥ :=
-  rfl
-
-instance Subtype.instTop : Top (Subtype (MeasurableSet : Set α → Prop)) :=
-  ⟨⟨Set.univ, MeasurableSet.univ⟩⟩
-
-@[simp]
-theorem coe_top : ↑(⊤ : Subtype (MeasurableSet : Set α → Prop)) = (⊤ : Set α) :=
-  rfl
-
-noncomputable instance Subtype.instBooleanAlgebra :
-    BooleanAlgebra (Subtype (MeasurableSet : Set α → Prop)) :=
-  Subtype.coe_injective.booleanAlgebra _ .rfl .rfl coe_union coe_inter coe_top coe_bot coe_compl
-    coe_sdiff coe_himp
 
 @[measurability]
 theorem measurableSet_blimsup {s : ℕ → Set α} {p : ℕ → Prop} (h : ∀ n, p n → MeasurableSet (s n)) :

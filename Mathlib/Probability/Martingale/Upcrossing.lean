@@ -381,7 +381,7 @@ theorem StronglyAdapted.upcrossingStrat (hf : StronglyAdapted ℱ f) :
   have hu := hf.isStoppingTime_upperCrossingTime (a := a) (b := b) (N := N) (n := i + 1) n
   simp only [ENat.some_eq_natCast, Nat.cast_le] at hl hu
   simp_rw [← not_le]
-  exact hl.inter hu.compl
+  exact (ℱ n).inter_mem hl ((ℱ n).compl_mem hu)
 
 theorem Submartingale.sum_upcrossingStrat_mul [IsFiniteMeasure μ] (hf : Submartingale f ℱ μ)
     (a b : ℝ) (N : ℕ) : Submartingale (fun n : ℕ =>
@@ -403,7 +403,9 @@ theorem Submartingale.sum_mul_upcrossingStrat_le [IsFiniteMeasure μ] (hf : Subm
     μ[∑ k ∈ Finset.range n, upcrossingStrat a b f N k * (f (k + 1) - f k)] ≤ μ[f n] - μ[f 0] := by
   have h₁ : (0 : ℝ) ≤
       μ[∑ k ∈ Finset.range n, (1 - upcrossingStrat a b f N k) * (f (k + 1) - f k)] := by
-    have := (hf.sum_sub_upcrossingStrat_mul a b N).setIntegral_le (zero_le (a := n)) .univ
+    have :=
+      (hf.sum_sub_upcrossingStrat_mul a b N).setIntegral_le (zero_le (a := n))
+        (ℱ 0).univ_mem
     rw [setIntegral_univ, setIntegral_univ] at this
     refine le_trans ?_ this
     simp only [Finset.range_zero, Finset.sum_empty, integral_zero', le_refl]

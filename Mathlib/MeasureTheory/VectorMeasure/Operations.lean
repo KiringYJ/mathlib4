@@ -536,39 +536,49 @@ variable {M : Type*} [AddCommMonoid M] [TopologicalSpace M]
 open scoped Classical in
 /-- Restriction of a vector measure onto a sub-σ-algebra. -/
 @[simps]
-def trim {m n : SigmaAlgebra α} (v : VectorMeasure α M) (hle : m ≤ n) :
-    @VectorMeasure α m M _ _ :=
-  @VectorMeasure.mk α m M _ _
-    (fun i => if MeasurableSet[m] i then v i else 0)
-    (by rw [ite_eq_left (@MeasurableSet.empty _ m), v.empty])
-    (fun i hi => by rw [ite_eq_right hi])
+def trim {𝓐 𝓑 : SigmaAlgebra α} (v : @VectorMeasure α 𝓑 M _ _) (hle : 𝓐 ≤ 𝓑) :
+    @VectorMeasure α 𝓐 M _ _ :=
+  @VectorMeasure.mk α 𝓐 M _ _
+    (fun i => if i ∈ 𝓐 then v i else 0)
+    (by rw [ite_eq_left 𝓐.empty_mem, v.empty])
+    (fun i hi => by rw [ite_eq_right fun hmem => hi (measurableSet_iff_mem.mpr hmem)])
     (fun f hf₁ hf₂ => by
-      have hf₁' : ∀ k, MeasurableSet[n] (f k) := fun k => hle (hf₁ k)
+      have hf₁' : ∀ k, MeasurableSet (𝓐 := 𝓑) (f k) := fun k =>
+        measurableSet_iff_mem.mpr (hle (measurableSet_iff_mem.mp (hf₁ k)))
       convert! v.m_iUnion hf₁' hf₂ using 1
       · ext n
-        rw [ite_eq_left (hf₁ n)]
-      · rw [ite_eq_left (@MeasurableSet.iUnion _ _ m _ _ hf₁)])
+        rw [ite_eq_left (measurableSet_iff_mem.mp (hf₁ n))]
+      · rw [ite_eq_left (𝓐.iUnion_mem fun n => measurableSet_iff_mem.mp (hf₁ n))])
 
-variable {n : SigmaAlgebra α} {v : VectorMeasure α M}
-
-theorem trim_eq_self : v.trim le_rfl = v := by
+theorem trim_eq_self {𝓐 : SigmaAlgebra α} {v : @VectorMeasure α 𝓐 M _ _} :
+    v.trim le_rfl = v := by
   ext i hi
-  exact ite_eq_left hi
+  exact ite_eq_left (measurableSet_iff_mem.mp hi)
 
 @[simp]
-theorem zero_trim (hle : m ≤ n) : (0 : VectorMeasure α M).trim hle = 0 := by
+theorem zero_trim {𝓐 𝓑 : SigmaAlgebra α} (hle : 𝓐 ≤ 𝓑) :
+    (0 : @VectorMeasure α 𝓑 M _ _).trim hle = 0 := by
   ext i hi
-  exact ite_eq_left hi
+  exact ite_eq_left (measurableSet_iff_mem.mp hi)
 
-theorem trim_measurableSet_eq (hle : m ≤ n) {i : Set α} (hi : MeasurableSet[m] i) :
+theorem trim_measurableSet_eq {𝓐 𝓑 : SigmaAlgebra α} {v : @VectorMeasure α 𝓑 M _ _}
+    (hle : 𝓐 ≤ 𝓑) {i : Set α} (hi : i ∈ 𝓐) :
     v.trim hle i = v i :=
   ite_eq_left hi
 
-theorem restrict_trim (hle : m ≤ n) {i : Set α} (hi : MeasurableSet[m] i) :
-    @VectorMeasure.restrict α m M _ _ (v.trim hle) i = (v.restrict i).trim hle := by
+theorem restrict_trim {𝓐 𝓑 : SigmaAlgebra α} {v : @VectorMeasure α 𝓑 M _ _}
+    (hle : 𝓐 ≤ 𝓑) {i : Set α} (hi : i ∈ 𝓐) :
+    @VectorMeasure.restrict α 𝓐 M _ _ (v.trim hle) i = (v.restrict i).trim hle := by
   ext j hj
-  rw [@restrict_apply _ m, trim_measurableSet_eq hle hj, restrict_apply, trim_measurableSet_eq]
-  all_goals measurability
+  have hi𝓐 : MeasurableSet (𝓐 := 𝓐) i := measurableSet_iff_mem.mpr hi
+  have hj𝓐 : j ∈ 𝓐 := measurableSet_iff_mem.mp hj
+  have hi𝓑 : MeasurableSet (𝓐 := 𝓑) i := measurableSet_iff_mem.mpr (hle hi)
+  have hj𝓑 : MeasurableSet (𝓐 := 𝓑) j := measurableSet_iff_mem.mpr (hle hj𝓐)
+  calc
+    (v.trim hle).restrict i j = v.trim hle (j ∩ i) := (v.trim hle).restrict_apply hi𝓐 hj
+    _ = v (j ∩ i) := trim_measurableSet_eq hle (𝓐.inter_mem hj𝓐 hi)
+    _ = v.restrict i j := (v.restrict_apply hi𝓑 hj𝓑).symm
+    _ = (v.restrict i).trim hle j := (trim_measurableSet_eq hle hj𝓐).symm
 
 end Trim
 

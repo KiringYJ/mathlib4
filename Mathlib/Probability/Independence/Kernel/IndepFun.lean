@@ -101,16 +101,16 @@ lemma iIndepFun.ae_isProbabilityMeasure (h : iIndepFun f κ μ) :
   h.iIndep.ae_isProbabilityMeasure
 
 lemma iIndepFun.meas_biInter (hf : iIndepFun f κ μ)
-    (hs : ∀ i, i ∈ S → MeasurableSet[(mβ i).comap (f i)] (s i)) :
+    (hs : ∀ i, i ∈ S → s i ∈ (mβ i).comap (f i)) :
     ∀ᵐ a ∂μ, κ a (⋂ i ∈ S, s i) = ∏ i ∈ S, κ a (s i) := hf.iIndep.meas_biInter hs
 
 lemma iIndepFun.meas_iInter [Fintype ι] (hf : iIndepFun f κ μ)
-    (hs : ∀ i, MeasurableSet[(mβ i).comap (f i)] (s i)) :
+    (hs : ∀ i, s i ∈ (mβ i).comap (f i)) :
     ∀ᵐ a ∂μ, κ a (⋂ i, s i) = ∏ i, κ a (s i) := hf.iIndep.meas_iInter hs
 
 lemma IndepFun.meas_inter {β} [mβ : SigmaAlgebra β] [mγ : SigmaAlgebra γ]
     {f : Ω → β} {g : Ω → γ} (hfg : IndepFun f g κ μ)
-    {s t : Set Ω} (hs : MeasurableSet[mβ.comap f] s) (ht : MeasurableSet[mγ.comap g] t) :
+    {s t : Set Ω} (hs : s ∈ mβ.comap f) (ht : t ∈ mγ.comap g) :
     ∀ᵐ a ∂μ, κ a (s ∩ t) = κ a s * κ a t := hfg _ _ hs ht
 
 lemma iIndepFun.precomp (hg : Function.Injective g) (h : iIndepFun f κ μ) :
@@ -145,14 +145,14 @@ alias ⟨IndepFun.measure_inter_preimage_eq_mul, _⟩ := indepFun_iff_measure_in
 theorem iIndepFun_iff_measure_inter_preimage_eq_mul {ι : Type*} {β : ι → Type*}
     (m : ∀ x, SigmaAlgebra (β x)) (f : ∀ i, Ω → β i) :
     iIndepFun f κ μ ↔
-      ∀ (S : Finset ι) {sets : ∀ i : ι, Set (β i)} (_H : ∀ i, i ∈ S → MeasurableSet[m i] (sets i)),
+      ∀ (S : Finset ι) {sets : ∀ i : ι, Set (β i)} (_H : ∀ i, i ∈ S → sets i ∈ m i),
         ∀ᵐ a ∂μ, κ a (⋂ i ∈ S, (f i) ⁻¹' (sets i)) = ∏ i ∈ S, κ a ((f i) ⁻¹' (sets i)) := by
   refine ⟨fun h S sets h_meas => h _ fun i hi_mem => ⟨sets i, h_meas i hi_mem, rfl⟩, ?_⟩
   intro h S setsΩ h_meas
   classical
   let setsβ : ∀ i : ι, Set (β i) := fun i =>
     dite (i ∈ S) (fun hi_mem => (h_meas i hi_mem).choose) fun _ => Set.univ
-  have h_measβ : ∀ i ∈ S, MeasurableSet[m i] (setsβ i) := by
+  have h_measβ : ∀ i ∈ S, setsβ i ∈ m i := by
     intro i hi_mem
     simp_rw [setsβ, dite_eq_left hi_mem]
     exact (h_meas i hi_mem).choose_spec.1
@@ -338,14 +338,14 @@ theorem iIndepFun.indepFun_finset (S T : Finset ι) (hST : Disjoint S T)
   apply IndepFun.congr (Filter.EventuallyEq.symm η_eq)
   -- We introduce π-systems, built from the π-system of boxes which generates `SigmaAlgebra.pi`.
   let πSβ := Set.pi (Set.univ : Set S) ''
-    Set.pi (Set.univ : Set S) fun i => { s : Set (β i) | MeasurableSet[m i] s }
+    Set.pi (Set.univ : Set S) fun i => (m i : Set (Set (β i)))
   let πS := { s : Set Ω | ∃ t ∈ πSβ, (fun a (i : S) => f i a) ⁻¹' t = s }
   have hπS_pi : IsPiSystem πS := by exact IsPiSystem.comap (@isPiSystem_pi _ _ ?_) _
   have hπS_gen : (SigmaAlgebra.pi.comap fun a (i : S) => f i a) = generateFrom πS := by
     rw [generateFrom_pi.symm, comap_generateFrom]
     congr
   let πTβ := Set.pi (Set.univ : Set T) ''
-      Set.pi (Set.univ : Set T) fun i => { s : Set (β i) | MeasurableSet[m i] s }
+      Set.pi (Set.univ : Set T) fun i => (m i : Set (Set (β i)))
   let πT := { s : Set Ω | ∃ t ∈ πTβ, (fun a (i : T) => f i a) ⁻¹' t = s }
   have hπT_pi : IsPiSystem πT := by exact IsPiSystem.comap (@isPiSystem_pi _ _ ?_) _
   have hπT_gen : (SigmaAlgebra.pi.comap fun a (i : T) => f i a) = generateFrom πT := by
@@ -356,7 +356,7 @@ theorem iIndepFun.indepFun_finset (S T : Finset ι) (hST : Disjoint S T)
     (Measurable.comap_le (measurable_pi_iff.mpr fun i => hf_meas i)) hπS_pi hπT_pi hπS_gen hπT_gen
     ?_
   rintro _ _ ⟨s, ⟨sets_s, hs1, hs2⟩, rfl⟩ ⟨t, ⟨sets_t, ht1, ht2⟩, rfl⟩
-  simp only [Set.mem_univ_pi, Set.mem_ofPred_eq] at hs1 ht1
+  simp only [Set.mem_univ_pi] at hs1 ht1
   rw [← hs2, ← ht2]
   classical
   let sets_s' : ∀ i : ι, Set (β i) := fun i =>
@@ -370,9 +370,13 @@ theorem iIndepFun.indepFun_finset (S T : Finset ι) (hST : Disjoint S T)
   have h_sets_t'_univ : ∀ {i} (_hi : i ∈ S), sets_t' i = Set.univ := by
     intro i hi; simp_rw [sets_t', dite_eq_right (Finset.disjoint_left.mp hST hi)]
   have h_meas_s' : ∀ i ∈ S, MeasurableSet (sets_s' i) := by
-    intro i hi; rw [h_sets_s'_eq hi]; exact hs1 _
+    intro i hi
+    rw [h_sets_s'_eq hi]
+    exact measurableSet_iff_mem.mpr (by simpa using hs1 ⟨i, hi⟩)
   have h_meas_t' : ∀ i ∈ T, MeasurableSet (sets_t' i) := by
-    intro i hi; simp_rw [sets_t', dite_eq_left hi]; exact ht1 _
+    intro i hi
+    simp_rw [sets_t', dite_eq_left hi]
+    exact measurableSet_iff_mem.mpr (by simpa using ht1 ⟨i, hi⟩)
   have h_eq_inter_S : (fun (ω : Ω) (i : ↥S) =>
     f (↑i) ω) ⁻¹' Set.pi Set.univ sets_s = ⋂ i ∈ S, f i ⁻¹' sets_s' i := by
     ext1 x
@@ -685,7 +689,7 @@ theorem iIndepSet.iIndepFun_indicator [Zero β] [One β] {m : SigmaAlgebra β} {
   rintro S π _hπ
   simp_rw [Set.indicator_const_preimage_eq_union]
   apply hs _ fun i _hi ↦ ?_
-  have hsi : MeasurableSet[generateFrom {s i}] (s i) :=
+  have hsi : s i ∈ generateFrom {s i} :=
     SigmaAlgebra.mem_generateFrom (Set.mem_singleton _)
   refine
     MeasurableSet.union (MeasurableSet.ite' (fun _ => hsi) fun _ => ?_)
@@ -695,7 +699,7 @@ theorem iIndepSet.iIndepFun_indicator [Zero β] [One β] {m : SigmaAlgebra β} {
 
 lemma Indep.indicator_const_indepFun {m : SigmaAlgebra Ω} {M 𝓧 : Type*}
     [Zero M] [SigmaAlgebra M] (c : M) {m𝓧 : SigmaAlgebra 𝓧} {A : Set Ω}
-    {X : Ω → 𝓧} (hA : MeasurableSet[m] A) (h : Indep m (m𝓧.comap X) κ μ) :
+    {X : Ω → 𝓧} (hA : A ∈ m) (h : Indep m (m𝓧.comap X) κ μ) :
     IndepFun (A.indicator (fun _ ↦ c)) X κ μ :=
   indep_of_indep_of_le_left h (measurable_const.indicator hA).comap_le
 
@@ -706,22 +710,22 @@ variable {mβ : SigmaAlgebra β} {X : ι → Ω → α} {Y : ι → Ω → β}
 into a product. -/
 lemma iIndepFun.cond_iInter [Finite ι] (hY : ∀ i, Measurable (Y i))
     (hindep : iIndepFun (fun i ω ↦ (X i ω, Y i ω)) κ μ)
-    (hf : ∀ i ∈ s, MeasurableSet[mα.comap (X i)] (f i))
+    (hf : ∀ i ∈ s, f i ∈ mα.comap (X i))
     (hy : ∀ᵐ a ∂μ, ∀ i ∉ s, κ a (Y i ⁻¹' t i) ≠ 0) (ht : ∀ i, MeasurableSet (t i)) :
     ∀ᵐ a ∂μ, (κ a)[⋂ i ∈ s, f i | ⋂ i, Y i ⁻¹' t i] = ∏ i ∈ s, (κ a)[f i | Y i in t i] := by
   classical
   cases nonempty_fintype ι
   let g (i' : ι) := if i' ∈ s then Y i' ⁻¹' t i' ∩ f i' else Y i' ⁻¹' t i'
-  have hYt i : MeasurableSet[(mα.prod mβ).comap fun ω ↦ (X i ω, Y i ω)] (Y i ⁻¹' t i) := by
-    have hprod : MeasurableSet[mα.prod mβ] (.univ ×ˢ t i) :=
-      MeasurableSet.prod (show MeasurableSet[mα] .univ from mα.univ_mem) (ht _)
+  have hYt i : Y i ⁻¹' t i ∈ (mα.prod mβ).comap fun ω ↦ (X i ω, Y i ω) := by
+    have hprod : .univ ×ˢ t i ∈ mα.prod mβ :=
+      MeasurableSet.prod (show .univ ∈ mα from mα.univ_mem) (ht _)
     exact ⟨.univ ×ˢ t i, hprod, by ext; simp⟩
-  have hg i : MeasurableSet[(mα.prod mβ).comap fun ω ↦ (X i ω, Y i ω)] (g i) := by
+  have hg i : g i ∈ (mα.prod mβ).comap fun ω ↦ (X i ω, Y i ω) := by
     by_cases hi : i ∈ s <;> simp only [hi, ↓reduceIte, g]
     · obtain ⟨A, hA, hA'⟩ := hf i hi
-      have hprod : MeasurableSet[mα.prod mβ] (A ×ˢ .univ) :=
-        MeasurableSet.prod (show MeasurableSet[mα] A from hA)
-          (show MeasurableSet[mβ] .univ from mβ.univ_mem)
+      have hprod : A ×ˢ .univ ∈ mα.prod mβ :=
+        MeasurableSet.prod (show A ∈ mα from hA)
+          (show .univ ∈ mβ from mβ.univ_mem)
       exact ((mα.prod mβ).comap fun ω ↦ (X i ω, Y i ω)).inter_mem (hYt _)
         ⟨A ×ˢ .univ, hprod, by ext; simp [← hA']⟩
     · exact hYt _

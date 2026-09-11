@@ -996,18 +996,19 @@ variable {E : Type*} {m m₀ : SigmaAlgebra α} {μ : Measure[m₀] α} {f g : �
   [TopologicalSpace E] [Preorder E] [OrderClosedTopology E] [PseudoMetrizableSpace E]
 
 lemma measurableSet_le (hf : StronglyMeasurable[m] f) (hg : StronglyMeasurable[m] g) :
-    MeasurableSet[m] {a | f a ≤ g a} := by
+    {a | f a ≤ g a} ∈ m := by
   borelize (E × E)
   exact (hf.prodMk hg).measurable isClosed_le_prod.measurableSet
 
 lemma measurableSet_lt (hf : StronglyMeasurable[m] f) (hg : StronglyMeasurable[m] g) :
-    MeasurableSet[m] {a | f a < g a} := by
-  simpa only [lt_iff_le_not_ge] using! (hf.measurableSet_le hg).inter (hg.measurableSet_le hf).compl
+    {a | f a < g a} ∈ m := by
+  simpa only [lt_iff_le_not_ge] using!
+    m.inter_mem (hf.measurableSet_le hg) (m.compl_mem (hg.measurableSet_le hf))
 
 lemma ae_le_trim_of_stronglyMeasurable (hm : m ≤ m₀) (hf : StronglyMeasurable[m] f)
     (hg : StronglyMeasurable[m] g) (hfg : f ≤ᵐ[μ] g) : f ≤ᵐ[μ.trim hm] g := by
   rwa [EventuallyLE, ae_iff, trim_measurableSet_eq hm]
-  exact (hf.measurableSet_le hg).compl
+  exact m.compl_mem (hf.measurableSet_le hg)
 
 lemma ae_le_trim_iff (hm : m ≤ m₀) (hf : StronglyMeasurable[m] f) (hg : StronglyMeasurable[m] g) :
     f ≤ᵐ[μ.trim hm] g ↔ f ≤ᵐ[μ] g :=
@@ -1020,14 +1021,14 @@ variable {E : Type*} {m m₀ : SigmaAlgebra α} {μ : Measure[m₀] α} {f g : �
   [TopologicalSpace E] [MetrizableSpace E]
 
 lemma measurableSet_eq_fun (hf : StronglyMeasurable[m] f) (hg : StronglyMeasurable[m] g) :
-    MeasurableSet[m] {a | f a = g a} := by
+    {a | f a = g a} ∈ m := by
   borelize (E × E)
   exact (hf.prodMk hg).measurable isClosed_diagonal.measurableSet
 
 lemma ae_eq_trim_of_stronglyMeasurable (hm : m ≤ m₀) (hf : StronglyMeasurable[m] f)
     (hg : StronglyMeasurable[m] g) (hfg : f =ᵐ[μ] g) : f =ᵐ[μ.trim hm] g := by
   rwa [EventuallyEq, ae_iff, trim_measurableSet_eq hm]
-  exact (hf.measurableSet_eq_fun hg).compl
+  exact m.compl_mem (hf.measurableSet_eq_fun hg)
 
 lemma ae_eq_trim_iff (hm : m ≤ m₀) (hf : StronglyMeasurable[m] f) (hg : StronglyMeasurable[m] g) :
     f =ᵐ[μ.trim hm] g ↔ f =ᵐ[μ] g :=
@@ -1052,17 +1053,17 @@ theorem stronglyMeasurable_in_set {m : SigmaAlgebra α} [TopologicalSpace β] [Z
 another σ-algebra `m₂` (hypothesis `hs`), the set `s` is `m` measurable and a function `f` supported
 on `s` is `m`-strongly-measurable, then `f` is also `m₂`-strongly-measurable. -/
 theorem stronglyMeasurable_of_sigmaAlgebra_le_on {α E} {m m₂ : SigmaAlgebra α}
-    [TopologicalSpace E] [Zero E] {s : Set α} {f : α → E} (hs_m : MeasurableSet[m] s)
-    (hs : ∀ t, MeasurableSet[m] (s ∩ t) → MeasurableSet[m₂] (s ∩ t))
+    [TopologicalSpace E] [Zero E] {s : Set α} {f : α → E} (hs_m : s ∈ m)
+    (hs : ∀ t, s ∩ t ∈ m → s ∩ t ∈ m₂)
     (hf : StronglyMeasurable[m] f) (hf_zero : ∀ x ∉ s, f x = 0) :
     StronglyMeasurable[m₂] f := by
-  have hs_m₂ : MeasurableSet[m₂] s := by
-    have : MeasurableSet (s ∩ univ) := hs univ (by simpa)
+  have hs_m₂ : s ∈ m₂ := by
+    have : s ∩ univ ∈ m₂ := hs univ (by simpa)
     simpa
   have h_sub : m.comap ((↑) : s → α) ≤ m₂.comap ((↑) : s → α) := by
     intro _ ht
     rcases ht with ⟨u, hu, rfl⟩
-    exact ⟨s ∩ u, hs u (hs_m.inter hu), by simp⟩
+    exact ⟨s ∩ u, hs u (m.inter_mem hs_m hu), by simp⟩
   refine stronglyMeasurable_of_restrict_of_restrict_compl hs_m₂ ?_ ?_
   · exact (hf.comp_measurable (comap_measurable _)).mono h_sub
   · exact stronglyMeasurable_const' fun x y ↦ by simp [hf_zero _ x.2, hf_zero _ y.2]
@@ -1073,7 +1074,7 @@ norm. In particular, `f` is integrable on each of those sets. -/
 theorem exists_spanning_measurableSet_norm_le [SeminormedAddCommGroup β] {m m0 : SigmaAlgebra α}
     (hm : m ≤ m0) (hf : StronglyMeasurable[m] f) (μ : Measure α) [SigmaFinite (μ.trim hm)] :
     ∃ s : ℕ → Set α,
-      (∀ n, MeasurableSet[m] (s n) ∧ μ (s n) < ∞ ∧ ∀ x ∈ s n, ‖f x‖ ≤ n) ∧
+      (∀ n, s n ∈ m ∧ μ (s n) < ∞ ∧ ∀ x ∈ s n, ‖f x‖ ≤ n) ∧
       ⋃ i, s i = Set.univ := by
   obtain ⟨s, hs, hs_univ⟩ :=
     @exists_spanning_measurableSet_le _ m _ hf.nnnorm.measurable (μ.trim hm) _

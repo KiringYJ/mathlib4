@@ -111,7 +111,7 @@ lemma integral_condExp_le_of_ae_nonneg {f : α → ℝ} (hf : 0 ≤ᵐ[μ] f) :
     apply integral_congr_ae
     filter_upwards [hf] with ω hω using abs_of_nonneg hω
 
-theorem setIntegral_abs_condExp_le {s : Set α} (hs : MeasurableSet[m] s) (f : α → E) :
+theorem setIntegral_abs_condExp_le {s : Set α} (hs : s ∈ m) (f : α → E) :
     ∫ x in s, |μ[f | m] x| ∂μ ≤ ∫ x in s, |f x| ∂μ := by
   by_cases! hm : ¬ m ≤ m0
   · simpa [condExp_of_not_le hm] using integral_nonneg (fun x => abs_nonneg f x)
@@ -125,7 +125,7 @@ theorem setIntegral_abs_condExp_le {s : Set α} (hs : MeasurableSet[m] s) (f : �
   _  ≤ _ := integral_abs_condExp_le f
 
 /-- Note that this is not trivial as we don't assume that `f` is integrable. -/
-lemma setIntegral_condExp_le_of_ae_restrict_nonneg {s : Set α} (hs : MeasurableSet[m] s) {f : α → ℝ}
+lemma setIntegral_condExp_le_of_ae_restrict_nonneg {s : Set α} (hs : s ∈ m) {f : α → ℝ}
     (hf : 0 ≤ᵐ[μ.restrict s] f) :
     ∫ x in s, μ[f | m] x ∂μ ≤ ∫ x in s, f x ∂μ := by
   by_cases! hm : ¬ m ≤ m0
@@ -139,7 +139,7 @@ lemma setIntegral_condExp_le_of_ae_restrict_nonneg {s : Set α} (hs : Measurable
     integral_congr_ae (condExp_restrict_ae_eq_restrict hm hs hfint).symm
   _ ≤ ∫ x in s, f x ∂μ := integral_condExp_le_of_ae_nonneg hf
 
-lemma setIntegral_condExp_le_of_ae_nonneg {s : Set α} (hs : MeasurableSet[m] s) {f : α → ℝ}
+lemma setIntegral_condExp_le_of_ae_nonneg {s : Set α} (hs : s ∈ m) {f : α → ℝ}
     (hf : 0 ≤ᵐ[μ] f) :
     ∫ x in s, μ[f | m] x ∂μ ≤ ∫ x in s, f x ∂μ :=
   setIntegral_condExp_le_of_ae_restrict_nonneg hs (ae_restrict_le hf)
@@ -209,7 +209,7 @@ theorem integral_norm_condExp_le (f : α → E) : ∫ x, ‖μ[f | m] x‖ ∂μ
   simpa using integral_norm_condExp_rpow_le le_rfl (by simpa using hfint.norm)
 
 theorem setIntegral_norm_condExp_rpow_le {p : ℝ} (hp : 1 ≤ p) {f : α → E} {s : Set α}
-    (hs : MeasurableSet[m] s) (hf : Integrable (‖f ·‖ ^ p) μ) :
+    (hs : s ∈ m) (hf : Integrable (‖f ·‖ ^ p) μ) :
     ∫ x in s, ‖μ[f | m] x‖ ^ p ∂μ ≤ ∫ x in s, ‖f x‖ ^ p ∂μ := by
   have hp' : p ≠ 0 := by linarith
   by_cases! hm : ¬ m ≤ m0
@@ -226,7 +226,7 @@ theorem setIntegral_norm_condExp_rpow_le {p : ℝ} (hp : 1 ≤ p) {f : α → E}
     apply setIntegral_condExp_le_of_ae_nonneg hs
     filter_upwards with ω using by positivity
 
-theorem setIntegral_norm_condExp_le {s : Set α} (hs : MeasurableSet[m] s) (f : α → E) :
+theorem setIntegral_norm_condExp_le {s : Set α} (hs : s ∈ m) (f : α → E) :
     ∫ x in s, ‖(μ[f | m]) x‖ ∂μ ≤ ∫ x in s, ‖f x‖ ∂μ := by
   by_cases! hfint : ¬ Integrable f μ
   · simpa [condExp_of_not_integrable hfint] using integral_nonneg (fun x => norm_nonneg (f x))
@@ -347,7 +347,7 @@ theorem Integrable.uniformIntegrable_condExp {ι : Type*} [IsFiniteMeasure μ] {
       ← mul_assoc, ENNReal.mul_inv_cancel hδ.ne' hδ_top.ne, one_mul, rpow_one]
     exact eLpNorm_condExp_le_eLpNorm g (le_refl 1)
   refine ⟨C, fun n => le_trans ?_ (h {x : α | C ≤ ‖(μ[g|ℱ n]) x‖₊} (hmeas n C) (this n))⟩
-  have hmeasℱ : MeasurableSet[ℱ n] {x : α | C ≤ ‖(μ[g|ℱ n]) x‖₊} :=
+  have hmeasℱ : {x : α | C ≤ ‖(μ[g|ℱ n]) x‖₊} ∈ ℱ n :=
     @measurableSet_le _ _ _ _ _ (ℱ n) _ _ _ _ _ measurable_const
       (@Measurable.nnnorm _ _ _ _ _ (ℱ n) _ stronglyMeasurable_condExp.measurable)
   rw [← eLpNorm_congr_ae (condExp_indicator hint hmeasℱ)]

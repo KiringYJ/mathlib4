@@ -98,7 +98,7 @@ protected theorem integrable (hf : Martingale f ℱ μ) (i : ι) : Integrable (f
   integrable_condExp.congr (hf.condExp_ae_eq (le_refl i))
 
 theorem setIntegral_eq [SigmaFiniteFiltration μ ℱ] (hf : Martingale f ℱ μ) {i j : ι} (hij : i ≤ j)
-    {s : Set Ω} (hs : MeasurableSet[ℱ i] s) : ∫ ω in s, f i ω ∂μ = ∫ ω in s, f j ω ∂μ := by
+    {s : Set Ω} (hs : s ∈ ℱ i) : ∫ ω in s, f i ω ∂μ = ∫ ω in s, f j ω ∂μ := by
   rw [← setIntegral_condExp (ℱ.le i) (hf.integrable j) hs]
   refine setIntegral_congr_ae (ℱ.le i hs) ?_
   filter_upwards [hf.2 i j hij] with _ heq _ using heq.symm
@@ -162,7 +162,7 @@ variable [CompleteSpace E]
 
 theorem setIntegral_le [PartialOrder E] [IsOrderedAddMonoid E] [IsOrderedModule ℝ E]
     [ClosedIciTopology E] [SigmaFiniteFiltration μ ℱ] {f : ι → Ω → E} (hf : Supermartingale f ℱ μ)
-    {i j : ι} (hij : i ≤ j) {s : Set Ω} (hs : MeasurableSet[ℱ i] s) :
+    {i j : ι} (hij : i ≤ j) {s : Set Ω} (hs : s ∈ ℱ i) :
     ∫ ω in s, f j ω ∂μ ≤ ∫ ω in s, f i ω ∂μ := by
   rw [← setIntegral_condExp (ℱ.le i) (hf.integrable j) hs]
   refine setIntegral_mono_ae integrable_condExp.integrableOn (hf.integrable i).integrableOn ?_
@@ -241,7 +241,7 @@ theorem neg [Preorder E] [AddLeftMono E] (hf : Submartingale f ℱ μ) :
 /-- The converse of this lemma is `MeasureTheory.submartingale_of_setIntegral_le`. -/
 theorem setIntegral_le [PartialOrder E] [IsOrderedAddMonoid E] [IsOrderedModule ℝ E]
     [ClosedIciTopology E] [SigmaFiniteFiltration μ ℱ] {f : ι → Ω → E} (hf : Submartingale f ℱ μ)
-    {i j : ι} (hij : i ≤ j) {s : Set Ω} (hs : MeasurableSet[ℱ i] s) :
+    {i j : ι} (hij : i ≤ j) {s : Set Ω} (hs : s ∈ ℱ i) :
     ∫ ω in s, f i ω ∂μ ≤ ∫ ω in s, f j ω ∂μ := by
   rw [← neg_le_neg_iff, ← integral_neg, ← integral_neg]
   exact Supermartingale.setIntegral_le hf.neg hij hs
@@ -281,7 +281,7 @@ section Submartingale
 theorem submartingale_of_setIntegral_le [SigmaFiniteFiltration μ ℱ]
     {f : ι → Ω → ℝ} (hadp : StronglyAdapted ℱ f)
     (hint : ∀ i, Integrable (f i) μ) (hf : ∀ i j : ι,
-      i ≤ j → ∀ s : Set Ω, MeasurableSet[ℱ i] s → ∫ ω in s, f i ω ∂μ ≤ ∫ ω in s, f j ω ∂μ) :
+      i ≤ j → ∀ s : Set Ω, s ∈ ℱ i → ∫ ω in s, f i ω ∂μ ≤ ∫ ω in s, f j ω ∂μ) :
     Submartingale f ℱ μ := by
   refine ⟨hadp, fun i j hij => ?_, hint⟩
   suffices f i ≤ᵐ[μ.trim (ℱ.le i)] μ[f j | ℱ i] by exact ae_le_of_ae_le_trim this
@@ -387,7 +387,7 @@ section OfSetIntegral
 
 theorem submartingale_of_setIntegral_le_succ [IsFiniteMeasure μ] {f : ℕ → Ω → ℝ}
     (hadp : StronglyAdapted 𝒢 f) (hint : ∀ i, Integrable (f i) μ)
-    (hf : ∀ i, ∀ s : Set Ω, MeasurableSet[𝒢 i] s → ∫ ω in s, f i ω ∂μ ≤ ∫ ω in s, f (i + 1) ω ∂μ) :
+    (hf : ∀ i, ∀ s : Set Ω, s ∈ 𝒢 i → ∫ ω in s, f i ω ∂μ ≤ ∫ ω in s, f (i + 1) ω ∂μ) :
     Submartingale f 𝒢 μ := by
   refine submartingale_of_setIntegral_le hadp hint fun i j hij s hs => ?_
   induction hij with
@@ -396,7 +396,7 @@ theorem submartingale_of_setIntegral_le_succ [IsFiniteMeasure μ] {f : ℕ → �
 
 theorem supermartingale_of_setIntegral_succ_le [IsFiniteMeasure μ] {f : ℕ → Ω → ℝ}
     (hadp : StronglyAdapted 𝒢 f) (hint : ∀ i, Integrable (f i) μ)
-    (hf : ∀ i, ∀ s : Set Ω, MeasurableSet[𝒢 i] s → ∫ ω in s, f (i + 1) ω ∂μ ≤ ∫ ω in s, f i ω ∂μ) :
+    (hf : ∀ i, ∀ s : Set Ω, s ∈ 𝒢 i → ∫ ω in s, f (i + 1) ω ∂μ ≤ ∫ ω in s, f i ω ∂μ) :
     Supermartingale f 𝒢 μ := by
   rw [← neg_neg f]
   refine (submartingale_of_setIntegral_le_succ hadp.neg (fun i => (hint i).neg) ?_).neg
@@ -492,7 +492,7 @@ theorem martingale_nat [CompleteSpace E] [IsFiniteMeasure μ]
 
 theorem martingale_of_setIntegral_eq_succ [CompleteSpace E] [IsFiniteMeasure μ] {f : ℕ → Ω → E}
     (hadp : StronglyAdapted 𝒢 f) (hint : ∀ i, Integrable (f i) μ)
-    (hf : ∀ i, ∀ s : Set Ω, MeasurableSet[𝒢 i] s → ∫ ω in s, f i ω ∂μ = ∫ ω in s, f (i + 1) ω ∂μ) :
+    (hf : ∀ i, ∀ s : Set Ω, s ∈ 𝒢 i → ∫ ω in s, f i ω ∂μ = ∫ ω in s, f (i + 1) ω ∂μ) :
     Martingale f 𝒢 μ := by
   refine martingale_nat hadp hint fun n ↦ ae_eq_of_ae_eq_trim <|
     ((hint n).trim (𝒢.le n) (hadp n)).ae_eq_of_forall_setIntegral_eq _ _

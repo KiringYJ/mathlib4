@@ -29,7 +29,7 @@ measure.
 
 @[expose] public section
 
-variable {X : Type*} [SigmaAlgebra X]
+variable {X : Type*} [𝓐 : SigmaAlgebra X]
 
 open NNReal ENNReal Function
 
@@ -52,12 +52,12 @@ open scoped Classical in
 the quantity `∑ p ∈ P.parts, f p`. If `s` is not measurable then it is set to `0`. -/
 noncomputable def preVariationFun (s : Set X) : ℝ≥0∞ :=
   if h : MeasurableSet s then
-    ⨆ (P : Finpartition (⟨s, h⟩ : Subtype MeasurableSet)), ∑ p ∈ P.parts, f p
+    ⨆ (P : Finpartition (⟨s, h⟩ : 𝓐)), ∑ p ∈ P.parts, f p
   else 0
 
 lemma preVariationFun_apply {s : Set X} (h : MeasurableSet s) :
     preVariationFun f s =
-      ⨆ (P : Finpartition (⟨s, h⟩ : Subtype MeasurableSet)), ∑ p ∈ P.parts, f p := by
+      ⨆ (P : Finpartition (⟨s, h⟩ : 𝓐)), ∑ p ∈ P.parts, f p := by
   simp [preVariationFun, h]
 
 lemma preVariationFun_of_not_measurableSet {s : Set X} (h : ¬ MeasurableSet s) :
@@ -71,13 +71,17 @@ namespace preVariation
 variable (f : Set X → ℝ≥0∞)
 
 /-- `preVariationFun` of the empty set is equal to zero. -/
-lemma empty : preVariationFun f ∅ = 0 := by simp [preVariationFun]
+lemma empty : preVariationFun f ∅ = 0 := by
+  rw [preVariationFun_apply f MeasurableSet.empty]
+  refine le_antisymm (iSup_le fun P ↦ ?_) zero_le
+  rw [show P.parts = ∅ from Finpartition.parts_eq_empty_iff.mpr (by ext; rfl)]
+  simp
 
 @[simp]
 lemma zero : preVariationFun (0 : Set X → ℝ≥0∞) = 0 := by ext; simp [preVariationFun]
 
 lemma sum_le {s : Set X} (hs : MeasurableSet s)
-    (P : Finpartition (⟨s, hs⟩ : Subtype MeasurableSet)) :
+    (P : Finpartition (⟨s, hs⟩ : 𝓐)) :
     ∑ p ∈ P.parts, f p ≤ preVariationFun f s := by
   simpa [preVariationFun, hs, le_iSup_iff] using fun _ a ↦ a P
 
@@ -85,19 +89,20 @@ lemma sum_le {s : Set X} (hs : MeasurableSet s)
 explicit measurability assumptions. -/
 noncomputable abbrev _root_.Finpartition.toMeasurableSet {s : Set X} (P : Finpartition s)
     (hs : MeasurableSet s) (hP : ∀ p ∈ P.parts, MeasurableSet p) :
-    Finpartition (⟨s, hs⟩ : Subtype MeasurableSet) :=
+    Finpartition (⟨s, hs⟩ : 𝓐) :=
   P.toSubtype (by measurability) (by measurability) (by measurability) hs hP
 
 lemma sum_le' {s : Set X} (hs : MeasurableSet s)
     (P : Finpartition s) (hP : ∀ p ∈ P.parts, MeasurableSet p) :
     ∑ p ∈ P.parts, f p ≤ preVariationFun f s := by
-  simp only [P.sum_eq_sum_finpartition_subtype (by measurability) (by measurability)
-    (by measurability) hs hP f, sum_le f hs (P.toMeasurableSet hs hP)]
+  rw [P.sum_eq_sum_finpartition_subtype (by measurability) (by measurability)
+    (by measurability) hs hP f]
+  exact sum_le f hs (P.toMeasurableSet hs hP)
 
 /-- If `P` is a partition of `s₁` and `s₁ ⊆ s₂` then
 `∑ p ∈ P.parts, f p ≤ preVariationFun f s₂`. -/
 lemma sum_le_preVariationFun_of_subset {s₁ s₂ : Set X} (hs₁ : MeasurableSet s₁)
-    (hs₂ : MeasurableSet s₂) (h : s₁ ⊆ s₂) (P : Finpartition (⟨s₁, hs₁⟩ : Subtype MeasurableSet)) :
+    (hs₂ : MeasurableSet s₂) (h : s₁ ⊆ s₂) (P : Finpartition (⟨s₁, hs₁⟩ : 𝓐)) :
     ∑ p ∈ P.parts, f p ≤ preVariationFun f s₂ := by
   calc
     ∑ p ∈ P.parts, f p ≤ ∑ p ∈ (P.extendOfLE h).parts, f p :=
@@ -113,13 +118,13 @@ lemma mono {s₁ s₂ : Set X} (hs₂ : MeasurableSet s₂) (h : s₁ ⊆ s₂) 
   · simp [preVariationFun, hs₁]
 
 lemma exists_Finpartition_sum_gt {s : Set X} (hs : MeasurableSet s) {a : ℝ≥0∞}
-    (ha : a < preVariationFun f s) : ∃ P : Finpartition (⟨s, hs⟩ : Subtype MeasurableSet),
+    (ha : a < preVariationFun f s) : ∃ P : Finpartition (⟨s, hs⟩ : 𝓐),
     a < ∑ p ∈ P.parts, f p := by
   simp_all [preVariationFun, lt_iSup_iff]
 
 lemma exists_Finpartition_sum_ge {s : Set X} (hs : MeasurableSet s) {ε : ℝ≥0} (hε : 0 < ε)
     (h : preVariationFun f s ≠ ∞) :
-    ∃ P : Finpartition (⟨s, hs⟩ : Subtype MeasurableSet),
+    ∃ P : Finpartition (⟨s, hs⟩ : 𝓐),
     preVariationFun f s ≤ ∑ p ∈ P.parts, f p + ε := by
   let ε' := min ε (preVariationFun f s).toNNReal
   have hε' : ε' ≤ preVariationFun f s := by simp_all [ε']
@@ -141,7 +146,7 @@ lemma exists_Finpartition_sum_ge {s : Set X} (hs : MeasurableSet s) {ε : ℝ≥
 
 lemma exists_Finpartition_sum_ge' {s : Set X} (hs : MeasurableSet s) {ε : ℝ≥0∞} (hε : 0 < ε)
     (h : preVariationFun f s ≠ ∞) :
-    ∃ P : Finpartition (⟨s, hs⟩ : Subtype MeasurableSet),
+    ∃ P : Finpartition (⟨s, hs⟩ : 𝓐),
     preVariationFun f s ≤ ∑ p ∈ P.parts, f p + ε := by
   rcases eq_top_or_lt_top ε with rfl | h'ε
   · simp
@@ -150,15 +155,16 @@ lemma exists_Finpartition_sum_ge' {s : Set X} (hs : MeasurableSet s) {ε : ℝ�
 
 lemma sum_le_preVariationFun_iUnion' {s : ℕ → Set X} (hs : ∀ i, MeasurableSet (s i))
     (hs' : Pairwise (Disjoint on s))
-    (P : ∀ (i : ℕ), Finpartition (⟨s i, hs i⟩ : Subtype MeasurableSet)) (n : ℕ) :
+    (P : ∀ (i : ℕ), Finpartition (⟨s i, hs i⟩ : 𝓐)) (n : ℕ) :
     ∑ i ∈ Finset.range n, ∑ p ∈ (P i).parts, f p ≤ preVariationFun f (⋃ i, s i) := by
-  let s' (i : ℕ) : Subtype MeasurableSet := ⟨s i, hs i⟩
+  let s' (i : ℕ) : 𝓐 := ⟨s i, hs i⟩
   have hs_disj : Set.PairwiseDisjoint (Finset.range n : Set ℕ) s' := fun i _ j _ hij => by
     simp only [Function.onFun, disjoint_iff, Subtype.ext_iff]
     exact Set.disjoint_iff_inter_eq_empty.mp (hs' hij)
   let Q := Finpartition.combine P hs_disj.supIndep
   have hQ_le : (Finset.range n).sup s' ≤ ⟨⋃ i, s i, MeasurableSet.iUnion hs⟩ := by
-    rw [← Subtype.coe_le_coe, Finset.sup_coe (Psup := by measurability), Finset.sup_set_eq_biUnion]
+    rw [← Subtype.coe_le_coe,
+      Finset.sup_coe (Psup := fun _ _ hx hy ↦ 𝓐.union_mem hx hy), Finset.sup_set_eq_biUnion]
     exact Set.iUnion₂_subset fun i _ => Set.subset_iUnion s i
   let R := Q.extendOfLE hQ_le
   calc ∑ i ∈ Finset.range n, ∑ p ∈ (P i).parts, f p
@@ -193,7 +199,7 @@ end preVariation
 /-- A set function is σ-subadditive on measurable sets if the value assigned to the union of a
 countable disjoint family of measurable sets is bounded above by the sum of values on the family. -/
 def IsSigmaSubadditiveSetFun (f : Set X → ℝ≥0∞) : Prop :=
-  ∀ (s : ℕ → {t : Set X // MeasurableSet t}), Pairwise (Disjoint on (Subtype.val ∘ s)) →
+  ∀ (s : ℕ → 𝓐), Pairwise (Disjoint on (Subtype.val ∘ s)) →
     f (⋃ i, (s i).val) ≤ ∑' i, f (s i)
 
 lemma isSigmaSubadditiveSetFun_zero : IsSigmaSubadditiveSetFun (0 : Set X → ℝ≥0∞) := by intro; simp
@@ -210,7 +216,7 @@ lemma iUnion (hf : IsSigmaSubadditiveSetFun f) (hf' : f ∅ = 0) (s : ℕ → Se
   refine ENNReal.le_tsum_of_forall_lt_exists_sum fun b hb ↦ ?_
   simp only [preVariationFun, MeasurableSet.iUnion hs, reduceDIte, lt_iSup_iff] at hb
   obtain ⟨Q, hQ⟩ := hb
-  let s' (i : ℕ) : Subtype MeasurableSet := ⟨s i, hs i⟩
+  let s' (i : ℕ) : 𝓐 := ⟨s i, hs i⟩
   let P (i : ℕ) := Q.restrict (b := s' i) (Set.subset_iUnion s i)
   have splitting : ∑ q ∈ Q.parts, f q ≤ ∑' i, ∑ p ∈ (P i).parts, f p := by
     calc ∑ q ∈ Q.parts, f q
@@ -218,7 +224,8 @@ lemma iUnion (hf : IsSigmaSubadditiveSetFun f) (hf' : f ∅ = 0) (s : ℕ → Se
           apply Finset.sum_le_sum fun q hq => ?_
           have hq_eq : q.val = ⋃ i, q.val ∩ s i := by
             rw [← Set.inter_iUnion]; exact (Set.inter_eq_left.mpr (Q.le hq)).symm
-          let t (i : ℕ) : Subtype MeasurableSet := ⟨q.val ∩ s i, q.2.inter (hs i)⟩
+          let t (i : ℕ) : 𝓐 :=
+            ⟨q.val ∩ s i, 𝓐.inter_mem q.2 (measurableSet_iff_mem.mp (hs i))⟩
           have ht_disj : Pairwise (Disjoint on (Subtype.val ∘ t)) :=
             fun i j hij => (hs' hij).mono Set.inter_subset_right Set.inter_subset_right
           calc f q

@@ -121,7 +121,7 @@ theorem isCaratheodory_inducedOuterMeasure_of_mem (hC : IsSetSemiring C) (m : Ad
   isCaratheodory_ofFunction_of_mem hC (m.extend hC) (fun _ ↦ m.extend_eq_top hC) hs
 
 theorem isCaratheodory_inducedOuterMeasure (hC : IsSetSemiring C) (m : AddContent ℝ≥0∞ C)
-    (s : Set α) (hs : MeasurableSet[SigmaAlgebra.generateFrom C] s) :
+    (s : Set α) (hs : s ∈ SigmaAlgebra.generateFrom C) :
     (inducedOuterMeasure (fun x _ ↦ m x) hC.empty_mem addContent_empty).IsCaratheodory s := by
   induction hs with
   | basic u hu => exact isCaratheodory_inducedOuterMeasure_of_mem hC m hu
@@ -140,8 +140,8 @@ noncomputable def measureCaratheodory (m : AddContent ℝ≥0∞ C) (hC : IsSetS
     m_iUnion := fun f hf hd ↦ OuterMeasure.iUnion_eq_of_caratheodory _ hf hd
     trim_le := by
       apply le_inducedOuterMeasure.mpr fun s hs ↦ ?_
-      have hs_meas : MeasurableSet[(inducedOuterMeasure (fun x _ ↦ m x) hC.empty_mem
-          addContent_empty).caratheodory] s := by
+      have hs_meas : s ∈ (inducedOuterMeasure (fun x _ ↦ m x) hC.empty_mem
+          addContent_empty).caratheodory := by
         change (inducedOuterMeasure (fun x _ ↦ m x) hC.empty_mem addContent_empty).IsCaratheodory s
         exact isCaratheodory_inducedOuterMeasure_of_mem hC m hs
       rw [OuterMeasure.trim_eq _ hs_meas, m.inducedOuterMeasure_eq hC m_sigma_subadd hs] }

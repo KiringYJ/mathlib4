@@ -201,17 +201,18 @@ theorem withDensityᵥ_eq_withDensity_pos_part_sub_withDensity_neg_part {f : α 
     toSignedMeasure_apply_measurable hi, measureReal_def, measureReal_def,
     withDensity_apply _ hi, withDensity_apply _ hi]
 
-theorem Integrable.withDensityᵥ_trim_eq_integral {m m0 : SigmaAlgebra α} {μ : Measure α}
-    (hm : m ≤ m0) {f : α → ℝ} (hf : Integrable f μ) {i : Set α} (hi : MeasurableSet[m] i) :
-    (μ.withDensityᵥ f).trim hm i = ∫ x in i, f x ∂μ := by
-  rw [VectorMeasure.trim_measurableSet_eq hm hi, withDensityᵥ_apply hf (hm hi)]
+theorem Integrable.withDensityᵥ_trim_eq_integral {𝓐 𝓑 : SigmaAlgebra α} {μ : Measure α}
+    (h𝓐𝓑 : 𝓐 ≤ 𝓑) {f : α → ℝ} (hf : Integrable f μ) {i : Set α} (hi : i ∈ 𝓐) :
+    (μ.withDensityᵥ f).trim h𝓐𝓑 i = ∫ x in i, f x ∂μ := by
+  rw [VectorMeasure.trim_measurableSet_eq h𝓐𝓑 hi, withDensityᵥ_apply hf (h𝓐𝓑 hi)]
 
-theorem Integrable.withDensityᵥ_trim_absolutelyContinuous {m m0 : SigmaAlgebra α} {μ : Measure α}
-    (hm : m ≤ m0) (hfi : Integrable f μ) :
-    (μ.withDensityᵥ f).trim hm ≪ᵥ (μ.trim hm).toENNRealVectorMeasure := by
+theorem Integrable.withDensityᵥ_trim_absolutelyContinuous {𝓐 𝓑 : SigmaAlgebra α} {μ : Measure α}
+    (h𝓐𝓑 : 𝓐 ≤ 𝓑) (hfi : Integrable f μ) :
+    (μ.withDensityᵥ f).trim h𝓐𝓑 ≪ᵥ (μ.trim h𝓐𝓑).toENNRealVectorMeasure := by
   refine VectorMeasure.AbsolutelyContinuous.mk fun j hj₁ hj₂ => ?_
-  rw [Measure.toENNRealVectorMeasure_apply_measurable hj₁, trim_measurableSet_eq hm hj₁] at hj₂
-  rw [VectorMeasure.trim_measurableSet_eq hm hj₁, withDensityᵥ_apply hfi (hm hj₁)]
+  rw [Measure.toENNRealVectorMeasure_apply_measurable hj₁,
+    trim_measurableSet_eq h𝓐𝓑 hj₁] at hj₂
+  rw [VectorMeasure.trim_measurableSet_eq h𝓐𝓑 hj₁, withDensityᵥ_apply hfi (h𝓐𝓑 hj₁)]
   simp only [Measure.restrict_eq_zero.mpr hj₂, integral_zero_measure]
 
 end SignedMeasure

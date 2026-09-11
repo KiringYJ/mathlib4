@@ -108,7 +108,7 @@ theorem inner_condExpL2_left_eq_right (hm : m ≤ m0) {f g : α →₂[μ] E} :
   haveI : Fact (m ≤ m0) := ⟨hm⟩
   Submodule.inner_starProjection_left_eq_right _ f g
 
-theorem condExpL2_indicator_of_measurable (hm : m ≤ m0) (hs : MeasurableSet[m] s) (hμs : μ s ≠ ∞)
+theorem condExpL2_indicator_of_measurable (hm : m ≤ m0) (hs : s ∈ m) (hμs : μ s ≠ ∞)
     (c : E) :
     (condExpL2 E 𝕜 hm (indicatorConstLp 2 (hm hs) hμs c) : α →₂[μ] E) =
       indicatorConstLp 2 (hm hs) hμs c := by
@@ -134,7 +134,7 @@ section Real
 
 variable {hm : m ≤ m0}
 
-theorem integral_condExpL2_eq_of_fin_meas_real (f : Lp 𝕜 2 μ) (hs : MeasurableSet[m] s)
+theorem integral_condExpL2_eq_of_fin_meas_real (f : Lp 𝕜 2 μ) (hs : s ∈ m)
     (hμs : μ s ≠ ∞) : ∫ x in s, (condExpL2 𝕜 𝕜 hm f : α → 𝕜) x ∂μ = ∫ x in s, f x ∂μ := by
   rw [← L2.inner_indicatorConstLp_one (𝕜 := 𝕜) (hm hs) hμs f]
   have h_eq_inner : ∫ x in s, (condExpL2 𝕜 𝕜 hm f : α → 𝕜) x ∂μ =
@@ -142,7 +142,7 @@ theorem integral_condExpL2_eq_of_fin_meas_real (f : Lp 𝕜 2 μ) (hs : Measurab
     rw [L2.inner_indicatorConstLp_one (hm hs) hμs]
   rw [h_eq_inner, ← inner_condExpL2_left_eq_right, condExpL2_indicator_of_measurable hm hs hμs]
 
-theorem lintegral_nnnorm_condExpL2_le (hs : MeasurableSet[m] s) (hμs : μ s ≠ ∞) (f : Lp ℝ 2 μ) :
+theorem lintegral_nnnorm_condExpL2_le (hs : s ∈ m) (hμs : μ s ≠ ∞) (f : Lp ℝ 2 μ) :
     ∫⁻ x in s, ‖(condExpL2 ℝ ℝ hm f : α → ℝ) x‖₊ ∂μ ≤ ∫⁻ x in s, ‖f x‖₊ ∂μ := by
   let h_meas := lpMeas.aestronglyMeasurable (condExpL2 ℝ ℝ hm f)
   let g := h_meas.choose
@@ -165,7 +165,7 @@ theorem lintegral_nnnorm_condExpL2_le (hs : MeasurableSet[m] s) (hμs : μ s ≠
     rw [← integral_condExpL2_eq_of_fin_meas_real (hm := hm) f ht hμt.ne]
     exact setIntegral_congr_ae (hm ht) (hg_eq.mono fun x hx _ => hx)
 
-theorem condExpL2_ae_eq_zero_of_ae_eq_zero (hs : MeasurableSet[m] s) (hμs : μ s ≠ ∞) {f : Lp ℝ 2 μ}
+theorem condExpL2_ae_eq_zero_of_ae_eq_zero (hs : s ∈ m) (hμs : μ s ≠ ∞) {f : Lp ℝ 2 μ}
     (hf : f =ᵐ[μ.restrict s] 0) : condExpL2 ℝ ℝ hm f =ᵐ[μ.restrict s] (0 : α → ℝ) := by
   suffices h_nnnorm_eq_zero : ∫⁻ x in s, ‖(condExpL2 ℝ ℝ hm f : α → ℝ) x‖₊ ∂μ = 0 by
     rw [lintegral_eq_zero_iff] at h_nnnorm_eq_zero
@@ -185,7 +185,7 @@ theorem condExpL2_ae_eq_zero_of_ae_eq_zero (hs : MeasurableSet[m] s) (hμs : μ 
   · exact (Lp.stronglyMeasurable _).enorm (ε := ℝ)
 
 theorem lintegral_nnnorm_condExpL2_indicator_le_real (hs : MeasurableSet s) (hμs : μ s ≠ ∞)
-    (ht : MeasurableSet[m] t) (hμt : μ t ≠ ∞) :
+    (ht : t ∈ m) (hμt : μ t ≠ ∞) :
     ∫⁻ a in t, ‖(condExpL2 ℝ ℝ hm (indicatorConstLp 2 hs hμs 1) : α → ℝ) a‖₊ ∂μ ≤ μ (s ∩ t) := by
   refine (lintegral_nnnorm_condExpL2_le ht hμt _).trans (le_of_eq ?_)
   have h_eq :
@@ -232,7 +232,7 @@ theorem condExpL2_const_inner (hm : m ≤ m0) (f : Lp E 2 μ) (c : E) :
     exact (lpMeas.aestronglyMeasurable _).const_inner
 
 /-- `condExpL2` verifies the equality of integrals defining the conditional expectation. -/
-theorem integral_condExpL2_eq (hm : m ≤ m0) (f : Lp E' 2 μ) (hs : MeasurableSet[m] s)
+theorem integral_condExpL2_eq (hm : m ≤ m0) (f : Lp E' 2 μ) (hs : s ∈ m)
     (hμs : μ s ≠ ∞) : ∫ x in s, (condExpL2 E' 𝕜 hm f : α → E') x ∂μ = ∫ x in s, f x ∂μ := by
   rw [← sub_eq_zero, ←
     integral_sub' (integrableOn_Lp_of_measure_ne_top _ fact_one_le_two_ennreal.elim hμs)
@@ -307,7 +307,7 @@ theorem condExpL2_indicator_eq_toSpanSingleton_comp (hm : m ≤ m0) (hs : Measur
 variable {𝕜}
 
 theorem setLIntegral_nnnorm_condExpL2_indicator_le (hm : m ≤ m0) (hs : MeasurableSet s)
-    (hμs : μ s ≠ ∞) (x : E') {t : Set α} (ht : MeasurableSet[m] t) (hμt : μ t ≠ ∞) :
+    (hμs : μ s ≠ ∞) (x : E') {t : Set α} (ht : t ∈ m) (hμt : μ t ≠ ∞) :
     ∫⁻ a in t, ‖(condExpL2 E' 𝕜 hm (indicatorConstLp 2 hs hμs x) : α → E') a‖₊ ∂μ ≤
     μ (s ∩ t) * ‖x‖₊ :=
   calc
@@ -376,7 +376,7 @@ theorem condExpIndSMul_ae_eq_smul (hm : m ≤ m0) (hs : MeasurableSet s) (hμs :
   (toSpanSingleton ℝ x).coeFn_compLpL _
 
 theorem setLIntegral_nnnorm_condExpIndSMul_le (hm : m ≤ m0) (hs : MeasurableSet s) (hμs : μ s ≠ ∞)
-    (x : G) {t : Set α} (ht : MeasurableSet[m] t) (hμt : μ t ≠ ∞) :
+    (x : G) {t : Set α} (ht : t ∈ m) (hμt : μ t ≠ ∞) :
     (∫⁻ a in t, ‖condExpIndSMul hm hs hμs x a‖₊ ∂μ) ≤ μ (s ∩ t) * ‖x‖₊ :=
   calc
     ∫⁻ a in t, ‖condExpIndSMul hm hs hμs x a‖₊ ∂μ =
@@ -412,7 +412,7 @@ theorem condExpIndSMul_empty {x : G} : condExpIndSMul hm MeasurableSet.empty
   rw [condExpIndSMul, indicatorConstLp_empty]
   simp only [Submodule.coe_zero, map_zero]
 
-theorem setIntegral_condExpL2_indicator (hs : MeasurableSet[m] s) (ht : MeasurableSet t)
+theorem setIntegral_condExpL2_indicator (hs : s ∈ m) (ht : MeasurableSet t)
     (hμs : μ s ≠ ∞) (hμt : μ t ≠ ∞) :
     ∫ x in s, (condExpL2 ℝ ℝ hm (indicatorConstLp 2 ht hμt 1) : α → ℝ) x ∂μ = μ.real (t ∩ s) :=
   calc
@@ -422,7 +422,7 @@ theorem setIntegral_condExpL2_indicator (hs : MeasurableSet[m] s) (ht : Measurab
     _ = μ.real (t ∩ s) • (1 : ℝ) := setIntegral_indicatorConstLp (hm hs) ht hμt 1
     _ = μ.real (t ∩ s) := by rw [smul_eq_mul, mul_one]
 
-theorem setIntegral_condExpIndSMul (hs : MeasurableSet[m] s) (ht : MeasurableSet t)
+theorem setIntegral_condExpIndSMul (hs : s ∈ m) (ht : MeasurableSet t)
     (hμs : μ s ≠ ∞) (hμt : μ t ≠ ∞) (x : G') :
     ∫ a in s, (condExpIndSMul hm ht hμt x) a ∂μ = μ.real (t ∩ s) • x :=
   calc

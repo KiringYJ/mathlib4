@@ -51,36 +51,36 @@ sets of the form `(t, ∞) × A` for `t ∈ ι` and `A ∈ 𝓕 t` and `{⊥} ×
 @[instance_reducible]
 def predictable [Preorder ι] [OrderBot ι] (𝓕 : Filtration ι m) : SigmaAlgebra (ι × Ω) :=
   SigmaAlgebra.generateFrom <|
-    {s | ∃ A, MeasurableSet[𝓕 ⊥] A ∧ s = {⊥} ×ˢ A} ∪
-    {s | ∃ i A, MeasurableSet[𝓕 i] A ∧ s = Set.Ioi i ×ˢ A}
+    {s | ∃ A, A ∈ 𝓕 ⊥ ∧ s = {⊥} ×ˢ A} ∪
+    {s | ∃ i A, A ∈ 𝓕 i ∧ s = Set.Ioi i ×ˢ A}
 
 end Filtration
 
 lemma measurableSet_predictable_singleton_bot_prod [LinearOrder ι] [OrderBot ι]
-    {𝓕 : Filtration ι m} {s : Set Ω} (hs : MeasurableSet[𝓕 ⊥] s) :
-    MeasurableSet[𝓕.predictable] <| {⊥} ×ˢ s :=
+    {𝓕 : Filtration ι m} {s : Set Ω} (hs : s ∈ 𝓕 ⊥) :
+    {⊥} ×ˢ s ∈ 𝓕.predictable :=
   SigmaAlgebra.mem_generateFrom <| Or.inl ⟨s, hs, rfl⟩
 
 lemma measurableSet_predictable_Ioi_prod [LinearOrder ι] [OrderBot ι]
-    {𝓕 : Filtration ι m} {i : ι} {s : Set Ω} (hs : MeasurableSet[𝓕 i] s) :
-    MeasurableSet[𝓕.predictable] <| Set.Ioi i ×ˢ s :=
+    {𝓕 : Filtration ι m} {i : ι} {s : Set Ω} (hs : s ∈ 𝓕 i) :
+    Set.Ioi i ×ˢ s ∈ 𝓕.predictable :=
   SigmaAlgebra.mem_generateFrom <| Or.inr ⟨i, s, hs, rfl⟩
 
 /-- Sets of the form `(i, j] × A` for any `A ∈ 𝓕 i` are measurable with respect to the predictable
 σ-algebra. -/
 lemma measurableSet_predictable_Ioc_prod [LinearOrder ι] [OrderBot ι]
-    {𝓕 : Filtration ι m} (i j : ι) {s : Set Ω} (hs : MeasurableSet[𝓕 i] s) :
-    MeasurableSet[𝓕.predictable] <| Set.Ioc i j ×ˢ s := by
+    {𝓕 : Filtration ι m} (i j : ι) {s : Set Ω} (hs : s ∈ 𝓕 i) :
+    Set.Ioc i j ×ˢ s ∈ 𝓕.predictable := by
   obtain hij | hij := le_total j i
-  · simp [hij]
+  · simpa [hij] using 𝓕.predictable.empty_mem
   · rw [← Set.Ioi_sdiff_Ioi, (by simp : (Set.Ioi i \ Set.Ioi j) ×ˢ s
       = Set.Ioi i ×ˢ (s \ s) ∪ (Set.Ioi i \ Set.Ioi j) ×ˢ s), ← Set.prod_sdiff_prod]
-    exact (measurableSet_predictable_Ioi_prod hs).diff
+    exact 𝓕.predictable.diff_mem (measurableSet_predictable_Ioi_prod hs)
       (measurableSet_predictable_Ioi_prod <| 𝓕.mono hij hs)
 
 lemma measurableSet_predictable_singleton_prod
-    {𝓕 : Filtration ℕ m} {n : ℕ} {s : Set Ω} (hs : MeasurableSet[𝓕 n] s) :
-    MeasurableSet[𝓕.predictable] <| {n + 1} ×ˢ s := by
+    {𝓕 : Filtration ℕ m} {n : ℕ} {s : Set Ω} (hs : s ∈ 𝓕 n) :
+    {n + 1} ×ˢ s ∈ 𝓕.predictable := by
   rw [(_ : {n + 1} = Set.Ioc n (n + 1))]
   · exact measurableSet_predictable_Ioc_prod _ _ hs
   · ext m
@@ -88,8 +88,8 @@ lemma measurableSet_predictable_singleton_prod
     lia
 
 lemma measurableSet_prodMk_add_one_of_predictable {𝓕 : Filtration ℕ m} {s : Set (ℕ × Ω)}
-    (hs : MeasurableSet[𝓕.predictable] s) (n : ℕ) :
-    MeasurableSet[𝓕 n] {ω | (n + 1, ω) ∈ s} := by
+    (hs : s ∈ 𝓕.predictable) (n : ℕ) :
+    {ω | (n + 1, ω) ∈ s} ∈ 𝓕 n := by
   rw [(by aesop : {ω | (n + 1, ω) ∈ s} = (Prod.mk (α := Set.singleton (n + 1)) (β := Ω)
       ⟨n + 1, rfl⟩) ⁻¹' ((fun (p : Set.singleton (n + 1) × Ω) ↦ ((p.1 : ℕ), p.2)) ⁻¹' s))]
   refine measurableSet_preimage (mβ := Subtype.instSigmaAlgebra.prod (𝓕 n))
@@ -128,8 +128,8 @@ lemma measurableSet_prodMk_add_one_of_predictable {𝓕 : Filtration ℕ m} {s :
 
 lemma sigmaAlgebra_le_predictable_of_measurableSet [Preorder ι] [OrderBot ι]
     {𝓕 : Filtration ι m} {m' : SigmaAlgebra (ι × Ω)}
-    (hm'bot : ∀ A, MeasurableSet[𝓕 ⊥] A → MeasurableSet[m'] ({⊥} ×ˢ A))
-    (hm' : ∀ i A, MeasurableSet[𝓕 i] A → MeasurableSet[m'] ((Set.Ioi i) ×ˢ A)) :
+    (hm'bot : ∀ A, A ∈ 𝓕 ⊥ → ({⊥} ×ˢ A) ∈ m')
+    (hm' : ∀ i A, A ∈ 𝓕 i → Set.Ioi i ×ˢ A ∈ m') :
     𝓕.predictable ≤ m' := by
   refine SigmaAlgebra.generateFrom_le ?_
   rintro - (⟨A, hA, rfl⟩ | ⟨i, A, hA, rfl⟩)
@@ -146,18 +146,20 @@ lemma measurable_inclusion_predictable [LinearOrder ι] [OrderBot ι] [SigmaAlge
   refine SigmaAlgebra.comap_le_iff_le_map.2 <|
     sigmaAlgebra_le_predictable_of_measurableSet ?_ ?_
   · intros A hA
-    change MeasurableSet[Subtype.instSigmaAlgebra.prod (𝓕 i)]
-      ((fun (p : Set.Iic i × Ω) ↦ ((p.1 : ι), p.2)) ⁻¹' ({⊥} ×ˢ A))
+    change (fun (p : Set.Iic i × Ω) ↦ ((p.1 : ι), p.2)) ⁻¹' ({⊥} ×ˢ A) ∈
+      Subtype.instSigmaAlgebra.prod (𝓕 i)
     rw [(by aesop : (fun (p : Set.Iic i × Ω) ↦ ((p.1 : ι), p.2)) ⁻¹' ({⊥} ×ˢ A) = {⊥} ×ˢ A)]
     exact (measurableSet_singleton _).prod <| 𝓕.mono bot_le hA
   · intros j A hA
-    change MeasurableSet[Subtype.instSigmaAlgebra.prod (𝓕 i)]
-      ((fun (p : Set.Iic i × Ω) ↦ ((p.1 : ι), p.2)) ⁻¹' (Set.Ioi j ×ˢ A))
+    change (fun (p : Set.Iic i × Ω) ↦ ((p.1 : ι), p.2)) ⁻¹' (Set.Ioi j ×ˢ A) ∈
+      Subtype.instSigmaAlgebra.prod (𝓕 i)
     obtain hji | hij := le_total j i
     · rw [(by grind : (fun (p : Set.Iic i × Ω) ↦ ((p.1 : ι), p.2)) ⁻¹' Set.Ioi j ×ˢ A
         = (Subtype.val ⁻¹' (Set.Ioc j i)) ×ˢ A)]
       exact MeasurableSet.prod (measurable_subtype_coe measurableSet_Ioc) (𝓕.mono hji hA)
-    · simp [(by grind : (fun (p : Set.Iic i × Ω) ↦ ((p.1 : ι), p.2)) ⁻¹' Set.Ioi j ×ˢ A = ∅)]
+    · rw [(by grind : (fun (p : Set.Iic i × Ω) ↦ ((p.1 : ι), p.2)) ⁻¹'
+          Set.Ioi j ×ˢ A = ∅)]
+      exact (Subtype.instSigmaAlgebra.prod (𝓕 i)).empty_mem
 
 end
 

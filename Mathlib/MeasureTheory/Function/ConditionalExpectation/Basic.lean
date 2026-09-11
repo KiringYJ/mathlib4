@@ -43,7 +43,7 @@ The conditional expectation and its properties
   with respect to `m`.
 * `integrable_condExp` : `condExp` is integrable.
 * `stronglyMeasurable_condExp` : `condExp` is `m`-strongly-measurable.
-* `setIntegral_condExp (hf : Integrable f μ) (hs : MeasurableSet[m] s)` : if `m ≤ m₀` (the
+* `setIntegral_condExp (hf : Integrable f μ) (hs : s ∈ m)` : if `m ≤ m₀` (the
   σ-algebra over which the measure is defined), then the conditional expectation verifies
   `∫ x in s, condExp m μ f x ∂μ = ∫ x in s, f x ∂μ` for any `m`-measurable set `s`.
 
@@ -230,7 +230,7 @@ theorem integrable_condExp : Integrable (μ[f | m]) μ := by
 /-- The integral of the conditional expectation `μ[f|hm]` over an `m`-measurable set is equal to
 the integral of `f` on that set. -/
 theorem setIntegral_condExp (hm : m ≤ m₀) [SigmaFinite (μ.trim hm)] (hf : Integrable f μ)
-    (hs : MeasurableSet[m] s) : ∫ x in s, (μ[f | m]) x ∂μ = ∫ x in s, f x ∂μ := by
+    (hs : s ∈ m) : ∫ x in s, (μ[f | m]) x ∂μ = ∫ x in s, f x ∂μ := by
   rw [setIntegral_congr_ae (hm hs) ((condExp_ae_eq_condExpL1 hm f).mono fun x hx _ => hx)]
   exact setIntegral_condExpL1 hf hs
 
@@ -239,7 +239,7 @@ theorem integral_condExp (hm : m ≤ m₀) [hμm : SigmaFinite (μ.trim hm)] :
   by_cases hf : Integrable f μ
   · suffices ∫ x in Set.univ, (μ[f | m]) x ∂μ = ∫ x in Set.univ, f x ∂μ by
       simp_rw [setIntegral_univ] at this; exact this
-    exact setIntegral_condExp hm hf .univ
+    exact setIntegral_condExp hm hf m.univ_mem
   simp only [condExp_of_not_integrable hf, Pi.zero_apply, integral_zero, integral_undef hf]
 
 /-- **Law of total probability** using `condExp` as conditional probability. -/
@@ -253,8 +253,8 @@ If a function is a.e. `m`-measurable, verifies an integrability condition and ha
 as `f` on all `m`-measurable sets, then it is a.e. equal to `μ[f|hm]`. -/
 theorem ae_eq_condExp_of_forall_setIntegral_eq (hm : m ≤ m₀) [SigmaFinite (μ.trim hm)]
     {f g : α → E} (hf : Integrable f μ)
-    (hg_int_finite : ∀ s, MeasurableSet[m] s → μ s < ∞ → IntegrableOn g s μ)
-    (hg_eq : ∀ s : Set α, MeasurableSet[m] s → μ s < ∞ → ∫ x in s, g x ∂μ = ∫ x in s, f x ∂μ)
+    (hg_int_finite : ∀ s, s ∈ m → μ s < ∞ → IntegrableOn g s μ)
+    (hg_eq : ∀ s : Set α, s ∈ m → μ s < ∞ → ∫ x in s, g x ∂μ = ∫ x in s, f x ∂μ)
     (hgm : AEStronglyMeasurable[m] g μ) : g =ᵐ[μ] μ[f | m] := by
   refine ae_eq_of_forall_setIntegral_eq_of_sigmaFinite' hm hg_int_finite
     (fun s _ _ => integrable_condExp.integrableOn) (fun s hs hμs => ?_) hgm

@@ -83,7 +83,7 @@ section sInf
 variable {m : Set (Measure α)}
 
 theorem sInf_caratheodory (s : Set α) (hs : MeasurableSet s) :
-    MeasurableSet[(sInf (toOuterMeasure '' m)).caratheodory] s := by
+    s ∈ (sInf (toOuterMeasure '' m)).caratheodory := by
   rw [OuterMeasure.sInf_eq_boundedBy_sInfGen]
   refine OuterMeasure.boundedBy_caratheodory fun t => ?_
   simp only [OuterMeasure.sInfGen, le_iInf_iff, forall_mem_image, measure_eq_iInf t,

@@ -193,7 +193,7 @@ noncomputable instance instCompleteLattice : CompleteLattice (Filtration ι m) w
 end Filtration
 
 theorem measurableSet_of_filtration [Preorder ι] {f : Filtration ι m} {s : Set Ω} {i : ι}
-    (hs : MeasurableSet[f i] s) : MeasurableSet[m] s :=
+    (hs : s ∈ f i) : s ∈ m :=
   f.le i hs
 
 /-- A measure is σ-finite with respect to filtration if it is σ-finite with respect
@@ -232,12 +232,12 @@ def filtrationOfSet {s : ι → Set Ω} (hsm : ∀ i, MeasurableSet (s i)) : Fil
   mono' _ _ hnm := SigmaAlgebra.generateFrom_mono fun _ ⟨k, hk₁, hk₂⟩ => ⟨k, hk₁.trans hnm, hk₂⟩
   le' _ := SigmaAlgebra.generateFrom_le fun _ ⟨k, _, hk₂⟩ => hk₂ ▸ hsm k
 
-theorem measurableSet_filtrationOfSet {s : ι → Set Ω} (hsm : ∀ i, MeasurableSet[m] (s i)) (i : ι)
-    {j : ι} (hj : j ≤ i) : MeasurableSet[filtrationOfSet hsm i] (s j) :=
+theorem measurableSet_filtrationOfSet {s : ι → Set Ω} (hsm : ∀ i, (s i) ∈ m) (i : ι)
+    {j : ι} (hj : j ≤ i) : (s j) ∈ filtrationOfSet hsm i :=
   SigmaAlgebra.mem_generateFrom ⟨j, hj, rfl⟩
 
-theorem measurableSet_filtrationOfSet' {s : ι → Set Ω} (hsm : ∀ n, MeasurableSet[m] (s n))
-    (i : ι) : MeasurableSet[filtrationOfSet hsm i] (s i) :=
+theorem measurableSet_filtrationOfSet' {s : ι → Set Ω} (hsm : ∀ n, (s n) ∈ m)
+    (i : ι) : (s i) ∈ filtrationOfSet hsm i :=
   measurableSet_filtrationOfSet hsm i le_rfl
 
 end OfSet
@@ -380,8 +380,8 @@ lemma IsRightContinuous.eq {𝓕 : Filtration ι m} [h : IsRightContinuous 𝓕]
 instance {𝓕 : Filtration ι m} : 𝓕₊.IsRightContinuous := ⟨(rightCont_self 𝓕).le⟩
 
 lemma IsRightContinuous.measurableSet {𝓕 : Filtration ι m} [IsRightContinuous 𝓕] {i : ι}
-    {s : Set Ω} (hs : MeasurableSet[𝓕₊ i] s) :
-    MeasurableSet[𝓕 i] s := IsRightContinuous.eq (𝓕 := 𝓕) ▸ hs
+    {s : Set Ω} (hs : s ∈ 𝓕₊ i) :
+    s ∈ 𝓕 i := IsRightContinuous.eq (𝓕 := 𝓕) ▸ hs
 
 end IsRightContinuous
 
@@ -410,7 +410,7 @@ section
 open SigmaAlgebra
 
 theorem filtrationOfSet_eq_natural [∀ i, MulZeroOneClass (β i)] [∀ i, Nontrivial (β i)]
-    {s : ι → Set Ω} (hsm : ∀ i, MeasurableSet[m] (s i)) :
+    {s : ι → Set Ω} (hsm : ∀ i, (s i) ∈ m) :
     filtrationOfSet hsm = natural (fun i => (s i).indicator (fun _ => 1 : Ω → β i)) fun i =>
       stronglyMeasurable_one.indicator (hsm i) := by
   refine Filtration.ext <| funext fun i ↦ ?_

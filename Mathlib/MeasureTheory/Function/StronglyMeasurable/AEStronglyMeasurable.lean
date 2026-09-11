@@ -278,8 +278,8 @@ another σ-algebra `m₂` (hypothesis `hs`), the set `s` is `m` measurable and a
 everywhere supported on `s` is `m`-ae-strongly-measurable, then `f` is also
 `m₂`-ae-strongly-measurable. -/
 lemma of_sigmaAlgebra_le_on {m' m₀ : SigmaAlgebra α} {μ : Measure[m₀] α} [Zero β]
-    (hm : m ≤ m₀) {s : Set α} (hs_m : MeasurableSet[m] s)
-    (hs : ∀ t, MeasurableSet[m] (s ∩ t) → MeasurableSet[m'] (s ∩ t))
+    (hm : m ≤ m₀) {s : Set α} (hs_m : s ∈ m)
+    (hs : ∀ t, s ∩ t ∈ m → s ∩ t ∈ m')
     (hf : AEStronglyMeasurable[m] f μ) (hf_zero : f =ᵐ[μ.restrict sᶜ] 0) :
     AEStronglyMeasurable[m'] f μ := by
   have h_ind_eq : s.indicator (hf.mk f) =ᵐ[μ] f := by
@@ -570,8 +570,9 @@ theorem nullMeasurableSet_eq_fun {E} [TopologicalSpace E] [MetrizableSpace E] {f
     (hf : AEStronglyMeasurable f μ) (hg : AEStronglyMeasurable g μ) :
     NullMeasurableSet { x | f x = g x } μ := by
   apply
-    (hf.stronglyMeasurable_mk.measurableSet_eq_fun
-          hg.stronglyMeasurable_mk).nullMeasurableSet.congr
+    (MeasurableSet.nullMeasurableSet <|
+      measurableSet_iff_mem.mpr <|
+        hf.stronglyMeasurable_mk.measurableSet_eq_fun hg.stronglyMeasurable_mk).congr
   filter_upwards [hf.ae_eq_mk, hg.ae_eq_mk] with x hfx hgx
   simp only [hfx, hgx]
 
@@ -584,7 +585,9 @@ theorem nullMeasurableSet_lt [Preorder β] [OrderClosedTopology β] [PseudoMetri
     {f g : α → β} (hf : AEStronglyMeasurable f μ) (hg : AEStronglyMeasurable g μ) :
     NullMeasurableSet { a | f a < g a } μ := by
   apply
-    (hf.stronglyMeasurable_mk.measurableSet_lt hg.stronglyMeasurable_mk).nullMeasurableSet.congr
+    (MeasurableSet.nullMeasurableSet <|
+      measurableSet_iff_mem.mpr <|
+        hf.stronglyMeasurable_mk.measurableSet_lt hg.stronglyMeasurable_mk).congr
   filter_upwards [hf.ae_eq_mk, hg.ae_eq_mk] with x hfx hgx
   simp only [hfx, hgx]
 
@@ -592,7 +595,9 @@ theorem nullMeasurableSet_le [Preorder β] [OrderClosedTopology β] [PseudoMetri
     {f g : α → β} (hf : AEStronglyMeasurable f μ) (hg : AEStronglyMeasurable g μ) :
     NullMeasurableSet { a | f a ≤ g a } μ := by
   apply
-    (hf.stronglyMeasurable_mk.measurableSet_le hg.stronglyMeasurable_mk).nullMeasurableSet.congr
+    (MeasurableSet.nullMeasurableSet <|
+      measurableSet_iff_mem.mpr <|
+        hf.stronglyMeasurable_mk.measurableSet_le hg.stronglyMeasurable_mk).congr
   filter_upwards [hf.ae_eq_mk, hg.ae_eq_mk] with x hfx hgx
   simp only [hfx, hgx]
 

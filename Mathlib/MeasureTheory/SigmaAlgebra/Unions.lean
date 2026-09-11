@@ -12,7 +12,7 @@ public import Mathlib.MeasureTheory.SigmaAlgebra.Constructions
 
 Broughton and Huff proved that the ordinary union of a strictly increasing sequence of
 sigma-algebras is not a sigma-algebra. The ordinary union of their collections of measurable
-sets must be distinguished from the lattice supremum `⨆ n, m n`, which is always a sigma-algebra.
+sets must be distinguished from the lattice supremum `⨆ n, 𝓐 n`, which is always a sigma-algebra.
 
 The proof first extracts pairwise disjoint sets that become measurable along a strictly
 increasing subsequence. Passing to the countable set of blocks then reduces the obstruction
@@ -40,42 +40,42 @@ open scoped MeasureTheory
 
 namespace SigmaAlgebra
 
-variable {α : Type*} {m : ℕ → SigmaAlgebra α}
+variable {α : Type*} {𝓐 : ℕ → SigmaAlgebra α}
 
 /-- If every countable subfamily of a family of sigma-algebras has an upper bound in the family,
 then a set is measurable in their supremum exactly when it is measurable in one member of the
 family. Thus, in this situation, the lattice supremum agrees with the ordinary union of the
 collections of measurable sets. -/
 theorem mem_iSup_iff_of_countablyDirected {ι : Type*}
-    {m : ι → SigmaAlgebra α}
-    (hm : ∀ u : Set ι, u.Countable → ∃ i, ∀ j ∈ u, m j ≤ m i) {s : Set α} :
-    s ∈ ⨆ i, m i ↔ ∃ i, s ∈ m i := by
+    {𝓐 : ι → SigmaAlgebra α}
+    (hm : ∀ u : Set ι, u.Countable → ∃ i, ∀ j ∈ u, 𝓐 j ≤ 𝓐 i) {s : Set α} :
+    s ∈ ⨆ i, 𝓐 i ↔ ∃ i, s ∈ 𝓐 i := by
   classical
   constructor
   · rw [iSup_eq_generateFrom]
     intro hs
-    change GenerateMeasurable (⋃ i, (m i : Set (Set α))) s at hs
+    change GenerateMeasurable (⋃ i, (𝓐 i : Set (Set α))) s at hs
     induction hs with
     | basic s hs => exact mem_iUnion.mp hs
     | empty =>
         obtain ⟨i, -⟩ := hm ∅ countable_empty
-        exact ⟨i, (m i).empty_mem⟩
+        exact ⟨i, (𝓐 i).empty_mem⟩
     | compl s _ hs =>
         obtain ⟨i, hi⟩ := hs
-        exact ⟨i, (m i).compl_mem hi⟩
+        exact ⟨i, (𝓐 i).compl_mem hi⟩
     | iUnion s _ hs =>
         choose i hi using hs
         obtain ⟨j, hj⟩ := hm (range i) (countable_range i)
-        exact ⟨j, (m j).iUnion_mem fun n ↦ hj (i n) ⟨n, rfl⟩ (hi n)⟩
+        exact ⟨j, (𝓐 j).iUnion_mem fun n ↦ hj (i n) ⟨n, rfl⟩ (hi n)⟩
   · rintro ⟨i, hi⟩
-    exact (le_iSup m i) hi
+    exact (le_iSup 𝓐 i) hi
 
-private def UnboundedWithin (m : ℕ → SigmaAlgebra α) (c : Set α) : Prop :=
-  ∀ n, ∃ s ⊆ c, (∃ k, MeasurableSet[m k] s) ∧ ¬ MeasurableSet[m n] s
+private def UnboundedWithin (𝓐 : ℕ → SigmaAlgebra α) (c : Set α) : Prop :=
+  ∀ n, ∃ s ⊆ c, (∃ k, s ∈ 𝓐 k) ∧ s ∉ 𝓐 n
 
-private lemma unbounded_split (hm : Monotone m) {c a : Set α}
-    (hc : UnboundedWithin m c) (ha : ∃ k, MeasurableSet[m k] a) :
-    UnboundedWithin m a ∨ UnboundedWithin m (c \ a) := by
+private lemma unbounded_split (hm : Monotone 𝓐) {c a : Set α}
+    (hc : UnboundedWithin 𝓐 c) (ha : ∃ k, a ∈ 𝓐 k) :
+    UnboundedWithin 𝓐 a ∨ UnboundedWithin 𝓐 (c \ a) := by
   classical
   by_contra! h
   rcases h with ⟨h₁, h₂⟩
@@ -84,59 +84,59 @@ private lemma unbounded_split (hm : Monotone m) {c a : Set α}
   obtain ⟨n₂, hn₂⟩ := h₂
   obtain ⟨s, hsc, ⟨k, hsk⟩, hs⟩ := hc (max n₁ n₂)
   obtain ⟨j, haj⟩ := ha
-  have hsk' : MeasurableSet[m (max k j)] s := hm (le_max_left _ _) hsk
-  have haj' : MeasurableSet[m (max k j)] a := hm (le_max_right _ _) haj
-  have hi : MeasurableSet[m n₁] (s ∩ a) :=
-    hn₁ _ inter_subset_right ⟨_, hsk'.inter haj'⟩
-  have hd : MeasurableSet[m n₂] (s \ a) :=
-    hn₂ _ (sdiff_subset_sdiff_left hsc) ⟨_, hsk'.diff haj'⟩
+  have hsk' : s ∈ 𝓐 (max k j) := hm (le_max_left _ _) hsk
+  have haj' : a ∈ 𝓐 (max k j) := hm (le_max_right _ _) haj
+  have hi : (s ∩ a) ∈ 𝓐 n₁ :=
+    hn₁ _ inter_subset_right ⟨_, (𝓐 (max k j)).inter_mem hsk' haj'⟩
+  have hd : (s \ a) ∈ 𝓐 n₂ :=
+    hn₂ _ (sdiff_subset_sdiff_left hsc) ⟨_, (𝓐 (max k j)).diff_mem hsk' haj'⟩
   apply hs
   have heq : s = (s ∩ a) ∪ (s \ a) := by simp
   rw [heq]
-  have hi' : MeasurableSet[m (max n₁ n₂)] (s ∩ a) := hm (le_max_left _ _) hi
-  have hd' : MeasurableSet[m (max n₁ n₂)] (s \ a) := hm (le_max_right _ _) hd
-  exact hi'.union hd'
+  have hi' : (s ∩ a) ∈ 𝓐 (max n₁ n₂) := hm (le_max_left _ _) hi
+  have hd' : (s \ a) ∈ 𝓐 (max n₁ n₂) := hm (le_max_right _ _) hd
+  exact (𝓐 (max n₁ n₂)).union_mem hi' hd'
 
-private lemma exists_split (hm : Monotone m) {n : ℕ} {c : Set α}
-    (hc : MeasurableSet[m n] c) (hu : UnboundedWithin m c) :
-    ∃ k > n, ∃ d ⊆ c, MeasurableSet[m k] d ∧ UnboundedWithin m d ∧
-      ¬ MeasurableSet[m n] (c \ d) := by
+private lemma exists_split (hm : Monotone 𝓐) {n : ℕ} {c : Set α}
+    (hc : c ∈ 𝓐 n) (hu : UnboundedWithin 𝓐 c) :
+    ∃ k > n, ∃ d ⊆ c, d ∈ 𝓐 k ∧ UnboundedWithin 𝓐 d ∧
+      c \ d ∉ 𝓐 n := by
   classical
   obtain ⟨a, hac, ⟨j, haj⟩, han⟩ := hu n
   let k := max (n + 1) j
   have hnk : n < k := (Nat.lt_succ_self _).trans_le (le_max_left _ _)
-  have hck : MeasurableSet[m k] c := hm hnk.le hc
-  have hak : MeasurableSet[m k] a := hm (le_max_right _ _) haj
-  have hcan : ¬ MeasurableSet[m n] (c \ a) := by
+  have hck : c ∈ 𝓐 k := hm hnk.le hc
+  have hak : a ∈ 𝓐 k := hm (le_max_right _ _) haj
+  have hcan : c \ a ∉ 𝓐 n := by
     intro h
     apply han
     have heq : c \ (c \ a) = a := Set.sdiff_sdiff_cancel_left hac
     rw [← heq]
-    exact hc.diff h
+    exact (𝓐 n).diff_mem hc h
   rcases unbounded_split hm hu ⟨j, haj⟩ with hu' | hu'
   · exact ⟨k, hnk, a, hac, hak, hu', hcan⟩
-  · refine ⟨k, hnk, c \ a, sdiff_subset, hck.diff hak, hu', ?_⟩
+  · refine ⟨k, hnk, c \ a, sdiff_subset, (𝓐 k).diff_mem hck hak, hu', ?_⟩
     have heq : c \ (c \ a) = a := Set.sdiff_sdiff_cancel_left hac
     rwa [heq]
 
 /-- A strictly increasing sequence of sigma-algebras admits disjoint new measurable sets after
 passing to a strictly increasing subsequence. -/
-theorem exists_pairwise_disjoint_not_mem_of_strictMono (hm : StrictMono m) :
+theorem exists_pairwise_disjoint_not_mem_of_strictMono (hm : StrictMono 𝓐) :
     ∃ j : ℕ → ℕ, StrictMono j ∧ ∃ f : ℕ → Set α,
-      (∀ n, f n ∈ m (j (n + 1))) ∧
-      (∀ n, f n ∉ m (j n)) ∧
+      (∀ n, f n ∈ 𝓐 (j (n + 1))) ∧
+      (∀ n, f n ∉ 𝓐 (j n)) ∧
       Pairwise (fun i j ↦ Disjoint (f i) (f j)) := by
   classical
-  have hstart : UnboundedWithin m univ := by
+  have hstart : UnboundedWithin 𝓐 univ := by
     intro n
-    have hnot : ¬ m (n + 1) ≤ m n := not_le_of_gt (hm (Nat.lt_succ_self _))
-    change ¬ (∀ s, MeasurableSet[m (n + 1)] s → MeasurableSet[m n] s) at hnot
+    have hnot : ¬ 𝓐 (n + 1) ≤ 𝓐 n := not_le_of_gt (hm (Nat.lt_succ_self _))
+    change ¬ (∀ s, s ∈ 𝓐 (n + 1) → s ∈ 𝓐 n) at hnot
     push Not at hnot
     obtain ⟨s, hs, hn⟩ := hnot
     exact ⟨s, subset_univ _, ⟨n + 1, hs⟩, hn⟩
-  let State := {p : ℕ × Set α // MeasurableSet[m p.1] p.2 ∧ UnboundedWithin m p.2}
+  let State := {p : ℕ × Set α // p.2 ∈ 𝓐 p.1 ∧ UnboundedWithin 𝓐 p.2}
   have hnext (p : State) : ∃ q : State,
-      p.1.1 < q.1.1 ∧ q.1.2 ⊆ p.1.2 ∧ ¬ MeasurableSet[m p.1.1] (p.1.2 \ q.1.2) := by
+      p.1.1 < q.1.1 ∧ q.1.2 ⊆ p.1.2 ∧ p.1.2 \ q.1.2 ∉ 𝓐 p.1.1 := by
     obtain ⟨k, hk, d, hd, hdmeas, hdu, hnew⟩ := exists_split hm.monotone p.2.1 p.2.2
     exact ⟨⟨⟨k, d⟩, hdmeas, hdu⟩, hk, hd, hnew⟩
   choose next hnext using hnext
@@ -144,16 +144,16 @@ theorem exists_pairwise_disjoint_not_mem_of_strictMono (hm : StrictMono m) :
   have hp (n : ℕ) : p (n + 1) = next (p n) := rfl
   have hpstep (n : ℕ) :
       (p n).1.1 < (p (n + 1)).1.1 ∧ (p (n + 1)).1.2 ⊆ (p n).1.2 ∧
-      ¬ MeasurableSet[m (p n).1.1] ((p n).1.2 \ (p (n + 1)).1.2) := by
+      (p n).1.2 \ (p (n + 1)).1.2 ∉ 𝓐 (p n).1.1 := by
     simpa only [hp] using hnext (p n)
   have hj : StrictMono (fun n ↦ (p n).1.1) := strictMono_nat_of_lt_succ fun n ↦ (hpstep n).1
   have hc : Antitone (fun n ↦ (p n).1.2) := antitone_nat_of_succ_le fun n ↦ (hpstep n).2.1
   refine ⟨fun n ↦ (p n).1.1, hj, fun n ↦ (p n).1.2 \ (p (n + 1)).1.2, ?_,
     fun n ↦ (hpstep n).2.2, ?_⟩
   · intro n
-    have hc : MeasurableSet[m (p (n + 1)).1.1] (p n).1.2 :=
+    have hc : (p n).1.2 ∈ 𝓐 (p (n + 1)).1.1 :=
       hm.monotone (hj (Nat.lt_succ_self n)).le (p n).2.1
-    exact hc.diff (p (n + 1)).2.1
+    exact (𝓐 (p (n + 1)).1.1).diff_mem hc (p (n + 1)).2.1
   · have hdis {i j : ℕ} (h : i < j) :
         Disjoint ((p i).1.2 \ (p (i + 1)).1.2) ((p j).1.2 \ (p (j + 1)).1.2) := by
       apply Set.disjoint_left.2
@@ -166,12 +166,12 @@ theorem exists_pairwise_disjoint_not_mem_of_strictMono (hm : StrictMono m) :
 
 private theorem nat_singletons_obstruction {d : ℕ → SigmaAlgebra ℕ}
     (hd : Monotone d)
-    (hyes : ∀ n, MeasurableSet[d (n + 1)] {n})
-    (hno : ∀ n, ¬ MeasurableSet[d n] {n})
-    (hcover : ∀ s : Set ℕ, ∃ n, MeasurableSet[d n] s) : False := by
+    (hyes : ∀ n, {n} ∈ d (n + 1))
+    (hno : ∀ n, {n} ∉ d n)
+    (hcover : ∀ s : Set ℕ, ∃ n, s ∈ d n) : False := by
   classical
   let b (n : ℕ) : Set ℕ := (d n).indistinguishabilityClass n
-  have hbm (n : ℕ) : MeasurableSet[d n] (b n) :=
+  have hbm (n : ℕ) : (b n) ∈ d n :=
     SigmaAlgebra.indistinguishabilityClass_mem_of_countable n
   have hbself (n : ℕ) : n ∈ b n := (d n).self_mem_indistinguishabilityClass n
   have hnext (n : ℕ) : ∃ q > n, q ∈ b n := by
@@ -187,10 +187,10 @@ private theorem nat_singletons_obstruction {d : ℕ → SigmaAlgebra ℕ}
     refine ⟨q, ?_, hq⟩
     by_contra hle
     have hlt : q < n := by omega
-    have hqm : MeasurableSet[d n] {q} := hd (Nat.succ_le_of_lt hlt) (hyes q)
+    have hqm : {q} ∈ d n := hd (Nat.succ_le_of_lt hlt) (hyes q)
     have hn : n ∈ ({q}ᶜ : Set ℕ) := by simp; omega
     have hq' : q ∈ ({q}ᶜ : Set ℕ) :=
-      (d n).indistinguishabilityClass_subset hqm.compl hn hq
+      (d n).indistinguishabilityClass_subset ((d n).compl_mem hqm) hn hq
     simp at hq'
   choose next hnext using hnext
   let a : ℕ → ℕ := Nat.rec 0 (fun _ ↦ next)
@@ -202,7 +202,7 @@ private theorem nat_singletons_obstruction {d : ℕ → SigmaAlgebra ℕ}
     | succ n ih => exact Nat.succ_le_of_lt (ih.trans_lt (haste n).1)
   obtain ⟨N, hN⟩ := hcover (range fun k ↦ a (2 * k))
   have hle : N ≤ a (2 * N) := by have := hbound (2 * N); omega
-  have hmeas : MeasurableSet[d (a (2 * N))] (range fun k ↦ a (2 * k)) := hd hle hN
+  have hmeas : range (fun k ↦ a (2 * k)) ∈ d (a (2 * N)) := hd hle hN
   have hodd : a (2 * N + 1) ∈ range (fun k ↦ a (2 * k)) :=
     (d (a (2 * N))).indistinguishabilityClass_subset hmeas ⟨N, rfl⟩
       (haste (2 * N)).2
@@ -232,42 +232,42 @@ private lemma blockUnion_compl {ι : Type*} {f : ι → Set α}
 The support must be measurable so that taking complements corresponds to relative complements. -/
 @[instance_reducible]
 private def blockSigmaAlgebra {ι : Type*} (f : ι → Set α)
-    (hf : Pairwise (fun i j ↦ Disjoint (f i) (f j))) (m : SigmaAlgebra α)
-    (hcover : MeasurableSet[m] (⋃ i, f i)) : SigmaAlgebra ι where
-  carrier := {s | MeasurableSet[m] (blockUnion f s)}
+    (hf : Pairwise (fun i j ↦ Disjoint (f i) (f j))) (𝓐 : SigmaAlgebra α)
+    (hcover : (⋃ i, f i) ∈ 𝓐) : SigmaAlgebra ι where
+  carrier := {s | (blockUnion f s) ∈ 𝓐}
   isSigmaAlgebra := {
-    empty_mem := by simp [blockUnion]
+    empty_mem := by simpa [blockUnion] using 𝓐.empty_mem
     compl_mem := by
       intro s hs
-      change MeasurableSet[m] (blockUnion f sᶜ)
-      change MeasurableSet[m] (blockUnion f s) at hs
+      change (blockUnion f sᶜ) ∈ 𝓐
+      change (blockUnion f s) ∈ 𝓐 at hs
       rw [blockUnion_compl hf]
-      exact hcover.diff hs
+      exact 𝓐.diff_mem hcover hs
     iUnion_mem_nat := by
       intro s hs
       have heq : blockUnion f (⋃ n, s n) = ⋃ n, blockUnion f (s n) := by
         ext x
         simp only [blockUnion, mem_iUnion, exists_prop]
         aesop
-      change MeasurableSet[m] (blockUnion f (⋃ n, s n))
-      change ∀ n, MeasurableSet[m] (blockUnion f (s n)) at hs
+      change blockUnion f (⋃ n, s n) ∈ 𝓐
+      change ∀ n, blockUnion f (s n) ∈ 𝓐 at hs
       rw [heq]
-      exact .iUnion hs }
+      exact 𝓐.iUnion_mem hs }
 
-private theorem false_of_mem_iff_exists_of_strictMono (hm : StrictMono m)
-    (m' : SigmaAlgebra α)
-    (hcover : ∀ s, s ∈ m' ↔ ∃ n, s ∈ m n) : False := by
+private theorem false_of_mem_iff_exists_of_strictMono (hm : StrictMono 𝓐)
+    (𝓐' : SigmaAlgebra α)
+    (hcover : ∀ s, s ∈ 𝓐' ↔ ∃ n, s ∈ 𝓐 n) : False := by
   classical
   obtain ⟨j, hj, f, hfm, hfn, hf⟩ :=
     exists_pairwise_disjoint_not_mem_of_strictMono hm
-  have hfm' (n : ℕ) : MeasurableSet[m'] (f n) := (hcover _).2 ⟨_, hfm n⟩
-  obtain ⟨p, hp⟩ := (hcover _).1 (MeasurableSet.iUnion hfm')
+  have hfm' (n : ℕ) : f n ∈ 𝓐' := (hcover _).2 ⟨_, hfm n⟩
+  obtain ⟨p, hp⟩ := (hcover _).1 (𝓐'.iUnion_mem hfm')
   have hjle (n : ℕ) : n ≤ j n := by
     induction n with
     | zero => omega
     | succ n ih => exact Nat.succ_le_of_lt (ih.trans_lt (hj (Nat.lt_succ_self n)))
-  have hsupport : MeasurableSet[m (j p)] (⋃ i, f (p + i)) := by
-    have hprefix : MeasurableSet[m (j p)] (⋃ i ∈ Finset.range p, f i) :=
+  have hsupport : (⋃ i, f (p + i)) ∈ 𝓐 (j p) := by
+    have hprefix : (⋃ i ∈ Finset.range p, f i) ∈ 𝓐 (j p) :=
       (Finset.range p).measurableSet_biUnion fun i hi ↦
         hm.monotone (hj.monotone (Nat.succ_le_of_lt (Finset.mem_range.1 hi))) (hfm i)
     have heq : (⋃ i, f (p + i)) = (⋃ i, f i) \ ⋃ i ∈ Finset.range p, f i := by
@@ -285,32 +285,32 @@ private theorem false_of_mem_iff_exists_of_strictMono (hm : StrictMono m)
         refine ⟨i - p, ?_⟩
         simpa [Nat.add_sub_of_le hpi] using hxi
     rw [heq]
-    have hp' : MeasurableSet[m (j p)] (⋃ i, f i) := hm.monotone (hjle p) hp
-    exact hp'.diff hprefix
+    have hp' : (⋃ i, f i) ∈ 𝓐 (j p) := hm.monotone (hjle p) hp
+    exact (𝓐 (j p)).diff_mem hp' hprefix
   have htail : Pairwise (fun i k ↦ Disjoint (f (p + i)) (f (p + k))) :=
     fun _ _ hik ↦ hf (by omega)
   let d (n : ℕ) : SigmaAlgebra ℕ :=
-    blockSigmaAlgebra (fun i ↦ f (p + i)) htail (m (j (p + n)))
+    blockSigmaAlgebra (fun i ↦ f (p + i)) htail (𝓐 (j (p + n)))
       (hm.monotone (hj.monotone (Nat.le_add_right p n)) hsupport)
   apply nat_singletons_obstruction (d := d)
   · intro n k hnk s hs
-    change MeasurableSet[m (j (p + n))] (blockUnion (fun i ↦ f (p + i)) s) at hs
-    change MeasurableSet[m (j (p + k))] (blockUnion (fun i ↦ f (p + i)) s)
+    change blockUnion (fun i ↦ f (p + i)) s ∈ 𝓐 (j (p + n)) at hs
+    change blockUnion (fun i ↦ f (p + i)) s ∈ 𝓐 (j (p + k))
     exact hm.monotone (hj.monotone (Nat.add_le_add_left hnk p)) hs
   · intro n
-    change blockUnion (fun i ↦ f (p + i)) {n} ∈ m (j (p + (n + 1)))
+    change blockUnion (fun i ↦ f (p + i)) {n} ∈ 𝓐 (j (p + (n + 1)))
     simpa [blockUnion, Nat.add_assoc] using hfm (p + n)
   · intro n hn
     apply hfn (p + n)
     change {n} ∈ d n at hn
-    change blockUnion (fun i ↦ f (p + i)) {n} ∈ m (j (p + n)) at hn
+    change blockUnion (fun i ↦ f (p + i)) {n} ∈ 𝓐 (j (p + n)) at hn
     simpa [blockUnion, Nat.add_assoc] using hn
   · intro s
-    have hs : MeasurableSet[m'] (blockUnion (fun i ↦ f (p + i)) s) :=
-      .biUnion (to_countable s) fun i _ ↦ hfm' (p + i)
+    have hs : blockUnion (fun i ↦ f (p + i)) s ∈ 𝓐' :=
+      𝓐'.biUnion_mem (to_countable s) fun i _ ↦ hfm' (p + i)
     obtain ⟨n, hn⟩ := (hcover _).1 hs
     refine ⟨n, ?_⟩
-    change MeasurableSet[m (j (p + n))] (blockUnion (fun i ↦ f (p + i)) s)
+    change blockUnion (fun i ↦ f (p + i)) s ∈ 𝓐 (j (p + n))
     apply hm.monotone _ hn
     have := hjle (p + n)
     omega
@@ -318,22 +318,22 @@ private theorem false_of_mem_iff_exists_of_strictMono (hm : StrictMono m)
 /-- A strengthening of the **Broughton--Huff theorem**: the supremum of a strictly increasing
 sequence of sigma-algebras contains a measurable set that belongs to none of the sigma-algebras in
 the sequence. -/
-theorem exists_mem_iSup_not_mem_of_strictMono (hm : StrictMono m) :
-    ∃ s, s ∈ ⨆ n, m n ∧ ∀ n, s ∉ m n := by
+theorem exists_mem_iSup_not_mem_of_strictMono (hm : StrictMono 𝓐) :
+    ∃ s, s ∈ ⨆ n, 𝓐 n ∧ ∀ n, s ∉ 𝓐 n := by
   classical
   by_contra! h
-  apply false_of_mem_iff_exists_of_strictMono hm (⨆ n, m n)
+  apply false_of_mem_iff_exists_of_strictMono hm (⨆ n, 𝓐 n)
   intro s
-  exact ⟨h s, fun ⟨n, hn⟩ ↦ (le_iSup m n) hn⟩
+  exact ⟨h s, fun ⟨n, hn⟩ ↦ (le_iSup 𝓐 n) hn⟩
 
 /-- **Broughton--Huff theorem**, stated for the ordinary union of the collections of measurable
 sets. This union differs from the lattice supremum of a strictly increasing sequence. -/
-theorem not_isSigmaAlgebra_iUnion_of_strictMono (hm : StrictMono m) :
-    ¬ IsSigmaAlgebra (⋃ n, (m n : Set (Set α))) := by
+theorem not_isSigmaAlgebra_iUnion_of_strictMono (hm : StrictMono 𝓐) :
+    ¬ IsSigmaAlgebra (⋃ n, (𝓐 n : Set (Set α))) := by
   intro h
   apply false_of_mem_iff_exists_of_strictMono hm h.toSigmaAlgebra
   intro s
-  change s ∈ ⋃ n, (m n : Set (Set α)) ↔ ∃ n, s ∈ m n
+  change s ∈ ⋃ n, (𝓐 n : Set (Set α)) ↔ ∃ n, s ∈ 𝓐 n
   exact mem_iUnion
 
 end SigmaAlgebra

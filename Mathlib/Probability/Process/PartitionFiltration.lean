@@ -57,12 +57,12 @@ def partitionFiltration (ht : ∀ n, MeasurableSet (t n)) :
 
 lemma measurableSet_partitionFiltration_of_mem (ht : ∀ n, MeasurableSet (t n)) (n : ℕ) {s : Set α}
     (hs : s ∈ memPartition t n) :
-    MeasurableSet[partitionFiltration ht n] s :=
+    s ∈ partitionFiltration ht n :=
   SigmaAlgebra.mem_generateFrom hs
 
 lemma measurableSet_partitionFiltration_memPartitionSet (ht : ∀ n, MeasurableSet (t n))
     (n : ℕ) (a : α) :
-    MeasurableSet[partitionFiltration ht n] (memPartitionSet t n a) :=
+    (memPartitionSet t n a) ∈ partitionFiltration ht n :=
   measurableSet_partitionFiltration_of_mem ht n (memPartitionSet_mem t n a)
 
 lemma measurable_memPartitionSet_subtype (ht : ∀ n, MeasurableSet (t n)) (n : ℕ)
@@ -72,7 +72,7 @@ lemma measurable_memPartitionSet_subtype (ht : ∀ n, MeasurableSet (t n)) (n : 
   refine @measurable_to_countable' (memPartition t n) α m _
     (partitionFiltration ht n) _ (fun s ↦ ?_)
   rcases s with ⟨s, hs⟩
-  suffices MeasurableSet[partitionFiltration ht n] {x | memPartitionSet t n x = s} by
+  suffices {x | memPartitionSet t n x = s} ∈ partitionFiltration ht n by
     convert! this
     ext x
     simp
@@ -115,11 +115,11 @@ noncomputable def countableFiltration (α : Type*) [m : SigmaAlgebra α] [Counta
 
 lemma measurableSet_countableFiltration_of_mem (n : ℕ) {s : Set α}
     (hs : s ∈ countablePartition α n) :
-    MeasurableSet[countableFiltration α n] s :=
+    s ∈ countableFiltration α n :=
   SigmaAlgebra.mem_generateFrom hs
 
 lemma measurableSet_countableFiltration_countablePartitionSet (n : ℕ) (t : α) :
-    MeasurableSet[countableFiltration α n] (countablePartitionSet n t) :=
+    (countablePartitionSet n t) ∈ countableFiltration α n :=
   measurableSet_countableFiltration_of_mem n (countablePartitionSet_mem n t)
 
 lemma measurable_countablePartitionSet_subtype (n : ℕ)

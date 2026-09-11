@@ -280,7 +280,7 @@ theorem dominatedFinMeasAdditive_condExpInd (hm : m ≤ m0) (μ : Measure α)
 
 variable {G}
 
-theorem setIntegral_condExpInd (hs : MeasurableSet[m] s) (ht : MeasurableSet t) (hμs : μ s ≠ ∞)
+theorem setIntegral_condExpInd (hs : s ∈ m) (ht : MeasurableSet t) (hμs : μ s ≠ ∞)
     (hμt : μ t ≠ ∞) (x : G') : ∫ a in s, condExpInd G' hm μ t x a ∂μ = μ.real (t ∩ s) • x :=
   calc
     ∫ a in s, condExpInd G' hm μ t x a ∂μ = ∫ a in s, condExpIndSMul hm ht hμt x a ∂μ :=
@@ -288,9 +288,9 @@ theorem setIntegral_condExpInd (hs : MeasurableSet[m] s) (ht : MeasurableSet t) 
         ((condExpInd_ae_eq_condExpIndSMul hm ht hμt x).mono fun _ hx _ => hx)
     _ = μ.real (t ∩ s) • x := setIntegral_condExpIndSMul hs ht hμs hμt x
 
-theorem condExpInd_of_measurable (hs : MeasurableSet[m] s) (hμs : μ s ≠ ∞) (c : G) :
+theorem condExpInd_of_measurable (hs : s ∈ m) (hμs : μ s ≠ ∞) (c : G) :
     condExpInd G hm μ s c = indicatorConstLp 1 (hm hs) hμs c := by
-  let hs0 : MeasurableSet s := measurableSet_iff_mem.mpr (hm (measurableSet_iff_mem.mp hs))
+  let hs0 : MeasurableSet s := measurableSet_iff_mem.mpr (hm hs)
   change condExpInd G hm μ s c = indicatorConstLp 1 hs0 hμs c
   ext1
   grw [indicatorConstLp_coeFn, condExpInd_ae_eq_condExpIndSMul hm hs0 hμs,
@@ -342,7 +342,7 @@ theorem condExpL1CLM_indicatorConst (hs : MeasurableSet s) (hμs : μ s ≠ ∞)
   rw [Lp.simpleFunc.coe_indicatorConst]; exact condExpL1CLM_indicatorConstLp hs hμs x
 
 /-- Auxiliary lemma used in the proof of `setIntegral_condExpL1CLM`. -/
-theorem setIntegral_condExpL1CLM_of_measure_ne_top (f : α →₁[μ] F') (hs : MeasurableSet[m] s)
+theorem setIntegral_condExpL1CLM_of_measure_ne_top (f : α →₁[μ] F') (hs : s ∈ m)
     (hμs : μ s ≠ ∞) : ∫ x in s, condExpL1CLM F' hm μ f x ∂μ = ∫ x in s, f x ∂μ := by
   refine @Lp.induction _ _ _ _ _ _ _ ENNReal.one_ne_top
     (fun f : α →₁[μ] F' => ∫ x in s, condExpL1CLM F' hm μ f x ∂μ = ∫ x in s, f x ∂μ) ?_ ?_
@@ -367,10 +367,10 @@ theorem setIntegral_condExpL1CLM_of_measure_ne_top (f : α →₁[μ] F') (hs : 
 /-- The integral of the conditional expectation `condExpL1CLM` over an `m`-measurable set is equal
 to the integral of `f` on that set. See also `setIntegral_condExp`, the similar statement for
 `condExp`. -/
-theorem setIntegral_condExpL1CLM (f : α →₁[μ] F') (hs : MeasurableSet[m] s) :
+theorem setIntegral_condExpL1CLM (f : α →₁[μ] F') (hs : s ∈ m) :
     ∫ x in s, condExpL1CLM F' hm μ f x ∂μ = ∫ x in s, f x ∂μ := by
   let S := spanningSets (μ.trim hm)
-  have hS_meas : ∀ i, MeasurableSet[m] (S i) := measurableSet_spanningSets (μ.trim hm)
+  have hS_meas : ∀ i, S i ∈ m := measurableSet_spanningSets (μ.trim hm)
   have hS_meas0 : ∀ i, MeasurableSet (S i) := fun i => hm (hS_meas i)
   have hs_eq : s = ⋃ i, S i ∩ s := by
     simp_rw [Set.inter_comm]
@@ -500,7 +500,7 @@ theorem integrable_condExpL1 (f : α → F') : Integrable (condExpL1 hm μ f) μ
 /-- The integral of the conditional expectation `condExpL1` over an `m`-measurable set is equal to
 the integral of `f` on that set. See also `setIntegral_condExp`, the similar statement for
 `condExp`. -/
-theorem setIntegral_condExpL1 [CompleteSpace F'] (hf : Integrable f μ) (hs : MeasurableSet[m] s) :
+theorem setIntegral_condExpL1 [CompleteSpace F'] (hf : Integrable f μ) (hs : s ∈ m) :
     ∫ x in s, condExpL1 hm μ f x ∂μ = ∫ x in s, f x ∂μ := by
   simp_rw [condExpL1_eq hf]
   rw [setIntegral_condExpL1CLM (hf.toL1 f) hs]

@@ -47,9 +47,9 @@ theorem Submartingale.expected_stoppedValue_mono {E : Type*} [NormedAddCommGroup
     {N : ℕ} (hbdd : ∀ ω, π ω ≤ N) : μ[stoppedValue f τ] ≤ μ[stoppedValue f π] := by
   rw [← sub_nonneg, ← integral_sub', stoppedValue_sub_eq_sum' hle hbdd]
   · simp only [Finset.sum_apply]
-    have this i : MeasurableSet[𝒢 i] {ω : Ω | τ ω ≤ i ∧ i < π ω} := by
+    have this i : {ω : Ω | τ ω ≤ i ∧ i < π ω} ∈ 𝒢 i := by
       simp_rw [Set.ofPred_and, ← not_le, ← Set.compl_ofPred]
-      exact (hτ i).inter (hπ i).compl
+      exact (𝒢 i).inter_mem (hτ i) ((𝒢 i).compl_mem (hπ i))
     rw [integral_finsetSum]
     · refine Finset.sum_nonneg fun i _ => ?_
       rw [integral_indicator (𝒢.le _ (this _)), integral_sub', sub_nonneg]

@@ -240,7 +240,7 @@ variable {s : ℕ → Set Ω}
 
 theorem process_zero : process s 0 = 0 := by rw [process, Finset.range_zero, Finset.sum_empty]
 
-theorem stronglyAdapted_process (hs : ∀ n, MeasurableSet[ℱ n] (s n)) :
+theorem stronglyAdapted_process (hs : ∀ n, (s n) ∈ ℱ n) :
     StronglyAdapted ℱ (process s) :=
   fun _ => Finset.stronglyMeasurable_sum _ fun _ hk =>
     stronglyMeasurable_one.indicator <| ℱ.mono (Finset.mem_range.1 hk) <| hs _
@@ -267,7 +267,7 @@ theorem process_difference_le (s : ℕ → Set Ω) (ω : Ω) (n : ℕ) :
   refine Set.indicator_le' (fun _ _ => ?_) (fun _ _ => zero_le_one) _
   rw [Pi.one_apply, norm_one]
 
-theorem integrable_process (μ : Measure Ω) [IsFiniteMeasure μ] (hs : ∀ n, MeasurableSet[ℱ n] (s n))
+theorem integrable_process (μ : Measure Ω) [IsFiniteMeasure μ] (hs : ∀ n, (s n) ∈ ℱ n)
     (n : ℕ) : Integrable (process s n) μ :=
   integrable_finsetSum' _ fun _ _ =>
     IntegrableOn.integrable_indicator (integrable_const 1) <| ℱ.le _ <| hs _
@@ -310,7 +310,7 @@ theorem tendsto_sum_indicator_atTop_iff [IsFiniteMeasure μ]
 open BorelCantelli
 
 theorem tendsto_sum_indicator_atTop_iff' [IsFiniteMeasure μ] {s : ℕ → Set Ω}
-    (hs : ∀ n, MeasurableSet[ℱ n] (s n)) : ∀ᵐ ω ∂μ,
+    (hs : ∀ n, (s n) ∈ ℱ n) : ∀ᵐ ω ∂μ,
     Tendsto (fun n => ∑ k ∈ Finset.range n,
       (s (k + 1)).indicator (1 : Ω → ℝ) ω) atTop atTop ↔
     Tendsto (fun n => ∑ k ∈ Finset.range n,
@@ -329,7 +329,7 @@ theorem tendsto_sum_indicator_atTop_iff' [IsFiniteMeasure μ] {s : ℕ → Set �
 filtration `ℱ` such that for all `n`, `s n` is `ℱ n`-measurable, `limsup s atTop` is almost
 everywhere equal to the set for which `∑ k, ℙ(s (k + 1) | ℱ k) = ∞`. -/
 theorem ae_mem_limsup_atTop_iff (μ : Measure Ω) [IsFiniteMeasure μ] {s : ℕ → Set Ω}
-    (hs : ∀ n, MeasurableSet[ℱ n] (s n)) : ∀ᵐ ω ∂μ, ω ∈ limsup s atTop ↔
+    (hs : ∀ n, (s n) ∈ ℱ n) : ∀ᵐ ω ∂μ, ω ∈ limsup s atTop ↔
     Tendsto (fun n => ∑ k ∈ Finset.range n,
       (μ[(s (k + 1)).indicator (1 : Ω → ℝ) | ℱ k]) ω) atTop atTop := by
   rw [← limsup_nat_add s 1,

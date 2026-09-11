@@ -108,7 +108,7 @@ theorem diff_mem {C : Set (Set α)} (hC : IsSigmaAlgebra C) {s t : Set α}
 end IsSigmaAlgebra
 
 /-- A bundled σ-algebra of subsets of `α`. The underlying family is available through the
-`SetLike` coercion, so `s ∈ m` means that `s` is measurable with respect to `m`. -/
+`SetLike` coercion, so `s ∈ 𝓐` means that `s` is measurable with respect to `𝓐`. -/
 @[class] structure SigmaAlgebra (α : Type*) where
   /-- The family of measurable subsets. -/
   carrier : Set (Set α)
@@ -158,47 +158,61 @@ end MeasurableSpace
 namespace SigmaAlgebra
 
 /-- The empty set belongs to every σ-algebra. -/
-theorem empty_mem (m : SigmaAlgebra α) : ∅ ∈ m :=
-  m.isSigmaAlgebra.empty_mem
+theorem empty_mem (𝓐 : SigmaAlgebra α) : ∅ ∈ 𝓐 :=
+  𝓐.isSigmaAlgebra.empty_mem
 
 /-- A σ-algebra is closed under complements. -/
-theorem compl_mem (m : SigmaAlgebra α) {s : Set α} (hs : s ∈ m) : sᶜ ∈ m :=
-  m.isSigmaAlgebra.compl_mem hs
+theorem compl_mem (𝓐 : SigmaAlgebra α) {s : Set α} (hs : s ∈ 𝓐) : sᶜ ∈ 𝓐 :=
+  𝓐.isSigmaAlgebra.compl_mem hs
 
 /-- A σ-algebra is closed under countable indexed unions. -/
-theorem iUnion_mem (m : SigmaAlgebra α) [Countable ι] {s : ι → Set α} (hs : ∀ i, s i ∈ m) :
-    ⋃ i, s i ∈ m :=
-  m.isSigmaAlgebra.iUnion_mem hs
+theorem iUnion_mem (𝓐 : SigmaAlgebra α) [Countable ι] {s : ι → Set α} (hs : ∀ i, s i ∈ 𝓐) :
+    ⋃ i, s i ∈ 𝓐 :=
+  𝓐.isSigmaAlgebra.iUnion_mem hs
 
 /-- A σ-algebra contains the whole space. -/
-theorem univ_mem (m : SigmaAlgebra α) : univ ∈ m :=
-  m.isSigmaAlgebra.univ_mem
+theorem univ_mem (𝓐 : SigmaAlgebra α) : univ ∈ 𝓐 :=
+  𝓐.isSigmaAlgebra.univ_mem
 
 /-- Membership in a σ-algebra is invariant under complements. -/
-theorem compl_mem_iff (m : SigmaAlgebra α) : sᶜ ∈ m ↔ s ∈ m :=
-  m.isSigmaAlgebra.compl_mem_iff
+theorem compl_mem_iff (𝓐 : SigmaAlgebra α) : sᶜ ∈ 𝓐 ↔ s ∈ 𝓐 :=
+  𝓐.isSigmaAlgebra.compl_mem_iff
 
 /-- A σ-algebra is closed under countable indexed intersections. -/
-theorem iInter_mem (m : SigmaAlgebra α) [Countable ι] {s : ι → Set α} (hs : ∀ i, s i ∈ m) :
-    ⋂ i, s i ∈ m :=
-  m.isSigmaAlgebra.iInter_mem hs
+theorem iInter_mem (𝓐 : SigmaAlgebra α) [Countable ι] {s : ι → Set α} (hs : ∀ i, s i ∈ 𝓐) :
+    ⋂ i, s i ∈ 𝓐 :=
+  𝓐.isSigmaAlgebra.iInter_mem hs
 
 /-- A σ-algebra is closed under unions of countable families. -/
-theorem sUnion_mem (m : SigmaAlgebra α) {S : Set (Set α)} (hS : S.Countable) (hSm : S ⊆ m) :
-    ⋃₀ S ∈ m :=
-  m.isSigmaAlgebra.sUnion_mem hS hSm
+theorem sUnion_mem (𝓐 : SigmaAlgebra α) {S : Set (Set α)} (hS : S.Countable) (hS𝓐 : S ⊆ 𝓐) :
+    ⋃₀ S ∈ 𝓐 :=
+  𝓐.isSigmaAlgebra.sUnion_mem hS hS𝓐
+
+/-- A σ-algebra is closed under unions indexed by a countable set. -/
+theorem biUnion_mem (𝓐 : SigmaAlgebra α) {f : β → Set α} {s : Set β} (hs : s.Countable)
+    (hf : ∀ b ∈ s, f b ∈ 𝓐) : ⋃ b ∈ s, f b ∈ 𝓐 := by
+  rw [biUnion_eq_iUnion]
+  let _ := hs.to_subtype
+  exact 𝓐.iUnion_mem (by simpa using hf)
+
+/-- A σ-algebra is closed under intersections indexed by a countable set. -/
+theorem biInter_mem (𝓐 : SigmaAlgebra α) {f : β → Set α} {s : Set β} (hs : s.Countable)
+    (hf : ∀ b ∈ s, f b ∈ 𝓐) : ⋂ b ∈ s, f b ∈ 𝓐 := by
+  apply (𝓐.compl_mem_iff).mp
+  rw [compl_iInter₂]
+  exact 𝓐.biUnion_mem hs fun b hb ↦ 𝓐.compl_mem (hf b hb)
 
 /-- A σ-algebra is closed under binary unions. -/
-theorem union_mem (m : SigmaAlgebra α) {s t : Set α} (hs : s ∈ m) (ht : t ∈ m) : s ∪ t ∈ m :=
-  m.isSigmaAlgebra.union_mem hs ht
+theorem union_mem (𝓐 : SigmaAlgebra α) {s t : Set α} (hs : s ∈ 𝓐) (ht : t ∈ 𝓐) : s ∪ t ∈ 𝓐 :=
+  𝓐.isSigmaAlgebra.union_mem hs ht
 
 /-- A σ-algebra is closed under binary intersections. -/
-theorem inter_mem (m : SigmaAlgebra α) {s t : Set α} (hs : s ∈ m) (ht : t ∈ m) : s ∩ t ∈ m :=
-  m.isSigmaAlgebra.inter_mem hs ht
+theorem inter_mem (𝓐 : SigmaAlgebra α) {s t : Set α} (hs : s ∈ 𝓐) (ht : t ∈ 𝓐) : s ∩ t ∈ 𝓐 :=
+  𝓐.isSigmaAlgebra.inter_mem hs ht
 
 /-- A σ-algebra is closed under set difference. -/
-theorem diff_mem (m : SigmaAlgebra α) {s t : Set α} (hs : s ∈ m) (ht : t ∈ m) : s \ t ∈ m :=
-  m.isSigmaAlgebra.diff_mem hs ht
+theorem diff_mem (𝓐 : SigmaAlgebra α) {s t : Set α} (hs : s ∈ 𝓐) (ht : t ∈ 𝓐) : s \ t ∈ 𝓐 :=
+  𝓐.isSigmaAlgebra.diff_mem hs ht
 
 end SigmaAlgebra
 
@@ -219,16 +233,15 @@ end IsSigmaAlgebra
 
 instance [h : SigmaAlgebra α] : SigmaAlgebra αᵒᵈ := h
 
-/-- `MeasurableSet s` means that `s` is measurable (in the ambient measure space on `α`) -/
-def MeasurableSet [SigmaAlgebra α] (s : Set α) : Prop :=
-  s ∈ (inferInstance : SigmaAlgebra α)
+/-- `MeasurableSet s` means that `s` belongs to the ambient σ-algebra on `α`.
 
-/-- Notation for `MeasurableSet` with respect to a non-standard σ-algebra. -/
-scoped[MeasureTheory] notation "MeasurableSet[" m "]" => @MeasurableSet _ m
+For an explicit `𝓐 : SigmaAlgebra α`, write `s ∈ 𝓐`. When an explicit `MeasurableSet` predicate
+head is useful for elaboration, write `MeasurableSet (𝓐 := 𝓐) s`. -/
+def MeasurableSet [𝓐 : SigmaAlgebra α] (s : Set α) : Prop :=
+  s ∈ 𝓐
 
-open scoped MeasureTheory
-
-theorem measurableSet_iff_mem {m : SigmaAlgebra α} {s : Set α} : MeasurableSet[m] s ↔ s ∈ m :=
+theorem measurableSet_iff_mem {𝓐 : SigmaAlgebra α} {s : Set α} :
+    MeasurableSet (𝓐 := 𝓐) s ↔ s ∈ 𝓐 :=
   Iff.rfl
 
 section
@@ -444,6 +457,137 @@ theorem Set.Countable.measurableSet {s : Set α} (hs : s.Countable) : Measurable
 end MeasurableSingletonClass
 
 namespace SigmaAlgebra
+
+/-! ### First-class measurable sets -/
+
+namespace Element
+
+variable {𝓐 : SigmaAlgebra α}
+
+/-- A point belongs to a first-class measurable set through its underlying subset. -/
+instance instMembership : Membership α 𝓐 :=
+  ⟨fun A x ↦ x ∈ (A : Set α)⟩
+
+@[simp]
+theorem mem_coe (x : α) (A : 𝓐) : x ∈ (A : Set α) ↔ x ∈ A :=
+  Iff.rfl
+
+instance instEmptyCollection : EmptyCollection 𝓐 :=
+  ⟨⟨∅, 𝓐.empty_mem⟩⟩
+
+@[simp]
+theorem coe_empty : ((∅ : 𝓐) : Set α) = ∅ :=
+  rfl
+
+instance instInsert [@MeasurableSingletonClass α 𝓐] : Insert α 𝓐 where
+  insert x A := ⟨insert x (A : Set α), by
+    rw [insert_eq]
+    exact 𝓐.union_mem (@measurableSet_singleton α 𝓐 _ x) A.property⟩
+
+@[simp]
+theorem coe_insert [@MeasurableSingletonClass α 𝓐] (x : α) (A : 𝓐) :
+    ((insert x A : 𝓐) : Set α) = insert x (A : Set α) :=
+  rfl
+
+instance instSingleton [@MeasurableSingletonClass α 𝓐] : Singleton α 𝓐 :=
+  ⟨fun x ↦ ⟨{x}, @measurableSet_singleton α 𝓐 _ x⟩⟩
+
+@[simp]
+theorem coe_singleton [@MeasurableSingletonClass α 𝓐] (x : α) :
+    (({x} : 𝓐) : Set α) = {x} :=
+  rfl
+
+instance instLawfulSingleton [@MeasurableSingletonClass α 𝓐] : LawfulSingleton α 𝓐 :=
+  ⟨fun _ ↦ Subtype.ext <| insert_empty_eq _⟩
+
+instance instCompl : Compl 𝓐 :=
+  ⟨fun A ↦ ⟨(A : Set α)ᶜ, 𝓐.compl_mem A.property⟩⟩
+
+@[simp]
+theorem coe_compl (A : 𝓐) : ((Aᶜ : 𝓐) : Set α) = (A : Set α)ᶜ :=
+  rfl
+
+instance instUnion : Union 𝓐 :=
+  ⟨fun A B ↦ ⟨(A : Set α) ∪ (B : Set α), 𝓐.union_mem A.property B.property⟩⟩
+
+@[simp]
+theorem coe_union (A B : 𝓐) : ((A ∪ B : 𝓐) : Set α) = (A : Set α) ∪ (B : Set α) :=
+  rfl
+
+instance instMax : Max 𝓐 :=
+  ⟨(· ∪ ·)⟩
+
+@[simp]
+theorem sup_eq_union (A B : 𝓐) : A ⊔ B = A ∪ B :=
+  rfl
+
+instance instInter : Inter 𝓐 :=
+  ⟨fun A B ↦ ⟨(A : Set α) ∩ (B : Set α), 𝓐.inter_mem A.property B.property⟩⟩
+
+@[simp]
+theorem coe_inter (A B : 𝓐) : ((A ∩ B : 𝓐) : Set α) = (A : Set α) ∩ (B : Set α) :=
+  rfl
+
+instance instMin : Min 𝓐 :=
+  ⟨(· ∩ ·)⟩
+
+@[simp]
+theorem inf_eq_inter (A B : 𝓐) : A ⊓ B = A ∩ B :=
+  rfl
+
+instance instSDiff : SDiff 𝓐 :=
+  ⟨fun A B ↦ ⟨(A : Set α) \ (B : Set α), 𝓐.diff_mem A.property B.property⟩⟩
+
+@[simp]
+theorem coe_sdiff (A B : 𝓐) : ((A \ B : 𝓐) : Set α) = (A : Set α) \ (B : Set α) :=
+  rfl
+
+noncomputable instance instHImp : HImp 𝓐 where
+  himp A B := ⟨(A : Set α) ⇨ (B : Set α), by
+    rw [himp_eq]
+    exact 𝓐.union_mem B.property (𝓐.compl_mem A.property)⟩
+
+@[simp]
+theorem coe_himp (A B : 𝓐) : ((A ⇨ B : 𝓐) : Set α) = (A : Set α) ⇨ (B : Set α) :=
+  rfl
+
+instance instBot : Bot 𝓐 :=
+  ⟨∅⟩
+
+@[simp]
+theorem coe_bot : ((⊥ : 𝓐) : Set α) = ⊥ :=
+  rfl
+
+instance instTop : Top 𝓐 :=
+  ⟨⟨Set.univ, 𝓐.univ_mem⟩⟩
+
+@[simp]
+theorem coe_top : ((⊤ : 𝓐) : Set α) = ⊤ :=
+  rfl
+
+noncomputable instance instBooleanAlgebra : BooleanAlgebra 𝓐 :=
+  Subtype.coe_injective.booleanAlgebra _ .rfl .rfl coe_union coe_inter coe_top coe_bot coe_compl
+    coe_sdiff coe_himp
+
+end Element
+
+/-- The union of a countable family of first-class measurable sets. -/
+def countableUnion (𝓐 : SigmaAlgebra α) [Countable ι] (A : ι → 𝓐) : 𝓐 :=
+  ⟨⋃ i, (A i : Set α), 𝓐.iUnion_mem fun i ↦ (A i).property⟩
+
+@[simp]
+theorem coe_countableUnion (𝓐 : SigmaAlgebra α) [Countable ι] (A : ι → 𝓐) :
+    (𝓐.countableUnion A : Set α) = ⋃ i, (A i : Set α) :=
+  rfl
+
+/-- The intersection of a countable family of first-class measurable sets. -/
+def countableInter (𝓐 : SigmaAlgebra α) [Countable ι] (A : ι → 𝓐) : 𝓐 :=
+  ⟨⋂ i, (A i : Set α), 𝓐.iInter_mem fun i ↦ (A i).property⟩
+
+@[simp]
+theorem coe_countableInter (𝓐 : SigmaAlgebra α) [Countable ι] (A : ι → 𝓐) :
+    (𝓐.countableInter A : Set α) = ⋂ i, (A i : Set α) :=
+  rfl
 
 /-- Copy of a `SigmaAlgebra` with a definitionally new membership predicate equal to the old one.
 Useful to fix
@@ -679,11 +823,11 @@ end SigmaAlgebra
 /-- A function `f` between measurable spaces is measurable if the preimage of every
   measurable set is measurable. -/
 @[fun_prop, wikidata Q516776]
-def Measurable [mα : SigmaAlgebra α] [mβ : SigmaAlgebra β] (f : α → β) : Prop :=
-  ∀ ⦃s : Set β⦄, s ∈ mβ → f ⁻¹' s ∈ mα
+def Measurable [𝓐 : SigmaAlgebra α] [𝓑 : SigmaAlgebra β] (f : α → β) : Prop :=
+  ∀ ⦃s : Set β⦄, s ∈ 𝓑 → f ⁻¹' s ∈ 𝓐
 
-theorem measurable_iff_preimage_mem {mα : SigmaAlgebra α} {mβ : SigmaAlgebra β} {f : α → β} :
-    @Measurable α β mα mβ f ↔ ∀ ⦃s : Set β⦄, s ∈ mβ → f ⁻¹' s ∈ mα :=
+theorem measurable_iff_preimage_mem {𝓐 : SigmaAlgebra α} {𝓑 : SigmaAlgebra β} {f : α → β} :
+    @Measurable α β 𝓐 𝓑 f ↔ ∀ ⦃s : Set β⦄, s ∈ 𝓑 → f ⁻¹' s ∈ 𝓐 :=
   Iff.rfl
 
 add_aesop_rules safe tactic
@@ -695,12 +839,14 @@ namespace MeasureTheory
 
 set_option quotPrecheck false in
 /-- Notation for `Measurable` with respect to a non-standard σ-algebra in the domain. -/
-scoped notation "Measurable[" m "]" => @Measurable _ _ m _
+scoped notation "Measurable[" 𝓐 "]" => @Measurable _ _ 𝓐 _
 /-- Notation for `Measurable` with respect to a non-standard σ-algebra in the domain and codomain.
 -/
-scoped notation "Measurable[" mα ", " mβ "]" => @Measurable _ _ mα mβ
+scoped notation "Measurable[" 𝓐 ", " 𝓑 "]" => @Measurable _ _ 𝓐 𝓑
 
 end MeasureTheory
+
+open scoped MeasureTheory
 
 section MeasurableFunctions
 
@@ -725,8 +871,8 @@ theorem measurable_const {_ : SigmaAlgebra α} {_ : SigmaAlgebra β} {a : α} :
     Measurable fun _ : β => a := fun s _ => MeasurableSet.const (a ∈ s)
 
 @[fun_prop]
-theorem Measurable.le {α} {m m0 : SigmaAlgebra α} {_ : SigmaAlgebra β} (hm : m ≤ m0)
-    {f : α → β} (hf : Measurable[m] f) : Measurable[m0] f := fun _ hs => hm (hf hs)
+theorem Measurable.le {α} {𝓐 𝓐₀ : SigmaAlgebra α} {_ : SigmaAlgebra β} (h𝓐 : 𝓐 ≤ 𝓐₀)
+    {f : α → β} (hf : Measurable[𝓐] f) : Measurable[𝓐₀] f := fun _ hs => h𝓐 (hf hs)
 
 end MeasurableFunctions
 

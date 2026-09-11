@@ -46,7 +46,7 @@ namespace ProbabilityTheory
   `lintegral_mul_eq_lintegral_mul_lintegral_of_independent_sigmaAlgebra`. -/
 theorem lintegral_mul_indicator_eq_lintegral_mul_lintegral_indicator {Mf mΩ : SigmaAlgebra Ω}
     {μ : Measure Ω} (hMf : Mf ≤ mΩ) (c : ℝ≥0∞) {T : Set Ω} (h_meas_T : MeasurableSet T)
-    (h_ind : IndepSets {s | MeasurableSet[Mf] s} {T} μ) (h_meas_f : Measurable[Mf] f) :
+    (h_ind : IndepSets (Mf : Set (Set Ω)) {T} μ) (h_meas_f : Measurable[Mf] f) :
     (∫⁻ ω, f ω * T.indicator (fun _ => c) ω ∂μ) =
       (∫⁻ ω, f ω ∂μ) * ∫⁻ ω, T.indicator (fun _ => c) ω ∂μ := by
   revert f
@@ -493,7 +493,7 @@ variable {Ω 𝓧 : Type*} {m mΩ : SigmaAlgebra Ω} {P : Measure Ω} [m𝓧 : S
 then `∫ ω in A, f (X ω) ∂P = P.real A • ∫ ω, f (X ω) ∂P` for a measurable function `f : 𝓧 → E`. -/
 lemma Indep.setIntegral_eq_smul {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
     (hm : m ≤ mΩ) {f : 𝓧 → E} (hA1 : Indep m (m𝓧.comap X) P)
-    (hX : AEMeasurable X P) (hA2 : MeasurableSet[m] A)
+    (hX : AEMeasurable X P) (hA2 : A ∈ m)
     (hf : AEStronglyMeasurable f (P.map X)) :
     ∫ ω in A, f (X ω) ∂P = P.real A • ∫ ω, f (X ω) ∂P :=
   calc ∫ ω in A, f (X ω) ∂P
@@ -512,7 +512,7 @@ lemma Indep.setIntegral_eq_smul {E : Type*} [NormedAddCommGroup E] [NormedSpace 
 /-- If a random variable `X` is independent of a sigma-algebra `m` and `A` is a set in `m`
 then `∫ ω in A, f (X ω) ∂P = P.real A * ∫ ω, f (X ω) ∂P` for a measurable function `f : 𝓧 → ℝ`. -/
 lemma Indep.setIntegral_eq_mul (hm : m ≤ mΩ) {f : 𝓧 → ℝ} (hA1 : Indep m (m𝓧.comap X) P)
-    (hX : AEMeasurable X P) (hA : MeasurableSet[m] A)
+    (hX : AEMeasurable X P) (hA : A ∈ m)
     (hf : AEStronglyMeasurable f (P.map X)) :
     ∫ ω in A, f (X ω) ∂P = P.real A * ∫ ω, f (X ω) ∂P :=
   hA1.setIntegral_eq_smul hm hX hA hf

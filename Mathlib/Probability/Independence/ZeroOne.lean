@@ -62,7 +62,7 @@ theorem Kernel.measure_eq_zero_or_one_of_indepSet_self [h : ∀ a, IsFiniteMeasu
   Kernel.measure_eq_zero_or_one_of_indepSet_self' (ae_of_all μα h) h_indep
 
 lemma Kernel.measure_eq_zero_or_one_of_indep_self [h : ∀ a, IsFiniteMeasure (κ a)]
-    (hm : Indep m m κ μα) {t : Set Ω} (ht : MeasurableSet[m] t) :
+    (hm : Indep m m κ μα) {t : Set Ω} (ht : t ∈ m) :
     ∀ᵐ a ∂μα, κ a t = 0 ∨ κ a t = 1 :=
   measure_eq_zero_or_one_of_indepSet_self
     (indep_of_indep_of_le hm (generateFrom_singleton_le ht) (generateFrom_singleton_le ht))
@@ -73,7 +73,7 @@ theorem measure_eq_zero_or_one_of_indepSet_self [IsFiniteMeasure μ] {t : Set Ω
     using! Kernel.measure_eq_zero_or_one_of_indepSet_self h_indep
 
 lemma measure_eq_zero_or_one_of_indep_self [IsFiniteMeasure μ] (hm : Indep m m μ)
-    {t : Set Ω} (ht : MeasurableSet[m] t) :
+    {t : Set Ω} (ht : t ∈ m) :
     μ t = 0 ∨ μ t = 1 := by
   simpa using Kernel.measure_eq_zero_or_one_of_indep_self hm ht
 
@@ -219,7 +219,7 @@ theorem condIndep_limsup_self [StandardBorelSpace Ω]
 theorem Kernel.measure_zero_or_one_of_measurableSet_limsup (h_le : ∀ n, s n ≤ m0)
     (h_indep : iIndep s κ μα)
     (hf : ∀ t, p t → tᶜ ∈ f) (hns : Directed (· ≤ ·) ns) (hnsp : ∀ a, p (ns a))
-    (hns_univ : ∀ n, ∃ a, n ∈ ns a) {t : Set Ω} (ht_tail : MeasurableSet[limsup s f] t) :
+    (hns_univ : ∀ n, ∃ a, n ∈ ns a) {t : Set Ω} (ht_tail : t ∈ limsup s f) :
     ∀ᵐ a ∂μα, κ a t = 0 ∨ κ a t = 1 := by
   apply measure_eq_zero_or_one_of_indepSet_self' ?_
     ((indep_limsup_self h_le h_indep hf hns hnsp hns_univ).indepSet_of_measurableSet ht_tail
@@ -229,7 +229,7 @@ theorem Kernel.measure_zero_or_one_of_measurableSet_limsup (h_le : ∀ n, s n �
 theorem measure_zero_or_one_of_measurableSet_limsup
     (h_le : ∀ n, s n ≤ m0) (h_indep : iIndep s μ)
     (hf : ∀ t, p t → tᶜ ∈ f) (hns : Directed (· ≤ ·) ns) (hnsp : ∀ a, p (ns a))
-    (hns_univ : ∀ n, ∃ a, n ∈ ns a) {t : Set Ω} (ht_tail : MeasurableSet[limsup s f] t) :
+    (hns_univ : ∀ n, ∃ a, n ∈ ns a) {t : Set Ω} (ht_tail : t ∈ limsup s f) :
     μ t = 0 ∨ μ t = 1 := by
   simpa only [ae_dirac_eq, Filter.eventually_pure]
     using! Kernel.measure_zero_or_one_of_measurableSet_limsup h_le h_indep hf hns hnsp hns_univ
@@ -239,7 +239,7 @@ theorem condExp_zero_or_one_of_measurableSet_limsup [StandardBorelSpace Ω]
     (hm : m ≤ m0) [IsFiniteMeasure μ]
     (h_le : ∀ n, s n ≤ m0) (h_indep : iCondIndep m hm s μ)
     (hf : ∀ t, p t → tᶜ ∈ f) (hns : Directed (· ≤ ·) ns) (hnsp : ∀ a, p (ns a))
-    (hns_univ : ∀ n, ∃ a, n ∈ ns a) {t : Set Ω} (ht_tail : MeasurableSet[limsup s f] t) :
+    (hns_univ : ∀ n, ∃ a, n ∈ ns a) {t : Set Ω} (ht_tail : t ∈ limsup s f) :
     ∀ᵐ ω ∂μ, (μ⟦t | m⟧) ω = 0 ∨ (μ⟦t | m⟧) ω = 1 := by
   have h := ae_of_ae_trim hm
     (Kernel.measure_zero_or_one_of_measurableSet_limsup h_le h_indep hf hns hnsp hns_univ ht_tail)
@@ -278,7 +278,7 @@ theorem condIndep_limsup_atTop_self [StandardBorelSpace Ω]
   Kernel.indep_limsup_atTop_self h_le h_indep
 
 theorem Kernel.measure_zero_or_one_of_measurableSet_limsup_atTop (h_le : ∀ n, s n ≤ m0)
-    (h_indep : iIndep s κ μα) {t : Set Ω} (ht_tail : MeasurableSet[limsup s atTop] t) :
+    (h_indep : iIndep s κ μα) {t : Set Ω} (ht_tail : t ∈ limsup s atTop) :
     ∀ᵐ a ∂μα, κ a t = 0 ∨ κ a t = 1 := by
   apply measure_eq_zero_or_one_of_indepSet_self' ?_
     ((indep_limsup_atTop_self h_le h_indep).indepSet_of_measurableSet ht_tail ht_tail)
@@ -289,14 +289,14 @@ sub-σ-algebras has probability 0 or 1.
 The tail σ-algebra `limsup s atTop` is the same as `⋂ n, ⋃ i ≥ n, s i`. -/
 theorem measure_zero_or_one_of_measurableSet_limsup_atTop
     (h_le : ∀ n, s n ≤ m0)
-    (h_indep : iIndep s μ) {t : Set Ω} (ht_tail : MeasurableSet[limsup s atTop] t) :
+    (h_indep : iIndep s μ) {t : Set Ω} (ht_tail : t ∈ limsup s atTop) :
     μ t = 0 ∨ μ t = 1 := by
   simpa only [ae_dirac_eq, Filter.eventually_pure]
     using! Kernel.measure_zero_or_one_of_measurableSet_limsup_atTop h_le h_indep ht_tail
 
 theorem condExp_zero_or_one_of_measurableSet_limsup_atTop [StandardBorelSpace Ω]
     (hm : m ≤ m0) [IsFiniteMeasure μ] (h_le : ∀ n, s n ≤ m0)
-    (h_indep : iCondIndep m hm s μ) {t : Set Ω} (ht_tail : MeasurableSet[limsup s atTop] t) :
+    (h_indep : iCondIndep m hm s μ) {t : Set Ω} (ht_tail : t ∈ limsup s atTop) :
     ∀ᵐ ω ∂μ, (μ⟦t | m⟧) ω = 0 ∨ (μ⟦t | m⟧) ω = 1 :=
   condExp_eq_zero_or_one_of_condIndepSet_self hm ((limsup_le_iSup.trans (iSup_le h_le)) ht_tail)
     ((condIndep_limsup_atTop_self hm h_le h_indep).condIndepSet_of_measurableSet ht_tail ht_tail)
@@ -335,7 +335,7 @@ theorem condIndep_limsup_atBot_self [StandardBorelSpace Ω]
 /-- **Kolmogorov's 0-1 law**, kernel version: any event in the tail σ-algebra of an independent
 sequence of sub-σ-algebras has probability 0 or 1 almost surely. -/
 theorem Kernel.measure_zero_or_one_of_measurableSet_limsup_atBot (h_le : ∀ n, s n ≤ m0)
-    (h_indep : iIndep s κ μα) {t : Set Ω} (ht_tail : MeasurableSet[limsup s atBot] t) :
+    (h_indep : iIndep s κ μα) {t : Set Ω} (ht_tail : t ∈ limsup s atBot) :
     ∀ᵐ a ∂μα, κ a t = 0 ∨ κ a t = 1 := by
   apply measure_eq_zero_or_one_of_indepSet_self' ?_
     ((indep_limsup_atBot_self h_le h_indep).indepSet_of_measurableSet ht_tail ht_tail)
@@ -345,7 +345,7 @@ theorem Kernel.measure_zero_or_one_of_measurableSet_limsup_atBot (h_le : ∀ n, 
 sub-σ-algebras has probability 0 or 1. -/
 theorem measure_zero_or_one_of_measurableSet_limsup_atBot
     (h_le : ∀ n, s n ≤ m0) (h_indep : iIndep s μ) {t : Set Ω}
-    (ht_tail : MeasurableSet[limsup s atBot] t) :
+    (ht_tail : t ∈ limsup s atBot) :
     μ t = 0 ∨ μ t = 1 := by
   simpa only [ae_dirac_eq, Filter.eventually_pure]
     using! Kernel.measure_zero_or_one_of_measurableSet_limsup_atBot h_le h_indep ht_tail
@@ -354,7 +354,7 @@ theorem measure_zero_or_one_of_measurableSet_limsup_atBot
 conditionally independent sequence of sub-σ-algebras has conditional probability 0 or 1. -/
 theorem condExp_zero_or_one_of_measurableSet_limsup_atBot [StandardBorelSpace Ω]
     (hm : m ≤ m0) [IsFiniteMeasure μ] (h_le : ∀ n, s n ≤ m0)
-    (h_indep : iCondIndep m hm s μ) {t : Set Ω} (ht_tail : MeasurableSet[limsup s atBot] t) :
+    (h_indep : iCondIndep m hm s μ) {t : Set Ω} (ht_tail : t ∈ limsup s atBot) :
     ∀ᵐ ω ∂μ, (μ⟦t | m⟧) ω = 0 ∨ (μ⟦t | m⟧) ω = 1 :=
   condExp_eq_zero_or_one_of_condIndepSet_self hm ((limsup_le_iSup.trans (iSup_le h_le)) ht_tail)
     ((condIndep_limsup_atBot_self hm h_le h_indep).condIndepSet_of_measurableSet ht_tail ht_tail)

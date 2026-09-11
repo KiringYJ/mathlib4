@@ -329,8 +329,8 @@ theorem Lp.ae_eq_of_forall_setIntegral_eq (f g : Lp E p μ) (hp_ne_zero : p ≠ 
     (Lp.finStronglyMeasurable _ hp_ne_zero hp_ne_top).aefinStronglyMeasurable
 
 theorem ae_eq_zero_of_forall_setIntegral_eq_of_finStronglyMeasurable_trim (hm : m ≤ m0) {f : α → E}
-    (hf_int_finite : ∀ s, MeasurableSet[m] s → μ s < ∞ → IntegrableOn f s μ)
-    (hf_zero : ∀ s : Set α, MeasurableSet[m] s → μ s < ∞ → ∫ x in s, f x ∂μ = 0)
+    (hf_int_finite : ∀ s, s ∈ m → μ s < ∞ → IntegrableOn f s μ)
+    (hf_zero : ∀ s : Set α, s ∈ m → μ s < ∞ → ∫ x in s, f x ∂μ = 0)
     (hf : FinStronglyMeasurable f (μ.trim hm)) : f =ᵐ[μ] 0 := by
   obtain ⟨t, ht_meas, htf_zero, htμ⟩ := hf.exists_set_sigmaFinite
   have : SigmaFinite ((μ.restrict t).trim hm) := by rwa [restrict_trim hm μ ht_meas] at htμ
@@ -346,15 +346,15 @@ theorem ae_eq_zero_of_forall_setIntegral_eq_of_finStronglyMeasurable_trim (hm : 
     unfold IntegrableOn
     rw [restrict_trim hm (μ.restrict t) hs, Measure.restrict_restrict (hm hs)]
     rw [← restrict_trim hm μ ht_meas, Measure.restrict_apply hs,
-      trim_measurableSet_eq hm (hs.inter ht_meas)] at hμs
+      trim_measurableSet_eq hm (m.inter_mem hs ht_meas)] at hμs
     refine Integrable.trim hm ?_ hf_meas_m
-    exact hf_int_finite _ (hs.inter ht_meas) hμs
+    exact hf_int_finite _ (m.inter_mem hs ht_meas) hμs
   · intro s hs hμs
     rw [restrict_trim hm (μ.restrict t) hs, Measure.restrict_restrict (hm hs)]
     rw [← restrict_trim hm μ ht_meas, Measure.restrict_apply hs,
-      trim_measurableSet_eq hm (hs.inter ht_meas)] at hμs
+      trim_measurableSet_eq hm (m.inter_mem hs ht_meas)] at hμs
     rw [← integral_trim hm hf_meas_m]
-    exact hf_zero _ (hs.inter ht_meas) hμs
+    exact hf_zero _ (m.inter_mem hs ht_meas) hμs
 
 theorem Integrable.ae_eq_zero_of_forall_setIntegral_eq_zero {f : α → E} (hf : Integrable f μ)
     (hf_zero : ∀ s, MeasurableSet s → μ s < ∞ → ∫ x in s, f x ∂μ = 0) : f =ᵐ[μ] 0 :=

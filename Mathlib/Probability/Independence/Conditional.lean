@@ -821,7 +821,7 @@ theorem condIndepFun_iff_map_prod_eq_prod_condDistrib_prod_condDistrib
         (Kernel.id ×ₖ (condDistrib f k μ ×ₖ condDistrib g k μ)) ∘ₘ μ.map k := by
   rw [condIndepFun_iff_map_prod_eq_prod_comp_trim hf hg]
   simp_rw [Measure.ext_prod₃_iff]
-  have hk_meas {s : Set γ} (hs : MeasurableSet s) : MeasurableSet[mγ.comap k] (k ⁻¹' s) :=
+  have hk_meas {s : Set γ} (hs : MeasurableSet s) : k ⁻¹' s ∈ mγ.comap k :=
     ⟨s, hs, rfl⟩
   have h_left {s : Set γ} {t : Set β} {u : Set β'} (hs : MeasurableSet s) (ht : MeasurableSet t)
       (hu : MeasurableSet u) :
@@ -829,7 +829,7 @@ theorem condIndepFun_iff_map_prod_eq_prod_condDistrib_prod_condDistrib
         (@Measure.map _ _ _ ((mγ.comap k).prod inferInstance)
           (fun ω ↦ (ω, f ω, g ω)) μ) ((k ⁻¹' s) ×ˢ t ×ˢ u) := by
     rw [Measure.map_apply (by fun_prop) (hs.prod (ht.prod hu)),
-      Measure.map_apply _ ((hk_meas hs).prod (ht.prod hu))]
+      Measure.map_apply _ ((measurableSet_iff_mem.mpr (hk_meas hs)).prod (ht.prod hu))]
     · simp [Set.mk_preimage_prod]
     · exact (measurable_id.mono le_rfl hk.comap_le).prodMk (by fun_prop)
   have h_right {s : Set γ} {t : Set β} {u : Set β'} (hs : MeasurableSet s) (ht : MeasurableSet t)
@@ -838,11 +838,13 @@ theorem condIndepFun_iff_map_prod_eq_prod_condDistrib_prod_condDistrib
         ((Kernel.id ×ₖ
           ((condExpKernel μ (mγ.comap k)).map f ×ₖ (condExpKernel μ (mγ.comap k)).map g)) ∘ₘ
         μ.trim hk.comap_le) ((k ⁻¹' s) ×ˢ t ×ˢ u) := by
-    rw [Measure.bind_apply ((hk_meas hs).prod (ht.prod hu)) (by fun_prop),
+    rw [Measure.bind_apply
+        ((measurableSet_iff_mem.mpr (hk_meas hs)).prod (ht.prod hu)) (by fun_prop),
       Measure.bind_apply (hs.prod (ht.prod hu)) (by fun_prop), lintegral_map ?_ (by fun_prop),
       lintegral_trim]
     rotate_left
-    · exact Kernel.measurable_coe _ ((hk_meas hs).prod (ht.prod hu))
+    · exact Kernel.measurable_coe _
+        ((measurableSet_iff_mem.mpr (hk_meas hs)).prod (ht.prod hu))
     · exact Kernel.measurable_coe _ (hs.prod (ht.prod hu))
     refine lintegral_congr_ae ?_
     filter_upwards [condDistrib_apply_ae_eq_condExpKernel_map hf hk ht,

@@ -488,14 +488,14 @@ theorem lintegral_trim_ae {μ : Measure α} (hm : m ≤ m0) {f : α → ℝ≥0�
     lintegral_trim hm hf.measurable_mk]
 
 theorem setLIntegral_trim_ae {μ : Measure α} (hm : m ≤ m0) {f : α → ℝ≥0∞}
-    (hf : AEMeasurable f (μ.trim hm)) {s : Set α} (hs : MeasurableSet[m] s) :
+    (hf : AEMeasurable f (μ.trim hm)) {s : Set α} (hs : s ∈ m) :
     ∫⁻ x in s, f x ∂μ.trim hm = ∫⁻ x in s, f x ∂μ := by
   rw [← lintegral_trim_ae hm]
   all_goals rw [← restrict_trim hm _ hs]
   exact hf.restrict
 
 theorem setLIntegral_trim {μ : Measure α} (hm : m ≤ m0) {f : α → ℝ≥0∞}
-    (hf : Measurable[m] f) {s : Set α} (hs : MeasurableSet[m] s) :
+    (hf : Measurable[m] f) {s : Set α} (hs : s ∈ m) :
     ∫⁻ x in s, f x ∂μ.trim hm = ∫⁻ x in s, f x ∂μ :=
   setLIntegral_trim_ae _ hf.aemeasurable hs
 

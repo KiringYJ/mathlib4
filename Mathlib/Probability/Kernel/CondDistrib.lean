@@ -304,7 +304,7 @@ theorem setLIntegral_preimage_condDistrib (hX : Measurable X) (hY : AEMeasurable
     Measure.map_apply_of_aemeasurable (hX.aemeasurable.prodMk hY) (ht.prod hs), mk_preimage_prod]
 
 theorem setLIntegral_condDistrib_of_measurableSet (hX : Measurable X) (hY : AEMeasurable Y μ)
-    (hs : MeasurableSet s) {t : Set α} (ht : MeasurableSet[mβ.comap X] t) :
+    (hs : MeasurableSet s) {t : Set α} (ht : t ∈ mβ.comap X) :
     ∫⁻ a in t, condDistrib Y X μ (X a) s ∂μ = μ (t ∩ Y ⁻¹' s) := by
   obtain ⟨t', ht', rfl⟩ := ht
   rw [setLIntegral_preimage_condDistrib hX hY hs ht']

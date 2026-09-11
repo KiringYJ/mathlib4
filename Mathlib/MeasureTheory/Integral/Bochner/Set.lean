@@ -658,7 +658,7 @@ theorem setIntegral_gt_gt {R : ℝ} {f : X → ℝ} (hR : 0 ≤ R)
   · exact Integrable.sub hfint this
 
 theorem setIntegral_trim {X} {m m0 : SigmaAlgebra X} {μ : Measure X} (hm : m ≤ m0) {f : X → E}
-    (hf_meas : StronglyMeasurable[m] f) {s : Set X} (hs : MeasurableSet[m] s) :
+    (hf_meas : StronglyMeasurable[m] f) {s : Set X} (hs : s ∈ m) :
     ∫ x in s, f x ∂μ = ∫ x in s, f x ∂μ.trim hm := by
   rwa [integral_trim hm hf_meas, restrict_trim hm μ]
 

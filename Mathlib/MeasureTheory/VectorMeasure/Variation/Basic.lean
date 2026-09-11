@@ -39,12 +39,13 @@ open scoped ENNReal NNReal
 
 namespace MeasureTheory.VectorMeasure
 
-variable {X V : Type*} {mX : SigmaAlgebra X}
+variable {X V : Type*} {𝓐 : SigmaAlgebra X}
 
-/-- The sum of a vector measure `μ` on a `Finpartition` of `Subtype MeasurableSet` equals `μ s`. -/
+/-- The sum of a vector measure `μ` on a finite partition of the measurable set `s` equals
+`μ s`. -/
 lemma sum_finpartition [AddCommMonoid V] [TopologicalSpace V] [T2Space V]
     (μ : VectorMeasure X V) {s : Set X} {hs : MeasurableSet s}
-    (P : Finpartition (⟨s, hs⟩ : Subtype MeasurableSet)) : ∑ p ∈ P.parts, μ p.val = μ s := by
+    (P : Finpartition (⟨s, hs⟩ : 𝓐)) : ∑ p ∈ P.parts, μ p.val = μ s := by
   rw [← μ.of_biUnion_finset (P.pairwiseDisjoint_apply (fun _ _ => rfl) rfl) (fun p _ => p.prop),
       ← Finset.sup_set_eq_biUnion, P.sup_parts_apply (fun _ _ => rfl) rfl]
 
@@ -91,7 +92,7 @@ lemma exists_lt_sum_of_lt_variation (μ : VectorMeasure X V) {s : Set X} (hs : M
       (∀ t ∈ P, MeasurableSet t) ∧ a < ∑ p ∈ P, ‖μ p‖ₑ := by
   simp only [variation_apply, preVariation, ennrealToMeasure_apply hs, ennrealPreVariation_apply]
     at ha ⊢
-  obtain ⟨P, hP⟩ : ∃ P : Finpartition (⟨s, hs⟩ : Subtype MeasurableSet),
+  obtain ⟨P, hP⟩ : ∃ P : Finpartition (⟨s, hs⟩ : 𝓐),
       a < ∑ p ∈ P.parts, (fun x ↦ ‖μ x‖ₑ) p :=
     preVariation.exists_Finpartition_sum_gt (‖μ ·‖ₑ) _ ha
   refine ⟨P.parts.map (Function.Embedding.subtype _), ?_, ?_, ?_, ?_⟩
@@ -104,9 +105,11 @@ lemma exists_lt_sum_of_lt_variation (μ : VectorMeasure X V) {s : Set X} (hs : M
       Subtype.exists, exists_and_right, exists_eq_right] at hi hj
     rcases hi with ⟨h'i, i_mem⟩
     rcases hj with ⟨h'j, j_mem⟩
-    exact (disjoint_subtype_iff (fun _ _ hs ht ↦ hs.inter ht) _).1
+    exact (disjoint_subtype_iff (fun _ _ hs ht ↦ 𝓐.inter_mem hs ht) _).1
       (P.disjoint i_mem j_mem (by simpa using hij))
-  · simp +contextual
+  · intro t ht
+    obtain ⟨u, _, rfl⟩ := Finset.mem_map.mp ht
+    exact measurableSet_iff_mem.mpr u.property
   · rwa [Finset.sum_map]
 
 /-- Measure version of `preVariation.exists_Finpartition_sum_ge'`. -/
@@ -116,7 +119,7 @@ lemma exists_variation_le_add' (μ : VectorMeasure X V) {s : Set X} (hs : Measur
       (∀ t ∈ P, MeasurableSet t) ∧ μ.variation s ≤ ∑ p ∈ P, ‖μ p‖ₑ + ε := by
   simp only [variation_apply, preVariation, ennrealToMeasure_apply hs, ennrealPreVariation_apply]
     at hμ ⊢
-  obtain ⟨P, hP⟩ : ∃ P : Finpartition (⟨s, hs⟩ : Subtype MeasurableSet),
+  obtain ⟨P, hP⟩ : ∃ P : Finpartition (⟨s, hs⟩ : 𝓐),
       preVariationFun (fun x ↦ ‖μ x‖ₑ) s ≤ ∑ p ∈ P.parts, (fun x ↦ ‖μ x‖ₑ) ↑p + ε :=
     preVariation.exists_Finpartition_sum_ge' (‖μ ·‖ₑ) hs hε hμ
   refine ⟨P.parts.map (Function.Embedding.subtype _), ?_, ?_, ?_, ?_⟩
@@ -129,9 +132,11 @@ lemma exists_variation_le_add' (μ : VectorMeasure X V) {s : Set X} (hs : Measur
       Subtype.exists, exists_and_right, exists_eq_right] at hi hj
     rcases hi with ⟨h'i, i_mem⟩
     rcases hj with ⟨h'j, j_mem⟩
-    exact (disjoint_subtype_iff (fun _ _ hs ht ↦ hs.inter ht) _).1
+    exact (disjoint_subtype_iff (fun _ _ hs ht ↦ 𝓐.inter_mem hs ht) _).1
       (P.disjoint i_mem j_mem (by simpa using hij))
-  · simp +contextual
+  · intro t ht
+    obtain ⟨u, _, rfl⟩ := Finset.mem_map.mp ht
+    exact measurableSet_iff_mem.mpr u.property
   · rwa [Finset.sum_map]
 
 /-- Measure version of `preVariation.exists_Finpartition_sum_ge`. -/
@@ -145,8 +150,11 @@ theorem enorm_measure_le_variation (μ : VectorMeasure X V) (E : Set X) :
     ‖μ E‖ₑ ≤ variation μ E := by
   by_cases hE : MeasurableSet E
   swap; · simp [hE]
-  by_cases hE' : (⟨E, hE⟩ : Subtype MeasurableSet) = ⊥
-  · simp_all
+  by_cases hE' : (⟨E, hE⟩ : 𝓐) = ⊥
+  · have hE_empty : E = ∅ := by
+      simpa using congrArg (fun A : 𝓐 ↦ (A : Set X)) hE'
+    subst E
+    simp
   simp only [variation_apply, preVariation, ennrealToMeasure_apply hE, ennrealPreVariation_apply]
   grw [← preVariation.sum_le _ _ (Finpartition.indiscrete hE')]
   simp
@@ -423,11 +431,11 @@ section ENNReal
 
 variable (μ : VectorMeasure X ℝ≥0∞)
 
-/-- For `μ : VectorMeasure X ℝ≥0∞` and measurable `s`, the supremum over Finpartitions of
-`⟨s, hs⟩ : Subtype MeasurableSet` of the sum of `μ` over parts equals `μ s`. -/
+/-- For `μ : VectorMeasure X ℝ≥0∞` and measurable `s`, the supremum over finite partitions of
+`⟨s, hs⟩ : 𝓐` of the sum of `μ` over parts equals `μ s`. -/
 @[simp]
 lemma iSup_sum_finpartition_parts {s : Set X} (hs : MeasurableSet s) :
-    ⨆ (P : Finpartition (⟨s, hs⟩ : Subtype MeasurableSet)), ∑ p ∈ P.parts, μ p.val = μ s := by
+    ⨆ (P : Finpartition (⟨s, hs⟩ : 𝓐)), ∑ p ∈ P.parts, μ p.val = μ s := by
   simp_rw [μ.sum_finpartition, iSup_const]
 
 /-- For `μ : VectorMeasure X ℝ≥0∞`, `preVariationFun μ s = μ s` for any `s`. -/

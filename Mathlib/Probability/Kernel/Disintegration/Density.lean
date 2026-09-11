@@ -246,7 +246,7 @@ lemma setIntegral_densityProcess (hκν : fst κ ≤ ν) [IsFiniteKernel ν]
     (hA : A ∈ countableFiltration γ n) :
     ∫ x in A, densityProcess κ ν n a x s ∂(ν a) = (κ a).real (A ×ˢ s) := by
   have : IsFiniteKernel κ := isFiniteKernel_of_isFiniteKernel_fst (h := isFiniteKernel_of_le hκν)
-  obtain ⟨S, hS_subset, rfl⟩ := (measurableSet_generateFrom_countablePartition_iff _ _).mp hA
+  obtain ⟨S, hS_subset, rfl⟩ := (mem_generateFrom_countablePartition_iff _ _).mp hA
   simp_rw [sUnion_eq_iUnion]
   have h_disj : Pairwise (Disjoint on fun i : S ↦ (i : Set γ)) := by
     intro u v huv

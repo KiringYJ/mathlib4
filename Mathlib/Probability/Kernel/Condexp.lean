@@ -304,7 +304,7 @@ lemma condExp_generateFrom_singleton (hs : MeasurableSet s) {f : Ω → F} (hf :
       rw [integrableOn_const_iff]
       exact Or.inr <| measure_lt_top (μ.restrict s) t
     · rintro t ht -
-      obtain (h | h | h | h) := measurableSet_generateFrom_singleton_iff.1 ht
+      obtain (h | h | h | h) := mem_generateFrom_singleton_iff.1 ht
       · simp [h]
       · simp only [h, cond, integral_smul_measure, ENNReal.toReal_inv, integral_const,
         MeasurableSet.univ, measureReal_restrict_apply, univ_inter, measureReal_restrict_apply_self,

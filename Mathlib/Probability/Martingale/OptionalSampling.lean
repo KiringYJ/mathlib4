@@ -202,7 +202,8 @@ theorem stoppedValue_min_ae_eq_condExp [SigmaFiniteFiltration μ ℱ] (h : Marti
   · exact condExp_min_stopping_time_ae_eq_restrict_le hσ hτ
   · suffices μ[stoppedValue f τ | (hσ.min hτ).sigmaAlgebra] =ᵐ[μ.restrict {x | τ x ≤ σ x}]
         μ[stoppedValue f τ | hσ.sigmaAlgebra] by
-      rw [ae_restrict_iff' (hσ.sigmaAlgebra_le (hσ.measurableSet_le_stopping_time hτ).compl)]
+      rw [ae_restrict_iff' (hσ.sigmaAlgebra_le
+        (hσ.sigmaAlgebra.compl_mem (hσ.measurableSet_le_stopping_time hτ)))]
       rw [Filter.EventuallyEq, ae_restrict_iff'] at this
       swap; · exact hτ.sigmaAlgebra_le (hτ.measurableSet_le_stopping_time hσ)
       filter_upwards [this] with x hx hx_mem

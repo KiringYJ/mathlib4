@@ -111,8 +111,8 @@ theorem mem_lpMeas_self {m0 : SigmaAlgebra α} (μ : Measure α) (f : Lp F p μ)
   mem_lpMeas_iff_aestronglyMeasurable.mpr (Lp.aestronglyMeasurable f)
 
 theorem mem_lpMeas_indicatorConstLp {m m0 : SigmaAlgebra α} (hm : m ≤ m0) {μ : Measure α}
-    {s : Set α} (hs : MeasurableSet[m] s) (hμs : μ s ≠ ∞) {c : F} :
-    indicatorConstLp p (measurableSet_iff_mem.mpr (hm (measurableSet_iff_mem.mp hs))) hμs c ∈
+    {s : Set α} (hs : s ∈ m) (hμs : μ s ≠ ∞) {c : F} :
+    indicatorConstLp p (measurableSet_iff_mem.mpr (hm hs)) hμs c ∈
       lpMeas F 𝕜 m p μ :=
   ⟨s.indicator fun _ : α => c, (@stronglyMeasurable_const _ _ m _ _).indicator hs,
     indicatorConstLp_coeFn⟩
@@ -329,13 +329,15 @@ theorem lpMeas.ae_fin_strongly_measurable' (hm : m ≤ m0) (f : lpMeas F 𝕜 m 
 the sub-sigma algebra and returns its version in the larger Lp space) to an indicator of the
 sub-sigma-algebra, we obtain an indicator in the Lp space of the larger sigma-algebra. -/
 theorem lpMeasToLpTrimLie_symm_indicator [one_le_p : Fact (1 ≤ p)] [NormedSpace ℝ F] {hm : m ≤ m0}
-    {s : Set α} {μ : Measure α} (hs : MeasurableSet[m] s) (hμs : μ.trim hm s ≠ ∞) (c : F) :
-    ((lpMeasToLpTrimLie F ℝ p μ hm).symm (indicatorConstLp p hs hμs c) : Lp F p μ) =
-      indicatorConstLp p (measurableSet_iff_mem.mpr (hm (measurableSet_iff_mem.mp hs)))
+    {s : Set α} {μ : Measure α} (hs : s ∈ m) (hμs : μ.trim hm s ≠ ∞) (c : F) :
+    ((lpMeasToLpTrimLie F ℝ p μ hm).symm
+      (indicatorConstLp p (measurableSet_iff_mem.mpr hs) hμs c) : Lp F p μ) =
+      indicatorConstLp p (measurableSet_iff_mem.mpr (hm hs))
         ((le_trim hm).trans_lt hμs.lt_top).ne c := by
   ext1
   change
-    lpTrimToLpMeas F ℝ p μ hm (indicatorConstLp p hs hμs c) =ᵐ[μ]
+    lpTrimToLpMeas F ℝ p μ hm
+      (indicatorConstLp p (measurableSet_iff_mem.mpr hs) hμs c) =ᵐ[μ]
       (indicatorConstLp p _ _ c : α → F)
   grw [lpTrimToLpMeas_ae_eq, ae_eq_of_ae_eq_trim indicatorConstLp_coeFn, indicatorConstLp_coeFn]
 
@@ -358,9 +360,9 @@ variable {m m0 : SigmaAlgebra α} {μ : Measure α} [Fact (1 ≤ p)] [NormedSpac
 /-- Auxiliary lemma for `Lp.induction_stronglyMeasurable`. -/
 @[elab_as_elim]
 theorem Lp.induction_stronglyMeasurable_aux (hm : m ≤ m0) (hp_ne_top : p ≠ ∞) (P : Lp F p μ → Prop)
-    (h_ind : ∀ (c : F) {s : Set α} (hs : MeasurableSet[m] s) (hμs : μ s < ∞),
+    (h_ind : ∀ (c : F) {s : Set α} (hs : s ∈ m) (hμs : μ s < ∞),
       P (Lp.simpleFunc.indicatorConst p
-        (measurableSet_iff_mem.mpr (hm (measurableSet_iff_mem.mp hs))) hμs.ne c))
+        (measurableSet_iff_mem.mpr (hm hs)) hμs.ne c))
     (h_add : ∀ ⦃f g⦄, ∀ hf : MemLp f p μ, ∀ hg : MemLp g p μ, AEStronglyMeasurable[m] f μ →
       AEStronglyMeasurable[m] g μ → Disjoint (Function.support f) (Function.support g) →
         P (hf.toLp f) → P (hg.toLp g) → P (hf.toLp f + hg.toLp g))
@@ -405,9 +407,9 @@ sub-σ-algebra `m` in a normed space, it suffices to show that
 -/
 @[elab_as_elim]
 theorem Lp.induction_stronglyMeasurable (hm : m ≤ m0) (hp_ne_top : p ≠ ∞) (P : Lp F p μ → Prop)
-    (h_ind : ∀ (c : F) {s : Set α} (hs : MeasurableSet[m] s) (hμs : μ s < ∞),
+    (h_ind : ∀ (c : F) {s : Set α} (hs : s ∈ m) (hμs : μ s < ∞),
       P (Lp.simpleFunc.indicatorConst p
-        (measurableSet_iff_mem.mpr (hm (measurableSet_iff_mem.mp hs))) hμs.ne c))
+        (measurableSet_iff_mem.mpr (hm hs)) hμs.ne c))
     (h_add : ∀ ⦃f g⦄, ∀ hf : MemLp f p μ, ∀ hg : MemLp g p μ, StronglyMeasurable[m] f →
       StronglyMeasurable[m] g → Disjoint (Function.support f) (Function.support g) →
         P (hf.toLp f) → P (hg.toLp g) → P (hf.toLp f + hg.toLp g))
@@ -421,10 +423,10 @@ theorem Lp.induction_stronglyMeasurable (hm : m ≤ m0) (hp_ne_top : p ≠ ∞) 
     Lp.induction_stronglyMeasurable_aux hm hp_ne_top _ h_ind h_add_ae h_closed f hf
   intro f g hf hg hfm hgm h_disj hPf hPg
   let s_f : Set α := Function.support (hfm.mk f)
-  have hs_f : MeasurableSet[m] s_f := hfm.stronglyMeasurable_mk.measurableSet_support
+  have hs_f : s_f ∈ m := hfm.stronglyMeasurable_mk.measurableSet_support
   have hs_f_eq : s_f =ᵐ[μ] Function.support f := hfm.ae_eq_mk.symm.support
   let s_g : Set α := Function.support (hgm.mk g)
-  have hs_g : MeasurableSet[m] s_g := hgm.stronglyMeasurable_mk.measurableSet_support
+  have hs_g : s_g ∈ m := hgm.stronglyMeasurable_mk.measurableSet_support
   have hs_g_eq : s_g =ᵐ[μ] Function.support g := hgm.ae_eq_mk.symm.support
   have h_inter_empty : s_f ∩ s_g =ᵐ[μ] ∅ := by
     refine (hs_f_eq.inter hs_g_eq).trans ?_
@@ -439,7 +441,8 @@ theorem Lp.induction_stronglyMeasurable (hm : m ≤ m0) (hp_ne_top : p ≠ ∞) 
     refine ((indicator_ae_eq_of_ae_eq_set this).trans ?_).symm
     rw [Set.indicator_support]
     exact hfm.ae_eq_mk.symm
-  have hf'_meas : StronglyMeasurable[m] f' := hfm.stronglyMeasurable_mk.indicator (hs_f.diff hs_g)
+  have hf'_meas : StronglyMeasurable[m] f' :=
+    hfm.stronglyMeasurable_mk.indicator (m.diff_mem hs_f hs_g)
   have hf'_Lp : MemLp f' p μ := hf.ae_eq hff'
   let g' := (s_g \ s_f).indicator (hgm.mk g)
   have hgg' : g =ᵐ[μ] g' := by
@@ -450,7 +453,8 @@ theorem Lp.induction_stronglyMeasurable (hm : m ≤ m0) (hp_ne_top : p ≠ ∞) 
     refine ((indicator_ae_eq_of_ae_eq_set this).trans ?_).symm
     rw [Set.indicator_support]
     exact hgm.ae_eq_mk.symm
-  have hg'_meas : StronglyMeasurable[m] g' := hgm.stronglyMeasurable_mk.indicator (hs_g.diff hs_f)
+  have hg'_meas : StronglyMeasurable[m] g' :=
+    hgm.stronglyMeasurable_mk.indicator (m.diff_mem hs_g hs_f)
   have hg'_Lp : MemLp g' p μ := hg.ae_eq hgg'
   have h_disj : Disjoint (Function.support f') (Function.support g') :=
     haveI : Disjoint (s_f \ s_g) (s_g \ s_f) := disjoint_sdiff_sdiff
@@ -469,7 +473,7 @@ to a sub-σ-algebra `m` in a normed space, it suffices to show that
 -/
 @[elab_as_elim]
 theorem MemLp.induction_stronglyMeasurable (hm : m ≤ m0) (hp_ne_top : p ≠ ∞) (P : (α → F) → Prop)
-    (h_ind : ∀ (c : F) ⦃s⦄, MeasurableSet[m] s → μ s < ∞ → P (s.indicator fun _ => c))
+    (h_ind : ∀ (c : F) ⦃s⦄, s ∈ m → μ s < ∞ → P (s.indicator fun _ => c))
     (h_add : ∀ ⦃f g : α → F⦄, Disjoint (Function.support f) (Function.support g) →
       MemLp f p μ → MemLp g p μ → StronglyMeasurable[m] f → StronglyMeasurable[m] g →
         P f → P g → P (f + g))
@@ -486,7 +490,7 @@ theorem MemLp.induction_stronglyMeasurable (hm : m ≤ m0) (hp_ne_top : p ≠ �
     rw [Lp.simpleFunc.coe_indicatorConst]
     refine h_ae indicatorConstLp_coeFn.symm ?_ (h_ind c hs hμs)
     exact memLp_indicator_const p
-      (measurableSet_iff_mem.mpr (hm (measurableSet_iff_mem.mp hs))) c (Or.inr hμs.ne)
+      (measurableSet_iff_mem.mpr (hm hs)) c (Or.inr hμs.ne)
   · intro f g hf_mem hg_mem hfm hgm h_disj hfP hgP
     have hfP' : P f := h_ae hf_mem.coeFn_toLp (Lp.memLp _) hfP
     have hgP' : P g := h_ae hg_mem.coeFn_toLp (Lp.memLp _) hgP

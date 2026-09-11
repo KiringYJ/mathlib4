@@ -98,7 +98,7 @@ lemma integrable_condVar : Integrable Var[X; μ | m] μ := integrable_condExp
 /-- The integral of the conditional variance `Var[X | m]` over an `m`-measurable set is equal to
 the integral of `(X - μ[X | m]) ^ 2` on that set. -/
 lemma setIntegral_condVar [SigmaFinite (μ.trim hm)] (hX : Integrable ((X - μ[X | m]) ^ 2) μ)
-    (hs : MeasurableSet[m] s) :
+    (hs : s ∈ m) :
     ∫ ω in s, (Var[X; μ | m]) ω ∂μ = ∫ ω in s, (X ω - (μ[X | m]) ω) ^ 2 ∂μ :=
   setIntegral_condExp _ hX hs
 

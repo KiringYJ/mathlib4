@@ -134,7 +134,7 @@ variable (hm : mΩ ≤ mΩ₀)
 /-- The (Lebesgue) integral of the conditional (Lebesgue) expectation `P⁻[X|mΩ]` over an
 `mΩ`-measurable set is equal to the integral of `X` on that set. -/
 theorem setLIntegral_condLExp (P : Measure[mΩ₀] Ω) [hσ : SigmaFinite (P.trim hm)]
-    (X : Ω → ℝ≥0∞) {s : Set Ω} (hs : MeasurableSet[mΩ] s) :
+    (X : Ω → ℝ≥0∞) {s : Set Ω} (hs : s ∈ mΩ) :
     ∫⁻ ω in s, P⁻[X|mΩ] ω ∂P = ∫⁻ ω in s, X ω ∂P := by
   by_cases hX : Measurable[mΩ] X
   · simp [condLExp_eq_self hm _ hX]
@@ -145,13 +145,14 @@ theorem setLIntegral_condLExp (P : Measure[mΩ₀] Ω) [hσ : SigmaFinite (P.tri
     trim_measurableSet_eq hm hs, withDensity_apply _ (hm hs)]
 
 theorem setLIntegral_condLExp_trim (P : Measure[mΩ₀] Ω) [hσ : SigmaFinite (P.trim hm)]
-    (X : Ω → ℝ≥0∞) {s : Set Ω} (hs : MeasurableSet[mΩ] s) :
+    (X : Ω → ℝ≥0∞) {s : Set Ω} (hs : s ∈ mΩ) :
     ∫⁻ ω in s, P⁻[X|mΩ] ω ∂P.trim hm = ∫⁻ ω in s, X ω ∂P := by
   rw [setLIntegral_trim hm (measurable_condLExp _ _ _) hs, setLIntegral_condLExp _ _ _ hs]
 
 theorem lintegral_condLExp (P : Measure[mΩ₀] Ω) [hσ : SigmaFinite (P.trim hm)] (X : Ω → ℝ≥0∞) :
     ∫⁻ ω, P⁻[X|mΩ] ω ∂P = ∫⁻ ω, X ω ∂P := by
-  simpa [← setLIntegral_univ] using setLIntegral_condLExp _ _ _ .univ
+  simpa [← setLIntegral_univ] using
+    setLIntegral_condLExp (mΩ := mΩ) (mΩ₀ := mΩ₀) hm P X mΩ.univ_mem
 
 lemma condLExp_lt_top {f : Ω → ℝ≥0∞} (hf : ∫⁻ x, f x ∂P ≠ ∞) : ∀ᵐ x ∂P, P⁻[f|mΩ] x < ∞ := by
   by_cases hm : mΩ ≤ mΩ₀
@@ -165,7 +166,7 @@ lemma condLExp_ne_top {f : Ω → ℝ≥0∞} (hf : ∫⁻ x, f x ∂P ≠ ∞) 
 
 theorem ae_eq_condLExp₀ {P : Measure[mΩ₀] Ω} [hσ : SigmaFinite (P.trim hm)]
     (X : Ω → ℝ≥0∞) (hY : AEMeasurable[mΩ] Y (P.trim hm))
-    (hXY : ∀ s, MeasurableSet[mΩ] s → ∫⁻ ω in s, Y ω ∂P = ∫⁻ ω in s, X ω ∂P) :
+    (hXY : ∀ s, s ∈ mΩ → ∫⁻ ω in s, Y ω ∂P = ∫⁻ ω in s, X ω ∂P) :
     Y =ᵐ[P] P⁻[X|mΩ] := by
   apply ae_eq_of_ae_eq_trim
   apply ae_eq_of_forall_setLIntegral_eq_of_sigmaFinite₀ hY (by fun_prop)
@@ -177,7 +178,7 @@ theorem ae_eq_condLExp₀ {P : Measure[mΩ₀] Ω} [hσ : SigmaFinite (P.trim hm
 function up to `P`-ae equality by its (Lebesgue) integral over all `mΩ`-measurable sets. -/
 theorem ae_eq_condLExp (P : Measure[mΩ₀] Ω) [hσ : SigmaFinite (P.trim hm)]
     (X : Ω → ℝ≥0∞) (hY : Measurable[mΩ] Y)
-    (hXY : ∀ s, MeasurableSet[mΩ] s → ∫⁻ ω in s, Y ω ∂P = ∫⁻ ω in s, X ω ∂P) :
+    (hXY : ∀ s, s ∈ mΩ → ∫⁻ ω in s, Y ω ∂P = ∫⁻ ω in s, X ω ∂P) :
     Y =ᵐ[P] P⁻[X|mΩ] := ae_eq_condLExp₀ _ _ hY.aemeasurable hXY
 
 theorem condLExp_const (P : Measure[mΩ₀] Ω) [hσ : SigmaFinite (P.trim hm)] (c : ℝ≥0∞) :

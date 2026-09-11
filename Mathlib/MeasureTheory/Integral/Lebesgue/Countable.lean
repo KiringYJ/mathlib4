@@ -249,13 +249,13 @@ variable {m m0 : SigmaAlgebra α}
 local infixr:25 " →ₛ " => SimpleFunc
 
 theorem univ_le_of_forall_fin_meas_le {μ : Measure α} (hm : m ≤ m0) [SigmaFinite (μ.trim hm)]
-    (C : ℝ≥0∞) {f : Set α → ℝ≥0∞} (hf : ∀ s, MeasurableSet[m] s → μ s ≠ ∞ → f s ≤ C)
+    (C : ℝ≥0∞) {f : Set α → ℝ≥0∞} (hf : ∀ s, s ∈ m → μ s ≠ ∞ → f s ≤ C)
     (h_F_lim :
-      ∀ S : ℕ → Set α, (∀ n, MeasurableSet[m] (S n)) → Monotone S → f (⋃ n, S n) ≤ ⨆ n, f (S n)) :
+      ∀ S : ℕ → Set α, (∀ n, S n ∈ m) → Monotone S → f (⋃ n, S n) ≤ ⨆ n, f (S n)) :
     f univ ≤ C := by
   let S := @spanningSets _ m (μ.trim hm) _
   have hS_mono : Monotone S := @monotone_spanningSets _ m (μ.trim hm) _
-  have hS_meas : ∀ n, MeasurableSet[m] (S n) := @measurableSet_spanningSets _ m (μ.trim hm) _
+  have hS_meas : ∀ n, S n ∈ m := @measurableSet_spanningSets _ m (μ.trim hm) _
   rw [← @iUnion_spanningSets _ m (μ.trim hm)]
   refine (h_F_lim S hS_meas hS_mono).trans ?_
   refine iSup_le fun n => hf (S n) (hS_meas n) ?_
@@ -266,7 +266,7 @@ measure in a sub-σ-algebra and the measure is σ-finite on that sub-σ-algebra,
 over the whole space is bounded by that same constant. -/
 theorem lintegral_le_of_forall_fin_meas_trim_le {μ : Measure α} (hm : m ≤ m0)
     [SigmaFinite (μ.trim hm)] (C : ℝ≥0∞) {f : α → ℝ≥0∞}
-    (hf : ∀ s, MeasurableSet[m] s → μ s ≠ ∞ → ∫⁻ x in s, f x ∂μ ≤ C) : ∫⁻ x, f x ∂μ ≤ C := by
+    (hf : ∀ s, s ∈ m → μ s ≠ ∞ → ∫⁻ x in s, f x ∂μ ≤ C) : ∫⁻ x, f x ∂μ ≤ C := by
   have : ∫⁻ x in univ, f x ∂μ = ∫⁻ x, f x ∂μ := by simp only [Measure.restrict_univ]
   rw [← this]
   refine univ_le_of_forall_fin_meas_le hm C hf fun S _ hS_mono => ?_

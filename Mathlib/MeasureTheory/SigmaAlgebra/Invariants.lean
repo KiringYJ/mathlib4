@@ -42,8 +42,8 @@ variable [SigmaAlgebra α]
 
 /-- A set `s` is `(invariants f)`-measurable
 iff it is measurable w.r.t. the canonical σ-algebra on `α` and `f ⁻¹' s = s`. -/
-theorem measurableSet_invariants {f : α → α} {s : Set α} :
-    MeasurableSet[invariants f] s ↔ MeasurableSet s ∧ f ⁻¹' s = s := by
+theorem mem_invariants_iff {f : α → α} {s : Set α} :
+    s ∈ invariants f ↔ MeasurableSet s ∧ f ⁻¹' s = s := by
   change (s ∈ (inferInstance : SigmaAlgebra α) ∧ f ⁻¹' s = s) ↔
     s ∈ (inferInstance : SigmaAlgebra α) ∧ f ⁻¹' s = s
   rfl
