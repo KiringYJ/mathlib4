@@ -333,7 +333,7 @@ theorem setFinite_inter [ProperSpace E] [Finite ι] {s : Set E} (hs : Bornology.
   exact AddSubgroup.isClosed_of_discreteTopology
 
 @[measurability]
-theorem fundamentalDomain_measurableSet [MeasurableSpace E] [OpensMeasurableSpace E] [Finite ι] :
+theorem fundamentalDomain_measurableSet [SigmaAlgebra E] [OpensSigmaAlgebra E] [Finite ι] :
     MeasurableSet (fundamentalDomain b) := by
   cases nonempty_fintype ι
   have : FiniteDimensional ℝ E := b.finiteDimensional_of_finite
@@ -347,7 +347,7 @@ theorem fundamentalDomain_measurableSet [MeasurableSpace E] [OpensMeasurableSpac
 
 /-- For a ℤ-lattice `Submodule.span ℤ (Set.range b)`, proves that the set defined
 by `ZSpan.fundamentalDomain` is a fundamental domain. -/
-protected theorem isAddFundamentalDomain [Finite ι] [MeasurableSpace E] [OpensMeasurableSpace E]
+protected theorem isAddFundamentalDomain [Finite ι] [SigmaAlgebra E] [OpensSigmaAlgebra E]
     (μ : Measure E) :
     IsAddFundamentalDomain (span ℤ (Set.range b)) (fundamentalDomain b) μ := by
   cases nonempty_fintype ι
@@ -355,18 +355,18 @@ protected theorem isAddFundamentalDomain [Finite ι] [MeasurableSpace E] [OpensM
     fun x => exist_unique_vadd_mem_fundamentalDomain b x
 
 /-- A version of `ZSpan.isAddFundamentalDomain` for `AddSubgroup`. -/
-protected theorem isAddFundamentalDomain' [Finite ι] [MeasurableSpace E] [OpensMeasurableSpace E]
+protected theorem isAddFundamentalDomain' [Finite ι] [SigmaAlgebra E] [OpensSigmaAlgebra E]
     (μ : Measure E) :
     IsAddFundamentalDomain (span ℤ (Set.range b)).toAddSubgroup (fundamentalDomain b) μ :=
   ZSpan.isAddFundamentalDomain b μ
 
-theorem measure_fundamentalDomain_ne_zero [Finite ι] [MeasurableSpace E] [BorelSpace E]
+theorem measure_fundamentalDomain_ne_zero [Finite ι] [SigmaAlgebra E] [BorelSpace E]
     {μ : Measure E} [Measure.IsAddHaarMeasure μ] :
     μ (fundamentalDomain b) ≠ 0 := by
   convert! (ZSpan.isAddFundamentalDomain b μ).measure_ne_zero (NeZero.ne μ)
   exact inferInstanceAs <| VAddInvariantMeasure (span ℤ (Set.range b)).toAddSubgroup E μ
 
-theorem measure_fundamentalDomain [Fintype ι] [DecidableEq ι] [MeasurableSpace E] (μ : Measure E)
+theorem measure_fundamentalDomain [Fintype ι] [DecidableEq ι] [SigmaAlgebra E] (μ : Measure E)
     [BorelSpace E] [Measure.IsAddHaarMeasure μ] (b₀ : Basis ι ℝ E) :
     μ (fundamentalDomain b) = ENNReal.ofReal |b₀.det b| * μ (fundamentalDomain b₀) := by
   have : FiniteDimensional ℝ E := b.finiteDimensional_of_finite
@@ -376,7 +376,7 @@ theorem measure_fundamentalDomain [Fintype ι] [DecidableEq ι] [MeasurableSpace
   · simp
 
 theorem measureReal_fundamentalDomain
-    [Fintype ι] [DecidableEq ι] [MeasurableSpace E] (μ : Measure E)
+    [Fintype ι] [DecidableEq ι] [SigmaAlgebra E] (μ : Measure E)
     [BorelSpace E] [Measure.IsAddHaarMeasure μ] (b₀ : Basis ι ℝ E) :
     μ.real (fundamentalDomain b) = |b₀.det b| * μ.real (fundamentalDomain b₀) := by
   simp [measureReal_def, measure_fundamentalDomain b μ b₀]
@@ -394,7 +394,7 @@ theorem volume_real_fundamentalDomain [Fintype ι] [DecidableEq ι] (b : Basis �
     volume.real (fundamentalDomain b) = |(Matrix.of b).det| := by
   simp [measureReal_def]
 
-theorem fundamentalDomain_ae_parallelepiped [Fintype ι] [MeasurableSpace E] (μ : Measure E)
+theorem fundamentalDomain_ae_parallelepiped [Fintype ι] [SigmaAlgebra E] (μ : Measure E)
     [BorelSpace E] [Measure.IsAddHaarMeasure μ] :
     fundamentalDomain b =ᵐ[μ] parallelepiped b := by
   classical
@@ -642,7 +642,7 @@ end Module.Basis
 open MeasureTheory in
 theorem ZLattice.isAddFundamentalDomain {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
     [FiniteDimensional ℝ E] {L : Submodule ℤ E} [DiscreteTopology L] [IsZLattice ℝ L] [Finite ι]
-    (b : Basis ι ℤ L) [MeasurableSpace E] [OpensMeasurableSpace E] (μ : Measure E) :
+    (b : Basis ι ℤ L) [SigmaAlgebra E] [OpensSigmaAlgebra E] (μ : Measure E) :
     IsAddFundamentalDomain L (fundamentalDomain (b.ofZLatticeBasis ℝ)) μ := by
   convert! ZSpan.isAddFundamentalDomain (b.ofZLatticeBasis ℝ) μ
   all_goals exact (b.ofZLatticeBasis_span ℝ).symm

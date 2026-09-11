@@ -63,7 +63,7 @@ variable (T : ℝ) [hT : Fact (0 < T)]
 /-- Equip the "additive circle" `ℝ ⧸ (ℤ ∙ T)` with, as a standard measure, the Haar measure of total
 mass `T` -/
 noncomputable instance measureSpace : MeasureSpace (AddCircle T) :=
-  { QuotientAddGroup.measurableSpace _ with volume := ENNReal.ofReal T • addHaarMeasure ⊤ }
+  { QuotientAddGroup.sigmaAlgebra _ with volume := ENNReal.ofReal T • addHaarMeasure ⊤ }
 
 @[simp]
 protected theorem measure_univ : volume (Set.univ : Set (AddCircle T)) = ENNReal.ofReal T := by

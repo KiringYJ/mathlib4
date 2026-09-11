@@ -9,8 +9,8 @@ public import Mathlib.Data.Finset.Update
 public import Mathlib.Data.Prod.TProd
 public import Mathlib.Data.Set.UnionLift
 public import Mathlib.GroupTheory.Coset.Defs
-public import Mathlib.MeasureTheory.MeasurableSpace.Basic
-public import Mathlib.MeasureTheory.MeasurableSpace.Instances
+public import Mathlib.MeasureTheory.SigmaAlgebra.Basic
+public import Mathlib.MeasureTheory.SigmaAlgebra.Instances
 public import Mathlib.Order.Disjointed
 
 /-!
@@ -30,7 +30,7 @@ universe uι
 
 variable {α β γ δ δ' : Type*} {ι : Sort uι} {s : Set α}
 
-theorem measurable_to_countable [MeasurableSpace α] [Countable α] [MeasurableSpace β] {f : β → α}
+theorem measurable_to_countable [SigmaAlgebra α] [Countable α] [SigmaAlgebra β] {f : β → α}
     (h : ∀ y, MeasurableSet (f ⁻¹' {f y})) : Measurable f := fun s _ => by
   rw [← biUnion_preimage_singleton]
   refine MeasurableSet.iUnion fun y => MeasurableSet.iUnion fun hy => ?_
@@ -39,12 +39,12 @@ theorem measurable_to_countable [MeasurableSpace α] [Countable α] [MeasurableS
     apply h
   · simp only [preimage_singleton_eq_empty.2 hyf, MeasurableSet.empty]
 
-theorem measurable_to_countable' [MeasurableSpace α] [Countable α] [MeasurableSpace β] {f : β → α}
+theorem measurable_to_countable' [SigmaAlgebra α] [Countable α] [SigmaAlgebra β] {f : β → α}
     (h : ∀ x, MeasurableSet (f ⁻¹' {x})) : Measurable f :=
   measurable_to_countable fun y => h (f y)
 
 set_option backward.isDefEq.respectTransparency false in
-theorem ENat.measurable_iff {α : Type*} [MeasurableSpace α] {f : α → ℕ∞} :
+theorem ENat.measurable_iff {α : Type*} [SigmaAlgebra α] {f : α → ℕ∞} :
     Measurable f ↔ ∀ n : ℕ, MeasurableSet (f ⁻¹' {↑n}) := by
   refine ⟨fun hf n ↦ hf <| measurableSet_singleton _, fun h ↦ measurable_to_countable' fun n ↦ ?_⟩
   cases n with
@@ -54,14 +54,14 @@ theorem ENat.measurable_iff {α : Type*} [MeasurableSpace α] {f : α → ℕ∞
     exact .compl <| .iUnion h
   | coe n => exact h n
 
-theorem measurable_unit [MeasurableSpace α] (f : Unit → α) : Measurable f :=
+theorem measurable_unit [SigmaAlgebra α] (f : Unit → α) : Measurable f :=
   measurable_from_top
 
 section ULift
-variable [MeasurableSpace α]
+variable [SigmaAlgebra α]
 
-instance _root_.ULift.instMeasurableSpace : MeasurableSpace (ULift α) :=
-  ‹MeasurableSpace α›.map ULift.up
+instance _root_.ULift.instSigmaAlgebra : SigmaAlgebra (ULift α) :=
+  ‹SigmaAlgebra α›.map ULift.up
 
 lemma measurable_down : Measurable (ULift.down : ULift α → α) := fun _ ↦ id
 lemma measurable_up : Measurable (ULift.up : α → ULift α) := fun _ ↦ id
@@ -75,7 +75,7 @@ end ULift
 
 section Nat
 
-variable {mα : MeasurableSpace α}
+variable {mα : SigmaAlgebra α}
 
 theorem measurable_from_nat {f : ℕ → α} : Measurable f :=
   measurable_from_top
@@ -124,20 +124,20 @@ end Nat
 
 section Quotient
 
-variable [MeasurableSpace α] [MeasurableSpace β]
+variable [SigmaAlgebra α] [SigmaAlgebra β]
 
-instance Quot.instMeasurableSpace {α} {r : α → α → Prop} [m : MeasurableSpace α] :
-    MeasurableSpace (Quot r) :=
+instance Quot.instSigmaAlgebra {α} {r : α → α → Prop} [m : SigmaAlgebra α] :
+    SigmaAlgebra (Quot r) :=
   m.map (Quot.mk r)
 
-instance Quotient.instMeasurableSpace {α} {s : Setoid α} [m : MeasurableSpace α] :
-    MeasurableSpace (Quotient s) :=
+instance Quotient.instSigmaAlgebra {α} {s : Setoid α} [m : SigmaAlgebra α] :
+    SigmaAlgebra (Quotient s) :=
   m.map Quotient.mk''
 
 @[to_additive]
-instance QuotientGroup.measurableSpace {G} [Group G] [MeasurableSpace G] (S : Subgroup G) :
-    MeasurableSpace (G ⧸ S) :=
-  Quotient.instMeasurableSpace
+instance QuotientGroup.sigmaAlgebra {G} [Group G] [SigmaAlgebra G] (S : Subgroup G) :
+    SigmaAlgebra (G ⧸ S) :=
+  Quotient.instSigmaAlgebra
 
 theorem measurableSet_quotient {s : Setoid α} {t : Set (Quotient s)} :
     MeasurableSet t ↔ MeasurableSet (Quotient.mk'' ⁻¹' t) :=
@@ -159,38 +159,38 @@ theorem measurable_quotient_mk'' {s : Setoid α} : Measurable (Quotient.mk'' : �
 theorem measurable_quot_mk {r : α → α → Prop} : Measurable (Quot.mk r) := fun _ => id
 
 @[to_additive (attr := fun_prop)]
-theorem QuotientGroup.measurable_coe {G} [Group G] [MeasurableSpace G] {S : Subgroup G} :
+theorem QuotientGroup.measurable_coe {G} [Group G] [SigmaAlgebra G] {S : Subgroup G} :
     Measurable ((↑) : G → G ⧸ S) :=
   measurable_quotient_mk''
 
 @[to_additive]
-nonrec theorem QuotientGroup.measurable_from_quotient {G} [Group G] [MeasurableSpace G]
+nonrec theorem QuotientGroup.measurable_from_quotient {G} [Group G] [SigmaAlgebra G]
     {S : Subgroup G} {f : G ⧸ S → α} : Measurable f ↔ Measurable (f ∘ ((↑) : G → G ⧸ S)) :=
   measurable_from_quotient
 
-instance Quotient.instDiscreteMeasurableSpace {α} {s : Setoid α} [MeasurableSpace α]
-    [DiscreteMeasurableSpace α] : DiscreteMeasurableSpace (Quotient s) where
+instance Quotient.instDiscreteSigmaAlgebra {α} {s : Setoid α} [SigmaAlgebra α]
+    [DiscreteSigmaAlgebra α] : DiscreteSigmaAlgebra (Quotient s) where
   forall_measurableSet _ := measurableSet_quotient.2 .of_discrete
 
 @[to_additive]
-instance QuotientGroup.instDiscreteMeasurableSpace {G} [Group G] [MeasurableSpace G]
-    [DiscreteMeasurableSpace G] (S : Subgroup G) : DiscreteMeasurableSpace (G ⧸ S) :=
-  Quotient.instDiscreteMeasurableSpace
+instance QuotientGroup.instDiscreteSigmaAlgebra {G} [Group G] [SigmaAlgebra G]
+    [DiscreteSigmaAlgebra G] (S : Subgroup G) : DiscreteSigmaAlgebra (G ⧸ S) :=
+  Quotient.instDiscreteSigmaAlgebra
 
 end Quotient
 
 section Subtype
 
-instance Subtype.instMeasurableSpace {α} {p : α → Prop} [m : MeasurableSpace α] :
-    MeasurableSpace (Subtype p) :=
+instance Subtype.instSigmaAlgebra {α} {p : α → Prop} [m : SigmaAlgebra α] :
+    SigmaAlgebra (Subtype p) :=
   m.comap ((↑) : _ → α)
 
 section
 
-variable [MeasurableSpace α]
+variable [SigmaAlgebra α]
 
 theorem measurable_subtype_coe {p : α → Prop} : Measurable ((↑) : Subtype p → α) :=
-  MeasurableSpace.le_map_comap
+  SigmaAlgebra.le_map_comap
 
 instance Subtype.instMeasurableSingletonClass {p : α → Prop} [MeasurableSingletonClass α] :
     MeasurableSingletonClass (Subtype p) where
@@ -200,7 +200,7 @@ instance Subtype.instMeasurableSingletonClass {p : α → Prop} [MeasurableSingl
 
 end
 
-variable {m : MeasurableSpace α} {mβ : MeasurableSpace β}
+variable {m : SigmaAlgebra α} {mβ : SigmaAlgebra β}
 
 theorem MeasurableSet.of_subtype_image {s : Set α} {t : Set s}
     (h : MeasurableSet (Subtype.val '' t)) : MeasurableSet t :=
@@ -243,15 +243,18 @@ theorem measurable_inclusion {s t : Set α} (h : s ⊆ t) : Measurable (inclusio
 theorem MeasurableSet.image_inclusion' {s t : Set α} (h : s ⊆ t) {u : Set s}
     (hs : MeasurableSet (Subtype.val ⁻¹' s : Set t)) (hu : MeasurableSet u) :
     MeasurableSet (inclusion h '' u) := by
+  rcases hs with ⟨v, hv, hvs⟩
   rcases hu with ⟨u, hu, rfl⟩
-  convert! (measurable_subtype_coe hu).inter hs
+  refine ⟨u ∩ v, m.inter_mem hu hv, ?_⟩
   ext ⟨x, hx⟩
-  simpa [@and_comm _ (_ = x)] using and_comm
+  have hxvs : x ∈ v ↔ x ∈ s := by
+    simpa using Set.ext_iff.mp hvs ⟨x, hx⟩
+  simp [hxvs, and_comm]
 
 theorem MeasurableSet.image_inclusion {s t : Set α} (h : s ⊆ t) {u : Set s}
     (hs : MeasurableSet s) (hu : MeasurableSet u) :
     MeasurableSet (inclusion h '' u) :=
-  (measurable_subtype_coe hs).image_inclusion' h hu
+  MeasurableSet.image_inclusion' h (measurable_subtype_coe hs) hu
 
 theorem MeasurableSet.of_union_cover {s t u : Set α} (hs : MeasurableSet s) (ht : MeasurableSet t)
     (h : univ ⊆ s ∪ t) (hsu : MeasurableSet (((↑) : s → α) ⁻¹' u))
@@ -262,7 +265,7 @@ theorem MeasurableSet.of_union_cover {s t u : Set α} (hs : MeasurableSet s) (ht
 theorem measurable_of_measurable_union_cover {f : α → β} (s t : Set α) (hs : MeasurableSet s)
     (ht : MeasurableSet t) (h : univ ⊆ s ∪ t) (hc : Measurable fun a : s => f a)
     (hd : Measurable fun a : t => f a) : Measurable f := fun _u hu =>
-  .of_union_cover hs ht h (hc hu) (hd hu)
+  MeasurableSet.of_union_cover hs ht h (hc hu) (hd hu)
 
 theorem measurable_of_restrict_of_restrict_compl {f : α → β} {s : Set α} (hs : MeasurableSet s)
     (h₁ : Measurable (s.domRestrict f)) (h₂ : Measurable (sᶜ.domRestrict f)) : Measurable f :=
@@ -289,102 +292,152 @@ theorem measurable_of_measurable_on_compl_singleton [MeasurableSingletonClass α
 
 end Subtype
 
-section Atoms
+section IndistinguishabilityClasses
 
-variable [MeasurableSpace β]
+namespace SigmaAlgebra
 
-/-- The *measurable atom* of `x` is the intersection of all the measurable sets containing `x`.
-It is measurable when the space is countable (or more generally when the measurable space is
-countably generated). -/
-def measurableAtom (x : β) : Set β :=
-  ⋂ (s : Set β) (_h's : x ∈ s) (_hs : MeasurableSet s), s
+/-- Two points are indistinguishable by `m` if they have the same membership pattern on its
+sets. -/
+def Indistinguishable (m : SigmaAlgebra β) (x y : β) : Prop :=
+  ∀ s ∈ m, x ∈ s ↔ y ∈ s
 
-@[simp] lemma mem_measurableAtom_self (x : β) : x ∈ measurableAtom x := by
-  simp +contextual [measurableAtom]
+@[refl] lemma indistinguishable_refl (m : SigmaAlgebra β) (x : β) : m.Indistinguishable x x :=
+  fun _ _ ↦ Iff.rfl
 
-lemma mem_of_mem_measurableAtom {x y : β} (h : y ∈ measurableAtom x) {s : Set β}
-    (hs : MeasurableSet s) (hxs : x ∈ s) : y ∈ s := by
-  simp only [measurableAtom, mem_iInter] at h
-  exact h s hxs hs
+@[symm] lemma Indistinguishable.symm {m : SigmaAlgebra β} {x y : β}
+    (h : m.Indistinguishable x y) : m.Indistinguishable y x :=
+  fun s hs ↦ (h s hs).symm
 
-lemma measurableAtom_subset {s : Set β} {x : β} (hs : MeasurableSet s) (hx : x ∈ s) :
-    measurableAtom x ⊆ s :=
-  iInter₂_subset_of_subset s hx fun ⦃a⦄ ↦ (by simp [hs])
+@[trans] lemma Indistinguishable.trans {m : SigmaAlgebra β} {x y z : β}
+    (hxy : m.Indistinguishable x y) (hyz : m.Indistinguishable y z) :
+    m.Indistinguishable x z :=
+  fun s hs ↦ (hxy s hs).trans (hyz s hs)
 
-@[simp] lemma measurableAtom_of_measurableSingletonClass [MeasurableSingletonClass β] (x : β) :
-    measurableAtom x = {x} :=
-  Subset.antisymm (measurableAtom_subset (measurableSet_singleton x) rfl) (by simp)
+/-- The setoid of points indistinguishable by a sigma-algebra. -/
+def indistinguishabilitySetoid (m : SigmaAlgebra β) : Setoid β where
+  r := m.Indistinguishable
+  iseqv := ⟨m.indistinguishable_refl, Indistinguishable.symm, Indistinguishable.trans⟩
 
-lemma MeasurableSet.measurableAtom_of_countable [Countable β] (x : β) :
-    MeasurableSet (measurableAtom x) := by
-  have : ∀ (y : β), y ∉ measurableAtom x → ∃ s, x ∈ s ∧ MeasurableSet s ∧ y ∉ s :=
-    fun y hy ↦ by simpa [measurableAtom] using hy
+/-- The points that no set in `m` distinguishes from `x`.
+
+This is an equivalence class for the relation of having the same membership pattern on `m`. It
+need not itself belong to `m`; see `SigmaAlgebra.IsAtom` for the distinct notion of a measurable
+atom. -/
+def indistinguishabilityClass (m : SigmaAlgebra β) (x : β) : Set β :=
+  {y | m.Indistinguishable x y}
+
+@[simp]
+lemma mem_indistinguishabilityClass_iff {m : SigmaAlgebra β} {x y : β} :
+    y ∈ m.indistinguishabilityClass x ↔ m.Indistinguishable x y :=
+  Iff.rfl
+
+theorem indistinguishable_iff_forall_mem {m : SigmaAlgebra β} {x y : β} :
+    m.Indistinguishable x y ↔ ∀ s ∈ m, x ∈ s ↔ y ∈ s :=
+  Iff.rfl
+
+@[simp] lemma self_mem_indistinguishabilityClass (m : SigmaAlgebra β) (x : β) :
+    x ∈ m.indistinguishabilityClass x :=
+  m.indistinguishable_refl x
+
+lemma mem_of_mem_indistinguishabilityClass {m : SigmaAlgebra β} {x y : β}
+    (h : y ∈ m.indistinguishabilityClass x) {s : Set β} (hs : s ∈ m) (hxs : x ∈ s) : y ∈ s :=
+  (h s hs).mp hxs
+
+lemma indistinguishabilityClass_subset {m : SigmaAlgebra β} {s : Set β} {x : β}
+    (hs : s ∈ m) (hx : x ∈ s) : m.indistinguishabilityClass x ⊆ s :=
+  fun _ hy ↦ mem_of_mem_indistinguishabilityClass hy hs hx
+
+lemma indistinguishabilityClass_eq_singleton {m : SigmaAlgebra β} {x : β} (hx : {x} ∈ m) :
+    m.indistinguishabilityClass x = {x} :=
+  Subset.antisymm (indistinguishabilityClass_subset hx rfl)
+    (fun _ hy ↦ hy ▸ m.self_mem_indistinguishabilityClass x)
+
+@[simp]
+lemma indistinguishabilityClass_of_measurableSingletonClass {m : SigmaAlgebra β}
+    [@MeasurableSingletonClass β m] (x : β) : m.indistinguishabilityClass x = {x} :=
+  indistinguishabilityClass_eq_singleton (measurableSet_singleton x)
+
+lemma indistinguishabilityClass_mem_of_countable {m : SigmaAlgebra β} [Countable β]
+    (x : β) : m.indistinguishabilityClass x ∈ m := by
+  classical
+  have : ∀ (y : β), y ∉ m.indistinguishabilityClass x →
+      ∃ s, x ∈ s ∧ s ∈ m ∧ y ∉ s :=
+    fun y hy ↦ by
+      simp only [mem_indistinguishabilityClass_iff, Indistinguishable, not_forall,
+        exists_prop] at hy
+      obtain ⟨s, hs, hxy⟩ := hy
+      by_cases hxs : x ∈ s
+      · have hys : y ∉ s := by simpa [hxs] using hxy
+        exact ⟨s, hxs, hs, hys⟩
+      · have hys : y ∈ s := by simpa [hxs] using hxy
+        exact ⟨sᶜ, by simpa, m.compl_mem hs, by simpa⟩
   choose! s hs using this
-  have : measurableAtom x = ⋂ (y ∈ (measurableAtom x)ᶜ), s y := by
+  have : m.indistinguishabilityClass x =
+      ⋂ (y ∈ (m.indistinguishabilityClass x)ᶜ), s y := by
     apply Subset.antisymm
     · intro z hz
       simp only [mem_iInter, mem_compl_iff]
       intro i hi
-      exact mem_of_mem_measurableAtom hz (hs i hi).2.1 (hs i hi).1
+      exact mem_of_mem_indistinguishabilityClass hz (hs i hi).2.1 (hs i hi).1
     · apply compl_subset_compl.1
       intro z hz
       simp only [compl_iInter, mem_iUnion, mem_compl_iff, exists_prop]
       exact ⟨z, hz, (hs z hz).2.2⟩
   rw [this]
-  exact MeasurableSet.biInter (to_countable (measurableAtom x)ᶜ) (fun i hi ↦ (hs i hi).2.1)
+  exact MeasurableSet.biInter (to_countable (m.indistinguishabilityClass x)ᶜ)
+    (fun i hi ↦ (hs i hi).2.1)
 
-/-- There is in fact equality: see `measurableAtom_eq_of_mem`. -/
-lemma measurableAtom_subset_of_mem {x y : β} (hx : x ∈ measurableAtom y) :
-    measurableAtom x ⊆ measurableAtom y := by
-  intro z hz
-  simp only [measurableAtom, mem_iInter] at hz hx ⊢
-  exact fun s hys hs ↦ hz s (hx s hys hs) hs
+/-- There is in fact equality: see `indistinguishabilityClass_eq_of_mem`. -/
+lemma indistinguishabilityClass_subset_of_mem {m : SigmaAlgebra β} {x y : β}
+    (hx : x ∈ m.indistinguishabilityClass y) :
+    m.indistinguishabilityClass x ⊆ m.indistinguishabilityClass y := by
+  intro z hz s hs
+  exact (hx s hs).trans (hz s hs)
 
-lemma measurableAtom_eq_of_mem {x y : β} (hx : x ∈ measurableAtom y) :
-    measurableAtom x = measurableAtom y := by
-  refine subset_antisymm (measurableAtom_subset_of_mem hx) ?_
-  by_cases hy : y ∈ measurableAtom x
-  · exact measurableAtom_subset_of_mem hy
-  exfalso
-  simp only [measurableAtom, mem_iInter, not_forall] at hx hy ⊢
-  obtain ⟨s, hxs, hs, hys⟩ := hy
-  specialize hx sᶜ hys hs.compl
-  exact hx hxs
+lemma indistinguishabilityClass_eq_of_mem {m : SigmaAlgebra β} {x y : β}
+    (hx : x ∈ m.indistinguishabilityClass y) :
+    m.indistinguishabilityClass x = m.indistinguishabilityClass y := by
+  refine subset_antisymm (indistinguishabilityClass_subset_of_mem hx) ?_
+  apply indistinguishabilityClass_subset_of_mem
+  exact fun s hs ↦ (hx s hs).symm
 
-lemma disjoint_measurableAtom_of_notMem {x y : β} (hx : x ∉ measurableAtom y) :
-    Disjoint (measurableAtom x) (measurableAtom y) := by
+lemma disjoint_indistinguishabilityClass_of_notMem {m : SigmaAlgebra β} {x y : β}
+    (hx : x ∉ m.indistinguishabilityClass y) :
+    Disjoint (m.indistinguishabilityClass x) (m.indistinguishabilityClass y) := by
   rw [Set.disjoint_iff_inter_eq_empty]
   ext z
   simp only [mem_inter_iff, mem_empty_iff_false, iff_false, not_and]
   intro hzx hzy
-  have h1 := measurableAtom_eq_of_mem hzx
-  have h2 := measurableAtom_eq_of_mem hzy
+  have h1 := indistinguishabilityClass_eq_of_mem hzx
+  have h2 := indistinguishabilityClass_eq_of_mem hzy
   rw [← h2, h1] at hx
-  exact hx (mem_measurableAtom_self x)
+  exact hx (self_mem_indistinguishabilityClass m x)
 
-end Atoms
+end SigmaAlgebra
+
+end IndistinguishabilityClasses
 
 section Prod
 
-/-- A `MeasurableSpace` structure on the product of two measurable spaces. -/
+/-- A `SigmaAlgebra` structure on the product of two measurable spaces. -/
 @[instance_reducible]
-def MeasurableSpace.prod {α β} (m₁ : MeasurableSpace α) (m₂ : MeasurableSpace β) :
-    MeasurableSpace (α × β) :=
+def SigmaAlgebra.prod {α β} (m₁ : SigmaAlgebra α) (m₂ : SigmaAlgebra β) :
+    SigmaAlgebra (α × β) :=
   m₁.comap Prod.fst ⊔ m₂.comap Prod.snd
 
-instance Prod.instMeasurableSpace {α β} [m₁ : MeasurableSpace α] [m₂ : MeasurableSpace β] :
-    MeasurableSpace (α × β) :=
+instance Prod.instSigmaAlgebra {α β} [m₁ : SigmaAlgebra α] [m₂ : SigmaAlgebra β] :
+    SigmaAlgebra (α × β) :=
   m₁.prod m₂
 
-theorem measurable_fst {_ : MeasurableSpace α} {_ : MeasurableSpace β} :
+theorem measurable_fst {_ : SigmaAlgebra α} {_ : SigmaAlgebra β} :
     Measurable (Prod.fst : α × β → α) :=
   Measurable.of_comap_le le_sup_left
 
-theorem measurable_snd {_ : MeasurableSpace α} {_ : MeasurableSpace β} :
+theorem measurable_snd {_ : SigmaAlgebra α} {_ : SigmaAlgebra β} :
     Measurable (Prod.snd : α × β → β) :=
   Measurable.of_comap_le le_sup_right
 
-variable {m : MeasurableSpace α} {mβ : MeasurableSpace β} {mγ : MeasurableSpace γ}
+variable {m : SigmaAlgebra α} {mβ : SigmaAlgebra β} {mγ : SigmaAlgebra γ}
 
 @[fun_prop]
 theorem Measurable.fst {f : α → β × γ} (hf : Measurable f) : Measurable fun a : α => (f a).1 :=
@@ -399,19 +452,19 @@ theorem Measurable.prod {f : α → β × γ} (hf₁ : Measurable fun a => (f a)
   Measurable.of_le_map <|
     sup_le
       (by
-        rw [MeasurableSpace.comap_le_iff_le_map, MeasurableSpace.map_comp]
+        rw [SigmaAlgebra.comap_le_iff_le_map, SigmaAlgebra.map_comp]
         exact hf₁)
       (by
-        rw [MeasurableSpace.comap_le_iff_le_map, MeasurableSpace.map_comp]
+        rw [SigmaAlgebra.comap_le_iff_le_map, SigmaAlgebra.map_comp]
         exact hf₂)
 
 @[fun_prop]
-theorem Measurable.prodMk {β γ} {_ : MeasurableSpace β} {_ : MeasurableSpace γ} {f : α → β}
+theorem Measurable.prodMk {β γ} {_ : SigmaAlgebra β} {_ : SigmaAlgebra γ} {f : α → β}
     {g : α → γ} (hf : Measurable f) (hg : Measurable g) : Measurable fun a : α => (f a, g a) :=
   Measurable.prod hf hg
 
 @[fun_prop]
-theorem Measurable.prodMap [MeasurableSpace δ] {f : α → β} {g : γ → δ} (hf : Measurable f)
+theorem Measurable.prodMap [SigmaAlgebra δ] {f : α → β} {g : γ → δ} (hf : Measurable f)
     (hg : Measurable g) : Measurable (Prod.map f g) :=
   (hf.comp measurable_fst).prodMk (hg.comp measurable_snd)
 
@@ -444,7 +497,7 @@ theorem measurable_fun_prod {f : α → β × γ} :
 theorem measurable_swap : Measurable (Prod.swap : α × β → β × α) :=
   Measurable.prod measurable_snd measurable_fst
 
-theorem measurable_swap_iff {_ : MeasurableSpace γ} {f : α × β → γ} :
+theorem measurable_swap_iff {_ : SigmaAlgebra γ} {f : α × β → γ} :
     Measurable (f ∘ Prod.swap) ↔ Measurable f :=
   ⟨fun hf => hf.comp measurable_swap, fun hf => hf.comp measurable_swap⟩
 
@@ -477,24 +530,28 @@ instance Prod.instMeasurableSingletonClass
   ⟨fun ⟨a, b⟩ => @singleton_prod_singleton _ _ a b ▸ .prod (.singleton a) (.singleton b)⟩
 
 /-- See `measurable_from_prod_countable_left` for a version where we assume that singletons are
-measurable instead of reasoning about `measurableAtom`. -/
+measurable instead of reasoning about indistinguishability classes. -/
 theorem measurable_from_prod_countable_left' [Countable β] {f : α × β → γ}
     (hf : ∀ y, Measurable fun x => f (x, y))
-    (h'f : ∀ y y' x, y' ∈ measurableAtom y → f (x, y') = f (x, y)) : Measurable f := fun s hs => by
-  have : f ⁻¹' s = ⋃ y, ((fun x => f (x, y)) ⁻¹' s) ×ˢ (measurableAtom y : Set β) := by
+    (h'f : ∀ y y' x, y' ∈ (inferInstance : SigmaAlgebra β).indistinguishabilityClass y →
+      f (x, y') = f (x, y)) : Measurable f := fun s hs => by
+  have : f ⁻¹' s = ⋃ y, ((fun x => f (x, y)) ⁻¹' s) ×ˢ
+      (inferInstance : SigmaAlgebra β).indistinguishabilityClass y := by
     ext1 ⟨x, y⟩
     simp only [mem_preimage, mem_iUnion, mem_prod]
-    refine ⟨fun h ↦ ⟨y, h, mem_measurableAtom_self y⟩, ?_⟩
+    refine ⟨fun h ↦ ⟨y, h, SigmaAlgebra.self_mem_indistinguishabilityClass _ y⟩, ?_⟩
     rintro ⟨y', hy's, hy'⟩
     rwa [h'f y' y x hy']
   rw [this]
-  exact .iUnion (fun y ↦ (hf y hs).prod (.measurableAtom_of_countable y))
+  exact MeasurableSet.iUnion (fun y : β ↦ MeasurableSet.prod (hf y hs)
+    (SigmaAlgebra.indistinguishabilityClass_mem_of_countable y))
 
 /-- See `measurable_from_prod_countable_right` for a version where we assume that singletons are
-measurable instead of reasoning about `measurableAtom`. -/
+measurable instead of reasoning about indistinguishability classes. -/
 lemma measurable_from_prod_countable_right' [Countable α] {f : α × β → γ}
     (hf : ∀ x, Measurable fun y => f (x, y))
-    (h'f : ∀ x x' y, x' ∈ measurableAtom x → f (x', y) = f (x, y)) : Measurable f := by
+    (h'f : ∀ x x' y, x' ∈ (inferInstance : SigmaAlgebra α).indistinguishabilityClass x →
+      f (x', y) = f (x, y)) : Measurable f := by
   change Measurable ((fun p ↦ f (p.2, p.1)) ∘ Prod.swap)
   exact (measurable_from_prod_countable_left' hf h'f).comp measurable_swap
 
@@ -512,7 +569,7 @@ lemma measurable_from_prod_countable_right [Countable α] [MeasurableSingletonCl
   measurable_from_prod_countable_right' hf (by simp +contextual)
 
 /-- A piecewise function on countably many pieces is measurable if all the data is measurable. -/
-theorem Measurable.find {_ : MeasurableSpace α} {f : ℕ → α → β} {p : ℕ → α → Prop}
+theorem Measurable.find {_ : SigmaAlgebra α} {f : ℕ → α → β} {p : ℕ → α → Prop}
     [∀ n, DecidablePred (p n)] (hf : ∀ n, Measurable (f n)) (hp : ∀ n, MeasurableSet { x | p n x })
     (h : ∀ x, ∃ n, p n x) : Measurable fun x => f (Nat.find (h x)) x :=
   have : Measurable fun p : α × ℕ => f p.2 p.1 := measurable_from_prod_countable_left fun n => hf n
@@ -526,7 +583,9 @@ theorem measurable_iUnionLift [Countable ι] {t : ι → Set α} {f : ∀ i, t i
     {T : Set α} (hT : T ⊆ ⋃ i, t i) (htm : ∀ i, MeasurableSet (t i)) (hfm : ∀ i, Measurable (f i)) :
     Measurable (iUnionLift t f htf T hT) := fun s hs => by
   rw [preimage_iUnionLift]
-  exact .preimage (.iUnion fun i => .image_inclusion _ (htm _) (hfm i hs)) (measurable_inclusion _)
+  exact MeasurableSet.preimage
+    (MeasurableSet.iUnion fun i => MeasurableSet.image_inclusion _ (htm _) (hfm i hs))
+    (measurable_inclusion _)
 
 /-- Let `t i` be a countable covering of `α` by measurable sets. Let `f i : t i → β` be a family of
 functions that agree on the intersections `t i ∩ t j`. Then the function `Set.liftCover t f _ _`,
@@ -537,7 +596,7 @@ theorem measurable_liftCover [Countable ι] (t : ι → Set α) (htm : ∀ i, Me
     (htU : ⋃ i, t i = univ) :
     Measurable (liftCover t f hf htU) := fun s hs => by
   rw [preimage_liftCover]
-  exact .iUnion fun i => .subtype_image (htm i) <| hfm i hs
+  exact MeasurableSet.iUnion fun i => MeasurableSet.subtype_image (htm i) <| hfm i hs
 
 /-- Let `t i` be a nonempty countable family of measurable sets in `α`. Let `g i : α → β` be a
 family of measurable functions such that `g i` agrees with `g j` on `t i ∩ t j`. Then there exists
@@ -569,22 +628,22 @@ end Prod
 
 section Pi
 
-variable {X : δ → Type*} [MeasurableSpace α]
+variable {X : δ → Type*} [SigmaAlgebra α]
 
-instance MeasurableSpace.pi [m : ∀ a, MeasurableSpace (X a)] : MeasurableSpace (∀ a, X a) :=
+instance SigmaAlgebra.pi [m : ∀ a, SigmaAlgebra (X a)] : SigmaAlgebra (∀ a, X a) :=
   ⨆ a, (m a).comap fun b => b a
 
-variable [∀ a, MeasurableSpace (X a)] [MeasurableSpace γ]
+variable [∀ a, SigmaAlgebra (X a)] [SigmaAlgebra γ]
 
 theorem measurable_pi_iff {g : α → ∀ a, X a} : Measurable g ↔ ∀ a, Measurable fun x => g x a := by
-  simp_rw [measurable_iff_comap_le, MeasurableSpace.pi, MeasurableSpace.comap_iSup,
-    MeasurableSpace.comap_comp, Function.comp_def, iSup_le_iff]
+  simp_rw [measurable_iff_comap_le, SigmaAlgebra.pi, SigmaAlgebra.comap_iSup,
+    SigmaAlgebra.comap_comp, Function.comp_def, iSup_le_iff]
 
 @[fun_prop]
 theorem measurable_pi_apply (a : δ) : Measurable fun f : ∀ a, X a => f a :=
   measurable_pi_iff.1 measurable_id a
 
-theorem MeasurableSpace.comap_le_comap_pi {g : (a : δ) → β → X a} (a : δ) :
+theorem SigmaAlgebra.comap_le_comap_pi {g : (a : δ) → β → X a} (a : δ) :
     .comap (g a) inferInstance ≤ pi.comap (fun b c ↦ g c b) := by
   simpa only [pi, comap_iSup] using le_iSup_of_le a <| by measurability
 
@@ -599,10 +658,10 @@ theorem Measurable.of_eval {f : α → ∀ a, X a} (hf : ∀ a, Measurable fun c
 
 @[deprecated (since := "2026-08-20")] alias measurable_pi_lambda := Measurable.of_eval
 
-lemma MeasurableSpace.comap_process_pi (X : (a : δ) → β → X a) :
-    MeasurableSpace.comap (fun b a ↦ X a b) inferInstance =
-      ⨆ a, MeasurableSpace.comap (X a) inferInstance := by
-  simp_rw [MeasurableSpace.pi, MeasurableSpace.comap_iSup, MeasurableSpace.comap_comp]
+lemma SigmaAlgebra.comap_process_pi (X : (a : δ) → β → X a) :
+    SigmaAlgebra.comap (fun b a ↦ X a b) inferInstance =
+      ⨆ a, SigmaAlgebra.comap (X a) inferInstance := by
+  simp_rw [SigmaAlgebra.pi, SigmaAlgebra.comap_iSup, SigmaAlgebra.comap_comp]
   rfl
 
 /-- The function `(f, x) ↦ update f a x : (Π a, X a) × X a → Π a, X a` is measurable. -/
@@ -694,7 +753,7 @@ theorem measurable_eq_mp {i i' : δ} (h : i = i') : Measurable (congr_arg X h).m
   exact measurable_id
 
 variable (X) in
-theorem Measurable.eq_mp {β} [MeasurableSpace β] {i i' : δ} (h : i = i') {f : β → X i}
+theorem Measurable.eq_mp {β} [SigmaAlgebra β] {i i' : δ} (h : i = i') {f : β → X i}
     (hf : Measurable f) : Measurable fun x => (congr_arg X h).mp (f x) :=
   (measurable_eq_mp X h).comp hf
 
@@ -764,16 +823,16 @@ theorem measurable_piEquivPiSubtypeProd (p : δ → Prop) [DecidablePred p] :
 
 end Pi
 
-instance TProd.instMeasurableSpace (X : δ → Type*) [∀ i, MeasurableSpace (X i)] :
-    ∀ l : List δ, MeasurableSpace (List.TProd X l)
-  | [] => PUnit.instMeasurableSpace
-  | _::is => @Prod.instMeasurableSpace _ _ _ (TProd.instMeasurableSpace X is)
+instance TProd.instSigmaAlgebra (X : δ → Type*) [∀ i, SigmaAlgebra (X i)] :
+    ∀ l : List δ, SigmaAlgebra (List.TProd X l)
+  | [] => PUnit.instSigmaAlgebra
+  | _::is => @Prod.instSigmaAlgebra _ _ _ (TProd.instSigmaAlgebra X is)
 
 section TProd
 
 open List
 
-variable {X : δ → Type*} [∀ i, MeasurableSpace (X i)]
+variable {X : δ → Type*} [∀ i, SigmaAlgebra (X i)]
 
 theorem measurable_tProd_mk (l : List δ) : Measurable (@TProd.mk δ X l) := by
   induction l with
@@ -803,38 +862,38 @@ theorem MeasurableSet.tProd (l : List δ) {s : ∀ i, Set (X i)} (hs : ∀ i, Me
 
 end TProd
 
-instance Sum.instMeasurableSpace {α β} [m₁ : MeasurableSpace α] [m₂ : MeasurableSpace β] :
-    MeasurableSpace (α ⊕ β) :=
+instance Sum.instSigmaAlgebra {α β} [m₁ : SigmaAlgebra α] [m₂ : SigmaAlgebra β] :
+    SigmaAlgebra (α ⊕ β) :=
   m₁.map Sum.inl ⊓ m₂.map Sum.inr
 
 section Sum
 
 @[fun_prop]
-theorem measurable_inl [MeasurableSpace α] [MeasurableSpace β] : Measurable (@Sum.inl α β) :=
+theorem measurable_inl [SigmaAlgebra α] [SigmaAlgebra β] : Measurable (@Sum.inl α β) :=
   Measurable.of_le_map inf_le_left
 
 @[fun_prop]
-theorem measurable_inr [MeasurableSpace α] [MeasurableSpace β] : Measurable (@Sum.inr α β) :=
+theorem measurable_inr [SigmaAlgebra α] [SigmaAlgebra β] : Measurable (@Sum.inr α β) :=
   Measurable.of_le_map inf_le_right
 
-variable {m : MeasurableSpace α} {mβ : MeasurableSpace β}
+variable {m : SigmaAlgebra α} {mβ : SigmaAlgebra β}
 
 theorem measurableSet_sum_iff {s : Set (α ⊕ β)} :
     MeasurableSet s ↔ MeasurableSet (Sum.inl ⁻¹' s) ∧ MeasurableSet (Sum.inr ⁻¹' s) :=
   Iff.rfl
 
-theorem measurable_fun_sum {_ : MeasurableSpace γ} {f : α ⊕ β → γ} (hl : Measurable (f ∘ Sum.inl))
+theorem measurable_fun_sum {_ : SigmaAlgebra γ} {f : α ⊕ β → γ} (hl : Measurable (f ∘ Sum.inl))
     (hr : Measurable (f ∘ Sum.inr)) : Measurable f :=
   Measurable.of_comap_le <|
-    le_inf (MeasurableSpace.comap_le_iff_le_map.2 <| hl)
-      (MeasurableSpace.comap_le_iff_le_map.2 <| hr)
+    le_inf (SigmaAlgebra.comap_le_iff_le_map.2 <| hl)
+      (SigmaAlgebra.comap_le_iff_le_map.2 <| hr)
 
 @[fun_prop]
-theorem Measurable.sumElim {_ : MeasurableSpace γ} {f : α → γ} {g : β → γ} (hf : Measurable f)
+theorem Measurable.sumElim {_ : SigmaAlgebra γ} {f : α → γ} {g : β → γ} (hf : Measurable f)
     (hg : Measurable g) : Measurable (Sum.elim f g) :=
   measurable_fun_sum hf hg
 
-theorem Measurable.sumMap {_ : MeasurableSpace γ} {_ : MeasurableSpace δ} {f : α → β} {g : γ → δ}
+theorem Measurable.sumMap {_ : SigmaAlgebra γ} {_ : SigmaAlgebra δ} {f : α → β} {g : γ → δ}
     (hf : Measurable f) (hg : Measurable g) : Measurable (Sum.map f g) :=
   (measurable_inl.comp hf).sumElim (measurable_inr.comp hg)
 
@@ -850,27 +909,28 @@ alias ⟨_, MeasurableSet.inl_image⟩ := measurableSet_inl_image
 
 alias ⟨_, MeasurableSet.inr_image⟩ := measurableSet_inr_image
 
-theorem measurableSet_range_inl [MeasurableSpace α] :
+theorem measurableSet_range_inl [SigmaAlgebra α] :
     MeasurableSet (range Sum.inl : Set (α ⊕ β)) := by
   rw [← image_univ]
   exact MeasurableSet.univ.inl_image
 
-theorem measurableSet_range_inr [MeasurableSpace α] :
+theorem measurableSet_range_inr [SigmaAlgebra α] :
     MeasurableSet (range Sum.inr : Set (α ⊕ β)) := by
   rw [← image_univ]
   exact MeasurableSet.univ.inr_image
 
 end Sum
 
-instance Sigma.instMeasurableSpace {α} {β : α → Type*} [m : ∀ a, MeasurableSpace (β a)] :
-    MeasurableSpace (Sigma β) :=
+instance Sigma.instSigmaAlgebra {α} {β : α → Type*} [m : ∀ a, SigmaAlgebra (β a)] :
+    SigmaAlgebra (Sigma β) :=
   ⨅ a, (m a).map (Sigma.mk a)
 
 section prop
-variable [MeasurableSpace α] {p q : α → Prop}
+variable [SigmaAlgebra α] {p q : α → Prop}
 
 @[simp] theorem measurableSet_setOfPred : MeasurableSet {a | p a} ↔ Measurable p :=
   ⟨fun h ↦ measurable_to_prop <| by simpa only [preimage_singleton_true], fun h => by
+    change {a | p a} ∈ (inferInstance : SigmaAlgebra α)
     simpa using h (measurableSet_singleton True)⟩
 
 @[deprecated (since := "2026-07-09")] alias measurableSet_setOf := measurableSet_setOfPred
@@ -919,23 +979,23 @@ lemma Measurable.exists [Countable ι] {p : ι → α → Prop} (hp : ∀ i, Mea
 end prop
 
 @[fun_prop]
-lemma Measurable.eq_const {_ : MeasurableSpace α} [MeasurableSpace β] [MeasurableSingletonClass β]
+lemma Measurable.eq_const {_ : SigmaAlgebra α} [SigmaAlgebra β] [MeasurableSingletonClass β]
     {f : α → β} (hf : Measurable f) (a : β) : Measurable fun x => f x = a :=
   measurableSet_setOfPred.mp (measurableSet_eq.preimage hf)
 
 @[fun_prop]
-lemma Measurable.const_eq {_ : MeasurableSpace α} [MeasurableSpace β] [MeasurableSingletonClass β]
+lemma Measurable.const_eq {_ : SigmaAlgebra α} [SigmaAlgebra β] [MeasurableSingletonClass β]
     {f : α → β} (hf : Measurable f) (a : β) : Measurable fun x => a = f x := by
   conv => enter [1, x]; rw [eq_comm]
   exact .eq_const hf a
 
 section Set
-variable [MeasurableSpace β] {g : β → Set α}
+variable [SigmaAlgebra β] {g : β → Set α}
 
 /-- This instance is useful when talking about Bernoulli sequences of random variables or binomial
 random graphs. -/
-instance Set.instMeasurableSpace : MeasurableSpace (Set α) :=
-  inferInstanceAs <| MeasurableSpace (α → Prop)
+instance Set.instSigmaAlgebra : SigmaAlgebra (Set α) :=
+  inferInstanceAs <| SigmaAlgebra (α → Prop)
 
 instance Set.instMeasurableSingletonClass [Countable α] : MeasurableSingletonClass (Set α) :=
   inferInstanceAs <| MeasurableSingletonClass (α → Prop)
@@ -993,13 +1053,13 @@ protected lemma Measurable.subset {s t : β → Set α} (hs : Measurable s) (hs 
 end Set
 
 section Finset
-variable [MeasurableSpace β] {g : β → Finset α}
+variable [SigmaAlgebra β] {g : β → Finset α}
 
 /-- We give `Finset α` the measurable structure inherited from `Set α`.
 
 This is the smallest sigma-algebra generated by `(a ∈ ·)` for all `a : α`.
 See `measurable_finset_iff`. -/
-instance Finset.instMeasurableSpace : MeasurableSpace (Finset α) :=
+instance Finset.instSigmaAlgebra : SigmaAlgebra (Finset α) :=
   .comap SetLike.coe inferInstance
 
 lemma measurable_finset_iff_measurable_set : Measurable g ↔ Measurable (fun x ↦ (g x : Set α)) :=
@@ -1010,7 +1070,7 @@ lemma measurable_finset_iff : Measurable g ↔ ∀ a, Measurable (a ∈ g ·) :=
 
 lemma measurableSet_finset_iff (S : Set (Finset α)) : MeasurableSet S ↔
     ∃ S' : Set (Set α), MeasurableSet S' ∧ { s : Finset α | ↑s ∈ S'} = S :=
-  MeasurableSpace.measurableSet_comap
+  SigmaAlgebra.mem_comap
 
 @[fun_prop]
 lemma measurable_finset_mem (a : α) : Measurable fun s : Finset α ↦ a ∈ s :=
@@ -1038,7 +1098,7 @@ variable {ι : Type*}
 
 section Function
 
-variable {κ X : Type*} [MeasurableSpace X]
+variable {κ X : Type*} [SigmaAlgebra X]
 
 @[fun_prop]
 lemma measurable_curry : Measurable (@curry ι κ X) :=
@@ -1057,7 +1117,7 @@ end Function
 
 section Sigma
 
-variable {κ : ι → Type*} {X : (i : ι) → κ i → Type*} [∀ i j, MeasurableSpace (X i j)]
+variable {κ : ι → Type*} {X : (i : ι) → κ i → Type*} [∀ i j, SigmaAlgebra (X i j)]
 
 @[fun_prop]
 lemma measurable_sigmaCurry : Measurable (Sigma.curry (γ := X)) :=
@@ -1081,28 +1141,28 @@ end curry
 
 variable (α) in
 /-- Typeclass for a measurable space `α` for which the diagonal of `α × α` is measurable. -/
-class MeasurableEq [MeasurableSpace α] where
+class MeasurableEq [SigmaAlgebra α] where
   measurableSet_diagonal : MeasurableSet (diagonal α)
 
 export MeasurableEq (measurableSet_diagonal)
 
 attribute [measurability] measurableSet_diagonal
 
-theorem measurableSet_eq_fun {m : MeasurableSpace α} [MeasurableSpace β] [MeasurableEq β]
+theorem measurableSet_eq_fun {m : SigmaAlgebra α} [SigmaAlgebra β] [MeasurableEq β]
     {f g : α → β} (hf : Measurable f) (hg : Measurable g) : MeasurableSet {x | f x = g x} :=
   measurableSet_diagonal.preimage (hf.prodMk hg)
 
 @[fun_prop]
-theorem Measurable.eq {m : MeasurableSpace α} [MeasurableSpace β] [MeasurableEq β]
+theorem Measurable.eq {m : SigmaAlgebra α} [SigmaAlgebra β] [MeasurableEq β]
     {f g : α → β} (hf : Measurable f) (hg : Measurable g) : Measurable fun x => f x = g x :=
   measurableSet_setOfPred.mp (measurableSet_eq_fun hf hg)
 
-instance [MeasurableSpace α] [MeasurableEq α] : MeasurableSingletonClass α := by
+instance [SigmaAlgebra α] [MeasurableEq α] : MeasurableSingletonClass α := by
   constructor
   simp_rw [← ofPred_eq_eq_singleton, measurableSet_setOfPred]
   measurability
 
-instance [MeasurableSpace α] [MeasurableSingletonClass α] [Countable α] : MeasurableEq α := by
+instance [SigmaAlgebra α] [MeasurableSingletonClass α] [Countable α] : MeasurableEq α := by
   constructor
   simp_rw [← Set.range_diag, Set.range_eq_iUnion]
   measurability

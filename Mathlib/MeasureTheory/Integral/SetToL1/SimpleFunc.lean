@@ -26,7 +26,7 @@ namespace MeasureTheory
 
 variable {α E F G 𝕜 : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [NormedAddCommGroup F] [NormedSpace ℝ F] [NormedAddCommGroup G]
-  {m : MeasurableSpace α} {μ : Measure α}
+  {m : SigmaAlgebra α} {μ : Measure α}
 
 namespace L1
 

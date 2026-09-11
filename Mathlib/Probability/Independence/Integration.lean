@@ -20,11 +20,11 @@ reals, `E[X * Y] = E[X] * E[Y]`, and similar results.
 
 Many lemmas in this file take two arguments of the same typeclass. It is worth remembering that lean
 will always pick the later typeclass in this situation, and does not care whether the arguments are
-`[]`, `{}`, or `()`. All of these use the `MeasurableSpace` `M2` to define `μ`:
+`[]`, `{}`, or `()`. All of these use the `SigmaAlgebra` `M2` to define `μ`:
 
 ```lean
-example {M1 : MeasurableSpace Ω} [M2 : MeasurableSpace Ω] {μ : Measure Ω} : sorry := sorry
-example [M1 : MeasurableSpace Ω] {M2 : MeasurableSpace Ω} {μ : Measure Ω} : sorry := sorry
+example {M1 : SigmaAlgebra Ω} [M2 : SigmaAlgebra Ω] {μ : Measure Ω} : sorry := sorry
+example [M1 : SigmaAlgebra Ω] {M2 : SigmaAlgebra Ω} {μ : Measure Ω} : sorry := sorry
 ```
 
 -/
@@ -36,15 +36,15 @@ open Set MeasureTheory ENNReal
 
 open scoped NNReal MeasureTheory
 
-variable {Ω 𝕜 : Type*} [RCLike 𝕜] {mΩ : MeasurableSpace Ω} {μ : Measure Ω} {f g : Ω → ℝ≥0∞}
+variable {Ω 𝕜 : Type*} [RCLike 𝕜] {mΩ : SigmaAlgebra Ω} {μ : Measure Ω} {f g : Ω → ℝ≥0∞}
     {X Y : Ω → 𝕜}
 
 namespace ProbabilityTheory
 
 /-- If a random variable `f` in `ℝ≥0∞` is independent of an event `T`, then if you restrict the
   random variable to `T`, then `E[f * indicator T c 0]=E[f] * E[indicator T c 0]`. It is useful for
-  `lintegral_mul_eq_lintegral_mul_lintegral_of_independent_measurableSpace`. -/
-theorem lintegral_mul_indicator_eq_lintegral_mul_lintegral_indicator {Mf mΩ : MeasurableSpace Ω}
+  `lintegral_mul_eq_lintegral_mul_lintegral_of_independent_sigmaAlgebra`. -/
+theorem lintegral_mul_indicator_eq_lintegral_mul_lintegral_indicator {Mf mΩ : SigmaAlgebra Ω}
     {μ : Measure Ω} (hMf : Mf ≤ mΩ) (c : ℝ≥0∞) {T : Set Ω} (h_meas_T : MeasurableSet T)
     (h_ind : IndepSets {s | MeasurableSet[Mf] s} {T} μ) (h_meas_f : Measurable[Mf] f) :
     (∫⁻ ω, f ω * T.indicator (fun _ => c) ω ∂μ) =
@@ -55,8 +55,8 @@ theorem lintegral_mul_indicator_eq_lintegral_mul_lintegral_indicator {Mf mΩ : M
   apply @Measurable.ennreal_induction _ Mf
   · intro c' s' h_meas_s'
     simp_rw [← inter_indicator_mul]
-    rw [lintegral_indicator (MeasurableSet.inter (hMf _ h_meas_s') h_meas_T),
-      lintegral_indicator (hMf _ h_meas_s'), lintegral_indicator h_meas_T]
+    rw [lintegral_indicator (MeasurableSet.inter (hMf h_meas_s') h_meas_T),
+      lintegral_indicator (hMf h_meas_s'), lintegral_indicator h_meas_T]
     simp only [lintegral_const, univ_inter,
       MeasurableSet.univ, Measure.restrict_apply]
     rw [IndepSets_iff] at h_ind
@@ -81,15 +81,15 @@ of the random variables, it uses the independence of measurable spaces for the
 domains of `f` and `g`. This is similar to the sigma-algebra approach to
 independence. See `lintegral_mul_eq_lintegral_mul_lintegral_of_indepFun` for
 a more common variant of the product of independent variables. -/
-theorem lintegral_mul_eq_lintegral_mul_lintegral_of_independent_measurableSpace
-    {Mf Mg mΩ : MeasurableSpace Ω} {μ : Measure Ω} (hMf : Mf ≤ mΩ) (hMg : Mg ≤ mΩ)
+theorem lintegral_mul_eq_lintegral_mul_lintegral_of_independent_sigmaAlgebra
+    {Mf Mg mΩ : SigmaAlgebra Ω} {μ : Measure Ω} (hMf : Mf ≤ mΩ) (hMg : Mg ≤ mΩ)
     (h_ind : Indep Mf Mg μ) (h_meas_f : Measurable[Mf] f) (h_meas_g : Measurable[Mg] g) :
     ∫⁻ ω, f ω * g ω ∂μ = (∫⁻ ω, f ω ∂μ) * ∫⁻ ω, g ω ∂μ := by
   revert g
   have h_measM_f : Measurable f := h_meas_f.mono hMf le_rfl
   apply @Measurable.ennreal_induction _ Mg
   · intro c s h_s
-    apply lintegral_mul_indicator_eq_lintegral_mul_lintegral_indicator hMf _ (hMg _ h_s) _ h_meas_f
+    apply lintegral_mul_indicator_eq_lintegral_mul_lintegral_indicator hMf _ (hMg h_s) _ h_meas_f
     apply indepSets_of_indepSets_of_le_right h_ind
     rwa [singleton_subset_iff]
   · intro f' g _ h_measMg_f' _ h_ind_f' h_ind_g'
@@ -110,7 +110,7 @@ then `E[f * g] = E[f] * E[g]`. -/
 theorem lintegral_mul_eq_lintegral_mul_lintegral_of_indepFun (h_meas_f : Measurable f)
     (h_meas_g : Measurable g) (h_indep_fun : f ⟂ᵢ[μ] g) :
     (∫⁻ ω, (f * g) ω ∂μ) = (∫⁻ ω, f ω ∂μ) * ∫⁻ ω, g ω ∂μ :=
-  lintegral_mul_eq_lintegral_mul_lintegral_of_independent_measurableSpace
+  lintegral_mul_eq_lintegral_mul_lintegral_of_independent_sigmaAlgebra
     (measurable_iff_comap_le.1 h_meas_f) (measurable_iff_comap_le.1 h_meas_g) h_indep_fun
     (Measurable.of_comap_le le_rfl) (Measurable.of_comap_le le_rfl)
 
@@ -148,15 +148,15 @@ theorem lintegral_prod_eq_prod_lintegral_of_indepFun {ι : Type*}
 
 section Integral
 
-variable {𝓧 𝓨 E F G : Type*} [MeasurableSpace 𝓧] [MeasurableSpace 𝓨]
+variable {𝓧 𝓨 E F G : Type*} [SigmaAlgebra 𝓧] [SigmaAlgebra 𝓨]
 
 /-- If `X` and `Y` are two independent and integrable random variables, and `B` is a function of
 two variables such that `‖B x y‖ₑ ≤ C * ‖x‖ₑ * ‖y‖ₑ`, then `B X Y` is integrable.
 
 This is useful in particular if `B` is a continuous bilinear map. -/
 theorem IndepFun.integrable_op
-    [TopologicalSpace E] [ContinuousENorm E] [MeasurableSpace E] [OpensMeasurableSpace E]
-    [TopologicalSpace F] [ContinuousENorm F] [MeasurableSpace F] [OpensMeasurableSpace F]
+    [TopologicalSpace E] [ContinuousENorm E] [SigmaAlgebra E] [OpensSigmaAlgebra E]
+    [TopologicalSpace F] [ContinuousENorm F] [SigmaAlgebra F] [OpensSigmaAlgebra F]
     [TopologicalSpace G] [ContinuousENorm G]
     {X : Ω → E} {Y : Ω → F} (hXY : X ⟂ᵢ[μ] Y) (hX : Integrable X μ) (hY : Integrable Y μ)
     (B : E → F → G) (cB : Continuous B.uncurry) (C : ℝ≥0) (hB : ∀ x y, ‖B x y‖ₑ ≤ C * ‖x‖ₑ * ‖y‖ₑ) :
@@ -176,8 +176,8 @@ theorem IndepFun.integrable_op
 /-- A continuous bilinear map applied to two independent and integrable random variables
 is integrable. -/
 theorem IndepFun.integrable_bilin {𝕜 : Type*} [NontriviallyNormedField 𝕜]
-    [SeminormedAddCommGroup E] [NormedSpace 𝕜 E] [MeasurableSpace E] [OpensMeasurableSpace E]
-    [SeminormedAddCommGroup F] [NormedSpace 𝕜 F] [MeasurableSpace F] [OpensMeasurableSpace F]
+    [SeminormedAddCommGroup E] [NormedSpace 𝕜 E] [SigmaAlgebra E] [OpensSigmaAlgebra E]
+    [SeminormedAddCommGroup F] [NormedSpace 𝕜 F] [SigmaAlgebra F] [OpensSigmaAlgebra F]
     [SeminormedAddCommGroup G] [NormedSpace 𝕜 G]
     {X : Ω → E} {Y : Ω → F} (hXY : X ⟂ᵢ[μ] Y) (hX : Integrable X μ) (hY : Integrable Y μ)
     (B : E →L[𝕜] F →L[𝕜] G) :
@@ -192,8 +192,8 @@ almost-surely `0` and `c * ‖x‖ₑ * ‖y‖ₑ ≤ ‖B x y‖ₑ`, then `X`
 This is useful for the case where `B` is scalar multiplication, as it will allow to drop
 integrability hypotheses. -/
 theorem IndepFun.integrable_left_of_integrable_op
-    [TopologicalSpace E] [ContinuousENorm E] [MeasurableSpace E] [OpensMeasurableSpace E]
-    [NormedAddGroup F] [MeasurableSpace F] [OpensMeasurableSpace F]
+    [TopologicalSpace E] [ContinuousENorm E] [SigmaAlgebra E] [OpensSigmaAlgebra E]
+    [NormedAddGroup F] [SigmaAlgebra F] [OpensSigmaAlgebra F]
     [TopologicalSpace G] [ContinuousENorm G]
     {X : Ω → E} {Y : Ω → F} (hXY : X ⟂ᵢ[μ] Y)
     (B : E → F → G) (c : ℝ≥0) (hc : c ≠ 0) (hB : ∀ x y, c * ‖x‖ₑ * ‖y‖ₑ ≤ ‖B x y‖ₑ)
@@ -225,8 +225,8 @@ almost-surely `0` and `c * ‖x‖ₑ * ‖y‖ₑ ≤ ‖B x y‖ₑ`, then `Y`
 This is useful for the case where `B` is scalar multiplication, as it will allow to drop
 integrability hypotheses. -/
 theorem IndepFun.integrable_right_of_integrable_op
-    [NormedAddGroup E] [MeasurableSpace E] [OpensMeasurableSpace E]
-    [TopologicalSpace F] [ContinuousENorm F] [MeasurableSpace F] [OpensMeasurableSpace F]
+    [NormedAddGroup E] [SigmaAlgebra E] [OpensSigmaAlgebra E]
+    [TopologicalSpace F] [ContinuousENorm F] [SigmaAlgebra F] [OpensSigmaAlgebra F]
     [TopologicalSpace G] [ContinuousENorm G]
     {X : Ω → E} {Y : Ω → F} (hXY : X ⟂ᵢ[μ] Y)
     (B : E → F → G) (c : ℝ≥0) (hc : c ≠ 0) (hB : ∀ x y, c * ‖x‖ₑ * ‖y‖ₑ ≤ ‖B x y‖ₑ)
@@ -313,9 +313,9 @@ theorem IndepFun.integral_bilin_comp_comp'
 is a continuous bilinear map, then `∫ ω, B (X ω) (Y ω) ∂μ = B μ[X] μ[Y].` -/
 theorem IndepFun.integral_bilin
     [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]
-    [MeasurableSpace E] [BorelSpace E]
+    [SigmaAlgebra E] [BorelSpace E]
     [NormedAddCommGroup F] [NormedSpace ℝ F] [CompleteSpace F]
-    [MeasurableSpace F] [BorelSpace F]
+    [SigmaAlgebra F] [BorelSpace F]
     [NormedAddCommGroup G] [NormedSpace ℝ G] [CompleteSpace G]
     {X : Ω → E} {Y : Ω → F} (hXY : X ⟂ᵢ[μ] Y) (hX : Integrable X μ) (hY : Integrable Y μ)
     (B : E →L[ℝ] F →L[ℝ] G) :
@@ -334,9 +334,9 @@ The assumption on `B` allows to drop the integrability condition in
 multiplication or the multiplication. -/
 theorem IndepFun.integral_bilin'
     [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]
-    [MeasurableSpace E] [BorelSpace E]
+    [SigmaAlgebra E] [BorelSpace E]
     [NormedAddCommGroup F] [NormedSpace ℝ F] [CompleteSpace F]
-    [MeasurableSpace F] [BorelSpace F]
+    [SigmaAlgebra F] [BorelSpace F]
     [NormedAddCommGroup G] [NormedSpace ℝ G] [CompleteSpace G]
     {X : Ω → E} {Y : Ω → F} (hXY : X ⟂ᵢ[μ] Y) (hX : AEStronglyMeasurable X μ)
     (hY : AEStronglyMeasurable Y μ)
@@ -347,8 +347,8 @@ theorem IndepFun.integral_bilin'
 
 /-- The scalar product of two independent and integrable random variables is integrable. -/
 theorem IndepFun.integrable_smul
-    [TopologicalSpace E] [ContinuousENorm E] [MeasurableSpace E] [OpensMeasurableSpace E]
-    [TopologicalSpace F] [ContinuousENorm F] [MeasurableSpace F] [OpensMeasurableSpace F]
+    [TopologicalSpace E] [ContinuousENorm E] [SigmaAlgebra E] [OpensSigmaAlgebra E]
+    [TopologicalSpace F] [ContinuousENorm F] [SigmaAlgebra F] [OpensSigmaAlgebra F]
     [SMul E F] [ContinuousSMul E F] [ENormSMulClass E F]
     {X : Ω → E} {Y : Ω → F} (hXY : X ⟂ᵢ[μ] Y) (hX : Integrable X μ) (hY : Integrable Y μ) :
     Integrable (fun ω ↦ (X ω) • (Y ω)) μ :=
@@ -357,7 +357,7 @@ theorem IndepFun.integrable_smul
 /-- The product of two independent and integrable random variables is integrable. -/
 theorem IndepFun.integrable_mul
     [TopologicalSpace E] [ContinuousENorm E] [Mul E] [ContinuousMul E] [ENormSMulClass E E]
-    [MeasurableSpace E] [OpensMeasurableSpace E]
+    [SigmaAlgebra E] [OpensSigmaAlgebra E]
     {X Y : Ω → E} (hXY : X ⟂ᵢ[μ] Y) (hX : Integrable X μ) (hY : Integrable Y μ) :
     Integrable (X * Y) μ := hXY.integrable_smul hX hY
 
@@ -400,7 +400,7 @@ lemma IndepFun.integral_comp_mul_comp
   hXY.integral_fun_comp_mul_comp hX hY hf hg
 
 lemma IndepFun.integral_smul_eq_smul_integral
-    [NormedAddCommGroup E] [NormedSpace ℝ E] [NormedSpace 𝕜 E] [MeasurableSpace E] [BorelSpace E]
+    [NormedAddCommGroup E] [NormedSpace ℝ E] [NormedSpace 𝕜 E] [SigmaAlgebra E] [BorelSpace E]
     {X : Ω → 𝕜} {Y : Ω → E} (hXY : X ⟂ᵢ[μ] Y)
     (hX : AEStronglyMeasurable X μ) (hY : AEStronglyMeasurable Y μ) :
     μ[X • Y] = μ[X] • μ[Y] := by
@@ -414,7 +414,7 @@ lemma IndepFun.integral_mul_eq_mul_integral
   hXY.integral_smul_eq_smul_integral hX hY
 
 lemma IndepFun.integral_fun_smul_eq_smul_integral
-    [NormedAddCommGroup E] [NormedSpace ℝ E] [NormedSpace 𝕜 E] [MeasurableSpace E] [BorelSpace E]
+    [NormedAddCommGroup E] [NormedSpace ℝ E] [NormedSpace 𝕜 E] [SigmaAlgebra E] [BorelSpace E]
     {X : Ω → 𝕜} {Y : Ω → E} (hXY : X ⟂ᵢ[μ] Y)
     (hX : AEStronglyMeasurable X μ) (hY : AEStronglyMeasurable Y μ) :
     ∫ ω, X ω • Y ω ∂μ = (∫ ω, X ω ∂μ) • ∫ ω, Y ω ∂μ :=
@@ -430,8 +430,8 @@ end Integral
 /-- Independence of functions `f` and `g` into arbitrary types is characterized by the relation
   `E[(φ ∘ f) * (ψ ∘ g)] = E[φ ∘ f] * E[ψ ∘ g]` for all measurable `φ` and `ψ` with values in `ℝ`
   satisfying appropriate integrability conditions. -/
-theorem indepFun_iff_integral_comp_mul [IsFiniteMeasure μ] {β β' : Type*} {mβ : MeasurableSpace β}
-    {mβ' : MeasurableSpace β'} {f : Ω → β} {g : Ω → β'} {hfm : Measurable f} {hgm : Measurable g} :
+theorem indepFun_iff_integral_comp_mul [IsFiniteMeasure μ] {β β' : Type*} {mβ : SigmaAlgebra β}
+    {mβ' : SigmaAlgebra β'} {f : Ω → β} {g : Ω → β'} {hfm : Measurable f} {hgm : Measurable g} :
     f ⟂ᵢ[μ] g ↔ ∀ {φ : β → ℝ} {ψ : β' → ℝ}, Measurable φ → Measurable ψ →
       Integrable (φ ∘ f) μ → Integrable (ψ ∘ g) μ →
         integral μ (φ ∘ f * ψ ∘ g) = integral μ (φ ∘ f) * integral μ (ψ ∘ g) := by
@@ -444,11 +444,12 @@ theorem indepFun_iff_integral_comp_mul [IsFiniteMeasure μ] {β β' : Type*} {m�
       ((integrable_const 1).indicator (hfm.comp measurable_id hA))
       ((integrable_const 1).indicator (hgm.comp measurable_id hB))
   rwa [← toReal_eq_toReal_iff' (measure_ne_top μ _), toReal_mul, ← measureReal_def,
-    ← measureReal_def, ← measureReal_def, ← integral_indicator_one ((hfm hA).inter (hgm hB)),
+    ← measureReal_def, ← measureReal_def,
+    ← integral_indicator_one (MeasurableSet.inter (hfm hA) (hgm hB)),
     ← integral_indicator_one (hfm hA), ← integral_indicator_one (hgm hB), Set.inter_indicator_one]
   exact mul_ne_top (measure_ne_top μ _) (measure_ne_top μ _)
 
-variable {ι : Type*} [Fintype ι] {𝓧 : ι → Type*} {m𝓧 : ∀ i, MeasurableSpace (𝓧 i)}
+variable {ι : Type*} [Fintype ι] {𝓧 : ι → Type*} {m𝓧 : ∀ i, SigmaAlgebra (𝓧 i)}
     {X : (i : ι) → Ω → 𝓧 i} {f : (i : ι) → 𝓧 i → 𝕜}
 
 lemma iIndepFun.integral_fun_prod_comp (hX : iIndepFun X μ)
@@ -485,7 +486,7 @@ lemma iIndepFun.integral_fun_prod_eq_prod_integral
 
 section SetIntegral
 
-variable {Ω 𝓧 : Type*} {m mΩ : MeasurableSpace Ω} {P : Measure Ω} [m𝓧 : MeasurableSpace 𝓧]
+variable {Ω 𝓧 : Type*} {m mΩ : SigmaAlgebra Ω} {P : Measure Ω} [m𝓧 : SigmaAlgebra 𝓧]
   {X : Ω → 𝓧} {A : Set Ω}
 
 /-- If a random variable `X` is independent of a sigma-algebra `m` and `A` is a set in `m`
@@ -497,14 +498,16 @@ lemma Indep.setIntegral_eq_smul {E : Type*} [NormedAddCommGroup E] [NormedSpace 
     ∫ ω in A, f (X ω) ∂P = P.real A • ∫ ω, f (X ω) ∂P :=
   calc ∫ ω in A, f (X ω) ∂P
     = ∫ ω, id (A.indicator (1 : Ω → ℝ) ω) • f (X ω) ∂P := by
-        rw [← integral_indicator (hm A hA2)]
+        rw [← integral_indicator (hm hA2)]
         congr with ω
         by_cases hω : ω ∈ A <;> simp [hω]
   _ = P.real A • ∫ ω, f (X ω) ∂P := by
     rw [IndepFun.integral_fun_comp_smul_comp _ _ hX (by fun_prop) hf]
-    · simp [hm A hA2]
+    · have hA2' : MeasurableSet A := hm hA2
+      simp [hA2']
     · exact hA1.indicator_indepFun 1 hA2
-    · exact (aemeasurable_indicator_const_iff 1).2 (hm A hA2).nullMeasurableSet
+    · exact (aemeasurable_indicator_const_iff 1).2
+        (MeasurableSet.nullMeasurableSet (hm hA2))
 
 /-- If a random variable `X` is independent of a sigma-algebra `m` and `A` is a set in `m`
 then `∫ ω in A, f (X ω) ∂P = P.real A * ∫ ω, f (X ω) ∂P` for a measurable function `f : 𝓧 → ℝ`. -/

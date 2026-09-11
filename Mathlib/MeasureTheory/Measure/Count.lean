@@ -22,7 +22,7 @@ and prove basic properties of this measure.
 open Set
 open scoped ENNReal Finset
 
-variable {α β : Type*} [MeasurableSpace α] [MeasurableSpace β] {s : Set α}
+variable {α β : Type*} [SigmaAlgebra α] [SigmaAlgebra β] {s : Set α}
 
 noncomputable section
 

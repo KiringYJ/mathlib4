@@ -64,7 +64,7 @@ open Submodule MeasureTheory Module MeasureTheory Module ZSpan
 
 section General
 
-variable {E : Type*} [NormedAddCommGroup E] [MeasurableSpace E] (L : Submodule ℤ E)
+variable {E : Type*} [NormedAddCommGroup E] [SigmaAlgebra E] (L : Submodule ℤ E)
 
 /-- The covolume of a `ℤ`-lattice is the volume of some fundamental domain; see
 `ZLattice.covolume_eq_volume` for the proof that the volume does not depend on the choice of
@@ -76,7 +76,7 @@ end General
 section Basic
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
-variable [MeasurableSpace E] [BorelSpace E]
+variable [SigmaAlgebra E] [BorelSpace E]
 variable (L : Submodule ℤ E) [DiscreteTopology L] [IsZLattice ℝ L]
 variable (μ : Measure E := by volume_tac) [Measure.IsAddHaarMeasure μ]
 
@@ -100,7 +100,7 @@ theorem covolume_pos : 0 < covolume L μ :=
 
 set_option backward.privateInPublic true in
 theorem covolume_comap {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F] [FiniteDimensional ℝ F]
-    [MeasurableSpace F] [BorelSpace F] (ν : Measure F := by volume_tac) [Measure.IsAddHaarMeasure ν]
+    [SigmaAlgebra F] [BorelSpace F] (ν : Measure F := by volume_tac) [Measure.IsAddHaarMeasure ν]
     {e : F ≃L[ℝ] E} (he : MeasurePreserving e ν μ) :
     covolume (ZLattice.comap ℝ L e.toLinearMap) ν = covolume L μ := by
   rw [covolume_eq_measure_fundamentalDomain _ _ (isAddFundamentalDomain (Free.chooseBasis ℤ L) μ),
@@ -168,7 +168,7 @@ A more general version of `covolume_div_covolume_eq_relIndex`;
 see the `Naming conventions` section in the introduction.
 -/
 theorem covolume_div_covolume_eq_relIndex' {E : Type*} [NormedAddCommGroup E]
-    [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [MeasurableSpace E] [BorelSpace E]
+    [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [SigmaAlgebra E] [BorelSpace E]
     (L₁ L₂ : Submodule ℤ E) [DiscreteTopology L₁] [IsZLattice ℝ L₁] [DiscreteTopology L₂]
     [IsZLattice ℝ L₂] (h : L₁ ≤ L₂) :
     covolume L₁ / covolume L₂ = L₁.toAddSubgroup.relIndex L₂.toAddSubgroup := by
@@ -193,7 +193,7 @@ set_option backward.isDefEq.respectTransparency.types false in
 /-- A more general version of `ZLattice.volume_image_eq_volume_div_covolume`;
 see the `Naming conventions` section in the introduction. -/
 theorem volume_image_eq_volume_div_covolume' {E : Type*} [NormedAddCommGroup E]
-    [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [MeasurableSpace E] [BorelSpace E]
+    [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [SigmaAlgebra E] [BorelSpace E]
     (L : Submodule ℤ E) [DiscreteTopology L] [IsZLattice ℝ L] {ι : Type*} [Fintype ι]
     (b : Basis ι ℤ L) {s : Set E} (hs : NullMeasurableSet s) :
     volume ((b.ofZLatticeBasis ℝ).equivFun '' s) = volume s / ENNReal.ofReal (covolume L) := by
@@ -227,7 +227,7 @@ variable {ι : Type*} [Fintype ι] (b : Basis ι ℤ L)
 set_option backward.isDefEq.respectTransparency.types false in
 /-- A version of `ZLattice.covolume.tendsto_card_div_pow` for the general case;
 see the `Naming convention` section in the introduction. -/
-theorem tendsto_card_div_pow'' [FiniteDimensional ℝ E] [MeasurableSpace E] [BorelSpace E]
+theorem tendsto_card_div_pow'' [FiniteDimensional ℝ E] [SigmaAlgebra E] [BorelSpace E]
     {s : Set E} (hs₁ : IsBounded s) (hs₂ : MeasurableSet s)
     (hs₃ : volume (frontier ((b.ofZLatticeBasis ℝ).equivFun '' s)) = 0) :
     Tendsto (fun n : ℕ ↦ (Nat.card (s ∩ (n : ℝ)⁻¹ • L : Set E) : ℝ) / n ^ card ι)
@@ -257,7 +257,7 @@ private theorem tendsto_card_le_div''_aux
 
 /-- A version of `ZLattice.covolume.tendsto_card_le_div` for the general case;
 see the `Naming conventions` section in the introduction. -/
-theorem tendsto_card_le_div'' [FiniteDimensional ℝ E] [MeasurableSpace E] [BorelSpace E]
+theorem tendsto_card_le_div'' [FiniteDimensional ℝ E] [SigmaAlgebra E] [BorelSpace E]
     [Nonempty ι] {X : Set E} (hX : ∀ ⦃x⦄ ⦃r : ℝ⦄, x ∈ X → 0 < r → r • x ∈ X)
     {F : E → ℝ} (h₁ : ∀ x ⦃r : ℝ⦄, 0 ≤ r → F (r • x) = r ^ card ι * (F x))
     (h₂ : IsBounded {x ∈ X | F x ≤ 1}) (h₃ : MeasurableSet {x ∈ X | F x ≤ 1})
@@ -350,7 +350,7 @@ open Filter Pointwise Bornology
 open scoped Topology
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
-  [MeasurableSpace E] [BorelSpace E]
+  [SigmaAlgebra E] [BorelSpace E]
 variable (L : Submodule ℤ E) [DiscreteTopology L] [IsZLattice ℝ L]
 
 /-- A version of `ZLattice.covolume.tendsto_card_div_pow` for the `InnerProductSpace` case;

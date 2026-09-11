@@ -44,16 +44,16 @@ continuous map, sigma-algebra
 
 @[expose] public section
 
-open MeasurableSpace TopologicalSpace
+open SigmaAlgebra TopologicalSpace
 
 variable {X Y : Type*} [TopologicalSpace X] [TopologicalSpace Y]
 
-instance ContinuousMap.measurableSpace : MeasurableSpace C(X, Y) := borel _
+instance ContinuousMap.sigmaAlgebra : SigmaAlgebra C(X, Y) := borel _
 
 instance : BorelSpace C(X, Y) where
-  measurable_eq := rfl
+  sigmaAlgebra_eq := rfl
 
-lemma ContinuousMap.measurable_eval [MeasurableSpace Y] [BorelSpace Y] (x : X) :
+lemma ContinuousMap.measurable_eval [SigmaAlgebra Y] [BorelSpace Y] (x : X) :
     Measurable (fun f : C(X, Y) ↦ f x) :=
   Continuous.measurable (by fun_prop)
 
@@ -85,8 +85,11 @@ theorem borel_eq_iSup_comap_eval :
   rw [borel_eq_generateFrom_of_subbasis compactOpen_eq]
   apply generateFrom_le
   rintro - ⟨K, hK, U, hU, rfl⟩
+  change @MeasurableSet C(X, Y) (⨆ x : X, (borel Y).comap fun f ↦ f x)
+    {f | K.MapsTo f U}
   obtain rfl | ⟨x, hx⟩ := U.eq_empty_or_nonempty
-  · simp
+  · simpa only [Set.mapsTo_empty_iff] using
+      (@MeasurableSet.const C(X, Y) _ (K = ∅))
   -- Consider `V` a countable basis of the topology on `Y` obtained by taking the finite unions
   -- of sets of `countableBasis Y`.
   let V := Set.sUnion '' {f : Set (Set Y) | f.Finite ∧ f ⊆ countableBasis Y}
@@ -118,7 +121,7 @@ theorem borel_eq_iSup_comap_eval :
   simp_rw [this]
   -- In particular, because `V` is countable, this is a countable union.
   -- To show measurability it is therefore enough to show the measurability of each term.
-  refine .biUnion cV (fun v hv1 ↦ .iUnion (fun hv2 ↦ ?_))
+  refine MeasurableSet.biUnion cV fun v hv1 ↦ MeasurableSet.iUnion fun hv2 ↦ ?_
   -- Consider now `v ∈ V` such that `closure v ⊆ U`.
   -- Consider `Q` a countable dense subset of `K`, which exists by second-countability assumption.
   obtain ⟨Q, cQ, hQ, dQ⟩ := exists_countable_dense_subset K
@@ -141,27 +144,27 @@ theorem borel_eq_iSup_comap_eval :
   -- so we are done.
   borelize Y
   refine .biInter cQ fun q hq ↦ .preimage measurableSet_closure (.le (le_iSup _ q) ?_)
-  rw [BorelSpace.measurable_eq (α := Y)]
+  rw [BorelSpace.sigmaAlgebra_eq (α := Y)]
   exact comap_measurable _
 
-variable [mY : MeasurableSpace Y] [BorelSpace Y]
+variable [mY : SigmaAlgebra Y] [BorelSpace Y]
 
-lemma measurableSpace_eq_iSup_comap_eval :
-    measurableSpace = ⨆ a : X, mY.comap fun b ↦ b a := by
-  simp_rw [BorelSpace.measurable_eq, borel_eq_iSup_comap_eval]
+lemma sigmaAlgebra_eq_iSup_comap_eval :
+    sigmaAlgebra = ⨆ a : X, mY.comap fun b ↦ b a := by
+  simp_rw [BorelSpace.sigmaAlgebra_eq, borel_eq_iSup_comap_eval]
 
 /-- A function `g : Z → C(X, Y)` is measurable if and only if,
 for all `x : X`, `z ↦ g z x` is measurable. -/
-lemma measurable_iff_eval {Z : Type*} [MeasurableSpace Z] {g : Z → C(X, Y)} :
+lemma measurable_iff_eval {Z : Type*} [SigmaAlgebra Z] {g : Z → C(X, Y)} :
     Measurable g ↔ ∀ (x : X), Measurable fun a ↦ g a x := by
-  rw [measurableSpace_eq_iSup_comap_eval]
+  rw [sigmaAlgebra_eq_iSup_comap_eval]
   simp_rw [measurable_iff_comap_le, comap_iSup, iSup_le_iff, comap_comp, Function.comp_def]
 
 end ContinuousMap
 
 namespace MeasurableEquiv
 
-variable [MeasurableSpace Y] [BorelSpace Y]
+variable [SigmaAlgebra Y] [BorelSpace Y]
 
 variable (X Y) in
 /-- A measurable equivalence between `C(X, Y)` and `{f : X → Y // Continuous f}`. -/

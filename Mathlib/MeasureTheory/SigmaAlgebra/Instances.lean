@@ -5,50 +5,50 @@ Authors: Johannes Hölzl, Mario Carneiro
 -/
 module
 
-public import Mathlib.MeasureTheory.MeasurableSpace.Defs
+public import Mathlib.MeasureTheory.SigmaAlgebra.Defs
 public import Mathlib.GroupTheory.GroupAction.IterateAct
 public import Mathlib.Data.Rat.Init
 public import Mathlib.Data.ZMod.Defs
 
 /-!
-# Measurable-space typeclass instances
+# Sigma-algebra typeclass instances
 
-This file provides measurable-space instances for a selection of standard countable types,
-in each case defining the Σ-algebra to be `⊤` (the discrete measurable-space structure).
+This file provides sigma-algebra instances for a selection of standard countable types,
+in each case defining the sigma-algebra to be `⊤` (the discrete sigma-algebra).
 -/
 
 public section
 
-instance Empty.instMeasurableSpace : MeasurableSpace Empty := ⊤
+instance Empty.instSigmaAlgebra : SigmaAlgebra Empty := ⊤
 
-instance PUnit.instMeasurableSpace : MeasurableSpace PUnit := ⊤
+instance PUnit.instSigmaAlgebra : SigmaAlgebra PUnit := ⊤
 
-instance Bool.instMeasurableSpace : MeasurableSpace Bool := ⊤
+instance Bool.instSigmaAlgebra : SigmaAlgebra Bool := ⊤
 
-instance Prop.instMeasurableSpace : MeasurableSpace Prop := ⊤
+instance Prop.instSigmaAlgebra : SigmaAlgebra Prop := ⊤
 
-instance Nat.instMeasurableSpace : MeasurableSpace ℕ := ⊤
+instance Nat.instSigmaAlgebra : SigmaAlgebra ℕ := ⊤
 
-instance ENat.instMeasurableSpace : MeasurableSpace ℕ∞ := ⊤
+instance ENat.instSigmaAlgebra : SigmaAlgebra ℕ∞ := ⊤
 
-instance Fin.instMeasurableSpace (n : ℕ) : MeasurableSpace (Fin n) := ⊤
+instance Fin.instSigmaAlgebra (n : ℕ) : SigmaAlgebra (Fin n) := ⊤
 
-instance ZMod.instMeasurableSpace (n : ℕ) : MeasurableSpace (ZMod n) := ⊤
+instance ZMod.instSigmaAlgebra (n : ℕ) : SigmaAlgebra (ZMod n) := ⊤
 
-instance Int.instMeasurableSpace : MeasurableSpace ℤ := ⊤
+instance Int.instSigmaAlgebra : SigmaAlgebra ℤ := ⊤
 
-instance Rat.instMeasurableSpace : MeasurableSpace ℚ := ⊤
-
-@[to_additive]
-instance IterateMulAct.instMeasurableSpace {α : Type*} {f : α → α} :
-    MeasurableSpace (IterateMulAct f) := ⊤
+instance Rat.instSigmaAlgebra : SigmaAlgebra ℚ := ⊤
 
 @[to_additive]
-instance IterateMulAct.instDiscreteMeasurableSpace {α : Type*} {f : α → α} :
-    DiscreteMeasurableSpace (IterateMulAct f) := inferInstance
+instance IterateMulAct.instSigmaAlgebra {α : Type*} {f : α → α} :
+    SigmaAlgebra (IterateMulAct f) := ⊤
+
+@[to_additive]
+instance IterateMulAct.instDiscreteSigmaAlgebra {α : Type*} {f : α → α} :
+    DiscreteSigmaAlgebra (IterateMulAct f) := inferInstance
 
 instance (priority := 100) Subsingleton.measurableSingletonClass
-    {α} [MeasurableSpace α] [Subsingleton α] : MeasurableSingletonClass α := by
+    {α} [SigmaAlgebra α] [Subsingleton α] : MeasurableSingletonClass α := by
   refine ⟨fun i => ?_⟩
   convert! MeasurableSet.univ
   simp [Set.eq_univ_iff_forall, eq_iff_true_of_subsingleton]
@@ -59,7 +59,7 @@ instance Prop.instMeasurableSingletonClass : MeasurableSingletonClass Prop := �
 
 instance Nat.instMeasurableSingletonClass : MeasurableSingletonClass ℕ := ⟨fun _ => trivial⟩
 
-instance ENat.instDiscreteMeasurableSpace : DiscreteMeasurableSpace ℕ∞ := ⟨fun _ ↦ trivial⟩
+instance ENat.instDiscreteSigmaAlgebra : DiscreteSigmaAlgebra ℕ∞ := ⟨fun _ ↦ trivial⟩
 
 instance ENat.instMeasurableSingletonClass : MeasurableSingletonClass ℕ∞ := inferInstance
 

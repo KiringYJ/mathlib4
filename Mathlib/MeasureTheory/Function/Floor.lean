@@ -21,24 +21,24 @@ open Set
 
 section FloorRing
 
-variable {α R : Type*} [MeasurableSpace α] [Ring R] [LinearOrder R] [FloorRing R]
-  [TopologicalSpace R] [OrderTopology R] [MeasurableSpace R]
+variable {α R : Type*} [SigmaAlgebra α] [Ring R] [LinearOrder R] [FloorRing R]
+  [TopologicalSpace R] [OrderTopology R] [SigmaAlgebra R]
 
-theorem Int.measurable_floor [OpensMeasurableSpace R] : Measurable (Int.floor : R → ℤ) :=
+theorem Int.measurable_floor [OpensSigmaAlgebra R] : Measurable (Int.floor : R → ℤ) :=
   measurable_to_countable fun x => by
     simpa only [Int.preimage_floor_singleton] using measurableSet_Ico
 
 @[fun_prop]
-theorem Measurable.floor [OpensMeasurableSpace R] {f : α → R} (hf : Measurable f) :
+theorem Measurable.floor [OpensSigmaAlgebra R] {f : α → R} (hf : Measurable f) :
     Measurable fun x => ⌊f x⌋ :=
   Int.measurable_floor.comp hf
 
-theorem Int.measurable_ceil [OpensMeasurableSpace R] : Measurable (Int.ceil : R → ℤ) :=
+theorem Int.measurable_ceil [OpensSigmaAlgebra R] : Measurable (Int.ceil : R → ℤ) :=
   measurable_to_countable fun x => by
     simpa only [Int.preimage_ceil_singleton] using measurableSet_Ioc
 
 @[fun_prop]
-theorem Measurable.ceil [OpensMeasurableSpace R] {f : α → R} (hf : Measurable f) :
+theorem Measurable.ceil [OpensSigmaAlgebra R] {f : α → R} (hf : Measurable f) :
     Measurable fun x => ⌈f x⌉ :=
   Int.measurable_ceil.comp hf
 
@@ -46,7 +46,8 @@ theorem measurable_fract [IsStrictOrderedRing R] [BorelSpace R] :
     Measurable (Int.fract : R → R) := by
   intro s hs
   rw [Int.preimage_fract]
-  exact MeasurableSet.iUnion fun z => measurable_id.sub_const _ (hs.inter measurableSet_Ico)
+  exact MeasurableSet.iUnion fun z =>
+    measurable_id.sub_const _ (MeasurableSet.inter hs measurableSet_Ico)
 
 @[fun_prop]
 theorem Measurable.fract [IsStrictOrderedRing R] [BorelSpace R] {f : α → R} (hf : Measurable f) :
@@ -57,14 +58,15 @@ theorem MeasurableSet.image_fract [IsStrictOrderedRing R] [BorelSpace R]
     {s : Set R} (hs : MeasurableSet s) :
     MeasurableSet (Int.fract '' s) := by
   simp only [Int.image_fract, sub_eq_add_neg, image_add_right']
-  exact MeasurableSet.iUnion fun m => (measurable_add_const _ hs).inter measurableSet_Ico
+  exact MeasurableSet.iUnion fun m =>
+    MeasurableSet.inter (measurable_add_const _ hs) measurableSet_Ico
 
 end FloorRing
 
 section FloorSemiring
 
-variable {α R : Type*} [MeasurableSpace α] [Semiring R] [LinearOrder R] [FloorSemiring R]
-  [TopologicalSpace R] [OrderTopology R] [MeasurableSpace R] [OpensMeasurableSpace R] {f : α → R}
+variable {α R : Type*} [SigmaAlgebra α] [Semiring R] [LinearOrder R] [FloorSemiring R]
+  [TopologicalSpace R] [OrderTopology R] [SigmaAlgebra R] [OpensSigmaAlgebra R] {f : α → R}
 
 theorem Nat.measurable_floor [IsStrictOrderedRing R] : Measurable (Nat.floor : R → ℕ) :=
   measurable_to_countable fun n => by

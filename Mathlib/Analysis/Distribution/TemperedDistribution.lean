@@ -71,7 +71,7 @@ variable [NormedAddCommGroup E] [NormedSpace ℝ E]
 
 namespace MeasureTheory.Measure
 
-variable [MeasurableSpace E] [BorelSpace E] [SecondCountableTopology E]
+variable [SigmaAlgebra E] [BorelSpace E] [SecondCountableTopology E]
   (μ : Measure E := by volume_tac) [hμ : μ.HasTemperateGrowth]
 
 set_option backward.privateInPublic true in
@@ -89,7 +89,7 @@ end MeasureTheory.Measure
 
 namespace Function.HasTemperateGrowth
 
-variable [MeasurableSpace E] [BorelSpace E] [SecondCountableTopology E]
+variable [SigmaAlgebra E] [BorelSpace E] [SecondCountableTopology E]
   (μ : Measure E := by volume_tac) [hμ : μ.HasTemperateGrowth]
 
 set_option backward.privateInPublic true in
@@ -107,9 +107,9 @@ end Function.HasTemperateGrowth
 
 namespace SchwartzMap
 
-section MeasurableSpace
+section SigmaAlgebra
 
-variable [MeasurableSpace E] [BorelSpace E] [SecondCountableTopology E]
+variable [SigmaAlgebra E] [BorelSpace E] [SecondCountableTopology E]
 
 set_option backward.isDefEq.respectTransparency false in
 variable (E F) in
@@ -129,7 +129,7 @@ theorem toTemperedDistributionCLM_apply_apply (μ : Measure E := by volume_tac)
     toTemperedDistributionCLM E F μ f g = ∫ (x : E), g x • f x ∂μ := by
   simp [toTemperedDistributionCLM, comp_apply _]
 
-end MeasurableSpace
+end SigmaAlgebra
 
 section MeasureSpace
 
@@ -154,7 +154,7 @@ open scoped ENNReal
 
 variable [CompleteSpace F]
 
-variable [MeasurableSpace E] [BorelSpace E] {μ : Measure E} [hμ : μ.HasTemperateGrowth]
+variable [SigmaAlgebra E] [BorelSpace E] {μ : Measure E} [hμ : μ.HasTemperateGrowth]
 
 /-- Define a tempered distribution from a L^p function. -/
 def toTemperedDistribution {p : ℝ≥0∞}
@@ -301,7 +301,7 @@ end TVS
 open ENNReal MeasureTheory
 
 variable [NormedAddCommGroup F] [NormedSpace ℂ F] [CompleteSpace F]
-  [MeasurableSpace E] [BorelSpace E] {μ : Measure E} [hμ : μ.HasTemperateGrowth]
+  [SigmaAlgebra E] [BorelSpace E] {μ : Measure E} [hμ : μ.HasTemperateGrowth]
 
 /-- Coercion of the product of two `Lp` functions to a tempered distribution is equal to the left
 multiplication if the left factor is a function of temperate growth. -/
@@ -398,7 +398,7 @@ instance : LineDerivLeftSMul ℝ E 𝓢'(E, F) 𝓢'(E, F) where
     simp [lineDerivOp_left_smul, map_smul_of_tower f]
 
 variable
-  [MeasurableSpace E] [BorelSpace E] [SecondCountableTopology E] [FiniteDimensional ℝ E]
+  [SigmaAlgebra E] [BorelSpace E] [SecondCountableTopology E] [FiniteDimensional ℝ E]
   {μ : Measure E} [μ.IsAddHaarMeasure]
 
 theorem lineDerivOp_toTemperedDistributionCLM_eq (f : 𝓢(E, F)) (m : E) :
@@ -441,7 +441,7 @@ theorem laplacian_apply_apply (f : 𝓢'(E, F)) (u : 𝓢(E, ℂ)) : (Δ f) u = 
   simp [laplacian_eq_sum (stdOrthonormalBasis ℝ E),
     SchwartzMap.laplacian_eq_sum (stdOrthonormalBasis ℝ E), map_neg, neg_neg]
 
-variable [MeasurableSpace E] [BorelSpace E]
+variable [SigmaAlgebra E] [BorelSpace E]
 
 /-- The distributional Laplacian and the classical Laplacian coincide on `𝓢(E, F)`. -/
 @[simp]
@@ -459,7 +459,7 @@ section Fourier
 open FourierTransform
 
 variable [NormedAddCommGroup E] [InnerProductSpace ℝ E]
-  [FiniteDimensional ℝ E] [MeasurableSpace E] [BorelSpace E]
+  [FiniteDimensional ℝ E] [SigmaAlgebra E] [BorelSpace E]
 
 section TVS
 
@@ -584,7 +584,7 @@ theorem delta_apply (x : E) (f : 𝓢(E, ℂ)) : delta x f = f x :=
 
 open MeasureTheory MeasureTheory.Measure
 
-variable [MeasurableSpace E] [BorelSpace E] [SecondCountableTopology E]
+variable [SigmaAlgebra E] [BorelSpace E] [SecondCountableTopology E]
 
 /-- Dirac measure considered as a tempered distribution is the delta distribution. -/
 @[simp]
@@ -593,7 +593,7 @@ theorem toTemperedDistribution_dirac_eq_delta (x : E) :
 
 end definition
 
-variable [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [MeasurableSpace E] [BorelSpace E]
+variable [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [SigmaAlgebra E] [BorelSpace E]
 
 open FourierTransform
 

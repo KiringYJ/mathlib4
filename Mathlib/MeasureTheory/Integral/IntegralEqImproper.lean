@@ -84,7 +84,7 @@ namespace MeasureTheory
 
 section AECover
 
-variable {α ι : Type*} [MeasurableSpace α] (μ : Measure α) (l : Filter ι)
+variable {α ι : Type*} [SigmaAlgebra α] (μ : Measure α) (l : Filter ι)
 
 /-- A sequence `φ` of subsets of `α` is a `MeasureTheory.AECover` w.r.t. a measure `μ` and a filter
 `l` if almost every point (w.r.t. `μ`) of `α` eventually belongs to `φ n` (w.r.t. `l`), and if
@@ -126,7 +126,7 @@ end AECover
 
 section MetricSpace
 
-variable [PseudoMetricSpace α] [OpensMeasurableSpace α]
+variable [PseudoMetricSpace α] [OpensSigmaAlgebra α]
 
 theorem aecover_ball {x : α} {r : ι → ℝ} (hr : Tendsto r l atTop) :
     AECover μ l (fun i ↦ Metric.ball x (r i)) where
@@ -146,7 +146,7 @@ end MetricSpace
 
 section Preorderα
 
-variable [Preorder α] [TopologicalSpace α] [OrderClosedTopology α] [OpensMeasurableSpace α]
+variable [Preorder α] [TopologicalSpace α] [OrderClosedTopology α] [OpensSigmaAlgebra α]
   {a b : ι → α}
 
 theorem aecover_Ici (ha : Tendsto a l atBot) : AECover μ l fun i => Ici (a i) where
@@ -164,7 +164,7 @@ end Preorderα
 
 section LinearOrderα
 
-variable [LinearOrder α] [TopologicalSpace α] [OrderClosedTopology α] [OpensMeasurableSpace α]
+variable [LinearOrder α] [TopologicalSpace α] [OrderClosedTopology α] [OpensSigmaAlgebra α]
   {a b : ι → α} (ha : Tendsto a l atBot) (hb : Tendsto b l atTop)
 
 include ha in
@@ -190,7 +190,7 @@ end LinearOrderα
 
 section FiniteIntervals
 
-variable [LinearOrder α] [TopologicalSpace α] [OrderClosedTopology α] [OpensMeasurableSpace α]
+variable [LinearOrder α] [TopologicalSpace α] [OrderClosedTopology α] [OpensSigmaAlgebra α]
   {a b c d : ι → α} {A B : α} (ha : Tendsto a l (𝓝 A)) (hb : Tendsto b l (𝓝 B))
   (hc : Tendsto c l atBot) (hd : Tendsto d l atTop)
 
@@ -319,7 +319,7 @@ theorem AECover.ae_tendsto_indicator {β : Type*} [Zero β] [TopologicalSpace β
   hφ.ae_eventually_mem.mono fun _x hx =>
     tendsto_const_nhds.congr' <| hx.mono fun _n hn => (indicator_of_mem hn _).symm
 
-theorem AECover.aemeasurable {β : Type*} [MeasurableSpace β] [l.IsCountablyGenerated] [l.NeBot]
+theorem AECover.aemeasurable {β : Type*} [SigmaAlgebra β] [l.IsCountablyGenerated] [l.NeBot]
     {f : α → β} {φ : ι → Set α} (hφ : AECover μ l φ)
     (hfm : ∀ i, AEMeasurable f (μ.restrict <| φ i)) : AEMeasurable f μ := by
   obtain ⟨u, hu⟩ := l.exists_seq_tendsto
@@ -338,7 +338,7 @@ theorem AECover.aestronglyMeasurable {β : Type*} [TopologicalSpace β] [PseudoM
 
 end AECover
 
-theorem AECover.comp_tendsto {α ι ι' : Type*} [MeasurableSpace α] {μ : Measure α} {l : Filter ι}
+theorem AECover.comp_tendsto {α ι ι' : Type*} [SigmaAlgebra α] {μ : Measure α} {l : Filter ι}
     {l' : Filter ι'} {φ : ι → Set α} (hφ : AECover μ l φ) {u : ι' → ι} (hu : Tendsto u l' l) :
     AECover μ l' (φ ∘ u) where
   ae_eventually_mem := hφ.ae_eventually_mem.mono fun _x hx => hu.eventually hx
@@ -346,7 +346,7 @@ theorem AECover.comp_tendsto {α ι ι' : Type*} [MeasurableSpace α] {μ : Meas
 
 section AECoverUnionInterCountable
 
-variable {α ι : Type*} [Countable ι] [MeasurableSpace α] {μ : Measure α}
+variable {α ι : Type*} [Countable ι] [SigmaAlgebra α] {μ : Measure α}
 
 theorem AECover.biUnion_Iic_aecover [Preorder ι] {φ : ι → Set α} (hφ : AECover μ atTop φ) :
     AECover μ atTop fun n : ι => ⋃ (k) (_h : k ∈ Iic n), φ k :=
@@ -363,7 +363,7 @@ end AECoverUnionInterCountable
 
 section Lintegral
 
-variable {α ι : Type*} [MeasurableSpace α] {μ : Measure α} {l : Filter ι}
+variable {α ι : Type*} [SigmaAlgebra α] {μ : Measure α} {l : Filter ι}
 
 private theorem lintegral_tendsto_of_monotone_of_nat {φ : ℕ → Set α} (hφ : AECover μ atTop φ)
     (hmono : Monotone φ) {f : α → ℝ≥0∞} (hfm : AEMeasurable f μ) :
@@ -408,7 +408,7 @@ end Lintegral
 
 section Integrable
 
-variable {α ι E : Type*} [MeasurableSpace α] {μ : Measure α} {l : Filter ι} [NormedAddCommGroup E]
+variable {α ι E : Type*} [SigmaAlgebra α] {μ : Measure α} {l : Filter ι} [NormedAddCommGroup E]
 
 theorem AECover.integrable_of_lintegral_enorm_bounded [l.NeBot] [l.IsCountablyGenerated]
     {φ : ι → Set α} (hφ : AECover μ l φ) {f : α → E} (I : ℝ) (hfm : AEStronglyMeasurable f μ)
@@ -475,7 +475,7 @@ end Integrable
 
 section Integral
 
-variable {α ι E : Type*} [MeasurableSpace α] {μ : Measure α} {l : Filter ι} [NormedAddCommGroup E]
+variable {α ι E : Type*} [SigmaAlgebra α] {μ : Measure α} {l : Filter ι} [NormedAddCommGroup E]
   [NormedSpace ℝ E]
 
 theorem AECover.integral_tendsto_of_countably_generated [l.IsCountablyGenerated] {φ : ι → Set α}

@@ -54,8 +54,8 @@ noncomputable section
 open Set Function Real ENNReal MeasureTheory Filter ProbabilityTheory ProbabilityTheory.Kernel
 open scoped Topology ENNReal MeasureTheory
 
-variable {α β γ E : Type*} {mα : MeasurableSpace α} {mβ : MeasurableSpace β}
-  {mγ : MeasurableSpace γ} [NormedAddCommGroup E] {a : α}
+variable {α β γ E : Type*} {mα : SigmaAlgebra α} {mβ : SigmaAlgebra β}
+  {mγ : SigmaAlgebra γ} [NormedAddCommGroup E] {a : α}
 
 namespace ProbabilityTheory
 
@@ -447,7 +447,7 @@ namespace MeasureTheory
 
 namespace Measure
 
-variable {α β E : Type*} {mα : MeasurableSpace α} {mβ : MeasurableSpace β}
+variable {α β E : Type*} {mα : SigmaAlgebra α} {mβ : SigmaAlgebra β}
   [NormedAddCommGroup E] {a : α} {κ : Kernel α β} {μ : Measure α} {f : β → E}
 
 section Integral

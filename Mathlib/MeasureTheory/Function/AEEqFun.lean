@@ -81,11 +81,11 @@ open Set Filter TopologicalSpace ENNReal MeasureTheory Function
 
 open scoped Topology
 
-variable {α β γ δ : Type*} [MeasurableSpace α] {μ ν : Measure α}
+variable {α β γ δ : Type*} [SigmaAlgebra α] {μ ν : Measure α}
 
 namespace MeasureTheory
 
-section MeasurableSpace
+section SigmaAlgebra
 
 variable [TopologicalSpace β]
 variable (β)
@@ -110,7 +110,7 @@ variable {α β}
 @[inherit_doc MeasureTheory.AEEqFun]
 notation:25 α " →ₘ[" μ "] " β => AEEqFun α β μ
 
-end MeasurableSpace
+end SigmaAlgebra
 
 variable [TopologicalSpace δ]
 
@@ -149,12 +149,12 @@ protected theorem aestronglyMeasurable (f : α →ₘ[μ] β) : AEStronglyMeasur
   f.stronglyMeasurable.aestronglyMeasurable
 
 @[fun_prop]
-protected theorem measurable [PseudoMetrizableSpace β] [MeasurableSpace β] [BorelSpace β]
+protected theorem measurable [PseudoMetrizableSpace β] [SigmaAlgebra β] [BorelSpace β]
     (f : α →ₘ[μ] β) : Measurable f :=
   f.stronglyMeasurable.measurable
 
 @[fun_prop]
-protected theorem aemeasurable [PseudoMetrizableSpace β] [MeasurableSpace β] [BorelSpace β]
+protected theorem aemeasurable [PseudoMetrizableSpace β] [SigmaAlgebra β] [BorelSpace β]
     (f : α →ₘ[μ] β) : AEMeasurable f μ :=
   f.measurable.aemeasurable
 
@@ -188,14 +188,14 @@ theorem induction_on (f : α →ₘ[μ] β) {p : (α →ₘ[μ] β) → Prop} (H
   Quotient.inductionOn' f <| Subtype.forall.2 H
 
 @[elab_as_elim]
-theorem induction_on₂ {α' β' : Type*} [MeasurableSpace α'] [TopologicalSpace β'] {μ' : Measure α'}
+theorem induction_on₂ {α' β' : Type*} [SigmaAlgebra α'] [TopologicalSpace β'] {μ' : Measure α'}
     (f : α →ₘ[μ] β) (f' : α' →ₘ[μ'] β') {p : (α →ₘ[μ] β) → (α' →ₘ[μ'] β') → Prop}
     (H : ∀ f hf f' hf', p (mk f hf) (mk f' hf')) : p f f' :=
   induction_on f fun f hf => induction_on f' <| H f hf
 
 @[elab_as_elim]
-theorem induction_on₃ {α' β' : Type*} [MeasurableSpace α'] [TopologicalSpace β'] {μ' : Measure α'}
-    {α'' β'' : Type*} [MeasurableSpace α''] [TopologicalSpace β''] {μ'' : Measure α''}
+theorem induction_on₃ {α' β' : Type*} [SigmaAlgebra α'] [TopologicalSpace β'] {μ' : Measure α'}
+    {α'' β'' : Type*} [SigmaAlgebra α''] [TopologicalSpace β''] {μ'' : Measure α''}
     (f : α →ₘ[μ] β) (f' : α' →ₘ[μ'] β') (f'' : α'' →ₘ[μ''] β'')
     {p : (α →ₘ[μ] β) → (α' →ₘ[μ'] β') → (α'' →ₘ[μ''] β'') → Prop}
     (H : ∀ f hf f' hf' f'' hf'', p (mk f hf) (mk f' hf') (mk f'' hf'')) : p f f' f'' :=
@@ -209,7 +209,7 @@ end
 
 section compQuasiMeasurePreserving
 
-variable [TopologicalSpace γ] [MeasurableSpace β] {ν : MeasureTheory.Measure β} {f : α → β}
+variable [TopologicalSpace γ] [SigmaAlgebra β] {ν : MeasureTheory.Measure β} {f : α → β}
 
 open MeasureTheory.Measure (QuasiMeasurePreserving)
 
@@ -249,7 +249,7 @@ theorem compQuasiMeasurePreserving_id (g : β →ₘ[ν] γ) :
   ext
   exact coeFn_compQuasiMeasurePreserving _ _
 
-theorem compQuasiMeasurePreserving_comp {γ : Type*} {mγ : MeasurableSpace γ}
+theorem compQuasiMeasurePreserving_comp {γ : Type*} {mγ : SigmaAlgebra γ}
     {ξ : Measure γ} (g : γ →ₘ[ξ] δ) {f : β → γ} (hf : QuasiMeasurePreserving f ν ξ) {f' : α → β}
     (hf' : QuasiMeasurePreserving f' μ ν) :
     compQuasiMeasurePreserving g (f ∘ f') (hf.comp hf') =
@@ -272,7 +272,7 @@ end compQuasiMeasurePreserving
 
 section compMeasurePreserving
 
-variable [TopologicalSpace γ] [MeasurableSpace β] {ν : MeasureTheory.Measure β}
+variable [TopologicalSpace γ] [SigmaAlgebra β] {ν : MeasureTheory.Measure β}
   {f : α → β} {g : β → γ}
 
 /-- Composition of an almost everywhere equal function and a quasi-measure-preserving function.
@@ -307,7 +307,7 @@ theorem compMeasurePreserving_id (g : β →ₘ[ν] γ) :
     compMeasurePreserving g id (.id ν) = g :=
   compQuasiMeasurePreserving_id _
 
-theorem compMeasurePreserving_comp {γ : Type*} {mγ : MeasurableSpace γ}
+theorem compMeasurePreserving_comp {γ : Type*} {mγ : SigmaAlgebra γ}
     {ξ : Measure γ} (g : γ →ₘ[ξ] δ) {f : β → γ} (hf : MeasurePreserving f ν ξ) {f' : α → β}
     (hf' : MeasurePreserving f' μ ν) :
     compMeasurePreserving g (f ∘ f') (hf.comp hf') =
@@ -353,7 +353,7 @@ theorem coeFn_comp (g : β → γ) (hg : Continuous g) (f : α →ₘ[μ] β) : 
   apply coeFn_mk
 
 theorem comp_compQuasiMeasurePreserving
-    {β : Type*} [MeasurableSpace β] {ν} (g : γ → δ) (hg : Continuous g)
+    {β : Type*} [SigmaAlgebra β] {ν} (g : γ → δ) (hg : Continuous g)
     (f : β →ₘ[ν] γ) {φ : α → β} (hφ : Measure.QuasiMeasurePreserving φ μ ν) :
     (comp g hg f).compQuasiMeasurePreserving φ hφ =
       comp g hg (f.compQuasiMeasurePreserving φ hφ) := by
@@ -361,8 +361,8 @@ theorem comp_compQuasiMeasurePreserving
 
 section CompMeasurable
 
-variable [MeasurableSpace β] [PseudoMetrizableSpace β] [BorelSpace β] [MeasurableSpace γ]
-  [PseudoMetrizableSpace γ] [OpensMeasurableSpace γ] [SecondCountableTopology γ]
+variable [SigmaAlgebra β] [PseudoMetrizableSpace β] [BorelSpace β] [SigmaAlgebra γ]
+  [PseudoMetrizableSpace γ] [OpensSigmaAlgebra γ] [SecondCountableTopology γ]
 
 /-- Given a measurable function `g : β → γ`, and an almost everywhere equal function `[f] : α →ₘ β`,
 return the equivalence class of `g ∘ f`, i.e., the almost everywhere equal function
@@ -441,9 +441,9 @@ theorem coeFn_comp₂ (g : β → γ → δ) (hg : Continuous (uncurry g)) (f₁
 
 section
 
-variable [MeasurableSpace β] [PseudoMetrizableSpace β] [BorelSpace β]
-  [MeasurableSpace γ] [PseudoMetrizableSpace γ] [BorelSpace γ] [SecondCountableTopologyEither β γ]
-  [MeasurableSpace δ] [PseudoMetrizableSpace δ] [OpensMeasurableSpace δ] [SecondCountableTopology δ]
+variable [SigmaAlgebra β] [PseudoMetrizableSpace β] [BorelSpace β]
+  [SigmaAlgebra γ] [PseudoMetrizableSpace γ] [BorelSpace γ] [SecondCountableTopologyEither β γ]
+  [SigmaAlgebra δ] [PseudoMetrizableSpace δ] [OpensSigmaAlgebra δ] [SecondCountableTopology δ]
 
 /-- Given a measurable function `g : β → γ → δ`, and almost everywhere equal functions
 `[f₁] : α →ₘ β` and `[f₂] : α →ₘ γ`, return the equivalence class of the function
@@ -495,13 +495,13 @@ theorem toGerm_injective : Injective (toGerm : (α →ₘ[μ] β) → Germ (ae �
   ext <| Germ.coe_eq.1 <| by rwa [← toGerm_eq, ← toGerm_eq]
 
 @[simp]
-theorem compQuasiMeasurePreserving_toGerm {β : Type*} [MeasurableSpace β] {f : α → β} {ν}
+theorem compQuasiMeasurePreserving_toGerm {β : Type*} [SigmaAlgebra β] {f : α → β} {ν}
     (g : β →ₘ[ν] γ) (hf : Measure.QuasiMeasurePreserving f μ ν) :
     (g.compQuasiMeasurePreserving f hf).toGerm = g.toGerm.compTendsto f hf.tendsto_ae := by
   rcases g; rfl
 
 @[simp]
-theorem compMeasurePreserving_toGerm {β : Type*} [MeasurableSpace β] {f : α → β} {ν}
+theorem compMeasurePreserving_toGerm {β : Type*} [SigmaAlgebra β] {f : α → β} {ν}
     (g : β →ₘ[ν] γ) (hf : MeasurePreserving f μ ν) :
     (g.compMeasurePreserving f hf).toGerm =
       g.toGerm.compTendsto f hf.quasiMeasurePreserving.tendsto_ae :=
@@ -511,9 +511,9 @@ theorem comp_toGerm (g : β → γ) (hg : Continuous g) (f : α →ₘ[μ] β) :
     (comp g hg f).toGerm = f.toGerm.map g :=
   induction_on f fun f _ => by simp
 
-theorem compMeasurable_toGerm [MeasurableSpace β] [BorelSpace β] [PseudoMetrizableSpace β]
-    [PseudoMetrizableSpace γ] [SecondCountableTopology γ] [MeasurableSpace γ]
-    [OpensMeasurableSpace γ] (g : β → γ) (hg : Measurable g) (f : α →ₘ[μ] β) :
+theorem compMeasurable_toGerm [SigmaAlgebra β] [BorelSpace β] [PseudoMetrizableSpace β]
+    [PseudoMetrizableSpace γ] [SecondCountableTopology γ] [SigmaAlgebra γ]
+    [OpensSigmaAlgebra γ] (g : β → γ) (hg : Measurable g) (f : α →ₘ[μ] β) :
     (compMeasurable g hg f).toGerm = f.toGerm.map g :=
   induction_on f fun f _ => by simp
 
@@ -523,10 +523,10 @@ theorem comp₂_toGerm (g : β → γ → δ) (hg : Continuous (uncurry g)) (f�
   induction_on₂ f₁ f₂ fun f₁ _ f₂ _ => by simp
 
 set_option backward.isDefEq.respectTransparency false in
-theorem comp₂Measurable_toGerm [PseudoMetrizableSpace β] [MeasurableSpace β] [BorelSpace β]
+theorem comp₂Measurable_toGerm [PseudoMetrizableSpace β] [SigmaAlgebra β] [BorelSpace β]
     [PseudoMetrizableSpace γ] [SecondCountableTopologyEither β γ]
-    [MeasurableSpace γ] [BorelSpace γ] [PseudoMetrizableSpace δ] [SecondCountableTopology δ]
-    [MeasurableSpace δ] [OpensMeasurableSpace δ] (g : β → γ → δ) (hg : Measurable (uncurry g))
+    [SigmaAlgebra γ] [BorelSpace γ] [PseudoMetrizableSpace δ] [SecondCountableTopology δ]
+    [SigmaAlgebra δ] [OpensSigmaAlgebra δ] (g : β → γ → δ) (hg : Measurable (uncurry g))
     (f₁ : α →ₘ[μ] β) (f₂ : α →ₘ[μ] γ) :
     (comp₂Measurable g hg f₁ f₂).toGerm = f₁.toGerm.map₂ g f₂.toGerm :=
   induction_on₂ f₁ f₂ fun f₁ _ f₂ _ => by simp

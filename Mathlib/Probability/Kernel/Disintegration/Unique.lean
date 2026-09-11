@@ -25,14 +25,14 @@ We prove that the conditional kernels `ProbabilityTheory.Kernel.condKernel` and
 
 public section
 
-open MeasureTheory Set Filter MeasurableSpace
+open MeasureTheory Set Filter SigmaAlgebra
 
 open scoped ENNReal MeasureTheory Topology ProbabilityTheory
 
 namespace ProbabilityTheory
 
-variable {α β Ω : Type*} {mα : MeasurableSpace α} {mβ : MeasurableSpace β}
-  [MeasurableSpace Ω] [StandardBorelSpace Ω] [Nonempty Ω]
+variable {α β Ω : Type*} {mα : SigmaAlgebra α} {mβ : SigmaAlgebra β}
+  [SigmaAlgebra Ω] [StandardBorelSpace Ω] [Nonempty Ω]
 
 section Measure
 
@@ -66,7 +66,7 @@ lemma eq_condKernel_of_measure_eq_compProd_real {ρ : Measure (α × ℝ)} [IsFi
   suffices ∀ᵐ x ∂ρ.fst, ∀ ⦃t⦄, MeasurableSet t → κ x t = ρ.condKernel x t by
     filter_upwards [this] with x hx
     ext t ht; exact hx ht
-  apply MeasurableSpace.ae_induction_on_inter Real.borel_eq_generateFrom_Iic_rat
+  apply SigmaAlgebra.ae_induction_on_inter Real.borel_eq_generateFrom_Iic_rat
     Real.isPiSystem_Iic_rat
   · simp
   · simp only [iUnion_singleton_eq_range, mem_range, forall_exists_index, forall_apply_eq_imp_iff]

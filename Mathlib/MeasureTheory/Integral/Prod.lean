@@ -41,13 +41,13 @@ open scoped Topology ENNReal MeasureTheory
 
 open Set Function Real ENNReal
 
-open MeasureTheory MeasurableSpace MeasureTheory.Measure
+open MeasureTheory SigmaAlgebra MeasureTheory.Measure
 
 open TopologicalSpace
 
 open Filter hiding prod_eq map
 
-variable {α β E : Type*} [MeasurableSpace α] [MeasurableSpace β] {μ : Measure α} {ν : Measure β}
+variable {α β E : Type*} [SigmaAlgebra α] [SigmaAlgebra β] {μ : Measure α} {ν : Measure β}
 variable [NormedAddCommGroup E]
 
 /-! ### Measurability
@@ -551,8 +551,8 @@ theorem integral_fun_fst (f : α → E) : ∫ z, f z.1 ∂μ.prod ν = ν.real u
 
 section ContinuousLinearMap
 
-variable {E F G : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] {mE : MeasurableSpace E}
-  [NormedAddCommGroup F] [NormedSpace ℝ F] {mF : MeasurableSpace F}
+variable {E F G : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] {mE : SigmaAlgebra E}
+  [NormedAddCommGroup F] [NormedSpace ℝ F] {mF : SigmaAlgebra F}
   [NormedAddCommGroup G] [NormedSpace ℝ G]
   {μ : Measure E} [IsProbabilityMeasure μ] {ν : Measure F} [IsProbabilityMeasure ν]
   {L : E × F →L[ℝ] G}
@@ -590,8 +590,8 @@ end ContinuousLinearMap
 section
 
 variable {X Y : Type*}
-    [TopologicalSpace X] [TopologicalSpace Y] [MeasurableSpace X] [MeasurableSpace Y]
-    [OpensMeasurableSpace X] [OpensMeasurableSpace Y]
+    [TopologicalSpace X] [TopologicalSpace Y] [SigmaAlgebra X] [SigmaAlgebra Y]
+    [OpensSigmaAlgebra X] [OpensSigmaAlgebra Y]
 
 /-- A version of *Fubini theorem* for continuous functions with compact support: one may swap
 the order of integration with respect to locally finite measures. One does not assume that the

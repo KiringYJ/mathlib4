@@ -5,7 +5,7 @@ Authors: Etienne Marion
 -/
 module
 
-public import Mathlib.MeasureTheory.MeasurableSpace.PreorderRestrict
+public import Mathlib.MeasureTheory.SigmaAlgebra.PreorderRestrict
 public import Mathlib.Probability.Kernel.Composition.Prod
 public import Mathlib.Probability.Kernel.IonescuTulcea.Maps
 
@@ -78,7 +78,7 @@ open Finset Function MeasureTheory Preorder ProbabilityTheory
 
 open scoped ENNReal
 
-variable {X : ℕ → Type*} {mX : ∀ n, MeasurableSpace (X n)} {a b c : ℕ}
+variable {X : ℕ → Type*} {mX : ∀ n, SigmaAlgebra (X n)} {a b c : ℕ}
   {κ : (n : ℕ) → Kernel (Π i : Iic n, X i) (X (n + 1))}
 
 section partialTraj
@@ -192,8 +192,8 @@ theorem partialTraj_comp_partialTraj (hab : a ≤ b) (hbc : b ≤ c) :
 /-- This is a specific lemma used in the proof of `partialTraj_eq_prod`. It is the main rewrite step
 and stating it as a separate lemma avoids using extensionality of kernels, which would generate
 a lot of measurability subgoals. -/
-private lemma fst_prod_comp_id_prod {X Y Z : Type*} {mX : MeasurableSpace X}
-    {mY : MeasurableSpace Y} {mZ : MeasurableSpace Z} (κ : Kernel X Y) [IsSFiniteKernel κ]
+private lemma fst_prod_comp_id_prod {X Y Z : Type*} {mX : SigmaAlgebra X}
+    {mY : SigmaAlgebra Y} {mZ : SigmaAlgebra Z} (κ : Kernel X Y) [IsSFiniteKernel κ]
     (η : Kernel (X × Y) Z) [IsSFiniteKernel η] :
     ((deterministic Prod.fst measurable_fst) ×ₖ η) ∘ₖ (Kernel.id ×ₖ κ) =
     Kernel.id ×ₖ (η ∘ₖ (Kernel.id ×ₖ κ)) := by

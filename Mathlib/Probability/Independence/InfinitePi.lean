@@ -33,8 +33,8 @@ open MeasureTheory Measure ProbabilityTheory
 
 namespace ProbabilityTheory
 
-variable {ι Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω}
-    {𝓧 : ι → Type*} {m𝓧 : ∀ i, MeasurableSpace (𝓧 i)} {X : Π i, Ω → 𝓧 i}
+variable {ι Ω : Type*} {mΩ : SigmaAlgebra Ω} {P : Measure Ω}
+    {𝓧 : ι → Type*} {m𝓧 : ∀ i, SigmaAlgebra (𝓧 i)} {X : Π i, Ω → 𝓧 i}
 
 /-- If random variables are independent then their joint distribution is the product measure. This
 is a version where the random variable `ω ↦ (Xᵢ(ω))ᵢ` is almost everywhere measurable.
@@ -122,7 +122,7 @@ lemma iIndepFun_iff_hasLaw_Pi_infinitePi [IsProbabilityMeasure P] {μ : (i : ι)
 
 /-- Given random variables `X i : Ω i → 𝓧 i`, they are independent when viewed as random
 variables defined on the product space `Π i, Ω i`. -/
-lemma iIndepFun_infinitePi {Ω : ι → Type*} {mΩ : ∀ i, MeasurableSpace (Ω i)}
+lemma iIndepFun_infinitePi {Ω : ι → Type*} {mΩ : ∀ i, SigmaAlgebra (Ω i)}
     {P : (i : ι) → Measure (Ω i)} [∀ i, IsProbabilityMeasure (P i)] {X : (i : ι) → Ω i → 𝓧 i}
     (mX : ∀ i, Measurable (X i)) :
     iIndepFun (fun i ω ↦ X i (ω i)) (infinitePi P) := by
@@ -131,7 +131,7 @@ lemma iIndepFun_infinitePi {Ω : ι → Type*} {mΩ : ∀ i, MeasurableSpace (Ω
   rw [← infinitePi_map_eval P i, map_map (mX i) (by fun_prop), Function.comp_def]
 
 lemma _root_.MeasureTheory.Measure.infinitePi_map_eval_prod {Ω : ι → Type*}
-    {mΩ : ∀ i, MeasurableSpace (Ω i)} {P : ∀ i, Measure (Ω i)}
+    {mΩ : ∀ i, SigmaAlgebra (Ω i)} {P : ∀ i, Measure (Ω i)}
     [∀ i, IsProbabilityMeasure (P i)] {i j : ι} (hij : i ≠ j) :
     (infinitePi P).map (fun ω ↦ (ω i, ω j)) = (P i).prod (P j) := by
   rw [IndepFun.map_prod_eq_prod_map_map]; rotate_right
@@ -140,7 +140,7 @@ lemma _root_.MeasureTheory.Measure.infinitePi_map_eval_prod {Ω : ι → Type*}
   all_goals exact Measurable.aemeasurable (by fun_prop)
 
 lemma _root_.MeasureTheory.Measure.map_infinitePi_infinitePi_of_inj {α : Type*} {Ω : ι → Type*}
-    {mΩ : ∀ i, MeasurableSpace (Ω i)} {P : ∀ i, Measure (Ω i)}
+    {mΩ : ∀ i, SigmaAlgebra (Ω i)} {P : ∀ i, Measure (Ω i)}
     [∀ i, IsProbabilityMeasure (P i)] {f : α → ι} (hf : Function.Injective f) :
     (infinitePi P).map (fun ω i ↦ ω (f i)) = infinitePi (fun i ↦ P (f i)) := by
   rw [(iIndepFun_iff_map_fun_eq_infinitePi_map <| by fun_prop).mp ?_]
@@ -151,7 +151,7 @@ section curry
 
 section dependent
 
-variable {κ : ι → Type*} {𝓧 : (i : ι) → κ i → Type*} {m𝓧 : ∀ i j, MeasurableSpace (𝓧 i j)}
+variable {κ : ι → Type*} {𝓧 : (i : ι) → κ i → Type*} {m𝓧 : ∀ i j, SigmaAlgebra (𝓧 i j)}
 
 /-- Consider `((Xᵢⱼ)ⱼ)ᵢ` a family of families of random variables.
 Assume that for any `i`, the random variables `(Xᵢⱼ)ⱼ` are independent.
@@ -175,7 +175,7 @@ lemma iIndepFun_uncurry {X : (i : ι) → (j : κ i) → Ω → 𝓧 i j} (mX : 
 
 /-- Given random variables `X i j : Ω i j → 𝓧 i j`, they are independent when viewed as random
 variables defined on the product space `Π i, Π j, Ω i j`. -/
-lemma iIndepFun_uncurry_infinitePi {Ω : (i : ι) → κ i → Type*} {mΩ : ∀ i j, MeasurableSpace (Ω i j)}
+lemma iIndepFun_uncurry_infinitePi {Ω : (i : ι) → κ i → Type*} {mΩ : ∀ i j, SigmaAlgebra (Ω i j)}
     {X : (i : ι) → (j : κ i) → Ω i j → 𝓧 i j}
     (μ : (i : ι) → (j : κ i) → Measure (Ω i j)) [∀ i j, IsProbabilityMeasure (μ i j)]
     (mX : ∀ i j, Measurable (X i j)) :
@@ -205,7 +205,7 @@ end dependent
 
 section nondependent
 
-variable {κ : Type*} {𝓧 : ι → κ → Type*} {m𝓧 : ∀ i j, MeasurableSpace (𝓧 i j)}
+variable {κ : Type*} {𝓧 : ι → κ → Type*} {m𝓧 : ∀ i j, SigmaAlgebra (𝓧 i j)}
 
 /-- Consider `((Xᵢⱼ)ⱼ)ᵢ` a family of families of random variables.
 Assume that for any `i`, the random variables `(Xᵢⱼ)ⱼ` are independent.
@@ -220,7 +220,7 @@ lemma iIndepFun_uncurry' {X : (i : ι) → (j : κ) → Ω → 𝓧 i j} (mX : �
 
 /-- Given random variables `X i j : Ω i j → 𝓧 i j`, they are independent when viewed as random
 variables defined on the product space `Π i, Π j, Ω i j`. -/
-lemma iIndepFun_uncurry_infinitePi' {Ω : ι → κ → Type*} {mΩ : ∀ i j, MeasurableSpace (Ω i j)}
+lemma iIndepFun_uncurry_infinitePi' {Ω : ι → κ → Type*} {mΩ : ∀ i j, SigmaAlgebra (Ω i j)}
     {X : (i : ι) → (j : κ) → Ω i j → 𝓧 i j}
     (μ : (i : ι) → (j : κ) → Measure (Ω i j)) [∀ i j, IsProbabilityMeasure (μ i j)]
     (mX : ∀ i j, Measurable (X i j)) :

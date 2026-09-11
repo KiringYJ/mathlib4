@@ -61,9 +61,9 @@ conditional, conditioned, bayes
 
 noncomputable section
 
-open ENNReal MeasureTheory MeasureTheory.Measure MeasurableSpace Set
+open ENNReal MeasureTheory MeasureTheory.Measure SigmaAlgebra Set
 
-variable {Ω Ω' α : Type*} {m : MeasurableSpace Ω} {m' : MeasurableSpace Ω'} {μ : Measure Ω}
+variable {Ω Ω' α : Type*} {m : SigmaAlgebra Ω} {m' : SigmaAlgebra Ω'} {μ : Measure Ω}
   {s t : Set Ω}
 
 namespace ProbabilityTheory
@@ -291,9 +291,9 @@ lemma comap_cond {i : Ω' → Ω} (hi : MeasurableEmbedding i) (hi' : ∀ᵐ ω 
   | exact hs
   | exact ht
   | exact hi.measurable hs
-  | exact (hi.measurable hs).inter ht
+  | exact m'.inter_mem (hi.measurable hs) ht
 
-variable [Fintype α] [MeasurableSpace α] [DiscreteMeasurableSpace α]
+variable [Fintype α] [SigmaAlgebra α] [DiscreteSigmaAlgebra α]
 
 /-- The **law of total probability** for a random variable taking finitely many values: a measure
 `μ` can be expressed as a linear combination of its conditional measures `μ[|X ← x]` on fibers of a
@@ -305,10 +305,11 @@ lemma sum_meas_smul_cond_fiber {X : Ω → α} (hX : Measurable X) (μ : Measure
     _ = ∑ x, μ (X ⁻¹' {x} ∩ E) := by
       simp only [Measure.coe_finsetSum, Measure.coe_smul, Finset.sum_apply,
         Pi.smul_apply, smul_eq_mul]
-      simp_rw [mul_comm (μ _), cond_mul_eq_inter (hX (.singleton _))]
+      simp_rw [mul_comm (μ _), cond_mul_eq_inter (hX MeasurableSet.of_discrete)]
     _ = _ := by
       have : ⋃ x ∈ Finset.univ, X ⁻¹' {x} ∩ E = E := by ext; simp
-      rw [← measure_biUnion_finset _ fun _ _ ↦ (hX (.singleton _)).inter hE, this]
+      rw [← measure_biUnion_finset _ fun _ _ ↦
+        m.inter_mem (hX MeasurableSet.of_discrete) hE, this]
       aesop (add simp [PairwiseDisjoint, Set.Pairwise, Function.onFun, disjoint_left])
 
 end ProbabilityTheory

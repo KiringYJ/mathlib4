@@ -41,7 +41,7 @@ Note that if `f` is not injective, this definition assigns `Set.univ` measure ze
 
 If the linearity is not needed, please use `comap` instead, which works for a larger class of
 functions. `comapₗ` is an auxiliary definition and most lemmas deal with comap. -/
-def comapₗ [MeasurableSpace α] [MeasurableSpace β] (f : α → β) : Measure β →ₗ[ℝ≥0∞] Measure α :=
+def comapₗ [SigmaAlgebra α] [SigmaAlgebra β] (f : α → β) : Measure β →ₗ[ℝ≥0∞] Measure α :=
   if hf : Injective f ∧ ∀ s, MeasurableSet s → MeasurableSet (f '' s) then
     liftLinear (OuterMeasure.comap f) fun μ s hs t => by
       simp only [OuterMeasure.comap_apply, image_inter hf.1, image_sdiff hf.1]
@@ -50,7 +50,7 @@ def comapₗ [MeasurableSpace α] [MeasurableSpace β] (f : α → β) : Measure
   else 0
 
 set_option backward.isDefEq.respectTransparency false in
-theorem comapₗ_apply {_ : MeasurableSpace α} {_ : MeasurableSpace β} (f : α → β)
+theorem comapₗ_apply {_ : SigmaAlgebra α} {_ : SigmaAlgebra β} (f : α → β)
     (hfi : Injective f) (hf : ∀ s, MeasurableSet s → MeasurableSet (f '' s)) (μ : Measure β)
     (hs : MeasurableSet s) : comapₗ f μ s = μ (f '' s) := by
   rw [comapₗ, dite_eq_left, liftLinear_apply _ hs, OuterMeasure.comap_apply, coe_toOuterMeasure]
@@ -61,7 +61,7 @@ open scoped Classical in
 then for each measurable set `s` we have `comap f μ s = μ (f '' s)`.
 
 Note that if `f` is not injective, this definition assigns `Set.univ` measure zero. -/
-def comap [MeasurableSpace α] [MeasurableSpace β] (f : α → β) (μ : Measure β) : Measure α :=
+def comap [SigmaAlgebra α] [SigmaAlgebra β] (f : α → β) (μ : Measure β) : Measure α :=
   if hf : Injective f ∧ ∀ s, MeasurableSet s → NullMeasurableSet (f '' s) μ then
     (OuterMeasure.comap f μ.toOuterMeasure).toMeasure <| by
       intro s hs t
@@ -69,7 +69,7 @@ def comap [MeasurableSpace α] [MeasurableSpace β] (f : α → β) (μ : Measur
       exact (measure_inter_add_sdiff₀ _ (hf.2 s hs)).symm
   else 0
 
-variable {mα : MeasurableSpace α} {mβ : MeasurableSpace β} {mγ : MeasurableSpace γ}
+variable {mα : SigmaAlgebra α} {mβ : SigmaAlgebra β} {mγ : SigmaAlgebra γ}
   {f : α → β} {g : β → γ}
 
 theorem comap_apply₀ (f : α → β) (μ : Measure β) (hfi : Injective f)
@@ -140,7 +140,8 @@ theorem NullMeasurableSet.image (f : α → β) (μ : Measure β) (hfi : Injecti
 theorem comap_preimage (f : α → β) (μ : Measure β) (hf : Injective f) (hf' : Measurable f)
     (h : ∀ t, MeasurableSet t → NullMeasurableSet (f '' t) μ) {s : Set β} (hs : MeasurableSet s) :
     μ.comap f (f ⁻¹' s) = μ (s ∩ range f) := by
-  rw [comap_apply₀ _ _ hf h (hf' hs).nullMeasurableSet, image_preimage_eq_inter_range]
+  rw [comap_apply₀ _ _ hf h (MeasurableSet.nullMeasurableSet (hf' hs)),
+    image_preimage_eq_inter_range]
 
 @[simp] lemma comap_zero (f : α → β) : (0 : Measure β).comap f = 0 := by
   by_cases hf : Injective f ∧ ∀ s, MeasurableSet s → NullMeasurableSet (f '' s) (0 : Measure β)
@@ -182,7 +183,7 @@ end MeasureTheory
 
 open MeasureTheory Measure
 
-variable {α β : Type*} {ma : MeasurableSpace α} {mb : MeasurableSpace β}
+variable {α β : Type*} {ma : SigmaAlgebra α} {mb : SigmaAlgebra β}
 
 lemma MeasurableEmbedding.comap_add {f : α → β} (hf : MeasurableEmbedding f) (μ ν : Measure β) :
     (μ + ν).comap f = μ.comap f + ν.comap f := by

@@ -39,7 +39,7 @@ variable
   (𝕜 : Type*) [RCLike 𝕜]
   {E : Type*} [NormedAddCommGroup E] [NormedSpace ℂ E] [NormedSpace 𝕜 E] [SMulCommClass ℂ 𝕜 E]
   {V : Type*} [NormedAddCommGroup V] [InnerProductSpace ℝ V] [FiniteDimensional ℝ V]
-  [MeasurableSpace V] [BorelSpace V]
+  [SigmaAlgebra V] [BorelSpace V]
 
 section definition
 

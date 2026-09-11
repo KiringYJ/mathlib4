@@ -211,10 +211,10 @@ section Measure
 
 /-- Since every set is Carathéodory-measurable under `PMF.toOuterMeasure`,
   we can further extend this `OuterMeasure` to a `Measure` on `α`. -/
-def toMeasure [MeasurableSpace α] (p : PMF α) : Measure α :=
+def toMeasure [SigmaAlgebra α] (p : PMF α) : Measure α :=
   p.toOuterMeasure.toMeasure (p.toOuterMeasure_caratheodory.symm ▸ le_top)
 
-variable [MeasurableSpace α] (p : PMF α) {s : Set α}
+variable [SigmaAlgebra α] (p : PMF α) {s : Set α}
 
 theorem toOuterMeasure_apply_le_toMeasure_apply (s : Set α) : p.toOuterMeasure s ≤ p.toMeasure s :=
   le_toMeasure_apply p.toOuterMeasure _ s
@@ -302,7 +302,7 @@ namespace Measure
 /-- Given that `α` is a countable, measurable space with all singleton sets measurable,
 we can convert any probability measure into a `PMF`, where the mass of a point
 is the measure of the singleton set under the original measure. -/
-def toPMF [Countable α] [MeasurableSpace α] [MeasurableSingletonClass α] (μ : Measure α)
+def toPMF [Countable α] [SigmaAlgebra α] [MeasurableSingletonClass α] (μ : Measure α)
     [h : IsProbabilityMeasure μ] : PMF α :=
   ⟨fun x => μ ({x} : Set α),
     ENNReal.summable.hasSum_iff.2
@@ -312,7 +312,7 @@ def toPMF [Countable α] [MeasurableSpace α] [MeasurableSingletonClass α] (μ 
             (tsum_congr fun x => congr_fun (Set.indicator_univ _) x))
         h.measure_univ)⟩
 
-variable [Countable α] [MeasurableSpace α] [MeasurableSingletonClass α] (μ : Measure α)
+variable [Countable α] [SigmaAlgebra α] [MeasurableSingletonClass α] (μ : Measure α)
   [IsProbabilityMeasure μ]
 
 theorem toPMF_apply (x : α) : μ.toPMF x = μ {x} := rfl
@@ -330,13 +330,13 @@ end MeasureTheory
 namespace PMF
 
 /-- The measure associated to a `PMF` by `toMeasure` is a probability measure. -/
-instance toMeasure.isProbabilityMeasure [MeasurableSpace α] (p : PMF α) :
+instance toMeasure.isProbabilityMeasure [SigmaAlgebra α] (p : PMF α) :
     IsProbabilityMeasure p.toMeasure :=
   ⟨by
     simpa only [MeasurableSet.univ, toMeasure_apply_eq_toOuterMeasure_apply, Set.indicator_univ,
       toOuterMeasure_apply, ENNReal.coe_eq_one] using tsum_coe p⟩
 
-variable [Countable α] [MeasurableSpace α] [MeasurableSingletonClass α] (p : PMF α)
+variable [Countable α] [SigmaAlgebra α] [MeasurableSingletonClass α] (p : PMF α)
 
 @[simp]
 theorem toMeasure_toPMF : p.toMeasure.toPMF = p :=

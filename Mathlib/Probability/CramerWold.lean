@@ -27,10 +27,10 @@ open MeasureTheory Filter RealInnerProductSpace
 public section
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
-  [MeasurableSpace E] [BorelSpace E] [FiniteDimensional ℝ E]
+  [SigmaAlgebra E] [BorelSpace E] [FiniteDimensional ℝ E]
 
-variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} [IsProbabilityMeasure P]
-  {Ω' : Type*} {mΩ' : MeasurableSpace Ω'} {P' : Measure Ω'} [IsProbabilityMeasure P']
+variable {Ω : Type*} {mΩ : SigmaAlgebra Ω} {P : Measure Ω} [IsProbabilityMeasure P]
+  {Ω' : Type*} {mΩ' : SigmaAlgebra Ω'} {P' : Measure Ω'} [IsProbabilityMeasure P']
   {X' : Ω' → E} {X : ℕ → Ω → E}
 
 /-- The **Cramér-Wold theorem**: convergence in distribution of a sequence of random variables

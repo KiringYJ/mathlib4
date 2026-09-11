@@ -34,10 +34,10 @@ variable {G : Type u} {M : Type v} {α : Type w}
 namespace SMulInvariantMeasure
 
 @[to_additive]
-instance zero [MeasurableSpace α] [SMul M α] : SMulInvariantMeasure M α (0 : Measure α) :=
+instance zero [SigmaAlgebra α] [SMul M α] : SMulInvariantMeasure M α (0 : Measure α) :=
   ⟨fun _ _ _ => rfl⟩
 
-variable [SMul M α] {m : MeasurableSpace α} {μ ν : Measure α}
+variable [SMul M α] {m : SigmaAlgebra α} {μ ν : Measure α}
 
 @[to_additive]
 instance add [SMulInvariantMeasure M α μ] [SMulInvariantMeasure M α ν] :
@@ -58,7 +58,7 @@ end SMulInvariantMeasure
 
 section AE_smul
 
-variable {m : MeasurableSpace α} [SMul G α]
+variable {m : SigmaAlgebra α} [SMul G α]
   (μ : Measure α) [SMulInvariantMeasure G α μ] {s : Set α}
 
 /-- See also `measure_preimage_smul_of_nullMeasurableSet` and `measure_preimage_smul`. -/
@@ -90,7 +90,7 @@ end AE_smul
 
 section AE
 
-variable {m : MeasurableSpace α} [Group G] [MulAction G α]
+variable {m : SigmaAlgebra α} [Group G] [MulAction G α]
   (μ : Measure α) [SMulInvariantMeasure G α μ]
 
 @[to_additive (attr := simp)]
@@ -170,7 +170,7 @@ end AE
 
 section MeasurableConstSMul
 
-variable {m : MeasurableSpace α} [SMul M α] [MeasurableConstSMul M α] (c : M)
+variable {m : SigmaAlgebra α} [SMul M α] [MeasurableConstSMul M α] (c : M)
   (μ : Measure α) [SMulInvariantMeasure M α μ]
 
 @[to_additive (attr := simp)]
@@ -189,13 +189,13 @@ end MeasurableConstSMul
 
 @[to_additive]
 theorem MeasurePreserving.smulInvariantMeasure_iterateMulAct
-    {f : α → α} {_ : MeasurableSpace α} {μ : Measure α} (hf : MeasurePreserving f μ μ) :
+    {f : α → α} {_ : SigmaAlgebra α} {μ : Measure α} (hf : MeasurePreserving f μ μ) :
     SMulInvariantMeasure (IterateMulAct f) α μ :=
   ⟨fun n _s hs ↦ (hf.iterate n.val).measure_preimage hs.nullMeasurableSet⟩
 
 @[to_additive]
 theorem smulInvariantMeasure_iterateMulAct
-    {f : α → α} {_ : MeasurableSpace α} {μ : Measure α} (hf : Measurable f) :
+    {f : α → α} {_ : SigmaAlgebra α} {μ : Measure α} (hf : Measurable f) :
     SMulInvariantMeasure (IterateMulAct f) α μ ↔ MeasurePreserving f μ μ :=
   ⟨fun _ ↦
     have := hf.measurableSMul₂_iterateMulAct
@@ -206,7 +206,7 @@ section SMulHomClass
 
 universe uM uN uα uβ
 variable {M : Type uM} {N : Type uN} {α : Type uα} {β : Type uβ}
-  [MeasurableSpace α] [MeasurableSpace β]
+  [SigmaAlgebra α] [SigmaAlgebra β]
 
 @[to_additive]
 theorem smulInvariantMeasure_map [SMul M α] [SMul M β]
@@ -232,7 +232,7 @@ instance smulInvariantMeasure_map_smul [SMul M α] [SMul N α] [SMulCommClass N 
 
 end SMulHomClass
 
-variable (G) {m : MeasurableSpace α} [Group G] [MulAction G α] (μ : Measure α)
+variable (G) {m : SigmaAlgebra α} [Group G] [MulAction G α] (μ : Measure α)
 
 variable [MeasurableConstSMul G α] in
 /-- Equivalent definitions of a measure invariant under a multiplicative action of a group.

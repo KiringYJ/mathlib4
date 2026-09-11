@@ -50,7 +50,7 @@ public section
 
 open MeasureTheory ProbabilityTheory Set
 
-variable {α β : Type*} {mα : MeasurableSpace α} {mβ : MeasurableSpace β}
+variable {α β : Type*} {mα : SigmaAlgebra α} {mβ : SigmaAlgebra β}
 
 namespace ProbabilityTheory
 
@@ -124,7 +124,7 @@ theorem IsDeterministic.exists_eq_deterministic [StandardBorelSpace β] (κ : Ke
 /-- The equation of a Positive Markov category: if the composition of two Markov kernels `η ∘ₖ κ` is
 deterministic, the distribution over both `η ∘ₖ κ` and `κ` can be obtained by computing `η ∘ₖ κ`
 and `κ` independently. -/
-lemma comp_parallelComp_comp_copy {γ : Type*} [MeasurableSpace γ] {κ : Kernel α β}
+lemma comp_parallelComp_comp_copy {γ : Type*} [SigmaAlgebra γ] {κ : Kernel α β}
     {η : Kernel β γ} [IsMarkovKernel κ] [IsMarkovKernel η] [IsDeterministic (η ∘ₖ κ)] :
     η ∘ₖ κ ∥ₖ κ ∘ₖ copy α = η ∥ₖ Kernel.id ∘ₖ copy β ∘ₖ κ := by
   simp only [parallelComp_comp_copy]

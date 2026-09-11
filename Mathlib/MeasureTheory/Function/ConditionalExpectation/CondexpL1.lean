@@ -65,7 +65,7 @@ seen as an element of `α →₁[μ] G`.
 -/
 
 
-variable {m m0 : MeasurableSpace α} {μ : Measure α} {s t : Set α} [NormedSpace ℝ G]
+variable {m m0 : SigmaAlgebra α} {μ : Measure α} {s t : Set α} [NormedSpace ℝ G]
 
 section CondexpIndL1Fin
 
@@ -149,7 +149,7 @@ section CondexpIndL1
 open scoped Classical in
 /-- Conditional expectation of the indicator of a set, as a function in L1. Its value for sets
 which are not both measurable and of finite measure is not used: we set it to 0. -/
-def condExpIndL1 {m m0 : MeasurableSpace α} (hm : m ≤ m0) (μ : Measure α) (s : Set α)
+def condExpIndL1 {m m0 : SigmaAlgebra α} (hm : m ≤ m0) (μ : Measure α) (s : Set α)
     [SigmaFinite (μ.trim hm)] (x : G) : α →₁[μ] G :=
   if hs : MeasurableSet s ∧ μ s ≠ ∞ then condExpIndL1Fin hm hs.1 hs.2 x else 0
 
@@ -223,7 +223,7 @@ end CondexpIndL1
 variable (G)
 
 /-- Conditional expectation of the indicator of a set, as a linear map from `G` to L1. -/
-def condExpInd {m m0 : MeasurableSpace α} (hm : m ≤ m0) (μ : Measure α) [SigmaFinite (μ.trim hm)]
+def condExpInd {m m0 : SigmaAlgebra α} (hm : m ≤ m0) (μ : Measure α) [SigmaFinite (μ.trim hm)]
     (s : Set α) : G →L[ℝ] α →₁[μ] G where
   toFun := condExpIndL1 hm μ s
   map_add' := condExpIndL1_add
@@ -284,17 +284,19 @@ theorem setIntegral_condExpInd (hs : MeasurableSet[m] s) (ht : MeasurableSet t) 
     (hμt : μ t ≠ ∞) (x : G') : ∫ a in s, condExpInd G' hm μ t x a ∂μ = μ.real (t ∩ s) • x :=
   calc
     ∫ a in s, condExpInd G' hm μ t x a ∂μ = ∫ a in s, condExpIndSMul hm ht hμt x a ∂μ :=
-      setIntegral_congr_ae (hm s hs)
+      setIntegral_congr_ae (hm hs)
         ((condExpInd_ae_eq_condExpIndSMul hm ht hμt x).mono fun _ hx _ => hx)
     _ = μ.real (t ∩ s) • x := setIntegral_condExpIndSMul hs ht hμs hμt x
 
 theorem condExpInd_of_measurable (hs : MeasurableSet[m] s) (hμs : μ s ≠ ∞) (c : G) :
-    condExpInd G hm μ s c = indicatorConstLp 1 (hm s hs) hμs c := by
+    condExpInd G hm μ s c = indicatorConstLp 1 (hm hs) hμs c := by
+  let hs0 : MeasurableSet s := measurableSet_iff_mem.mpr (hm (measurableSet_iff_mem.mp hs))
+  change condExpInd G hm μ s c = indicatorConstLp 1 hs0 hμs c
   ext1
-  grw [indicatorConstLp_coeFn, condExpInd_ae_eq_condExpIndSMul hm (hm s hs) hμs,
+  grw [indicatorConstLp_coeFn, condExpInd_ae_eq_condExpIndSMul hm hs0 hμs,
     condExpIndSMul_ae_eq_smul]
   rw [condExpL2_indicator_of_measurable hm hs hμs (1 : ℝ)]
-  filter_upwards [@indicatorConstLp_coeFn α _ _ 2 μ _ s (hm s hs) hμs (1 : ℝ)] with x hx
+  filter_upwards [@indicatorConstLp_coeFn α _ _ 2 μ _ s hs0 hμs (1 : ℝ)] with x hx
   rw [hx]
   by_cases hx_mem : x ∈ s <;> simp [hx_mem]
 
@@ -310,7 +312,7 @@ end CondexpInd
 section CondexpL1
 
 
-variable {m m0 : MeasurableSpace α} {μ : Measure α} {hm : m ≤ m0} [SigmaFinite (μ.trim hm)]
+variable {m m0 : SigmaAlgebra α} {μ : Measure α} {hm : m ≤ m0} [SigmaFinite (μ.trim hm)]
   {f g : α → F'} {s : Set α}
 
 section CondExpL1CLM
@@ -347,13 +349,13 @@ theorem setIntegral_condExpL1CLM_of_measure_ne_top (f : α →₁[μ] F') (hs : 
     (isClosed_eq ?_ ?_) f
   · intro x t ht hμt
     simp_rw [condExpL1CLM_indicatorConst ht hμt.ne x]
-    rw [Lp.simpleFunc.coe_indicatorConst, setIntegral_indicatorConstLp (hm _ hs)]
+    rw [Lp.simpleFunc.coe_indicatorConst, setIntegral_indicatorConstLp (hm hs)]
     exact setIntegral_condExpInd hs ht hμs hμt.ne x
   · intro f g hf_Lp hg_Lp _ hf hg
     simp_rw [(condExpL1CLM F' hm μ).map_add]
-    rw [setIntegral_congr_ae (hm s hs) ((Lp.coeFn_add (condExpL1CLM F' hm μ (hf_Lp.toLp f))
+    rw [setIntegral_congr_ae (hm hs) ((Lp.coeFn_add (condExpL1CLM F' hm μ (hf_Lp.toLp f))
       (condExpL1CLM F' hm μ (hg_Lp.toLp g))).mono fun x hx _ => hx)]
-    rw [setIntegral_congr_ae (hm s hs)
+    rw [setIntegral_congr_ae (hm hs)
       ((Lp.coeFn_add (hf_Lp.toLp f) (hg_Lp.toLp g)).mono fun x hx _ => hx)]
     simp_rw [Pi.add_apply]
     rw [integral_add (L1.integrable_coeFn _).integrableOn (L1.integrable_coeFn _).integrableOn,
@@ -369,7 +371,7 @@ theorem setIntegral_condExpL1CLM (f : α →₁[μ] F') (hs : MeasurableSet[m] s
     ∫ x in s, condExpL1CLM F' hm μ f x ∂μ = ∫ x in s, f x ∂μ := by
   let S := spanningSets (μ.trim hm)
   have hS_meas : ∀ i, MeasurableSet[m] (S i) := measurableSet_spanningSets (μ.trim hm)
-  have hS_meas0 : ∀ i, MeasurableSet (S i) := fun i => hm _ (hS_meas i)
+  have hS_meas0 : ∀ i, MeasurableSet (S i) := fun i => hm (hS_meas i)
   have hs_eq : s = ⋃ i, S i ∩ s := by
     simp_rw [Set.inter_comm]
     rw [← Set.inter_iUnion, iUnion_spanningSets (μ.trim hm), Set.inter_univ]
@@ -388,12 +390,12 @@ theorem setIntegral_condExpL1CLM (f : α →₁[μ] F') (hs : MeasurableSet[m] s
         (hS_finite i).ne
   have h_right : Tendsto (fun i => ∫ x in S i ∩ s, f x ∂μ) atTop (𝓝 (∫ x in s, f x ∂μ)) := by
     have h :=
-      tendsto_setIntegral_of_monotone (fun i => (hS_meas0 i).inter (hm s hs)) h_mono
+      tendsto_setIntegral_of_monotone (fun i => (hS_meas0 i).inter (hm hs)) h_mono
         (L1.integrable_coeFn f).integrableOn
     rwa [← hs_eq] at h
   have h_left : Tendsto (fun i => ∫ x in S i ∩ s, condExpL1CLM F' hm μ f x ∂μ) atTop
       (𝓝 (∫ x in s, condExpL1CLM F' hm μ f x ∂μ)) := by
-    have h := tendsto_setIntegral_of_monotone (fun i => (hS_meas0 i).inter (hm s hs)) h_mono
+    have h := tendsto_setIntegral_of_monotone (fun i => (hS_meas0 i).inter (hm hs)) h_mono
       (L1.integrable_coeFn (condExpL1CLM F' hm μ f)).integrableOn
     rwa [← hs_eq] at h
   rw [h_eq_forall] at h_left
@@ -502,7 +504,7 @@ theorem setIntegral_condExpL1 [CompleteSpace F'] (hf : Integrable f μ) (hs : Me
     ∫ x in s, condExpL1 hm μ f x ∂μ = ∫ x in s, f x ∂μ := by
   simp_rw [condExpL1_eq hf]
   rw [setIntegral_condExpL1CLM (hf.toL1 f) hs]
-  exact setIntegral_congr_ae (hm s hs) (hf.coeFn_toL1.mono fun x hx _ => hx)
+  exact setIntegral_congr_ae (hm hs) (hf.coeFn_toL1.mono fun x hx _ => hx)
 
 theorem condExpL1_add (hf : Integrable f μ) (hg : Integrable g μ) :
     condExpL1 hm μ (f + g) = condExpL1 hm μ f + condExpL1 hm μ g :=

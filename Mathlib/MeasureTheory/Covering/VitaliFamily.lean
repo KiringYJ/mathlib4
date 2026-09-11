@@ -65,7 +65,7 @@ Vitali families are provided by covering theorems such as the Besicovitch coveri
 Vitali covering theorem. They make it possible to formulate general versions of theorems on
 differentiations of measure that apply in both contexts.
 -/
-structure VitaliFamily {m : MeasurableSpace X} (μ : Measure X) where
+structure VitaliFamily {m : SigmaAlgebra X} (μ : Measure X) where
   /-- Sets of the family "centered" at a given point. -/
   setsAt : X → Set (Set X)
   /-- All sets of the family are measurable. -/
@@ -85,7 +85,7 @@ structure VitaliFamily {m : MeasurableSpace X} (μ : Measure X) where
 
 namespace VitaliFamily
 
-variable {m0 : MeasurableSpace X} {μ : Measure X}
+variable {m0 : SigmaAlgebra X} {μ : Measure X}
 
 /-- A Vitali family for a measure `μ` is also a Vitali family for any measure absolutely continuous
 with respect to `μ`. -/

@@ -35,9 +35,9 @@ open scoped ENNReal
 
 namespace MeasureTheory.Measure
 
-variable {α β : Type*} {mα : MeasurableSpace α} {mβ : MeasurableSpace β}
+variable {α β : Type*} {mα : SigmaAlgebra α} {mβ : SigmaAlgebra β}
   {μ ν : Measure α} {κ η : Kernel α β} [IsFiniteKernel κ] [IsFiniteKernel η]
-  [MeasurableSpace.CountableOrCountablyGenerated α β]
+  [SigmaAlgebra.CountableOrCountablyGenerated α β]
 
 lemma MutuallySingular.compProd_of_right (μ ν : Measure α) (hκη : ∀ᵐ a ∂μ, κ a ⟂ₘ η a) :
     μ ⊗ₘ κ ⟂ₘ ν ⊗ₘ η := by

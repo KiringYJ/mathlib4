@@ -23,7 +23,7 @@ public section
 open Filter Set Function MeasureTheory Measure ProbabilityTheory
 open scoped NNReal ENNReal Topology
 
-variable {X : Type*} {m : MeasurableSpace X} {μ ν : Measure X} {f : X → X}
+variable {X : Type*} {m : SigmaAlgebra X} {μ ν : Measure X} {f : X → X}
 
 namespace Ergodic
 

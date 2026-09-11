@@ -78,8 +78,8 @@ open scoped NNReal MeasureTheory Topology ProbabilityTheory
 
 namespace ProbabilityTheory.Kernel
 
-variable {α γ : Type*} {mα : MeasurableSpace α} {mγ : MeasurableSpace γ} {κ η : Kernel α γ}
-  [hαγ : MeasurableSpace.CountableOrCountablyGenerated α γ]
+variable {α γ : Type*} {mα : SigmaAlgebra α} {mγ : SigmaAlgebra γ} {κ η : Kernel α γ}
+  [hαγ : SigmaAlgebra.CountableOrCountablyGenerated α γ]
 
 open scoped Classical in
 /-- Auxiliary function used to define `ProbabilityTheory.Kernel.rnDeriv` and
@@ -120,7 +120,7 @@ lemma measurable_rnDerivAux (κ η : Kernel α γ) :
       (fun a ↦ Measure.measurable_rnDeriv (κ a) (η a)) fun a a' c ha'_mem_a ↦ ?_
     have h_eq : ∀ κ : Kernel α γ, κ a' = κ a := fun κ ↦ by
       ext s hs
-      exact mem_of_mem_measurableAtom ha'_mem_a
+      exact SigmaAlgebra.mem_of_mem_indistinguishabilityClass ha'_mem_a
         (Kernel.measurable_coe κ hs (measurableSet_singleton (κ a s))) rfl
     rw [h_eq κ, h_eq η]
   · have := hαγ.countableOrCountablyGenerated.resolve_left hα

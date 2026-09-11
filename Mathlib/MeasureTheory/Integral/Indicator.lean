@@ -38,7 +38,7 @@ open Set Filter ENNReal
 
 open scoped Topology
 
-variable {α : Type*} [MeasurableSpace α] {A : Set α}
+variable {α : Type*} [SigmaAlgebra α] {A : Set α}
 variable {ι : Type*} (L : Filter ι) [IsCountablyGenerated L] {As : ι → Set α}
 
 /-- If the indicators of measurable sets `Aᵢ` tend pointwise almost everywhere to the indicator

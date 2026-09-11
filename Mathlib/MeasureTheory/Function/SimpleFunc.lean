@@ -44,7 +44,7 @@ variable {α β γ δ : Type*}
 /-- A function `f` from a measurable space to any type is called *simple*,
 if every preimage `f ⁻¹' {x}` is measurable, and the range is finite. This structure bundles
 a function with these properties. -/
-structure SimpleFunc.{u, v} (α : Type u) [MeasurableSpace α] (β : Type v) where
+structure SimpleFunc.{u, v} (α : Type u) [SigmaAlgebra α] (β : Type v) where
   /-- The underlying function -/
   toFun : α → β
   measurableSet_fiber' : ∀ x, MeasurableSet (toFun ⁻¹' {x})
@@ -56,7 +56,7 @@ namespace SimpleFunc
 
 section Measurable
 
-variable [MeasurableSpace α]
+variable [SigmaAlgebra α]
 
 @[macro_inline]
 instance instFunLike : FunLike (α →ₛ β) α β where
@@ -123,7 +123,7 @@ theorem exists_forall_le [Nonempty β] [Preorder β] [IsDirectedOrder β] (f : �
   f.range.exists_le.imp fun _ => forall_mem_range.1
 
 /-- Constant function as a `SimpleFunc`. -/
-def const (α) {β} [MeasurableSpace α] (b : β) : α →ₛ β :=
+def const (α) {β} [SigmaAlgebra α] (b : β) : α →ₛ β :=
   ⟨fun _ => b, fun _ => MeasurableSet.const _, finite_range_const⟩
 
 instance instInhabited [Inhabited β] : Inhabited (α →ₛ β) :=
@@ -137,20 +137,21 @@ theorem coe_const (b : β) : ⇑(const α b) = Function.const α b :=
   rfl
 
 @[simp]
-theorem range_const (α) [MeasurableSpace α] [Nonempty α] (b : β) : (const α b).range = {b} :=
+theorem range_const (α) [SigmaAlgebra α] [Nonempty α] (b : β) : (const α b).range = {b} :=
   Finset.coe_injective <| by simp +unfoldPartialApp [Function.const]
 
-theorem range_const_subset (α) [MeasurableSpace α] (b : β) : (const α b).range ⊆ {b} :=
+theorem range_const_subset (α) [SigmaAlgebra α] (b : β) : (const α b).range ⊆ {b} :=
   Finset.coe_subset.1 <| by simp
 
 theorem simpleFunc_bot {α} (f : @SimpleFunc α ⊥ β) [Nonempty β] : ∃ c, ∀ x, f x = c := by
-  have hf_meas := @SimpleFunc.measurableSet_fiber α _ ⊥ f
-  simp_rw [MeasurableSpace.measurableSet_bot_iff] at hf_meas
+  have hf_meas : ∀ b, f ⁻¹' {b} ∈ (⊥ : SigmaAlgebra α) :=
+    @SimpleFunc.measurableSet_fiber α _ ⊥ f
+  simp_rw [SigmaAlgebra.mem_bot_iff] at hf_meas
   exact (exists_eq_const_of_preimage_singleton hf_meas).imp fun c hc ↦ congr_fun hc
 
 theorem simpleFunc_bot' {α} [Nonempty β] (f : @SimpleFunc α ⊥ β) :
     ∃ c, f = @SimpleFunc.const α _ ⊥ c :=
-  letI : MeasurableSpace α := ⊥; (simpleFunc_bot f).imp fun _ ↦ ext
+  letI : SigmaAlgebra α := ⊥; (simpleFunc_bot f).imp fun _ ↦ ext
 
 theorem measurableSet_cut (r : α → β → Prop) (f : α →ₛ β) (h : ∀ b, MeasurableSet { a | r a b }) :
     MeasurableSet { a | r a (f a) } := by
@@ -169,11 +170,11 @@ theorem measurableSet_preimage (f : α →ₛ β) (s) : MeasurableSet (f ⁻¹' 
 
 /-- A simple function is measurable -/
 @[fun_prop]
-protected theorem measurable [MeasurableSpace β] (f : α →ₛ β) : Measurable f := fun s _ =>
+protected theorem measurable [SigmaAlgebra β] (f : α →ₛ β) : Measurable f := fun s _ =>
   measurableSet_preimage f s
 
 @[fun_prop]
-protected theorem aemeasurable [MeasurableSpace β] {μ : Measure α} (f : α →ₛ β) :
+protected theorem aemeasurable [SigmaAlgebra β] {μ : Measure α} (f : α →ₛ β) :
     AEMeasurable f μ :=
   f.measurable.aemeasurable
 
@@ -189,7 +190,7 @@ open scoped Classical in
 /-- If-then-else as a `SimpleFunc`. -/
 def piecewise (s : Set α) (hs : MeasurableSet s) (f g : α →ₛ β) : α →ₛ β :=
   ⟨s.piecewise f g, fun _ =>
-    letI : MeasurableSpace β := ⊤
+    letI : SigmaAlgebra β := ⊤
     f.measurable.piecewise hs g.measurable trivial,
     (f.finite_range.union g.finite_range).subset range_ite_subset⟩
 
@@ -230,7 +231,7 @@ def dite (s : Set α) (hs : MeasurableSet s) (f : s →ₛ β) (g : (sᶜ : Set 
   toFun x := open scoped Classical in if hx : x ∈ s then f ⟨x, hx⟩ else g ⟨x, hx⟩
   measurableSet_fiber' x := by
     classical
-    let : MeasurableSpace β := ⊤
+    let : SigmaAlgebra β := ⊤
     exact Measurable.dite f.measurable g.measurable hs trivial
   finite_range' := (f.finite_range.union g.finite_range).subset (by grind)
 
@@ -247,7 +248,7 @@ theorem range_indicator {s : Set α} (hs : MeasurableSet s) (hs_nonempty : s.Non
     Finset.coe_insert, Finset.coe_singleton, hs_nonempty.image_const,
     (nonempty_compl.2 hs_ne_univ).image_const, singleton_union, Function.const]
 
-theorem measurable_bind [MeasurableSpace γ] (f : α →ₛ β) (g : β → α → γ)
+theorem measurable_bind [SigmaAlgebra γ] (f : α →ₛ β) (g : β → α → γ)
     (hg : ∀ b, Measurable (g b)) : Measurable fun a => g (f a) a := fun s hs =>
   f.measurableSet_cut (fun a b => g b a ∈ s) fun b => hg b hs
 
@@ -299,49 +300,49 @@ theorem map_preimage_singleton (f : α →ₛ β) (g : β → γ) (c : γ) :
   map_preimage _ _ _
 
 /-- Composition of a `SimpleFun` and a measurable function is a `SimpleFunc`. -/
-def comp [MeasurableSpace β] (f : β →ₛ γ) (g : α → β) (hgm : Measurable g) : α →ₛ γ where
+def comp [SigmaAlgebra β] (f : β →ₛ γ) (g : α → β) (hgm : Measurable g) : α →ₛ γ where
   toFun := f ∘ g
   finite_range' := f.finite_range.subset <| Set.range_comp_subset_range _ _
   measurableSet_fiber' z := hgm (f.measurableSet_fiber z)
 
 @[simp]
-theorem coe_comp [MeasurableSpace β] (f : β →ₛ γ) {g : α → β} (hgm : Measurable g) :
+theorem coe_comp [SigmaAlgebra β] (f : β →ₛ γ) {g : α → β} (hgm : Measurable g) :
     ⇑(f.comp g hgm) = f ∘ g :=
   rfl
 
-theorem range_comp_subset_range [MeasurableSpace β] (f : β →ₛ γ) {g : α → β} (hgm : Measurable g) :
+theorem range_comp_subset_range [SigmaAlgebra β] (f : β →ₛ γ) {g : α → β} (hgm : Measurable g) :
     (f.comp g hgm).range ⊆ f.range :=
   Finset.coe_subset.1 <| by simp only [coe_range, coe_comp, Set.range_comp_subset_range]
 
 /-- Extend a `SimpleFunc` along a measurable embedding: `f₁.extend g hg f₂` is the function
 `F : β →ₛ γ` such that `F ∘ g = f₁` and `F y = f₂ y` whenever `y ∉ range g`. -/
-def extend [MeasurableSpace β] (f₁ : α →ₛ γ) (g : α → β) (hg : MeasurableEmbedding g)
+def extend [SigmaAlgebra β] (f₁ : α →ₛ γ) (g : α → β) (hg : MeasurableEmbedding g)
     (f₂ : β →ₛ γ) : β →ₛ γ where
   toFun := Function.extend g f₁ f₂
   finite_range' :=
     (f₁.finite_range.union <| f₂.finite_range.subset (image_subset_range _ _)).subset
       (range_extend_subset _ _ _)
   measurableSet_fiber' := by
-    let : MeasurableSpace γ := ⊤; have : MeasurableSingletonClass γ := ⟨fun _ => trivial⟩
+    let : SigmaAlgebra γ := ⊤; have : MeasurableSingletonClass γ := ⟨fun _ => trivial⟩
     exact fun x => hg.measurable_extend f₁.measurable f₂.measurable (measurableSet_singleton _)
 
 @[simp]
-theorem extend_apply [MeasurableSpace β] (f₁ : α →ₛ γ) {g : α → β} (hg : MeasurableEmbedding g)
+theorem extend_apply [SigmaAlgebra β] (f₁ : α →ₛ γ) {g : α → β} (hg : MeasurableEmbedding g)
     (f₂ : β →ₛ γ) (x : α) : (f₁.extend g hg f₂) (g x) = f₁ x :=
   hg.injective.extend_apply _ _ _
 
 @[simp]
-theorem extend_apply' [MeasurableSpace β] (f₁ : α →ₛ γ) {g : α → β} (hg : MeasurableEmbedding g)
+theorem extend_apply' [SigmaAlgebra β] (f₁ : α →ₛ γ) {g : α → β} (hg : MeasurableEmbedding g)
     (f₂ : β →ₛ γ) {y : β} (h : ¬∃ x, g x = y) : (f₁.extend g hg f₂) y = f₂ y :=
   Function.extend_apply' _ _ _ h
 
 @[simp]
-theorem extend_comp_eq' [MeasurableSpace β] (f₁ : α →ₛ γ) {g : α → β} (hg : MeasurableEmbedding g)
+theorem extend_comp_eq' [SigmaAlgebra β] (f₁ : α →ₛ γ) {g : α → β} (hg : MeasurableEmbedding g)
     (f₂ : β →ₛ γ) : f₁.extend g hg f₂ ∘ g = f₁ :=
   funext fun _ => extend_apply _ _ _ _
 
 @[simp]
-theorem extend_comp_eq [MeasurableSpace β] (f₁ : α →ₛ γ) {g : α → β} (hg : MeasurableEmbedding g)
+theorem extend_comp_eq [SigmaAlgebra β] (f₁ : α →ₛ γ) {g : α → β} (hg : MeasurableEmbedding g)
     (f₂ : β →ₛ γ) : (f₁.extend g hg f₂).comp g hg.measurable = f₁ :=
   coe_injective <| extend_comp_eq' _ hg _
 
@@ -827,8 +828,8 @@ def approx (i : ℕ → β) (f : α → β) (n : ℕ) : α →ₛ β :=
   (Finset.range n).sup fun k => restrict (const α (i k)) { a : α | i k ≤ f a }
 
 open scoped Classical in
-theorem approx_apply [TopologicalSpace β] [OrderClosedTopology β] [MeasurableSpace β]
-    [OpensMeasurableSpace β] {i : ℕ → β} {f : α → β} {n : ℕ} (a : α) (hf : Measurable f) :
+theorem approx_apply [TopologicalSpace β] [OrderClosedTopology β] [SigmaAlgebra β]
+    [OpensSigmaAlgebra β] {i : ℕ → β} {f : α → β} {n : ℕ} (a : α) (hf : Measurable f) :
     (approx i f n : α →ₛ β) a = (Finset.range n).sup fun k => if i k ≤ f a then i k else 0 := by
   dsimp only [approx]
   rw [finset_sup_apply]
@@ -841,8 +842,8 @@ theorem approx_apply [TopologicalSpace β] [OrderClosedTopology β] [MeasurableS
 theorem monotone_approx (i : ℕ → β) (f : α → β) : Monotone (approx i f) := fun _ _ h =>
   Finset.sup_mono <| Finset.range_subset_range.2 h
 
-theorem approx_comp [TopologicalSpace β] [OrderClosedTopology β] [MeasurableSpace β]
-    [OpensMeasurableSpace β] [MeasurableSpace γ] {i : ℕ → β} {f : γ → β} {g : α → γ} {n : ℕ} (a : α)
+theorem approx_comp [TopologicalSpace β] [OrderClosedTopology β] [SigmaAlgebra β]
+    [OpensSigmaAlgebra β] [SigmaAlgebra γ] {i : ℕ → β} {f : γ → β} {g : α → γ} {n : ℕ} (a : α)
     (hf : Measurable f) (hg : Measurable g) :
     (approx i (f ∘ g) n : α →ₛ β) a = (approx i f n : γ →ₛ β) (g a) := by
   rw [approx_apply _ hf, approx_apply _ (hf.comp hg), Function.comp_apply]
@@ -850,7 +851,7 @@ theorem approx_comp [TopologicalSpace β] [OrderClosedTopology β] [MeasurableSp
 end
 
 theorem iSup_approx_apply [TopologicalSpace β] [CompleteLattice β] [OrderClosedTopology β] [Zero β]
-    [MeasurableSpace β] [OpensMeasurableSpace β] (i : ℕ → β) (f : α → β) (a : α) (hf : Measurable f)
+    [SigmaAlgebra β] [OpensSigmaAlgebra β] (i : ℕ → β) (f : α → β) (a : α) (hf : Measurable f)
     (h_zero : (0 : β) = ⊥) : ⨆ n, (approx i f n : α →ₛ β) a = ⨆ (k) (_ : i k ≤ f a), i k := by
   refine le_antisymm (iSup_le fun n => ?_) (iSup_le fun k => iSup_le fun hk => ?_)
   · rw [approx_apply a hf, h_zero]
@@ -913,7 +914,7 @@ lemma iSup_eapprox_apply (hf : Measurable f) (a : α) : ⨆ n, (eapprox f n : α
 lemma iSup_coe_eapprox (hf : Measurable f) : ⨆ n, ⇑(eapprox f n) = f := by
   simpa [funext_iff] using iSup_eapprox_apply hf
 
-theorem eapprox_comp [MeasurableSpace γ] {f : γ → ℝ≥0∞} {g : α → γ} {n : ℕ} (hf : Measurable f)
+theorem eapprox_comp [SigmaAlgebra γ] {f : γ → ℝ≥0∞} {g : α → γ} {n : ℕ} (hf : Measurable f)
     (hg : Measurable g) : (eapprox (f ∘ g) n : α → ℝ≥0∞) = (eapprox f n : γ →ₛ ℝ≥0∞) ∘ g :=
   funext fun a => approx_comp a hf hg
 
@@ -953,10 +954,10 @@ end Measurable
 
 section Measure
 
-variable {m : MeasurableSpace α} {μ ν : Measure α}
+variable {m : SigmaAlgebra α} {μ ν : Measure α}
 
 /-- Integral of a simple function whose codomain is `ℝ≥0∞`. -/
-def lintegral {_m : MeasurableSpace α} (f : α →ₛ ℝ≥0∞) (μ : Measure α) : ℝ≥0∞ :=
+def lintegral {_m : SigmaAlgebra α} (f : α →ₛ ℝ≥0∞) (μ : Measure α) : ℝ≥0∞ :=
   ∑ x ∈ f.range, x * μ (f ⁻¹' {x})
 
 theorem lintegral_eq_of_subset (f : α →ₛ ℝ≥0∞) {s : Finset ℝ≥0∞}
@@ -1008,7 +1009,7 @@ theorem const_mul_lintegral (f : α →ₛ ℝ≥0∞) (x : ℝ≥0∞) :
     _ = x * ∑ r ∈ f.range, r * μ (f ⁻¹' {r}) := by simp_rw [Finset.mul_sum, mul_assoc]
 
 /-- Integral of a simple function `α →ₛ ℝ≥0∞` as a bilinear map. -/
-def lintegralₗ {m : MeasurableSpace α} : (α →ₛ ℝ≥0∞) →ₗ[ℝ≥0∞] Measure α →ₗ[ℝ≥0∞] ℝ≥0∞ where
+def lintegralₗ {m : SigmaAlgebra α} : (α →ₛ ℝ≥0∞) →ₗ[ℝ≥0∞] Measure α →ₗ[ℝ≥0∞] ℝ≥0∞ where
   toFun f :=
     { toFun := lintegral f
       map_add' := by simp [lintegral, mul_add, Finset.sum_add_distrib]
@@ -1029,7 +1030,7 @@ theorem lintegral_smul {R : Type*} [SMul R ℝ≥0∞] [IsScalarTower R ℝ≥0�
   simpa only [smul_one_smul] using! (lintegralₗ f).map_smul (c • 1) μ
 
 @[simp]
-theorem lintegral_zero [MeasurableSpace α] (f : α →ₛ ℝ≥0∞) : f.lintegral 0 = 0 :=
+theorem lintegral_zero [SigmaAlgebra α] (f : α →ₛ ℝ≥0∞) : f.lintegral 0 = 0 :=
   (lintegralₗ f).map_zero
 
 theorem lintegral_finsetSum {ι} (f : α →ₛ ℝ≥0∞) (μ : ι → Measure α) (s : Finset ι) :
@@ -1038,7 +1039,7 @@ theorem lintegral_finsetSum {ι} (f : α →ₛ ℝ≥0∞) (μ : ι → Measure
 
 @[deprecated (since := "2026-04-08")] alias lintegral_finset_sum := lintegral_finsetSum
 
-theorem lintegral_sum {m : MeasurableSpace α} {ι} (f : α →ₛ ℝ≥0∞) (μ : ι → Measure α) :
+theorem lintegral_sum {m : SigmaAlgebra α} {ι} (f : α →ₛ ℝ≥0∞) (μ : ι → Measure α) :
     f.lintegral (Measure.sum μ) = ∑' i, f.lintegral (μ i) := by
   simp only [lintegral, Measure.sum_apply, f.measurableSet_preimage, ← Finset.tsum_subtype, ←
     ENNReal.tsum_mul_left]
@@ -1059,7 +1060,7 @@ theorem restrict_lintegral (f : α →ₛ ℝ≥0∞) {s : Set α} (hs : Measura
           if hb : f b = 0 then by simp only [hb, zero_mul]
           else by rw [restrict_preimage_singleton _ hs hb, inter_comm]
 
-theorem lintegral_restrict {m : MeasurableSpace α} (f : α →ₛ ℝ≥0∞) (s : Set α) (μ : Measure α) :
+theorem lintegral_restrict {m : SigmaAlgebra α} (f : α →ₛ ℝ≥0∞) (s : Set α) (μ : Measure α) :
     f.lintegral (μ.restrict s) = ∑ y ∈ f.range, y * μ (f ⁻¹' {y} ∩ s) := by
   simp only [lintegral, Measure.restrict_apply, f.measurableSet_preimage]
 
@@ -1113,7 +1114,7 @@ theorem lintegral_mono {f g : α →ₛ ℝ≥0∞} (hfg : f ≤ g) (hμν : μ 
   (lintegral_mono_fun hfg).trans (lintegral_mono_measure hμν)
 
 /-- `SimpleFunc.lintegral` depends only on the measures of `f ⁻¹' {y}`. -/
-theorem lintegral_eq_of_measure_preimage [MeasurableSpace β] {f : α →ₛ ℝ≥0∞} {g : β →ₛ ℝ≥0∞}
+theorem lintegral_eq_of_measure_preimage [SigmaAlgebra β] {f : α →ₛ ℝ≥0∞} {g : β →ₛ ℝ≥0∞}
     {ν : Measure β} (H : ∀ y, μ (f ⁻¹' {y}) = ν (g ⁻¹' {y})) : f.lintegral μ = g.lintegral ν := by
   simp only [lintegral, ← H]
   apply lintegral_eq_of_subset
@@ -1126,14 +1127,14 @@ theorem lintegral_congr {f g : α →ₛ ℝ≥0∞} (h : f =ᵐ[μ] g) : f.lint
   lintegral_eq_of_measure_preimage fun y =>
     measure_congr <| Eventually.set_eq <| h.mono fun x hx => by simp [hx]
 
-theorem lintegral_map' {β} [MeasurableSpace β] {μ' : Measure β} (f : α →ₛ ℝ≥0∞) (g : β →ₛ ℝ≥0∞)
+theorem lintegral_map' {β} [SigmaAlgebra β] {μ' : Measure β} (f : α →ₛ ℝ≥0∞) (g : β →ₛ ℝ≥0∞)
     (m' : α → β) (eq : ∀ a, f a = g (m' a)) (h : ∀ s, MeasurableSet s → μ' s = μ (m' ⁻¹' s)) :
     f.lintegral μ = g.lintegral μ' :=
   lintegral_eq_of_measure_preimage fun y => by
     simp only [preimage, eq]
     exact (h (g ⁻¹' {y}) (g.measurableSet_preimage _)).symm
 
-theorem lintegral_map {β} [MeasurableSpace β] (g : β →ₛ ℝ≥0∞) {f : α → β} (hf : Measurable f) :
+theorem lintegral_map {β} [SigmaAlgebra β] (g : β →ₛ ℝ≥0∞) {f : α → β} (hf : Measurable f) :
     g.lintegral (Measure.map f μ) = (g.comp f hf).lintegral μ :=
   Eq.symm <| lintegral_map' _ _ f (fun _ => rfl) fun _s hs => Measure.map_apply hf hs
 
@@ -1144,15 +1145,15 @@ section FinMeasSupp
 open Finset Function
 
 open scoped Classical in
-theorem support_eq [MeasurableSpace α] [Zero β] (f : α →ₛ β) :
+theorem support_eq [SigmaAlgebra α] [Zero β] (f : α →ₛ β) :
     support f = ⋃ y ∈ {y ∈ f.range | y ≠ 0}, f ⁻¹' {y} :=
   Set.ext fun x => by
     simp only [mem_support, Set.mem_preimage, mem_filter, mem_range_self, true_and, exists_prop,
       mem_iUnion, mem_singleton_iff, exists_eq_right']
 
-variable {m : MeasurableSpace α} [Zero β] [Zero γ] {μ : Measure α} {f : α →ₛ β}
+variable {m : SigmaAlgebra α} [Zero β] [Zero γ] {μ : Measure α} {f : α →ₛ β}
 
-theorem measurableSet_support [MeasurableSpace α] (f : α →ₛ β) : MeasurableSet (support f) := by
+theorem measurableSet_support [SigmaAlgebra α] (f : α →ₛ β) : MeasurableSet (support f) := by
   rw [f.support_eq]
   exact Finset.measurableSet_biUnion _ fun y _ => measurableSet_fiber _ _
 
@@ -1166,7 +1167,7 @@ lemma measure_support_lt_top (f : α →ₛ β) (hf : ∀ y, y ≠ 0 → μ (f �
 
 /-- A `SimpleFunc` has finite measure support if it is equal to `0` outside of a set of finite
 measure. -/
-protected def FinMeasSupp {_m : MeasurableSpace α} (f : α →ₛ β) (μ : Measure α) : Prop :=
+protected def FinMeasSupp {_m : SigmaAlgebra α} (f : α →ₛ β) (μ : Measure α) : Prop :=
   f =ᶠ[μ.cofinite] 0
 
 theorem finMeasSupp_iff_support : f.FinMeasSupp μ ↔ μ (support f) < ∞ :=
@@ -1260,7 +1261,7 @@ of a characteristic function, and that this multiple doesn't appear in the image
 
 To use in an induction proof, the syntax is `induction f using SimpleFunc.induction with`. -/
 @[elab_as_elim]
-protected theorem induction {α γ} [MeasurableSpace α] [AddZeroClass γ]
+protected theorem induction {α γ} [SigmaAlgebra α] [AddZeroClass γ]
     {motive : SimpleFunc α γ → Prop}
     (const : ∀ (c) {s} (hs : MeasurableSet s),
       motive (SimpleFunc.piecewise s hs (SimpleFunc.const _ c) (SimpleFunc.const _ 0)))
@@ -1303,7 +1304,7 @@ of functions.
 
 To use in an induction proof, the syntax is `induction f with`. -/
 @[induction_eliminator]
-protected theorem induction' {α γ} [MeasurableSpace α] [Nonempty γ] {P : SimpleFunc α γ → Prop}
+protected theorem induction' {α γ} [SigmaAlgebra α] [Nonempty γ] {P : SimpleFunc α γ → Prop}
     (const : ∀ (c), P (SimpleFunc.const _ c))
     (pcw : ∀ ⦃f g : SimpleFunc α γ⦄ {s} (hs : MeasurableSet s), P f → P g →
       P (f.piecewise s hs g))
@@ -1339,14 +1340,14 @@ protected theorem induction' {α γ} [MeasurableSpace α] [Nonempty γ] {P : Sim
 /-- In a topological vector space, the addition of a measurable function and a simple function is
 measurable. -/
 theorem _root_.Measurable.add_simpleFunc
-    {E : Type*} {_ : MeasurableSpace α} [MeasurableSpace E] [AddCancelMonoid E] [MeasurableAdd E]
+    {E : Type*} {_ : SigmaAlgebra α} [SigmaAlgebra E] [AddCancelMonoid E] [MeasurableAdd E]
     {g : α → E} (hg : Measurable g) (f : SimpleFunc α E) : Measurable (g + (f : α → E)) :=
   f.measurable_bind (fun b a ↦ g a + b) fun b ↦ hg.add_const b
 
 /-- In a topological vector space, the addition of a simple function and a measurable function is
 measurable. -/
 theorem _root_.Measurable.simpleFunc_add
-    {E : Type*} {_ : MeasurableSpace α} [MeasurableSpace E] [AddCancelMonoid E] [MeasurableAdd E]
+    {E : Type*} {_ : SigmaAlgebra α} [SigmaAlgebra E] [AddCancelMonoid E] [MeasurableAdd E]
     {g : α → E} (hg : Measurable g) (f : SimpleFunc α E) : Measurable ((f : α → E) + g) :=
   f.measurable_bind (fun b a ↦ b + g a) fun b ↦ hg.const_add b
 
@@ -1356,7 +1357,7 @@ end MeasureTheory
 
 open MeasureTheory MeasureTheory.SimpleFunc
 
-variable {α : Type*} {mα : MeasurableSpace α} {μ : Measure α}
+variable {α : Type*} {mα : SigmaAlgebra α} {μ : Measure α}
 
 /-- To prove something for an arbitrary measurable function into `ℝ≥0∞`, it suffices to show
 that the property holds for (multiples of) characteristic functions and is closed under addition

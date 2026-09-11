@@ -24,7 +24,7 @@ public section
 open MeasureTheory RCLike
 open scoped ENNReal NNReal
 
-variable {X Y E F Fₗ : Type*} [MeasurableSpace X] {μ : Measure X} {𝕜 𝕜' : Type*} [RCLike 𝕜]
+variable {X Y E F Fₗ : Type*} [SigmaAlgebra X] {μ : Measure X} {𝕜 𝕜' : Type*} [RCLike 𝕜]
   [RCLike 𝕜'] [NormedAddCommGroup E] [NormedSpace 𝕜 E] [NormedAddCommGroup F] [NormedSpace 𝕜' F]
   [NormedAddCommGroup Fₗ] [NormedSpace 𝕜 Fₗ] {p : ℝ≥0∞}
 

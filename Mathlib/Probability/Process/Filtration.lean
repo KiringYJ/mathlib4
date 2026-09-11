@@ -7,7 +7,7 @@ module
 
 public import Mathlib.MeasureTheory.Constructions.Cylinders
 public import Mathlib.MeasureTheory.Function.ConditionalExpectation.Real
-public import Mathlib.MeasureTheory.MeasurableSpace.PreorderRestrict
+public import Mathlib.MeasureTheory.SigmaAlgebra.PreorderRestrict
 
 /-!
 # Filtrations
@@ -47,17 +47,17 @@ namespace MeasureTheory
 
 /-- A `Filtration` on a measurable space `Ω` with σ-algebra `m` is a monotone
 sequence of sub-σ-algebras of `m`. -/
-structure Filtration {Ω : Type*} (ι : Type*) [Preorder ι] (m : MeasurableSpace Ω) where
+structure Filtration {Ω : Type*} (ι : Type*) [Preorder ι] (m : SigmaAlgebra Ω) where
   /-- The sequence of sub-σ-algebras of `m` -/
-  seq : ι → MeasurableSpace Ω
+  seq : ι → SigmaAlgebra Ω
   mono' : Monotone seq
   le' : ∀ i : ι, seq i ≤ m
 
 attribute [coe] Filtration.seq
 
-variable {Ω ι : Type*} {m : MeasurableSpace Ω}
+variable {Ω ι : Type*} {m : SigmaAlgebra Ω}
 
-instance [Preorder ι] : CoeFun (Filtration ι m) fun _ => ι → MeasurableSpace Ω :=
+instance [Preorder ι] : CoeFun (Filtration ι m) fun _ => ι → SigmaAlgebra Ω :=
   ⟨fun f => f.seq⟩
 
 namespace Filtration
@@ -71,16 +71,16 @@ protected theorem le (f : Filtration ι m) (i : ι) : f i ≤ m :=
   f.le' i
 
 @[ext]
-protected theorem ext {f g : Filtration ι m} (h : (f : ι → MeasurableSpace Ω) = g) : f = g := by
+protected theorem ext {f g : Filtration ι m} (h : (f : ι → SigmaAlgebra Ω) = g) : f = g := by
   cases f; cases g; congr
 
 variable (ι) in
 /-- The constant filtration which is equal to `m` for all `i : ι`. -/
-def const (m' : MeasurableSpace Ω) (hm' : m' ≤ m) : Filtration ι m :=
+def const (m' : SigmaAlgebra Ω) (hm' : m' ≤ m) : Filtration ι m :=
   ⟨fun _ => m', monotone_const, fun _ => hm'⟩
 
 @[simp]
-theorem const_apply {m' : MeasurableSpace Ω} {hm' : m' ≤ m} (i : ι) : const ι m' hm' i = m' :=
+theorem const_apply {m' : SigmaAlgebra Ω} {hm' : m' ≤ m} (i : ι) : const ι m' hm' i = m' :=
   rfl
 
 instance : Inhabited (Filtration ι m) :=
@@ -194,7 +194,7 @@ end Filtration
 
 theorem measurableSet_of_filtration [Preorder ι] {f : Filtration ι m} {s : Set Ω} {i : ι}
     (hs : MeasurableSet[f i] s) : MeasurableSet[m] s :=
-  f.le i s hs
+  f.le i hs
 
 /-- A measure is σ-finite with respect to filtration if it is σ-finite with respect
 to all the sub-σ-algebra of the filtration. -/
@@ -228,13 +228,13 @@ variable [Preorder ι]
 /-- Given a sequence of measurable sets `(sₙ)`, `filtrationOfSet` is the smallest filtration
 such that `sₙ` is measurable with respect to the `n`-th sub-σ-algebra in `filtrationOfSet`. -/
 def filtrationOfSet {s : ι → Set Ω} (hsm : ∀ i, MeasurableSet (s i)) : Filtration ι m where
-  seq i := MeasurableSpace.generateFrom {t | ∃ j ≤ i, s j = t}
-  mono' _ _ hnm := MeasurableSpace.generateFrom_mono fun _ ⟨k, hk₁, hk₂⟩ => ⟨k, hk₁.trans hnm, hk₂⟩
-  le' _ := MeasurableSpace.generateFrom_le fun _ ⟨k, _, hk₂⟩ => hk₂ ▸ hsm k
+  seq i := SigmaAlgebra.generateFrom {t | ∃ j ≤ i, s j = t}
+  mono' _ _ hnm := SigmaAlgebra.generateFrom_mono fun _ ⟨k, hk₁, hk₂⟩ => ⟨k, hk₁.trans hnm, hk₂⟩
+  le' _ := SigmaAlgebra.generateFrom_le fun _ ⟨k, _, hk₂⟩ => hk₂ ▸ hsm k
 
 theorem measurableSet_filtrationOfSet {s : ι → Set Ω} (hsm : ∀ i, MeasurableSet[m] (s i)) (i : ι)
     {j : ι} (hj : j ≤ i) : MeasurableSet[filtrationOfSet hsm i] (s j) :=
-  MeasurableSpace.measurableSet_generateFrom ⟨j, hj, rfl⟩
+  SigmaAlgebra.mem_generateFrom ⟨j, hj, rfl⟩
 
 theorem measurableSet_filtrationOfSet' {s : ι → Set Ω} (hsm : ∀ n, MeasurableSet[m] (s n))
     (i : ι) : MeasurableSet[filtrationOfSet hsm i] (s i) :=
@@ -386,14 +386,14 @@ lemma IsRightContinuous.measurableSet {𝓕 : Filtration ι m} [IsRightContinuou
 end IsRightContinuous
 
 variable {β : ι → Type*} [∀ i, TopologicalSpace (β i)] [∀ i, MetrizableSpace (β i)]
-  [mβ : ∀ i, MeasurableSpace (β i)] [∀ i, BorelSpace (β i)]
+  [mβ : ∀ i, SigmaAlgebra (β i)] [∀ i, BorelSpace (β i)]
   [Preorder ι]
 
 /-- Given a sequence of functions, the natural filtration is the smallest sequence
 of σ-algebras such that the sequence of functions is measurable with respect to
 the filtration. -/
 def natural (u : (i : ι) → Ω → β i) (hum : ∀ i, StronglyMeasurable (u i)) : Filtration ι m where
-  seq i := ⨆ j ≤ i, MeasurableSpace.comap (u j) (mβ j)
+  seq i := ⨆ j ≤ i, SigmaAlgebra.comap (u j) (mβ j)
   mono' _ _ hij := biSup_mono fun _ => ge_trans hij
   le' i := by
     refine iSup₂_le ?_
@@ -402,38 +402,41 @@ def natural (u : (i : ι) → Ω → β i) (hum : ∀ i, StronglyMeasurable (u i
 
 lemma natural_eq_comap (u : (i : ι) → Ω → β i) (hum : ∀ (i : ι), StronglyMeasurable (u i)) (i : ι) :
     natural u hum i = .comap (fun ω (j : Set.Iic i) ↦ u j ω) inferInstance := by
-  simp_rw [natural, MeasurableSpace.comap_process_pi, iSup_subtype']
+  simp_rw [natural, SigmaAlgebra.comap_process_pi, iSup_subtype']
   rfl
 
 section
 
-open MeasurableSpace
+open SigmaAlgebra
 
 theorem filtrationOfSet_eq_natural [∀ i, MulZeroOneClass (β i)] [∀ i, Nontrivial (β i)]
     {s : ι → Set Ω} (hsm : ∀ i, MeasurableSet[m] (s i)) :
     filtrationOfSet hsm = natural (fun i => (s i).indicator (fun _ => 1 : Ω → β i)) fun i =>
       stronglyMeasurable_one.indicator (hsm i) := by
   refine Filtration.ext <| funext fun i ↦ ?_
-  simp only [filtrationOfSet, natural, measurableSpace_iSup_eq, exists_prop]
-  refine le_antisymm (generateFrom_le ?_) (generateFrom_le ?_)
+  change SigmaAlgebra.generateFrom {t | ∃ j ≤ i, s j = t} =
+    ⨆ j ≤ i, SigmaAlgebra.comap ((s j).indicator fun _ ↦ 1 : Ω → β j) (mβ j)
+  refine le_antisymm (generateFrom_le ?_) ?_
   · rintro _ ⟨j, hij, rfl⟩
-    refine measurableSet_generateFrom ⟨j, measurableSet_generateFrom ⟨hij, ?_⟩⟩
+    have hmem : s j ∈ SigmaAlgebra.comap ((s j).indicator fun _ ↦ 1 : Ω → β j) (mβ j) := by
+      change ∃ t ∈ mβ j, (s j).indicator (fun _ ↦ 1 : Ω → β j) ⁻¹' t = s j
+      refine ⟨{1}, measurableSet_singleton 1, ?_⟩
+      ext x
+      simp
+    exact (le_iSup (fun j ↦ ⨆ _ : j ≤ i,
+      SigmaAlgebra.comap ((s j).indicator fun _ ↦ 1 : Ω → β j) (mβ j)) j)
+        ((le_iSup (fun _ : j ≤ i ↦
+          SigmaAlgebra.comap ((s j).indicator fun _ ↦ 1 : Ω → β j) (mβ j)) hij) hmem)
+  · refine iSup_le fun n ↦ iSup_le fun hn ↦ ?_
     rw [comap_eq_generateFrom]
-    refine measurableSet_generateFrom ⟨{1}, measurableSet_singleton 1, ?_⟩
-    ext x
-    simp
-  · rintro t ⟨n, ht⟩
-    suffices MeasurableSpace.generateFrom {t | n ≤ i ∧
-      MeasurableSet[MeasurableSpace.comap ((s n).indicator (fun _ => 1 : Ω → β n)) (mβ n)] t} ≤
-        MeasurableSpace.generateFrom {t | ∃ (j : ι), j ≤ i ∧ s j = t} by
-      exact this _ ht
     refine generateFrom_le ?_
-    rintro t ⟨hn, u, _, hu'⟩
+    rintro t ⟨u, hu, hu'⟩
     obtain heq | heq | heq | heq := Set.indicator_const_preimage (s n) u (1 : β n)
     on_goal 4 => rw [Set.mem_singleton_iff] at heq
     all_goals rw [heq] at hu'; rw [← hu']
-    exacts [MeasurableSet.univ, measurableSet_generateFrom ⟨n, hn, rfl⟩,
-      MeasurableSet.compl (measurableSet_generateFrom ⟨n, hn, rfl⟩), measurableSet_empty _]
+    exacts [(SigmaAlgebra.generateFrom _).univ_mem, mem_generateFrom ⟨n, hn, rfl⟩,
+      (SigmaAlgebra.generateFrom _).compl_mem (mem_generateFrom ⟨n, hn, rfl⟩),
+      (SigmaAlgebra.generateFrom _).empty_mem]
 
 end
 
@@ -482,9 +485,9 @@ section piLE
 
 /-! ### Filtration of the first events -/
 
-open MeasurableSpace Preorder
+open SigmaAlgebra Preorder
 
-variable {X : ι → Type*} [∀ i, MeasurableSpace (X i)]
+variable {X : ι → Type*} [∀ i, SigmaAlgebra (X i)]
 
 /-- The canonical filtration on the product space `Π i, X i`, where `piLE i`
 consists of measurable sets depending only on coordinates `≤ i`. -/
@@ -509,9 +512,9 @@ end piLE
 
 section piFinset
 
-open MeasurableSpace Finset
+open SigmaAlgebra Finset
 
-variable {ι : Type*} {X : ι → Type*} [∀ i, MeasurableSpace (X i)]
+variable {ι : Type*} {X : ι → Type*} [∀ i, SigmaAlgebra (X i)]
 
 /-- The filtration of events which only depends on finitely many coordinates
 on the product space `Π i, X i`, `piFinset s` consists of measurable sets depending only on

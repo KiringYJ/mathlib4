@@ -5,19 +5,19 @@ Authors: Rémy Degenne, Peter Pfaffelhuber, Yaël Dillies, Kin Yau James Wong
 -/
 module
 
-public import Mathlib.MeasureTheory.MeasurableSpace.Constructions
+public import Mathlib.MeasureTheory.SigmaAlgebra.Constructions
 public import Mathlib.MeasureTheory.PiSystem
 public import Mathlib.Topology.Constructions
 
 /-!
 # π-systems of cylinders and square cylinders
 
-The instance `MeasurableSpace.pi` on `∀ i, α i`, where each `α i` has a `MeasurableSpace` `m i`,
+The instance `SigmaAlgebra.pi` on `∀ i, α i`, where each `α i` has a `SigmaAlgebra` `m i`,
 is defined as `⨆ i, (m i).comap (fun a => a i)`.
 That is, a function `g : β → ∀ i, α i` is measurable iff for all `i`, the function `b ↦ g b i`
 is measurable.
 
-We define two π-systems generating `MeasurableSpace.pi`, cylinders and square cylinders.
+We define two π-systems generating `SigmaAlgebra.pi`, cylinders and square cylinders.
 
 ## Main definitions
 
@@ -44,7 +44,7 @@ a product set.
 
 @[expose] public section
 
-open Function Set MeasurableSpace
+open Function Set SigmaAlgebra
 
 namespace MeasureTheory
 
@@ -110,21 +110,22 @@ theorem isPiSystem_squareCylinders {C : ∀ i, Set (Set (α i))} (hC : ∀ i, Is
   · rw [Finset.coe_union]
 
 theorem comap_eval_le_generateFrom_squareCylinders_singleton
-    (α : ι → Type*) [m : ∀ i, MeasurableSpace (α i)] (i : ι) :
-    MeasurableSpace.comap (Function.eval i) (m i) ≤
-      MeasurableSpace.generateFrom
+    (α : ι → Type*) [m : ∀ i, SigmaAlgebra (α i)] (i : ι) :
+    SigmaAlgebra.comap (Function.eval i) (m i) ≤
+      SigmaAlgebra.generateFrom
         ((fun t ↦ ({i} : Set ι).pi t) '' univ.pi fun i ↦ {s : Set (α i) | MeasurableSet s}) := by
   simp only [singleton_pi]
-  rw [MeasurableSpace.comap_eq_generateFrom]
-  refine MeasurableSpace.generateFrom_mono fun S ↦ ?_
+  rw [SigmaAlgebra.comap_eq_generateFrom]
+  refine SigmaAlgebra.generateFrom_mono fun S ↦ ?_
   simp only [mem_ofPred_eq, mem_image, mem_univ_pi, forall_exists_index, and_imp]
   intro t ht h
   classical
   refine ⟨fun j ↦ if hji : j = i then by convert! t else univ, fun j ↦ ?_, ?_⟩
   · by_cases hji : j = i
-    · simp only [hji, eq_mpr_eq_cast, dite_eq_left]
-      convert! ht
-      simp only [cast_heq]
+    · subst j
+      rw [measurableSet_iff_mem]
+      convert ht using 1
+      simp
     · simp only [hji, not_false_iff, dite_eq_right, MeasurableSet.univ]
   · #adaptation_note /-- Before https://github.com/leanprover/lean4/pull/13166
     (replacing grind's canonicalizer with a type-directed normalizer), `grind` closed this goal.
@@ -133,17 +134,17 @@ theorem comap_eval_le_generateFrom_squareCylinders_singleton
     simp [h]
 
 /-- The square cylinders formed from measurable sets generate the product σ-algebra. -/
-theorem generateFrom_squareCylinders [∀ i, MeasurableSpace (α i)] :
-    MeasurableSpace.generateFrom (squareCylinders fun i ↦ {s : Set (α i) | MeasurableSet s}) =
-      MeasurableSpace.pi := by
+theorem generateFrom_squareCylinders [∀ i, SigmaAlgebra (α i)] :
+    SigmaAlgebra.generateFrom (squareCylinders fun i ↦ {s : Set (α i) | MeasurableSet s}) =
+      SigmaAlgebra.pi := by
   apply le_antisymm
-  · rw [MeasurableSpace.generateFrom_le_iff]
+  · rw [SigmaAlgebra.generateFrom_le_iff]
     rintro S ⟨s, t, h, rfl⟩
     simp only [mem_univ_pi, mem_ofPred_eq] at h
     exact MeasurableSet.pi (Finset.countable_toSet _) (fun i _ ↦ h i)
   · refine iSup_le fun i ↦ ?_
     refine (comap_eval_le_generateFrom_squareCylinders_singleton α i).trans ?_
-    refine MeasurableSpace.generateFrom_mono ?_
+    refine SigmaAlgebra.generateFrom_mono ?_
     rw [← Finset.coe_singleton, squareCylinders_eq_iUnion_image]
     exact subset_iUnion
       (fun (s : Finset ι) ↦
@@ -250,7 +251,7 @@ theorem IsClosed.cylinder [∀ i, TopologicalSpace (α i)] (s : Finset ι) {S : 
     (hs : IsClosed S) : IsClosed (cylinder s S) :=
   hs.preimage (continuous_pi fun _ ↦ continuous_apply _)
 
-theorem _root_.MeasurableSet.cylinder [∀ i, MeasurableSpace (α i)] (s : Finset ι)
+theorem _root_.MeasurableSet.cylinder [∀ i, SigmaAlgebra (α i)] (s : Finset ι)
     {S : Set (∀ i : s, α i)} (hS : MeasurableSet S) :
     MeasurableSet (cylinder s S) :=
   Measurable.of_eval (fun _ ↦ measurable_pi_apply _) hS
@@ -268,15 +269,15 @@ section cylinders
 /-- Given a finite set `s` of indices, a cylinder is the preimage of a set `S` of `∀ i : s, α i` by
 the projection from `∀ i, α i` to `∀ i : s, α i`.
 `measurableCylinders` is the set of all cylinders with measurable base `S`. -/
-def measurableCylinders (α : ι → Type*) [∀ i, MeasurableSpace (α i)] : Set (Set (∀ i, α i)) :=
+def measurableCylinders (α : ι → Type*) [∀ i, SigmaAlgebra (α i)] : Set (Set (∀ i, α i)) :=
   ⋃ (s) (S) (_ : MeasurableSet S), {cylinder s S}
 
-theorem empty_mem_measurableCylinders (α : ι → Type*) [∀ i, MeasurableSpace (α i)] :
+theorem empty_mem_measurableCylinders (α : ι → Type*) [∀ i, SigmaAlgebra (α i)] :
     ∅ ∈ measurableCylinders α := by
   simp_rw [measurableCylinders, mem_iUnion, mem_singleton_iff]
   exact ⟨∅, ∅, MeasurableSet.empty, (cylinder_empty _).symm⟩
 
-variable [∀ i, MeasurableSpace (α i)] {s t : Set (∀ i, α i)}
+variable [∀ i, SigmaAlgebra (α i)] {s t : Set (∀ i, α i)}
 
 @[simp]
 theorem mem_measurableCylinders (t : Set (∀ i, α i)) :
@@ -338,7 +339,7 @@ theorem compl_mem_measurableCylinders (hs : s ∈ measurableCylinders α) :
   refine ⟨s, Sᶜ, hS.compl, ?_⟩
   rw [compl_cylinder]
 
-theorem univ_mem_measurableCylinders (α : ι → Type*) [∀ i, MeasurableSpace (α i)] :
+theorem univ_mem_measurableCylinders (α : ι → Type*) [∀ i, SigmaAlgebra (α i)] :
     Set.univ ∈ measurableCylinders α := by
   rw [← compl_empty]; exact compl_mem_measurableCylinders (empty_mem_measurableCylinders α)
 
@@ -360,14 +361,14 @@ alias diff_mem_measurableCylinders := sdiff_mem_measurableCylinders
 
 /-- The measurable cylinders generate the product σ-algebra. -/
 theorem generateFrom_measurableCylinders :
-    MeasurableSpace.generateFrom (measurableCylinders α) = MeasurableSpace.pi := by
+    SigmaAlgebra.generateFrom (measurableCylinders α) = SigmaAlgebra.pi := by
   apply le_antisymm
-  · refine MeasurableSpace.generateFrom_le (fun S hS ↦ ?_)
+  · refine SigmaAlgebra.generateFrom_le (fun S hS ↦ ?_)
     obtain ⟨s, S, hSm, rfl⟩ := (mem_measurableCylinders _).mp hS
     exact hSm.cylinder
   · refine iSup_le fun i ↦ ?_
     refine (comap_eval_le_generateFrom_squareCylinders_singleton α i).trans ?_
-    refine MeasurableSpace.generateFrom_mono (fun x ↦ ?_)
+    refine SigmaAlgebra.generateFrom_mono (fun x ↦ ?_)
     simp only [singleton_pi, mem_image, mem_pi, mem_univ, mem_ofPred_eq,
       forall_true_left, mem_measurableCylinders, forall_exists_index, and_imp]
     rintro t ht rfl
@@ -377,7 +378,7 @@ theorem generateFrom_measurableCylinders :
 
 /-- The cylinders of a product space indexed by `ℕ` can be seen as depending on the first
 coordinates. -/
-theorem measurableCylinders_nat {X : ℕ → Type*} [∀ n, MeasurableSpace (X n)] :
+theorem measurableCylinders_nat {X : ℕ → Type*} [∀ n, SigmaAlgebra (X n)] :
     measurableCylinders X = ⋃ (a) (S) (_ : MeasurableSet S), {cylinder (Finset.Iic a) S} := by
   ext s
   simp only [mem_measurableCylinders, exists_prop, mem_iUnion]
@@ -395,28 +396,28 @@ end cylinders
 
 section cylinderEvents
 
-variable {α ι : Type*} {X : ι → Type*} {mα : MeasurableSpace α} [m : ∀ i, MeasurableSpace (X i)]
+variable {α ι : Type*} {X : ι → Type*} {mα : SigmaAlgebra α} [m : ∀ i, SigmaAlgebra (X i)]
   {Δ Δ₁ Δ₂ : Set ι} {i : ι}
 
 /-- The σ-algebra of cylinder events on `Δ`. It is the smallest σ-algebra making the projections
 on the `i`-th coordinate measurable for all `i ∈ Δ`. -/
 @[instance_reducible]
-def cylinderEvents (Δ : Set ι) : MeasurableSpace (∀ i, X i) := ⨆ i ∈ Δ, (m i).comap fun σ ↦ σ i
+def cylinderEvents (Δ : Set ι) : SigmaAlgebra (∀ i, X i) := ⨆ i ∈ Δ, (m i).comap fun σ ↦ σ i
 
-@[simp] lemma cylinderEvents_univ : cylinderEvents (X := X) univ = MeasurableSpace.pi := by
-  simp [cylinderEvents, MeasurableSpace.pi]
+@[simp] lemma cylinderEvents_univ : cylinderEvents (X := X) univ = SigmaAlgebra.pi := by
+  simp [cylinderEvents, SigmaAlgebra.pi]
 
 @[gcongr]
 lemma cylinderEvents_mono (h : Δ₁ ⊆ Δ₂) : cylinderEvents (X := X) Δ₁ ≤ cylinderEvents Δ₂ :=
   biSup_mono h
 
-lemma cylinderEvents_le_pi : cylinderEvents (X := X) Δ ≤ MeasurableSpace.pi := by
+lemma cylinderEvents_le_pi : cylinderEvents (X := X) Δ ≤ SigmaAlgebra.pi := by
   simpa using cylinderEvents_mono (subset_univ _)
 
 lemma measurable_cylinderEvents_iff {g : α → ∀ i, X i} :
     @Measurable _ _ _ (cylinderEvents Δ) g ↔ ∀ ⦃i⦄, i ∈ Δ → Measurable fun a ↦ g a i := by
-  simp_rw [measurable_iff_comap_le, cylinderEvents, MeasurableSpace.comap_iSup,
-    MeasurableSpace.comap_comp, Function.comp_def, iSup_le_iff]
+  simp_rw [measurable_iff_comap_le, cylinderEvents, SigmaAlgebra.comap_iSup,
+    SigmaAlgebra.comap_comp, Function.comp_def, iSup_le_iff]
 
 @[fun_prop]
 lemma measurable_cylinderEvent_apply (hi : i ∈ Δ) :
@@ -469,10 +470,10 @@ end cylinderEvents
 
 /-- A measurable set from the product sigma-algebra only depends on countably many coordinates. -/
 lemma MeasurableSet.eq_preimage_restrict_countable
-    [∀ i, MeasurableSpace (α i)] {s : Set (Π i, α i)} (hs : MeasurableSet s) :
+    [∀ i, SigmaAlgebra (α i)] {s : Set (Π i, α i)} (hs : MeasurableSet s) :
     ∃ I : Set ι, ∃ t, I.Countable ∧ s = I.domRestrict ⁻¹' t := by
   refine induction_on_inter generateFrom_squareCylinders.symm
-    (isPiSystem_squareCylinders (fun _ ↦ isPiSystem_measurableSet) (by simp))
+    (isPiSystem_squareCylinders (fun _ ↦ SigmaAlgebra.isPiSystem _) (by simp))
     ⟨∅, ∅, by simp⟩ ?_ ?_ ?_ s hs
   · rintro - ⟨I, t, -, rfl⟩
     exact ⟨I, univ.pi (fun i ↦ t i), I.countable_toSet, by ext; simp⟩

@@ -9,22 +9,21 @@ public import Mathlib.Analysis.Normed.Lp.PiLp
 public import Mathlib.MeasureTheory.Constructions.BorelSpace.Basic
 
 /-!
-# Measurable space structure on `WithLp`
+# Sigma-algebra on `WithLp`
 
-If `X` is a measurable space, we set the measurable space structure on `WithLp p X` to be the
-same as the one on `X`.
+The sigma-algebra on `WithLp p X` is the one transported from `X`.
 -/
 
 @[expose] public section
 
 open scoped ENNReal
 
-variable (p : ℝ≥0∞) (X : Type*) [MeasurableSpace X]
+variable (p : ℝ≥0∞) (X : Type*) [SigmaAlgebra X]
 
 namespace WithLp
 
-instance measurableSpace : MeasurableSpace (WithLp p X) :=
-  MeasurableSpace.comap ofLp inferInstance
+instance sigmaAlgebra : SigmaAlgebra (WithLp p X) :=
+  SigmaAlgebra.comap ofLp inferInstance
 
 @[fun_prop]
 lemma measurable_ofLp : Measurable (@ofLp p X) := comap_measurable _
@@ -34,25 +33,25 @@ lemma measurable_toLp : Measurable (@toLp p X) := fun s hs ↦ by
   obtain ⟨t, ht, rfl⟩ := hs
   simpa [Set.preimage_preimage]
 
-variable (Y : Type*) [MeasurableSpace Y] [TopologicalSpace X] [TopologicalSpace Y]
+variable (Y : Type*) [SigmaAlgebra Y] [TopologicalSpace X] [TopologicalSpace Y]
   [BorelSpace X] [BorelSpace Y] [SecondCountableTopologyEither X Y]
 
 instance borelSpace : BorelSpace (WithLp p (X × Y)) where
-  measurable_eq := by
-    rw [instProdTopologicalSpace, borel_comap, measurableSpace,
-      BorelSpace.measurable_eq (α := X × Y)]
+  sigmaAlgebra_eq := by
+    rw [instProdTopologicalSpace, borel_comap, sigmaAlgebra,
+      BorelSpace.sigmaAlgebra_eq (α := X × Y)]
 
 end WithLp
 
 namespace PiLp
 
-variable {ι : Type*} {X : ι → Type*} [Countable ι] [∀ i, MeasurableSpace (X i)]
+variable {ι : Type*} {X : ι → Type*} [Countable ι] [∀ i, SigmaAlgebra (X i)]
     [∀ i, TopologicalSpace (X i)] [∀ i, BorelSpace (X i)] [∀ i, SecondCountableTopology (X i)]
 
 instance borelSpace : BorelSpace (PiLp p X) where
-  measurable_eq := by
-    rw [topologicalSpace, borel_comap, WithLp.measurableSpace,
-      BorelSpace.measurable_eq (α := Π i, X i)]
+  sigmaAlgebra_eq := by
+    rw [topologicalSpace, borel_comap, WithLp.sigmaAlgebra,
+      BorelSpace.sigmaAlgebra_eq (α := Π i, X i)]
 
 end PiLp
 

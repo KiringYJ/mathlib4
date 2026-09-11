@@ -40,12 +40,12 @@ open scoped NNReal ENNReal MeasureTheory ProbabilityTheory
 
 namespace MeasureTheory
 
-variable {Ω E : Type*} {m0 : MeasurableSpace Ω} {μ : Measure Ω} [NormedAddCommGroup E]
+variable {Ω E : Type*} {m0 : SigmaAlgebra Ω} {μ : Measure Ω} [NormedAddCommGroup E]
   [NormedSpace ℝ E] {f g : ℕ → Ω → E} {ℱ : Filtration ℕ m0}
 
 /-- Any `ℕ`-indexed stochastic process can be written as the sum of a martingale and a predictable
 process. This is the predictable process. See `martingalePart` for the martingale. -/
-noncomputable def predictablePart {m0 : MeasurableSpace Ω} (f : ℕ → Ω → E) (ℱ : Filtration ℕ m0)
+noncomputable def predictablePart {m0 : SigmaAlgebra Ω} (f : ℕ → Ω → E) (ℱ : Filtration ℕ m0)
     (μ : Measure Ω) : ℕ → Ω → E := fun n => ∑ i ∈ Finset.range n, μ[f (i + 1) - f i | ℱ i]
 
 @[simp]
@@ -113,7 +113,7 @@ theorem stronglyAdapted_predictablePart :
   fun _ => Finset.stronglyMeasurable_sum _ fun _ hin =>
     stronglyMeasurable_condExp.mono (ℱ.mono (Finset.mem_range_succ_iff.mp hin))
 
-lemma isPredictable_predictablePart [SecondCountableTopology E] [MeasurableSpace E] [BorelSpace E] :
+lemma isPredictable_predictablePart [SecondCountableTopology E] [SigmaAlgebra E] [BorelSpace E] :
     IsStronglyPredictable ℱ (predictablePart f ℱ μ) :=
   IsStronglyPredictable.of_measurable_add_one (by measurability)
     fun n ↦ (stronglyAdapted_predictablePart n)
@@ -124,7 +124,7 @@ theorem stronglyAdapted_predictablePart' : StronglyAdapted ℱ fun n => predicta
 
 /-- Any `ℕ`-indexed stochastic process can be written as the sum of a martingale and a predictable
 process. This is the martingale. See `predictablePart` for the predictable process. -/
-noncomputable def martingalePart {m0 : MeasurableSpace Ω} (f : ℕ → Ω → E) (ℱ : Filtration ℕ m0)
+noncomputable def martingalePart {m0 : SigmaAlgebra Ω} (f : ℕ → Ω → E) (ℱ : Filtration ℕ m0)
     (μ : Measure Ω) : ℕ → Ω → E := fun n => f n - predictablePart f ℱ μ n
 
 @[simp]

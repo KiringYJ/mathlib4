@@ -16,7 +16,7 @@ public section
 
 namespace MeasureTheory
 
-variable {α : Type*} [MeasurableSpace α] {μ : Measure α}
+variable {α : Type*} [SigmaAlgebra α] {μ : Measure α}
 
 theorem lintegral_ofReal_le_lintegral_enorm (f : α → ℝ) :
     ∫⁻ x, ENNReal.ofReal (f x) ∂μ ≤ ∫⁻ x, ‖f x‖ₑ ∂μ := by

@@ -566,7 +566,7 @@ section Integral
 open MeasureTheory
 
 variable {D : Type*} [NormedAddCommGroup D] [NormedSpace ℝ D]
-  {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [MeasurableSpace D] [BorelSpace D]
+  {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [SigmaAlgebra D] [BorelSpace D]
   (μ : Measure D)
 
 example (f : D → E) : 0 ≤ ∫ x, ‖f x‖ ∂μ := by positivity

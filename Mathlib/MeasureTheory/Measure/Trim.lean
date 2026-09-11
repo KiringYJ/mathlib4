@@ -33,14 +33,14 @@ cannot be a measure on `m`, hence the definition of `μ.trim hm`.
 This notion is related to `OuterMeasure.trim`, see the lemma
 `toOuterMeasure_trim_eq_trim_toOuterMeasure`. -/
 noncomputable
-def Measure.trim {m m0 : MeasurableSpace α} (μ : @Measure α m0) (hm : m ≤ m0) : @Measure α m :=
+def Measure.trim {m m0 : SigmaAlgebra α} (μ : @Measure α m0) (hm : m ≤ m0) : @Measure α m :=
   @OuterMeasure.toMeasure α m μ.toOuterMeasure (hm.trans (le_toOuterMeasure_caratheodory μ))
 
 @[simp]
-theorem trim_eq_self [MeasurableSpace α] {μ : Measure α} : μ.trim le_rfl = μ := by
+theorem trim_eq_self [SigmaAlgebra α] {μ : Measure α} : μ.trim le_rfl = μ := by
   simp [Measure.trim]
 
-variable {m m0 : MeasurableSpace α} {mβ : MeasurableSpace β} {μ : Measure α} {s : Set α}
+variable {m m0 : SigmaAlgebra α} {mβ : SigmaAlgebra β} {μ : Measure α} {s : Set α}
 
 theorem toOuterMeasure_trim_eq_trim_toOuterMeasure (μ : Measure α) (hm : m ≤ m0) :
     @Measure.toOuterMeasure _ m (μ.trim hm) = @OuterMeasure.trim _ m μ.toOuterMeasure := by
@@ -99,18 +99,17 @@ theorem ae_le_of_ae_le_trim {E} [LE E] {hm : m ≤ m0} {f₁ f₂ : α → E}
     (h12 : f₁ ≤ᵐ[μ.trim hm] f₂) : f₁ ≤ᵐ[μ] f₂ :=
   measure_eq_zero_of_trim_eq_zero hm h12
 
-theorem trim_trim {m₁ m₂ : MeasurableSpace α} {hm₁₂ : m₁ ≤ m₂} {hm₂ : m₂ ≤ m0} :
+theorem trim_trim {m₁ m₂ : SigmaAlgebra α} {hm₁₂ : m₁ ≤ m₂} {hm₂ : m₂ ≤ m0} :
     (μ.trim hm₂).trim hm₁₂ = μ.trim (hm₁₂.trans hm₂) := by
   refine @Measure.ext _ m₁ _ _ (fun t ht => ?_)
   rw [trim_measurableSet_eq hm₁₂ ht, trim_measurableSet_eq (hm₁₂.trans hm₂) ht,
-    trim_measurableSet_eq hm₂ (hm₁₂ t ht)]
+    trim_measurableSet_eq hm₂ (hm₁₂ ht)]
 
-theorem restrict_trim (hm : m ≤ m0) (μ : Measure α) (hs : @MeasurableSet α m s) :
+theorem restrict_trim (hm : m ≤ m0) (μ : Measure α) (hs : s ∈ m) :
     @Measure.restrict α m (μ.trim hm) s = (μ.restrict s).trim hm := by
   refine @Measure.ext _ m _ _ (fun t ht => ?_)
   rw [@Measure.restrict_apply α m _ _ _ ht, trim_measurableSet_eq hm ht,
-    Measure.restrict_apply (hm t ht),
-    trim_measurableSet_eq hm (@MeasurableSet.inter α m t s ht hs)]
+    Measure.restrict_apply (hm ht), trim_measurableSet_eq hm (m.inter_mem ht hs)]
 
 theorem measure_spanningSets_trim_lt_top (hm : m ≤ m0) (μ : Measure α) [SigmaFinite (μ.trim hm)]
     (n : ℕ) :
@@ -126,7 +125,7 @@ instance isFiniteMeasure_trim (hm : m ≤ m0) [IsFiniteMeasure μ] : IsFiniteMea
     rw [trim_measurableSet_eq hm (@MeasurableSet.univ _ m)]
     exact measure_lt_top _ _
 
-theorem sigmaFiniteTrim_mono {m m₂ m0 : MeasurableSpace α} {μ : Measure α} (hm : m ≤ m0)
+theorem sigmaFiniteTrim_mono {m m₂ m0 : SigmaAlgebra α} {μ : Measure α} (hm : m ≤ m0)
     (hm₂ : m₂ ≤ m) [SigmaFinite (μ.trim (hm₂.trans hm))] : SigmaFinite (μ.trim hm) := by
   have : SigmaFinite ((μ.trim hm).trim hm₂) := by simpa [trim_trim]
   exact ⟨⟨
@@ -135,7 +134,7 @@ theorem sigmaFiniteTrim_mono {m m₂ m0 : MeasurableSpace α} {μ : Measure α} 
       finite := fun i => measure_spanningSets_trim_lt_top hm₂ (μ.trim hm) i
       spanning := iUnion_spanningSets _ }⟩⟩
 
-lemma SigmaFinite.of_trim {m m0 : MeasurableSpace α} {μ : Measure α} (hm : m ≤ m0)
+lemma SigmaFinite.of_trim {m m0 : SigmaAlgebra α} {μ : Measure α} (hm : m ≤ m0)
     [SigmaFinite (μ.trim hm)] : SigmaFinite μ := by
   rw [← trim_eq_self (μ := μ)]
   exact sigmaFiniteTrim_mono le_rfl hm
@@ -152,8 +151,8 @@ lemma Measure.AbsolutelyContinuous.trim {ν : Measure α} (hμν : μ ≪ ν) (h
   rw [trim_measurableSet_eq hm hs] at hsν ⊢
   exact hμν hsν
 
-theorem _root_.ae_eq_trim_of_measurable {α β} {m m0 : MeasurableSpace α} {μ : Measure α}
-    [MeasurableSpace β] [MeasurableEq β]
+theorem _root_.ae_eq_trim_of_measurable {α β} {m m0 : SigmaAlgebra α} {μ : Measure α}
+    [SigmaAlgebra β] [MeasurableEq β]
     (hm : m ≤ m0) {f g : α → β} (hf : Measurable[m] f) (hg : Measurable[m] g) (hfg : f =ᵐ[μ] g) :
     f =ᵐ[μ.trim hm] g := by
   rwa [Filter.EventuallyEq, ae_iff, trim_measurableSet_eq hm _]

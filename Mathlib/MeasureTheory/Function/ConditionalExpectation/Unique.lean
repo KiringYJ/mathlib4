@@ -34,7 +34,7 @@ open scoped ENNReal MeasureTheory
 
 namespace MeasureTheory
 
-variable {α E' F' 𝕜 : Type*} {p : ℝ≥0∞} {m m0 : MeasurableSpace α} {μ : Measure α} [RCLike 𝕜]
+variable {α E' F' 𝕜 : Type*} {p : ℝ≥0∞} {m m0 : SigmaAlgebra α} {μ : Measure α} [RCLike 𝕜]
   -- 𝕜 for ℝ or ℂ
   -- E' for an inner product space on which we compute integrals
   [NormedAddCommGroup E']
@@ -159,18 +159,18 @@ theorem integral_norm_le_of_forall_fin_meas_integral_eq (hm : m ≤ m0) {f g : �
   have h_meas_nonpos_f : MeasurableSet {x | f x ≤ 0} :=
     hf.measurableSet_le stronglyMeasurable_const
   refine sub_le_sub ?_ ?_
-  · rw [Measure.restrict_restrict (hm _ h_meas_nonneg_g), Measure.restrict_restrict h_meas_nonneg_f,
+  · rw [Measure.restrict_restrict (hm h_meas_nonneg_g), Measure.restrict_restrict h_meas_nonneg_f,
       hgf _ (@MeasurableSet.inter α m _ _ h_meas_nonneg_g hs)
         ((measure_mono Set.inter_subset_right).trans_lt (lt_top_iff_ne_top.mpr hμs)),
-      ← Measure.restrict_restrict (hm _ h_meas_nonneg_g), ←
+      ← Measure.restrict_restrict (hm h_meas_nonneg_g), ←
       Measure.restrict_restrict h_meas_nonneg_f]
-    exact setIntegral_le_nonneg (hm _ h_meas_nonneg_g) hf hfi
-  · rw [Measure.restrict_restrict (hm _ h_meas_nonpos_g), Measure.restrict_restrict h_meas_nonpos_f,
+    exact setIntegral_le_nonneg (hm h_meas_nonneg_g) hf hfi
+  · rw [Measure.restrict_restrict (hm h_meas_nonpos_g), Measure.restrict_restrict h_meas_nonpos_f,
       hgf _ (@MeasurableSet.inter α m _ _ h_meas_nonpos_g hs)
         ((measure_mono Set.inter_subset_right).trans_lt (lt_top_iff_ne_top.mpr hμs)),
-      ← Measure.restrict_restrict (hm _ h_meas_nonpos_g), ←
+      ← Measure.restrict_restrict (hm h_meas_nonpos_g), ←
       Measure.restrict_restrict h_meas_nonpos_f]
-    exact setIntegral_nonpos_le (hm _ h_meas_nonpos_g) hf hfi
+    exact setIntegral_nonpos_le (hm h_meas_nonpos_g) hf hfi
 
 /-- Let `m` be a sub-σ-algebra of `m0`, `f` an `m0`-measurable function and `g` an `m`-measurable
 function, such that their integrals coincide on `m`-measurable sets with finite measure.

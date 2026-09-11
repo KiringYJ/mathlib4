@@ -26,22 +26,22 @@ independence, stochastic processes
 
 public section
 
-open MeasureTheory MeasurableSpace Set
+open MeasureTheory SigmaAlgebra Set
 
 namespace ProbabilityTheory
 
-variable {S T Ω : Type*} {mΩ : MeasurableSpace Ω}
+variable {S T Ω : Type*} {mΩ : SigmaAlgebra Ω}
 
 namespace Kernel
 
-variable {α : Type*} {mα : MeasurableSpace α} {κ : Kernel α Ω} {P : Measure α}
+variable {α : Type*} {mα : SigmaAlgebra α} {κ : Kernel α Ω} {P : Measure α}
 
 /-- If `X` is a process independent from `Y` and for all `i`, `X' i` is almost everywhere equal
 to `X i`, then `X'` is also independent from `Y`. This implies that independence results about
 measurable processes should generally also hold
 for processes whose marginals are only a.e.-measurable. -/
 lemma IndepFun.process_congr_left {𝓧 : S → Type*} {𝓨 : Type*}
-    [∀ i, MeasurableSpace (𝓧 i)] [MeasurableSpace 𝓨] {X X' : (i : S) → Ω → 𝓧 i}
+    [∀ i, SigmaAlgebra (𝓧 i)] [SigmaAlgebra 𝓨] {X X' : (i : S) → Ω → 𝓧 i}
     {Y : Ω → 𝓨} (h1 : IndepFun (fun ω i ↦ X i ω) Y κ P) (h2 : ∀ i, ∀ᵐ a ∂P, X i =ᵐ[κ a] X' i) :
     IndepFun (fun ω i ↦ X' i ω) Y κ P := by
   rintro - - ⟨s, hs, rfl⟩ ⟨t, ht, rfl⟩
@@ -49,7 +49,8 @@ lemma IndepFun.process_congr_left {𝓧 : S → Type*} {𝓨 : Type*}
       κ a ((fun ω i ↦ X i ω) ⁻¹' s) * κ a (Y ⁻¹' t) :=
     h1 ((fun ω i ↦ X i ω) ⁻¹' s) (Y ⁻¹' t) ⟨s, hs, rfl⟩ ⟨t, ht, rfl⟩
   obtain ⟨I, u, hI, rfl⟩ : ∃ (I : Set S) (u : Set (Π i : I, 𝓧 i)),
-      I.Countable ∧ s = I.domRestrict ⁻¹' u := hs.eq_preimage_restrict_countable
+      I.Countable ∧ s = I.domRestrict ⁻¹' u :=
+    MeasurableSet.eq_preimage_restrict_countable hs
   have aux (f : (i : S) → Ω → 𝓧 i) : (fun ω i ↦ f i ω) ⁻¹' I.domRestrict ⁻¹' u =
       (fun ω (i : I) ↦ f i ω) ⁻¹' u := rfl
   simp_rw [aux] at *
@@ -68,7 +69,7 @@ to `X i`, then `X'` is also independent from `Y`. This implies that independence
 measurable processes should generally also hold
 for processes whose marginals are only a.e.-measurable. -/
 lemma IndepFun.process_congr_right {𝓧 : S → Type*} {𝓨 : Type*}
-    [∀ i, MeasurableSpace (𝓧 i)] [MeasurableSpace 𝓨] {X X' : (i : S) → Ω → 𝓧 i}
+    [∀ i, SigmaAlgebra (𝓧 i)] [SigmaAlgebra 𝓨] {X X' : (i : S) → Ω → 𝓧 i}
     {Y : Ω → 𝓨} (h1 : IndepFun Y (fun ω i ↦ X i ω) κ P) (h2 : ∀ i, ∀ᵐ a ∂P, X i =ᵐ[κ a] X' i) :
     IndepFun Y (fun ω i ↦ X' i ω) κ P :=
   (h1.symm.process_congr_left h2).symm
@@ -79,7 +80,7 @@ then `X'` is independent from `Y'`. This implies that independence results about
 measurable processes should generally also hold
 for processes whose marginals are only a.e.-measurable. -/
 lemma IndepFun.process_congr {𝓧 : S → Type*} {𝓨 : T → Type*}
-    [∀ i, MeasurableSpace (𝓧 i)] [∀ j, MeasurableSpace (𝓨 j)] {X X' : (i : S) → Ω → 𝓧 i}
+    [∀ i, SigmaAlgebra (𝓧 i)] [∀ j, SigmaAlgebra (𝓨 j)] {X X' : (i : S) → Ω → 𝓧 i}
     {Y Y' : (j : T) → Ω → (𝓨 j)} (hXY : IndepFun (fun ω i ↦ X i ω) (fun ω j ↦ Y j ω) κ P)
     (hX : ∀ i, ∀ᵐ a ∂P, X i =ᵐ[κ a] X' i) (hY : ∀ j, ∀ᵐ a ∂P, Y j =ᵐ[κ a] Y' j) :
     IndepFun (fun ω i ↦ X' i ω) (fun ω j ↦ Y' j ω) κ P :=
@@ -88,7 +89,7 @@ lemma IndepFun.process_congr {𝓧 : S → Type*} {𝓨 : T → Type*}
 /-- A stochastic process $(X_s)_{s \in S}$ is independent from a random variable $Y$ if
 for all $s_1, ..., s_p \in S$ the family $(X_{s_1}, ..., X_{s_p})$ is independent from $Y$. -/
 lemma IndepFun.process_indepFun {𝓧 : S → Type*} {𝓨 : Type*}
-    [∀ i, MeasurableSpace (𝓧 i)] [MeasurableSpace 𝓨] {X : (i : S) → Ω → 𝓧 i}
+    [∀ i, SigmaAlgebra (𝓧 i)] [SigmaAlgebra 𝓨] {X : (i : S) → Ω → 𝓧 i}
     {Y : Ω → 𝓨} (hX : ∀ i, Measurable (X i)) (hY : Measurable Y)
     (h : ∀ (I : Finset S),
       IndepFun (fun ω (i : I) ↦ X i ω) Y κ P) [IsZeroOrMarkovKernel κ] :
@@ -97,14 +98,16 @@ lemma IndepFun.process_indepFun {𝓧 : S → Type*} {𝓨 : Type*}
   let πX := {s : Set Ω | ∃ t ∈ squareCylinders (fun i ↦ {s : Set (𝓧 i) | MeasurableSet s}),
       (fun ω i ↦ X i ω) ⁻¹' t = s}
   have πX_pi : IsPiSystem πX :=
-    IsPiSystem.comap (isPiSystem_squareCylinders (fun _ ↦ isPiSystem_measurableSet) (by simp)) _
-  have πX_gen : (MeasurableSpace.pi.comap fun ω i ↦ X i ω) = generateFrom πX := by
-    rw [generateFrom_squareCylinders.symm, MeasurableSpace.comap_generateFrom]
+    IsPiSystem.comap
+      (isPiSystem_squareCylinders (fun _ ↦ SigmaAlgebra.isPiSystem _)
+        (fun _ ↦ MeasurableSet.univ)) _
+  have πX_gen : (SigmaAlgebra.pi.comap fun ω i ↦ X i ω) = generateFrom πX := by
+    rw [generateFrom_squareCylinders.symm, SigmaAlgebra.comap_generateFrom]
     rfl
   -- To prove independence, we prove independence of the generating π-system with the `σ`-algebra.
   refine IndepSets.indep (measurable_pi_iff.2 hX).comap_le hY.comap_le
-    πX_pi (@isPiSystem_measurableSet Ω (.comap Y inferInstance)) πX_gen
-    (@generateFrom_measurableSet Ω (.comap Y inferInstance)).symm ?_
+    πX_pi (SigmaAlgebra.isPiSystem _) πX_gen
+    (SigmaAlgebra.generateFrom_self (.comap Y inferInstance)).symm ?_
   rintro - - ⟨-, ⟨I, s, hs, rfl⟩, rfl⟩ ⟨t, ht, rfl⟩
   simp only [Set.mem_pi, Set.mem_univ, Set.mem_ofPred_eq, forall_const] at hs
   have : (fun ω i ↦ X i ω) ⁻¹' .pi I s =
@@ -121,7 +124,7 @@ for all $s_1, ..., s_p \in S$ the family $(X_{s_1}, ..., X_{s_p})$ is independen
 
 This version only requires a.e.-measurability. -/
 lemma IndepFun.process_indepFun₀ {𝓧 : S → Type*} {𝓨 : Type*}
-    [∀ i, MeasurableSpace (𝓧 i)] [MeasurableSpace 𝓨] {X : (i : S) → Ω → 𝓧 i}
+    [∀ i, SigmaAlgebra (𝓧 i)] [SigmaAlgebra 𝓨] {X : (i : S) → Ω → 𝓧 i}
     {Y : Ω → 𝓨} (hX : ∀ i, AEMeasurable (X i) (κ ∘ₘ P)) (hY : AEMeasurable Y (κ ∘ₘ P))
     (h : ∀ (I : Finset S), IndepFun (fun ω (i : I) ↦ X i ω) Y κ P) [IsZeroOrMarkovKernel κ] :
     IndepFun (fun ω i ↦ X i ω) Y κ P := by
@@ -137,7 +140,7 @@ lemma IndepFun.process_indepFun₀ {𝓧 : S → Type*} {𝓨 : Type*}
 for all $s_1, ..., s_p \in S$ the variable $Y$ is independent from the family
 $(X_{s_1}, ..., X_{s_p})$. -/
 lemma IndepFun.indepFun_process {𝓧 : Type*} {𝓨 : S → Type*}
-    [MeasurableSpace 𝓧] [∀ i, MeasurableSpace (𝓨 i)] {X : Ω → 𝓧}
+    [SigmaAlgebra 𝓧] [∀ i, SigmaAlgebra (𝓨 i)] {X : Ω → 𝓧}
     {Y : (i : S) → Ω → 𝓨 i} (hX : Measurable X) (hY : ∀ i, Measurable (Y i))
     (h : ∀ (I : Finset S),
       IndepFun X (fun ω (i : I) ↦ Y i ω) κ P) [IsZeroOrMarkovKernel κ] :
@@ -150,7 +153,7 @@ $(X_{s_1}, ..., X_{s_p})$.
 
 This version only requires a.e.-measurability. -/
 lemma IndepFun.indepFun_process₀ {𝓧 : Type*} {𝓨 : S → Type*}
-    [MeasurableSpace 𝓧] [∀ i, MeasurableSpace (𝓨 i)] {X : Ω → 𝓧}
+    [SigmaAlgebra 𝓧] [∀ i, SigmaAlgebra (𝓨 i)] {X : Ω → 𝓧}
     {Y : (i : S) → Ω → 𝓨 i} (hX : AEMeasurable X (κ ∘ₘ P)) (hY : ∀ i, AEMeasurable (Y i) (κ ∘ₘ P))
     (h : ∀ (I : Finset S),
       IndepFun X (fun ω (i : I) ↦ Y i ω) κ P) [IsZeroOrMarkovKernel κ] :
@@ -161,7 +164,7 @@ lemma IndepFun.indepFun_process₀ {𝓧 : Type*} {𝓨 : S → Type*}
 for all $s_1, ..., s_p \in S$ and $t_1, ..., t_q \in T$ the two families
 $(X_{s_1}, ..., X_{s_p})$ and $(Y_{t_1}, ..., Y_{t_q})$ are independent. -/
 lemma IndepFun.process_indepFun_process {T : Type*} {𝓧 : S → Type*} {𝓨 : T → Type*}
-    [∀ i, MeasurableSpace (𝓧 i)] [∀ j, MeasurableSpace (𝓨 j)] {X : (i : S) → Ω → 𝓧 i}
+    [∀ i, SigmaAlgebra (𝓧 i)] [∀ j, SigmaAlgebra (𝓨 j)] {X : (i : S) → Ω → 𝓧 i}
     {Y : (j : T) → Ω → 𝓨 j} (hX : ∀ i, Measurable (X i)) (hY : ∀ j, Measurable (Y j))
     (h : ∀ (I : Finset S) (J : Finset T),
       IndepFun (fun ω (i : I) ↦ X i ω) (fun ω (j : J) ↦ Y j ω) κ P) [IsZeroOrMarkovKernel κ] :
@@ -175,7 +178,7 @@ $(X_{s_1}, ..., X_{s_p})$ and $(Y_{t_1}, ..., Y_{t_q})$ are independent.
 
 This version only requires a.e.-measurability. -/
 lemma IndepFun.process_indepFun_process₀ {T : Type*} {𝓧 : S → Type*} {𝓨 : T → Type*}
-    [∀ i, MeasurableSpace (𝓧 i)] [∀ j, MeasurableSpace (𝓨 j)] {X : (i : S) → Ω → 𝓧 i}
+    [∀ i, SigmaAlgebra (𝓧 i)] [∀ j, SigmaAlgebra (𝓨 j)] {X : (i : S) → Ω → 𝓧 i}
     {Y : (j : T) → Ω → 𝓨 j} (hX : ∀ i, AEMeasurable (X i) (κ ∘ₘ P))
     (hY : ∀ j, AEMeasurable (Y j) (κ ∘ₘ P))
     (h : ∀ (I : Finset S) (J : Finset T),
@@ -194,7 +197,7 @@ then `X'` are also independent. This implies that independence results about
 measurable processes should generally also hold
 for processes whose marginals are only a.e.-measurable. -/
 lemma iIndepFun.process_congr {T : S → Type*} {𝓧 : (i : S) → (j : T i) → Type*}
-    [∀ i j, MeasurableSpace (𝓧 i j)] {X X' : (i : S) → (j : T i) → Ω → 𝓧 i j}
+    [∀ i j, SigmaAlgebra (𝓧 i j)] {X X' : (i : S) → (j : T i) → Ω → 𝓧 i j}
     (h1 : iIndepFun (fun i ω j ↦ X i j ω) κ P) (h2 : ∀ i j, ∀ᵐ a ∂P, X i j =ᵐ[κ a] X' i j) :
     iIndepFun (fun i ω j ↦ X' i j ω) κ P := by
   intro s f hf
@@ -204,7 +207,7 @@ lemma iIndepFun.process_congr {T : S → Type*} {𝓧 : (i : S) → (j : T i) �
     refine Finset.prod_congr rfl fun i hi ↦ ?_
     rw [hg i hi]
   simp_rw [h3, h3']
-  choose! I u hI hu using fun i hi ↦ (mg i hi).eq_preimage_restrict_countable
+  choose! I u hI hu using fun i hi ↦ MeasurableSet.eq_preimage_restrict_countable (mg i hi)
   have h4 (f : (i : S) → (j : T i) → Ω → 𝓧 i j) : ⋂ i ∈ s, (fun i ω j ↦ f i j ω) i ⁻¹' g i =
       ⋂ i ∈ s, (fun i ω j ↦ f i j ω) i ⁻¹' (I i).domRestrict ⁻¹' u i :=
       (biInf_congr (fun i hi ↦ by rw [hu i hi])).symm
@@ -236,7 +239,7 @@ for all $s_1, ..., s_n$ and all $t^{s_i}_1, ..., t^{s_i}_{p_i}$ the families
 $(X^{s_1}_{t^{s_1}_1}, ..., X^{s_1}_{t^{s_1}_{p_1}}), ...,
 (X^{s_n}_{t^{s_n}_1}, ..., X^{s_n}_{t^{s_n}_{p_n}})$ are mutually independent. -/
 lemma iIndepFun.iIndepFun_process {T : S → Type*} {𝓧 : (i : S) → (j : T i) → Type*}
-    [∀ i j, MeasurableSpace (𝓧 i j)] {X : (i : S) → (j : T i) → Ω → 𝓧 i j}
+    [∀ i j, SigmaAlgebra (𝓧 i j)] {X : (i : S) → (j : T i) → Ω → 𝓧 i j}
     (hX : ∀ i j, Measurable (X i j))
     (h : ∀ (I : Finset S) (J : (i : I) → Finset (T i)),
       iIndepFun (fun i ω (j : J i) ↦ X i j ω) κ P) :
@@ -249,9 +252,10 @@ lemma iIndepFun.iIndepFun_process {T : S → Type*} {𝓧 : (i : S) → (j : T i
   let π i := {s : Set Ω | ∃ t ∈ squareCylinders (fun j ↦ {s : Set (𝓧 i j) | MeasurableSet s}),
     (fun ω j ↦ X i j ω) ⁻¹' t = s}
   have π_pi i : IsPiSystem (π i) :=
-    (isPiSystem_squareCylinders (fun _ ↦ isPiSystem_measurableSet) (by simp)).comap _
-  have π_gen i : (MeasurableSpace.pi.comap fun ω j ↦ X i j ω) = generateFrom (π i) := by
-    rw [generateFrom_squareCylinders.symm, MeasurableSpace.comap_generateFrom]
+    (isPiSystem_squareCylinders (fun _ ↦ SigmaAlgebra.isPiSystem _)
+      (fun _ ↦ MeasurableSet.univ)).comap _
+  have π_gen i : (SigmaAlgebra.pi.comap fun ω j ↦ X i j ω) = generateFrom (π i) := by
+    rw [generateFrom_squareCylinders.symm, SigmaAlgebra.comap_generateFrom]
     rfl
   refine iIndepSets.iIndep _ (fun i ↦ (measurable_pi_iff.2 (hX i)).comap_le) π π_pi π_gen
     fun I s hs ↦ ?_
@@ -280,7 +284,7 @@ $(X^{s_1}_{t^{s_1}_1}, ..., X^{s_1}_{t^{s_1}_{p_1}}), ...,
 
 This version only requires a.e.-measurability. -/
 lemma iIndepFun.iIndepFun_process₀ {T : S → Type*} {𝓧 : (i : S) → (j : T i) → Type*}
-    [∀ i j, MeasurableSpace (𝓧 i j)] {X : (i : S) → (j : T i) → Ω → 𝓧 i j}
+    [∀ i j, SigmaAlgebra (𝓧 i j)] {X : (i : S) → (j : T i) → Ω → 𝓧 i j}
     (hX : ∀ i j, AEMeasurable (X i j) (κ ∘ₘ P))
     (h : ∀ (I : Finset S) (J : (i : I) → Finset (T i)),
       iIndepFun (fun i ω (j : J i) ↦ X i j ω) κ P) :
@@ -298,7 +302,7 @@ to `X i`, then `X'` is also independent from `Y`. This implies that independence
 measurable processes should generally also hold
 for processes whose marginals are only a.e.-measurable. -/
 lemma IndepFun.process_congr_left {𝓧 : S → Type*} {𝓨 : Type*}
-    [∀ i, MeasurableSpace (𝓧 i)] [MeasurableSpace 𝓨] {X X' : (i : S) → Ω → 𝓧 i}
+    [∀ i, SigmaAlgebra (𝓧 i)] [SigmaAlgebra 𝓨] {X X' : (i : S) → Ω → 𝓧 i}
     {Y : Ω → 𝓨} (h1 : (fun ω i ↦ X i ω) ⟂ᵢ[P] Y) (h2 : ∀ i, X i =ᵐ[P] X' i) :
     (fun ω i ↦ X' i ω) ⟂ᵢ[P] Y :=
   Kernel.IndepFun.process_congr_left h1 (by simpa)
@@ -308,7 +312,7 @@ to `X i`, then `X'` is also independent from `Y`. This implies that independence
 measurable processes should generally also hold
 for processes whose marginals are only a.e.-measurable. -/
 lemma IndepFun.process_congr_right {𝓧 : S → Type*} {𝓨 : Type*}
-    [∀ i, MeasurableSpace (𝓧 i)] [MeasurableSpace 𝓨] {X X' : (i : S) → Ω → 𝓧 i}
+    [∀ i, SigmaAlgebra (𝓧 i)] [SigmaAlgebra 𝓨] {X X' : (i : S) → Ω → 𝓧 i}
     {Y : Ω → 𝓨} (h1 : Y ⟂ᵢ[P] (fun ω i ↦ X i ω)) (h2 : ∀ i, X i =ᵐ[P] X' i) :
     Y ⟂ᵢ[P] (fun ω i ↦ X' i ω) :=
   Kernel.IndepFun.process_congr_right h1 (by simpa)
@@ -319,7 +323,7 @@ then `X'` is independent from `Y'`. This implies that independence results about
 measurable processes should generally also hold
 for processes whose marginals are only a.e.-measurable. -/
 lemma IndepFun.process_congr {𝓧 : S → Type*} {𝓨 : T → Type*}
-    [∀ i, MeasurableSpace (𝓧 i)] [∀ j, MeasurableSpace (𝓨 j)] {X X' : (i : S) → Ω → 𝓧 i}
+    [∀ i, SigmaAlgebra (𝓧 i)] [∀ j, SigmaAlgebra (𝓨 j)] {X X' : (i : S) → Ω → 𝓧 i}
     {Y Y' : (j : T) → Ω → (𝓨 j)} (hXY : (fun ω i ↦ X i ω) ⟂ᵢ[P] (fun ω j ↦ Y j ω))
     (hX : ∀ i, X i =ᵐ[P] X' i) (hY : ∀ j, Y j =ᵐ[P] Y' j) :
     (fun ω i ↦ X' i ω) ⟂ᵢ[P] (fun ω j ↦ Y' j ω) :=
@@ -328,7 +332,7 @@ lemma IndepFun.process_congr {𝓧 : S → Type*} {𝓨 : T → Type*}
 /-- A stochastic process $(X_s)_{s \in S}$ is independent from a random variable $Y$ if
 for all $s_1, ..., s_p \in S$ the family $(X_{s_1}, ..., X_{s_p})$ is independent from $Y$. -/
 lemma IndepFun.process_indepFun {𝓧 : S → Type*} {𝓨 : Type*}
-    [∀ i, MeasurableSpace (𝓧 i)] [MeasurableSpace 𝓨] {X : (i : S) → Ω → 𝓧 i}
+    [∀ i, SigmaAlgebra (𝓧 i)] [SigmaAlgebra 𝓨] {X : (i : S) → Ω → 𝓧 i}
     {Y : Ω → 𝓨} (hX : ∀ i, Measurable (X i)) (hY : Measurable Y)
     (h : ∀ (I : Finset S), (fun ω (i : I) ↦ X i ω) ⟂ᵢ[P] Y) [IsZeroOrProbabilityMeasure P] :
     IndepFun (fun ω i ↦ X i ω) Y P :=
@@ -339,7 +343,7 @@ for all $s_1, ..., s_p \in S$ the family $(X_{s_1}, ..., X_{s_p})$ is independen
 
 This version only requires a.e.-measurability. -/
 lemma IndepFun.process_indepFun₀ {𝓧 : S → Type*} {𝓨 : Type*}
-    [∀ i, MeasurableSpace (𝓧 i)] [MeasurableSpace 𝓨] {X : (i : S) → Ω → 𝓧 i}
+    [∀ i, SigmaAlgebra (𝓧 i)] [SigmaAlgebra 𝓨] {X : (i : S) → Ω → 𝓧 i}
     {Y : Ω → 𝓨} (hX : ∀ i, AEMeasurable (X i) P) (hY : AEMeasurable Y P)
     (h : ∀ (I : Finset S), (fun ω (i : I) ↦ X i ω) ⟂ᵢ[P] Y) [IsZeroOrProbabilityMeasure P] :
     IndepFun (fun ω i ↦ X i ω) Y P :=
@@ -349,7 +353,7 @@ lemma IndepFun.process_indepFun₀ {𝓧 : S → Type*} {𝓨 : Type*}
 for all $s_1, ..., s_p \in S$ the variable $Y$ is independent from the family
 $(X_{s_1}, ..., X_{s_p})$. -/
 lemma IndepFun.indepFun_process {𝓧 : Type*} {𝓨 : S → Type*}
-    [MeasurableSpace 𝓧] [∀ i, MeasurableSpace (𝓨 i)] {X : Ω → 𝓧}
+    [SigmaAlgebra 𝓧] [∀ i, SigmaAlgebra (𝓨 i)] {X : Ω → 𝓧}
     {Y : (i : S) → Ω → 𝓨 i} (hX : Measurable X) (hY : ∀ i, Measurable (Y i))
     (h : ∀ (I : Finset S), X ⟂ᵢ[P] (fun ω (i : I) ↦ Y i ω)) [IsZeroOrProbabilityMeasure P] :
     IndepFun X (fun ω i ↦ Y i ω) P :=
@@ -361,7 +365,7 @@ $(X_{s_1}, ..., X_{s_p})$.
 
 This version only requires a.e.-measurability. -/
 lemma IndepFun.indepFun_process₀ {𝓧 : Type*} {𝓨 : S → Type*}
-    [MeasurableSpace 𝓧] [∀ i, MeasurableSpace (𝓨 i)] {X : Ω → 𝓧}
+    [SigmaAlgebra 𝓧] [∀ i, SigmaAlgebra (𝓨 i)] {X : Ω → 𝓧}
     {Y : (i : S) → Ω → 𝓨 i} (hX : AEMeasurable X P) (hY : ∀ i, AEMeasurable (Y i) P)
     (h : ∀ (I : Finset S), X ⟂ᵢ[P] (fun ω (i : I) ↦ Y i ω)) [IsZeroOrProbabilityMeasure P] :
     IndepFun X (fun ω i ↦ Y i ω) P :=
@@ -371,7 +375,7 @@ lemma IndepFun.indepFun_process₀ {𝓧 : Type*} {𝓨 : S → Type*}
 for all $s_1, ..., s_p \in S$ and $t_1, ..., t_q \in T$ the two families
 $(X_{s_1}, ..., X_{s_p})$ and $(Y_{t_1}, ..., Y_{t_q})$ are independent. -/
 lemma IndepFun.process_indepFun_process {T : Type*} {𝓧 : S → Type*} {𝓨 : T → Type*}
-    [∀ i, MeasurableSpace (𝓧 i)] [∀ j, MeasurableSpace (𝓨 j)] {X : (i : S) → Ω → 𝓧 i}
+    [∀ i, SigmaAlgebra (𝓧 i)] [∀ j, SigmaAlgebra (𝓨 j)] {X : (i : S) → Ω → 𝓧 i}
     {Y : (j : T) → Ω → 𝓨 j} (hX : ∀ i, Measurable (X i)) (hY : ∀ j, Measurable (Y j))
     (h : ∀ (I : Finset S) (J : Finset T),
       (fun ω (i : I) ↦ X i ω) ⟂ᵢ[P] (fun ω (j : J) ↦ Y j ω)) [IsZeroOrProbabilityMeasure P] :
@@ -384,7 +388,7 @@ $(X_{s_1}, ..., X_{s_p})$ and $(Y_{t_1}, ..., Y_{t_q})$ are independent.
 
 This version only requires a.e.-measurability. -/
 lemma IndepFun.process_indepFun_process₀ {T : Type*} {𝓧 : S → Type*} {𝓨 : T → Type*}
-    [∀ i, MeasurableSpace (𝓧 i)] [∀ j, MeasurableSpace (𝓨 j)] {X : (i : S) → Ω → 𝓧 i}
+    [∀ i, SigmaAlgebra (𝓧 i)] [∀ j, SigmaAlgebra (𝓨 j)] {X : (i : S) → Ω → 𝓧 i}
     {Y : (j : T) → Ω → 𝓨 j} (hX : ∀ i, AEMeasurable (X i) P) (hY : ∀ j, AEMeasurable (Y j) P)
     (h : ∀ (I : Finset S) (J : Finset T),
       (fun ω (i : I) ↦ X i ω) ⟂ᵢ[P] (fun ω (j : J) ↦ Y j ω)) [IsZeroOrProbabilityMeasure P] :
@@ -397,7 +401,7 @@ then `X'` are also independent. This implies that independence results about
 measurable processes should generally also hold
 for processes whose marginals are only a.e.-measurable. -/
 lemma iIndepFun.process_congr {T : S → Type*} {𝓧 : (i : S) → (j : T i) → Type*}
-    [∀ i j, MeasurableSpace (𝓧 i j)] {X X' : (i : S) → (j : T i) → Ω → 𝓧 i j}
+    [∀ i j, SigmaAlgebra (𝓧 i j)] {X X' : (i : S) → (j : T i) → Ω → 𝓧 i j}
     (h1 : iIndepFun (fun i ω j ↦ X i j ω) P) (h2 : ∀ i j, X i j =ᵐ[P] X' i j) :
     iIndepFun (fun i ω j ↦ X' i j ω) P :=
   Kernel.iIndepFun.process_congr h1 (by simpa)
@@ -407,7 +411,7 @@ for all $s_1, ..., s_n$ and all $t^{s_i}_1, ..., t^{s_i}_{p_i}$ the families
 $(X^{s_1}_{t^{s_1}_1}, ..., X^{s_1}_{t^{s_1}_{p_1}}), ...,
 (X^{s_n}_{t^{s_n}_1}, ..., X^{s_n}_{t^{s_n}_{p_n}})$ are mutually independent. -/
 lemma iIndepFun.iIndepFun_process {T : S → Type*} {𝓧 : (i : S) → (j : T i) → Type*}
-    [∀ i j, MeasurableSpace (𝓧 i j)] {X : (i : S) → (j : T i) → Ω → 𝓧 i j}
+    [∀ i j, SigmaAlgebra (𝓧 i j)] {X : (i : S) → (j : T i) → Ω → 𝓧 i j}
     (hX : ∀ i j, Measurable (X i j))
     (h : ∀ (I : Finset S) (J : (i : I) → Finset (T i)), iIndepFun (fun i ω (j : J i) ↦ X i j ω) P) :
     iIndepFun (fun i ω j ↦ X i j ω) P :=
@@ -420,7 +424,7 @@ $(X^{s_1}_{t^{s_1}_1}, ..., X^{s_1}_{t^{s_1}_{p_1}}), ...,
 
 This version only requires a.e.-measurability. -/
 lemma iIndepFun.iIndepFun_process₀ {T : S → Type*} {𝓧 : (i : S) → (j : T i) → Type*}
-    [∀ i j, MeasurableSpace (𝓧 i j)] {X : (i : S) → (j : T i) → Ω → 𝓧 i j}
+    [∀ i j, SigmaAlgebra (𝓧 i j)] {X : (i : S) → (j : T i) → Ω → 𝓧 i j}
     (hX : ∀ i j, AEMeasurable (X i j) P)
     (h : ∀ (I : Finset S) (J : (i : I) → Finset (T i)), iIndepFun (fun i ω (j : J i) ↦ X i j ω) P) :
     iIndepFun (fun i ω j ↦ X i j ω) P :=

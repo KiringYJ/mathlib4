@@ -28,7 +28,7 @@ open ENNReal
 
 namespace MeasureTheory
 
-variable {α β : Type*} {m : MeasurableSpace α}
+variable {α β : Type*} {m : SigmaAlgebra α}
 
 open Set
 

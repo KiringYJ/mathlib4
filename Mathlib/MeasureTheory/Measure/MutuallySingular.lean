@@ -34,11 +34,11 @@ namespace MeasureTheory
 
 namespace Measure
 
-variable {α : Type*} {m0 : MeasurableSpace α} {μ μ₁ μ₂ ν ν₁ ν₂ : Measure α}
+variable {α : Type*} {m0 : SigmaAlgebra α} {μ μ₁ μ₂ ν ν₁ ν₂ : Measure α}
 
 /-- Two measures `μ`, `ν` are said to be mutually singular if there exists a measurable set `s`
 such that `μ s = 0` and `ν sᶜ = 0`. -/
-def MutuallySingular {_ : MeasurableSpace α} (μ ν : Measure α) : Prop :=
+def MutuallySingular {_ : SigmaAlgebra α} (μ ν : Measure α) : Prop :=
   ∃ s : Set α, MeasurableSet s ∧ μ s = 0 ∧ ν sᶜ = 0
 
 @[inherit_doc MeasureTheory.Measure.MutuallySingular]
@@ -173,7 +173,7 @@ lemma absolutelyContinuous_of_add_of_mutuallySingular {ν₁ ν₂ : Measure α}
   simp only [Measure.coe_add, Pi.add_apply, add_eq_zero]
   exact ⟨measure_inter_null_of_null_left _ hs_zero, measure_inter_null_of_null_right _ htν₂⟩
 
-lemma _root_.MeasurableEmbedding.mutuallySingular_map {β : Type*} {_ : MeasurableSpace β}
+lemma _root_.MeasurableEmbedding.mutuallySingular_map {β : Type*} {_ : SigmaAlgebra β}
     {f : α → β} (hf : MeasurableEmbedding f) (hμν : μ ⟂ₘ ν) :
     μ.map f ⟂ₘ ν.map f := by
   refine ⟨f '' hμν.nullSet, hf.measurableSet_image' hμν.measurableSet_nullSet, ?_, ?_⟩

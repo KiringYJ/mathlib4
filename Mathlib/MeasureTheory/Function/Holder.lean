@@ -35,7 +35,7 @@ noncomputable section
 
 section Bilinear
 
-variable {α 𝕜 E F G : Type*} {m : MeasurableSpace α} {μ : Measure α}
+variable {α 𝕜 E F G : Type*} {m : SigmaAlgebra α} {μ : Measure α}
     {p q r : ENNReal} [hpqr : HolderTriple p q r] [NontriviallyNormedField 𝕜]
     [NormedAddCommGroup E] [NormedAddCommGroup F] [NormedAddCommGroup G]
     [NormedSpace 𝕜 E] [NormedSpace 𝕜 F] [NormedSpace 𝕜 G]
@@ -168,7 +168,7 @@ normed field everywhere. Moreover, it would only simplify a few proofs.
 
 section SMul
 
-variable {α 𝕜' 𝕜 E : Type*} {m : MeasurableSpace α} {μ : Measure α}
+variable {α 𝕜' 𝕜 E : Type*} {m : SigmaAlgebra α} {μ : Measure α}
     {p q r : ℝ≥0∞} [hpqr : HolderTriple p q r]
 
 section MulActionWithZero

@@ -5,7 +5,7 @@ Authors: Etienne Marion
 -/
 module
 
-public import Mathlib.MeasureTheory.MeasurableSpace.Embedding
+public import Mathlib.MeasureTheory.SigmaAlgebra.Embedding
 public import Mathlib.Order.Restriction
 
 /-! # Auxiliary maps for Ionescu-Tulcea theorem
@@ -30,7 +30,7 @@ def IocProdIoc (a b c : ι) (x : (Π i : Ioc a b, X i) × (Π i : Ioc b c, X i))
     else x.2 ⟨i, mem_Ioc.2 ⟨not_le.1 h, (mem_Ioc.1 i.2).2⟩⟩
 
 @[fun_prop]
-lemma measurable_IocProdIoc [∀ i, MeasurableSpace (X i)] {a b c : ι} :
+lemma measurable_IocProdIoc [∀ i, SigmaAlgebra (X i)] {a b c : ι} :
     Measurable (IocProdIoc (X := X) a b c) := by
   refine .of_eval (fun i ↦ ?_)
   by_cases h : i ≤ b
@@ -78,7 +78,7 @@ lemma IicProdIoc_comp_restrict₂ {a b : ι} :
   ext x i
   simp [IicProdIoc, not_le.2 (mem_Ioc.1 i.2).1]
 
-variable [∀ i, MeasurableSpace (X i)]
+variable [∀ i, SigmaAlgebra (X i)]
 
 @[fun_prop]
 lemma measurable_IicProdIoc {m n : ι} : Measurable (IicProdIoc (X := X) m n) := by
@@ -140,7 +140,7 @@ end LinearOrder
 
 section Nat
 
-variable {X : ℕ → Type*} [∀ n, MeasurableSpace (X n)]
+variable {X : ℕ → Type*} [∀ n, SigmaAlgebra (X n)]
 
 /-- Identifying `{a + 1}` with `Ioc a (a + 1)`, as a measurable equiv on dependent functions. -/
 def MeasurableEquiv.piSingleton (a : ℕ) : X (a + 1) ≃ᵐ Π i : Ioc a (a + 1), X i where

@@ -25,14 +25,14 @@ measure, outer measure
 
 namespace MeasureTheory
 
-variable {α : Type*} [ms : MeasurableSpace α] {s t : Set α}
+variable {α : Type*} [ms : SigmaAlgebra α] {s t : Set α}
 
 /-- Obtain a measure by giving an outer measure where all sets in the σ-algebra are
   Carathéodory measurable. -/
 noncomputable def OuterMeasure.toMeasure (m : OuterMeasure α) (h : ms ≤ m.caratheodory) :
     Measure α :=
   Measure.ofMeasurable (fun s _ => m s) m.empty fun _f hf hd =>
-    m.iUnion_eq_of_caratheodory (fun i => h _ (hf i)) hd
+    m.iUnion_eq_of_caratheodory (fun i => h (hf i)) hd
 
 theorem le_toOuterMeasure_caratheodory (μ : Measure α) : ms ≤ μ.toOuterMeasure.caratheodory :=
   fun _s hs _t => (measure_inter_add_sdiff _ hs).symm

@@ -47,7 +47,7 @@ namespace MeasureTheory
 variable {α E G : Type*}
   [NormedAddCommGroup E] [NormedSpace ℝ E]
   [NormedAddCommGroup G] [NormedSpace ℝ G]
-  {m : MeasurableSpace α} {μ : Measure α}
+  {m : SigmaAlgebra α} {μ : Measure α}
 
 /-- **Lebesgue dominated convergence theorem** provides sufficient conditions under which almost
   everywhere convergence of a sequence of functions implies the convergence of their integrals.
@@ -130,7 +130,7 @@ end MeasureTheory
 
 section TendstoMono
 
-variable {α E : Type*} [MeasurableSpace α]
+variable {α E : Type*} [SigmaAlgebra α]
   {μ : Measure α} [NormedAddCommGroup E] [NormedSpace ℝ E] {s : ℕ → Set α}
   {f : α → E}
 

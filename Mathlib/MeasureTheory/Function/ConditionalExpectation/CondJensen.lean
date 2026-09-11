@@ -31,7 +31,7 @@ public section
 open MeasureTheory Function Set Filter
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]
-  {α : Type*} {f : α → E} {φ : E → ℝ} {m mα : MeasurableSpace α} {μ : Measure α} {s : Set E}
+  {α : Type*} {f : α → E} {φ : E → ℝ} {m mα : SigmaAlgebra α} {μ : Measure α} {s : Set E}
 
 private lemma Convex.condExp_mem_of_hereditarilyLindelofSpace [IsFiniteMeasure μ]
     [HereditarilyLindelofSpace E] (hm : m ≤ mα) (hf_int : Integrable f μ) (hs : IsClosed s)
@@ -87,7 +87,7 @@ lemma Convex.condExp_mem (hm : m ≤ mα) [SigmaFinite (μ.trim hm)]
     ∀ᵐ a ∂μ, μ[f | m] a ∈ s := by
   apply (isCountablySpanning_spanningSets (μ.trim hm)).null_of_forall_restrict_null <;>
     rintro - ⟨n, rfl⟩
-  · exact hm _ (measurableSet_spanningSets (μ.trim hm) n)
+  · exact hm (measurableSet_spanningSets (μ.trim hm) n)
   have h1 := condExp_restrict_ae_eq_restrict hm (measurableSet_spanningSets (μ.trim hm) n) hf_int
   have : IsFiniteMeasure (μ.restrict (spanningSets (μ.trim hm) n)) := isFiniteMeasure_restrict.2
     ((le_trim hm).trans_lt (measure_spanningSets_lt_top (μ.trim hm) n)).ne
@@ -171,7 +171,7 @@ theorem ConvexOn.map_condExp_le (hm : m ≤ mα) [SigmaFinite (μ.trim hm)]
     φ ∘ μ[f | m] ≤ᵐ[μ] μ[φ ∘ f | m] := by
   apply (isCountablySpanning_spanningSets (μ.trim hm)).null_of_forall_restrict_null <;>
     rintro - ⟨n, rfl⟩
-  · exact hm _ (measurableSet_spanningSets (μ.trim hm) n)
+  · exact hm (measurableSet_spanningSets (μ.trim hm) n)
   have h1 := condExp_restrict_ae_eq_restrict hm (measurableSet_spanningSets (μ.trim hm) n) hf_int
   have h2 := condExp_restrict_ae_eq_restrict hm (measurableSet_spanningSets (μ.trim hm) n) hφ_int
   have : IsFiniteMeasure (μ.restrict (spanningSets (μ.trim hm) n)) := isFiniteMeasure_restrict.2
@@ -181,7 +181,7 @@ theorem ConvexOn.map_condExp_le (hm : m ≤ mα) [SigmaFinite (μ.trim hm)]
   filter_upwards [h1, h2, h3] with a ha hb hc
   simpa [← ha, ← hb]
 
-theorem ConvexOn.map_condExp_le_trim {mE : MeasurableSpace E} [BorelSpace E]
+theorem ConvexOn.map_condExp_le_trim {mE : SigmaAlgebra E} [BorelSpace E]
     (hm : m ≤ mα) [SigmaFinite (μ.trim hm)]
     (hφ_cvx : ConvexOn ℝ s φ) (hφ_cont : LowerSemicontinuousOn φ s)
     (hφ_meas : StronglyMeasurable φ) (hf : ∀ᵐ a ∂μ, f a ∈ s)
@@ -198,7 +198,7 @@ theorem ConcaveOn.condExp_map_le (hm : m ≤ mα) [SigmaFinite (μ.trim hm)]
     condExp_neg (φ ∘ f) m] with a h ha
   simp_all [Pi.neg_comp]
 
-theorem ConcaveOn.condExp_map_le_trim {mE : MeasurableSpace E} [BorelSpace E]
+theorem ConcaveOn.condExp_map_le_trim {mE : SigmaAlgebra E} [BorelSpace E]
     (hm : m ≤ mα) [SigmaFinite (μ.trim hm)]
     (hφ_cvx : ConcaveOn ℝ s φ) (hφ_cont : UpperSemicontinuousOn φ s)
     (hφ_meas : StronglyMeasurable φ) (hf : ∀ᵐ a ∂μ, f a ∈ s)
@@ -217,7 +217,7 @@ theorem ConvexOn.map_condExp_le_univ (hm : m ≤ mα) [SigmaFinite (μ.trim hm)]
   ConvexOn.map_condExp_le hm hφ_cvx (lowerSemicontinuousOn_univ_iff.2 hφ_cont) (by simp)
     isClosed_univ hf_int hφ_int
 
-theorem ConvexOn.map_condExp_le_trim_univ {mE : MeasurableSpace E} [BorelSpace E]
+theorem ConvexOn.map_condExp_le_trim_univ {mE : SigmaAlgebra E} [BorelSpace E]
     (hm : m ≤ mα) [SigmaFinite (μ.trim hm)]
     (hφ_cvx : ConvexOn ℝ univ φ) (hφ_cont : LowerSemicontinuous φ)
     (hφ_meas : StronglyMeasurable φ) (hf_int : Integrable f μ) (hφ_int : Integrable (φ ∘ f) μ) :
@@ -233,7 +233,7 @@ theorem ConcaveOn.condExp_map_le_univ (hm : m ≤ mα) [SigmaFinite (μ.trim hm)
     condExp_neg (φ ∘ f) m] with a h ha
   simp_all [Pi.neg_comp]
 
-theorem ConcaveOn.condExp_map_le_trim_univ {mE : MeasurableSpace E} [BorelSpace E]
+theorem ConcaveOn.condExp_map_le_trim_univ {mE : SigmaAlgebra E} [BorelSpace E]
     (hm : m ≤ mα) [SigmaFinite (μ.trim hm)]
     (hφ_cvx : ConcaveOn ℝ univ φ) (hφ_cont : UpperSemicontinuous φ)
     (hφ_meas : StronglyMeasurable φ) (hf_int : Integrable f μ) (hφ_int : Integrable (φ ∘ f) μ) :

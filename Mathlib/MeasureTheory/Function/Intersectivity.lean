@@ -35,7 +35,7 @@ public section
 open Filter Function MeasureTheory Set
 open scoped ENNReal
 
-variable {ι α : Type*} [MeasurableSpace α] {μ : Measure α} [IsFiniteMeasure μ] {r : ℝ≥0∞}
+variable {ι α : Type*} [SigmaAlgebra α] {μ : Measure α} [IsFiniteMeasure μ] {r : ℝ≥0∞}
 
 /-- **Bergelson Intersectivity Lemma**: In a finite measure space, a sequence of events that have
 measure at least `r` has an infinite subset whose finite intersections all have positive volume.

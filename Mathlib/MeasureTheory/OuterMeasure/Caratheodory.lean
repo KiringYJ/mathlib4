@@ -12,11 +12,11 @@ public import Mathlib.MeasureTheory.PiSystem
 # The Carathéodory σ-algebra of an outer measure
 
 Given an outer measure `m`, the Carathéodory-measurable sets are the sets `s` such that
-for all sets `t` we have `m t = m (t ∩ s) + m (t \ s)`. This forms a measurable space.
+for all sets `t` we have `m t = m (t ∩ s) + m (t \ s)`. They form a σ-algebra.
 
 ## Main definitions and statements
 
-* `MeasureTheory.OuterMeasure.caratheodory` is the Carathéodory-measurable space
+* `MeasureTheory.OuterMeasure.caratheodory` is the Carathéodory σ-algebra
   of an outer measure.
 
 ## References
@@ -164,30 +164,30 @@ theorem f_iUnion {s : ℕ → Set α} (h : ∀ i, IsCaratheodory m (s i)) (hd : 
   exact m.mono (iUnion₂_subset fun i _ => subset_iUnion _ i)
 
 /-- The Carathéodory-measurable sets for an outer measure `m` form a Dynkin system. -/
-def caratheodoryDynkin : MeasurableSpace.DynkinSystem α where
-  Has := IsCaratheodory m
-  has_empty := isCaratheodory_empty m
-  has_compl s := isCaratheodory_compl m s
-  has_iUnion_nat _ hf hn := by apply isCaratheodory_iUnion m hf
+def caratheodoryDynkin : SigmaAlgebra.DynkinSystem α where
+  carrier := {s | IsCaratheodory m s}
+  empty_mem := isCaratheodory_empty m
+  compl_mem s := isCaratheodory_compl m s
+  iUnion_mem_nat _ hf := by apply isCaratheodory_iUnion m hf
 
-/-- Given an outer measure `μ`, the Carathéodory-measurable space is
+/-- Given an outer measure `μ`, the Carathéodory σ-algebra is
   defined such that `s` is measurable if `∀ t, μ t = μ (t ∩ s) + μ (t \ s)`. -/
 @[instance_reducible]
-protected def caratheodory : MeasurableSpace α := by
-  apply MeasurableSpace.DynkinSystem.toMeasurableSpace (caratheodoryDynkin m)
+protected def caratheodory : SigmaAlgebra α := by
+  apply (caratheodoryDynkin m).toSigmaAlgebra
   intro s₁ s₂
   apply isCaratheodory_inter
 
 theorem isCaratheodory_iff {s : Set α} :
-    MeasurableSet[OuterMeasure.caratheodory m] s ↔ ∀ t, m t = m (t ∩ s) + m (t \ s) :=
+    s ∈ OuterMeasure.caratheodory m ↔ ∀ t, m t = m (t ∩ s) + m (t \ s) :=
   Iff.rfl
 
 theorem isCaratheodory_iff_le {s : Set α} :
-    MeasurableSet[OuterMeasure.caratheodory m] s ↔ ∀ t, m (t ∩ s) + m (t \ s) ≤ m t :=
+    s ∈ OuterMeasure.caratheodory m ↔ ∀ t, m (t ∩ s) + m (t \ s) ≤ m t :=
   isCaratheodory_iff_le' m
 
 protected theorem iUnion_eq_of_caratheodory {s : ℕ → Set α}
-    (h : ∀ i, MeasurableSet[OuterMeasure.caratheodory m] (s i)) (hd : Pairwise (Disjoint on s)) :
+    (h : ∀ i, s i ∈ OuterMeasure.caratheodory m) (hd : Pairwise (Disjoint on s)) :
     m (⋃ i, s i) = ∑' i, m (s i) :=
   f_iUnion m h hd
 
@@ -197,7 +197,7 @@ variable {α : Type*}
 
 theorem ofFunction_caratheodory {m : Set α → ℝ≥0∞} {s : Set α} {h₀ : m ∅ = 0}
     (hs : ∀ t, m (t ∩ s) + m (t \ s) ≤ m t) :
-    MeasurableSet[(OuterMeasure.ofFunction m h₀).caratheodory] s := by
+    s ∈ (OuterMeasure.ofFunction m h₀).caratheodory := by
   apply (isCaratheodory_iff_le _).mpr
   refine fun t => le_iInf fun f => le_iInf fun hf => ?_
   refine
@@ -213,7 +213,7 @@ theorem ofFunction_caratheodory {m : Set α → ℝ≥0∞} {s : Set α} {h₀ :
     exact ENNReal.tsum_le_tsum fun i => hs _
 
 theorem boundedBy_caratheodory {m : Set α → ℝ≥0∞} {s : Set α}
-    (hs : ∀ t, m (t ∩ s) + m (t \ s) ≤ m t) : MeasurableSet[(boundedBy m).caratheodory] s := by
+    (hs : ∀ t, m (t ∩ s) + m (t \ s) ≤ m t) : s ∈ (boundedBy m).caratheodory := by
   apply ofFunction_caratheodory; intro t
   rcases t.eq_empty_or_nonempty with rfl | h
   · simp [Set.not_nonempty_empty]
@@ -237,7 +237,7 @@ theorem le_add_caratheodory (m₁ m₂ : OuterMeasure α) :
 
 theorem le_sum_caratheodory {ι} (m : ι → OuterMeasure α) :
     ⨅ i, (m i).caratheodory ≤ (sum m).caratheodory := fun s h t => by
-  simp [fun i => MeasurableSpace.measurableSet_iInf.1 h i t, ENNReal.tsum_add]
+  simp [fun i => (SigmaAlgebra.mem_iInf.1 h i) t, ENNReal.tsum_add]
 
 theorem le_smul_caratheodory (a : ℝ≥0∞) (m : OuterMeasure α) :
     m.caratheodory ≤ (a • m).caratheodory := fun s h t => by

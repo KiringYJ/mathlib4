@@ -5,7 +5,7 @@ Authors: Johannes Hölzl, Mario Carneiro
 -/
 module
 
-public import Mathlib.MeasureTheory.MeasurableSpace.MeasurablyGenerated
+public import Mathlib.MeasureTheory.SigmaAlgebra.MeasurablyGenerated
 public import Mathlib.MeasureTheory.Measure.CompleteLattice
 
 /-!
@@ -29,7 +29,7 @@ open scoped ENNReal
 
 namespace MeasureTheory
 
-variable {α β : Type*} {mα : MeasurableSpace α} {mβ : MeasurableSpace β}
+variable {α β : Type*} {mα : SigmaAlgebra α} {mβ : SigmaAlgebra β}
   {μ ν : MeasureTheory.Measure α} {s t : Set α}
 
 section AE

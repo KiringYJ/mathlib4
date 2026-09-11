@@ -29,8 +29,8 @@ open MeasureTheory
 
 namespace ProbabilityTheory
 
-variable {Ω Ω' ι E F : Type*} {mΩ : MeasurableSpace Ω} {mΩ' : MeasurableSpace Ω'}
-    {mE : MeasurableSpace E} {mF : MeasurableSpace F}
+variable {Ω Ω' ι E F : Type*} {mΩ : SigmaAlgebra Ω} {mΩ' : SigmaAlgebra Ω'}
+    {mE : SigmaAlgebra E} {mF : SigmaAlgebra F}
     {μ : Measure Ω} {ν : Measure Ω'}
 
 /-- If `X` and `Y` are independent random variables on `Ω`, `Z` and `W` are independent random
@@ -54,7 +54,7 @@ lemma IdentDistrib.prodMk [IsFiniteMeasure μ]
 /-- If `(X i)` and `(Y i)` are families of independent random variables indexed by a countable
 type `ι`, such that for each `i`, `X i` and `Y i` are identically distributed, then the products
 `X` and `Y` are identically distributed. -/
-lemma IdentDistrib.pi [Countable ι] {E : ι → Type*} {mE : ∀ i, MeasurableSpace (E i)}
+lemma IdentDistrib.pi [Countable ι] {E : ι → Type*} {mE : ∀ i, SigmaAlgebra (E i)}
     {X : (i : ι) → Ω → E i} {Y : (i : ι) → Ω' → E i}
     (h : ∀ i, IdentDistrib (X i) (Y i) μ ν) (hX_ind : iIndepFun X μ) (hY_ind : iIndepFun Y ν) :
     IdentDistrib (fun ω ↦ (X · ω)) (fun ω ↦ (Y · ω)) μ ν where

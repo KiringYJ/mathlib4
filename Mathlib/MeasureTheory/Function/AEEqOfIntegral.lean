@@ -56,7 +56,7 @@ namespace MeasureTheory
 
 section AeEqOfForall
 
-variable {α E 𝕜 : Type*} {m : MeasurableSpace α} {μ : Measure α} [RCLike 𝕜]
+variable {α E 𝕜 : Type*} {m : SigmaAlgebra α} {μ : Measure α} [RCLike 𝕜]
 
 open scoped InnerProductSpace in
 theorem ae_eq_zero_of_forall_inner [NormedAddCommGroup E] [InnerProductSpace 𝕜 E]
@@ -118,7 +118,7 @@ theorem ae_eq_zero_of_forall_dual [NormedAddCommGroup E] [NormedSpace 𝕜 E]
 
 end AeEqOfForall
 
-variable {α E : Type*} {m m0 : MeasurableSpace α} {μ : Measure α}
+variable {α E : Type*} {m m0 : SigmaAlgebra α} {μ : Measure α}
   [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E] {p : ℝ≥0∞}
 
 section AeEqOfForallSetIntegralEq
@@ -335,7 +335,7 @@ theorem ae_eq_zero_of_forall_setIntegral_eq_of_finStronglyMeasurable_trim (hm : 
   obtain ⟨t, ht_meas, htf_zero, htμ⟩ := hf.exists_set_sigmaFinite
   have : SigmaFinite ((μ.restrict t).trim hm) := by rwa [restrict_trim hm μ ht_meas] at htμ
   have htf_zero : f =ᵐ[μ.restrict tᶜ] 0 := by
-    rw [EventuallyEq, ae_restrict_iff' (MeasurableSet.compl (hm _ ht_meas))]
+    rw [EventuallyEq, ae_restrict_iff' (MeasurableSet.compl (hm ht_meas))]
     exact Eventually.of_forall htf_zero
   have hf_meas_m : StronglyMeasurable[m] f := hf.stronglyMeasurable
   suffices f =ᵐ[μ.restrict t] 0 from
@@ -344,13 +344,13 @@ theorem ae_eq_zero_of_forall_setIntegral_eq_of_finStronglyMeasurable_trim (hm : 
   refine ae_eq_zero_of_forall_setIntegral_eq_of_sigmaFinite ?_ ?_
   · intro s hs hμs
     unfold IntegrableOn
-    rw [restrict_trim hm (μ.restrict t) hs, Measure.restrict_restrict (hm s hs)]
+    rw [restrict_trim hm (μ.restrict t) hs, Measure.restrict_restrict (hm hs)]
     rw [← restrict_trim hm μ ht_meas, Measure.restrict_apply hs,
       trim_measurableSet_eq hm (hs.inter ht_meas)] at hμs
     refine Integrable.trim hm ?_ hf_meas_m
     exact hf_int_finite _ (hs.inter ht_meas) hμs
   · intro s hs hμs
-    rw [restrict_trim hm (μ.restrict t) hs, Measure.restrict_restrict (hm s hs)]
+    rw [restrict_trim hm (μ.restrict t) hs, Measure.restrict_restrict (hm hs)]
     rw [← restrict_trim hm μ ht_meas, Measure.restrict_apply hs,
       trim_measurableSet_eq hm (hs.inter ht_meas)] at hμs
     rw [← integral_trim hm hf_meas_m]
@@ -368,7 +368,7 @@ theorem Integrable.ae_eq_of_forall_setIntegral_eq (f g : α → E) (hf : Integra
   AEFinStronglyMeasurable.ae_eq_of_forall_setIntegral_eq (fun _ _ _ => hf.integrableOn)
     (fun _ _ _ => hg.integrableOn) hfg hf.aefinStronglyMeasurable hg.aefinStronglyMeasurable
 
-variable {β : Type*} [TopologicalSpace β] [MeasurableSpace β] [BorelSpace β]
+variable {β : Type*} [TopologicalSpace β] [SigmaAlgebra β] [BorelSpace β]
 
 /-- If an integrable function has zero integral on all closed sets, then it is zero
 almost everywhere. -/

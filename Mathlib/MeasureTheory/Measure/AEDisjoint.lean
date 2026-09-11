@@ -22,7 +22,7 @@ open Set Function
 
 namespace MeasureTheory
 
-variable {ι α : Type*} {m : MeasurableSpace α} (μ : Measure α)
+variable {ι α : Type*} {m : SigmaAlgebra α} (μ : Measure α)
 
 /-- Two sets are said to be `μ`-a.e. disjoint if their intersection has measure zero. -/
 def AEDisjoint (s t : Set α) :=

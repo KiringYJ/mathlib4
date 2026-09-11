@@ -55,7 +55,7 @@ open scoped ENNReal NNReal
 
 namespace ProbabilityTheory
 
-variable {Θ 𝓧 𝓨 : Type*} {mΘ : MeasurableSpace Θ} {m𝓧 : MeasurableSpace 𝓧} {m𝓨 : MeasurableSpace 𝓨}
+variable {Θ 𝓧 𝓨 : Type*} {mΘ : SigmaAlgebra Θ} {m𝓧 : SigmaAlgebra 𝓧} {m𝓨 : SigmaAlgebra 𝓨}
   {ℓ : Θ → 𝓨 → ℝ≥0∞} {P : Kernel Θ 𝓧} {κ : Kernel 𝓧 𝓨} {π : Measure Θ}
 
 section Posterior
@@ -108,7 +108,7 @@ variable [StandardBorelSpace Θ] [Nonempty Θ] {f : 𝓧 → 𝓨} [IsFiniteKern
 /-- We say that a measurable function `f : 𝓧 → 𝓨` is an argmin estimator
 with respect to the prior `π` if for `(P ∘ₘ π)`-almost every `x` it is of
 the form `x ↦ argmin_y P†π(x)[θ ↦ ℓ θ y]`. -/
-structure IsArgminEstimator {𝓨 : Type*} [MeasurableSpace 𝓨]
+structure IsArgminEstimator {𝓨 : Type*} [SigmaAlgebra 𝓨]
     (ℓ : Θ → 𝓨 → ℝ≥0∞) (P : Kernel Θ 𝓧) [IsFiniteKernel P]
     (π : Measure Θ) [IsFiniteMeasure π] (f : 𝓧 → 𝓨) : Prop where
   measurable : Measurable f
@@ -139,7 +139,7 @@ lemma IsArgminEstimator.isBayesEstimator (hf : IsArgminEstimator ℓ P π f)
 
 /-- The estimation problem admits an argmin estimator with respect to the prior `π`.
 That is, we can choose the argmin of the posterior expected loss in a measurable way. -/
-structure HasArgminEstimator {𝓨 : Type*} [MeasurableSpace 𝓨]
+structure HasArgminEstimator {𝓨 : Type*} [SigmaAlgebra 𝓨]
     (ℓ : Θ → 𝓨 → ℝ≥0∞) (P : Kernel Θ 𝓧) [IsFiniteKernel P] (π : Measure Θ) [IsFiniteMeasure π] :
     Prop where
   exists_isArgminEstimator : ∃ f : 𝓧 → 𝓨, IsArgminEstimator ℓ P π f

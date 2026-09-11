@@ -22,7 +22,7 @@ public section
 
 open MeasureTheory
 
-variable {α : Type*} {_ : MeasurableSpace α} {f : α → ℝ} {μ : Measure α}
+variable {α : Type*} {_ : SigmaAlgebra α} {f : α → ℝ} {μ : Measure α}
 
 namespace Real
 

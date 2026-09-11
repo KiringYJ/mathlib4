@@ -31,7 +31,7 @@ open NNReal ENNReal MeasureTheory
 
 namespace Real
 
-variable {α : Type*} {_ : MeasurableSpace α} {f : α → ℝ} {μ : MeasureTheory.Measure α}
+variable {α : Type*} {_ : SigmaAlgebra α} {f : α → ℝ} {μ : MeasureTheory.Measure α}
 
 theorem measurable_exp : Measurable exp :=
   continuous_exp.measurable
@@ -122,7 +122,7 @@ section RealComposition
 
 open Real
 
-variable {α : Type*} {m : MeasurableSpace α} {f : α → ℝ} (hf : Measurable f)
+variable {α : Type*} {m : SigmaAlgebra α} {f : α → ℝ} (hf : Measurable f)
 include hf
 
 @[fun_prop]
@@ -154,7 +154,7 @@ section RealComposition
 
 open Real
 
-variable {α : Type*} {m : MeasurableSpace α} {μ : Measure α} {f : α → ℝ} (hf : AEMeasurable f μ)
+variable {α : Type*} {m : SigmaAlgebra α} {μ : Measure α} {f : α → ℝ} (hf : AEMeasurable f μ)
 include hf
 
 @[fun_prop]
@@ -191,7 +191,7 @@ section ComplexComposition
 
 open Complex
 
-variable {α : Type*} {m : MeasurableSpace α} {f : α → ℂ} (hf : Measurable f)
+variable {α : Type*} {m : SigmaAlgebra α} {f : α → ℂ} (hf : Measurable f)
 include hf
 
 @[fun_prop]
@@ -228,7 +228,7 @@ section ComplexComposition
 
 open Complex
 
-variable {α : Type*} {m : MeasurableSpace α} {μ : Measure α} {f : α → ℂ} (hf : AEMeasurable f μ)
+variable {α : Type*} {m : SigmaAlgebra α} {μ : Measure α} {f : α → ℂ} (hf : AEMeasurable f μ)
 include hf
 
 @[fun_prop]
@@ -262,12 +262,12 @@ protected lemma AEMeasurable.clog : AEMeasurable (fun x ↦ log (f x)) μ :=
 end ComplexComposition
 
 @[fun_prop]
-protected theorem Measurable.complex_ofReal {α : Type*} {m : MeasurableSpace α} {f : α → ℝ}
+protected theorem Measurable.complex_ofReal {α : Type*} {m : SigmaAlgebra α} {f : α → ℝ}
     (hf : Measurable f) :
     Measurable fun x ↦ (f x : ℂ) := by fun_prop
 
 @[fun_prop]
-protected theorem AEMeasurable.complex_ofReal {α : Type*} {m : MeasurableSpace α} {μ : Measure α}
+protected theorem AEMeasurable.complex_ofReal {α : Type*} {m : SigmaAlgebra α} {μ : Measure α}
     {f : α → ℝ} (hf : AEMeasurable f μ) :
     AEMeasurable (fun x ↦ (f x : ℂ)) μ := by
   fun_prop

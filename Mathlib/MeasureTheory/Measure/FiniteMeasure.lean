@@ -102,7 +102,7 @@ In this section we define the `Type` of `MeasureTheory.FiniteMeasure Ω`, when `
 space. Finite measures on `Ω` are a module over `ℝ≥0`.
 
 If `Ω` is moreover a topological space and the sigma algebra on `Ω` is finer than the Borel sigma
-algebra (i.e. `[OpensMeasurableSpace Ω]`), then `MeasureTheory.FiniteMeasure Ω` is equipped with
+algebra (i.e. `[OpensSigmaAlgebra Ω]`), then `MeasureTheory.FiniteMeasure Ω` is equipped with
 the topology of weak convergence of measures. This is implemented by defining a pairing of finite
 measures `μ` on `Ω` with continuous bounded nonnegative functions `f : Ω →ᵇ ℝ≥0` via integration,
 and using the associated weak topology (essentially the weak-star topology on the dual of
@@ -110,11 +110,11 @@ and using the associated weak topology (essentially the weak-star topology on th
 -/
 
 
-variable {Ω : Type*} [MeasurableSpace Ω] {s t : Set Ω}
+variable {Ω : Type*} [SigmaAlgebra Ω] {s t : Set Ω}
 
 /-- Finite measures are defined as the subtype of measures that have the property of being finite
 measures (i.e., their total mass is finite). -/
-def _root_.MeasureTheory.FiniteMeasure (Ω : Type*) [MeasurableSpace Ω] : Type _ :=
+def _root_.MeasureTheory.FiniteMeasure (Ω : Type*) [SigmaAlgebra Ω] : Type _ :=
   { μ : Measure Ω // IsFiniteMeasure μ }
 
 /-- Coercion from `MeasureTheory.FiniteMeasure Ω` to `MeasureTheory.Measure Ω`. -/
@@ -274,7 +274,7 @@ theorem toMeasure_sum {ι : Type*} {s : Finset ι} {ν : ι → FiniteMeasure Ω
     ↑(∑ i ∈ s, ν i) = ∑ i ∈ s, (ν i : Measure Ω) :=
   map_sum toMeasureAddMonoidHom _ _
 
-instance {Ω : Type*} [MeasurableSpace Ω] : Module ℝ≥0 (FiniteMeasure Ω) :=
+instance {Ω : Type*} [SigmaAlgebra Ω] : Module ℝ≥0 (FiniteMeasure Ω) :=
   Function.Injective.module _ toMeasureAddMonoidHom toMeasure_injective toMeasure_smul
 
 @[simp]
@@ -330,8 +330,8 @@ theorem restrict_nonzero_iff (μ : FiniteMeasure Ω) (A : Set Ω) : μ.restrict 
   simp
 
 /-- The type of finite measures is a measurable space when equipped with the Giry monad. -/
-instance : MeasurableSpace (FiniteMeasure Ω) :=
-  inferInstanceAs <| MeasurableSpace (Subtype _)
+instance : SigmaAlgebra (FiniteMeasure Ω) :=
+  inferInstanceAs <| SigmaAlgebra (Subtype _)
 
 /-- The set of all finite measures is a measurable set in the Giry monad. -/
 lemma measurableSet_isFiniteMeasure : MeasurableSet { μ : Measure Ω | IsFiniteMeasure μ } := by
@@ -344,7 +344,7 @@ lemma measurableSet_isFiniteMeasure : MeasurableSet { μ : Measure Ω | IsFinite
 
 /-- The monoidal product is a measurable function from the product of finite measures over
 `α` and `β` into the type of finite measures over `α × β`. -/
-theorem measurable_fun_prod {α β : Type*} [MeasurableSpace α] [MeasurableSpace β] :
+theorem measurable_fun_prod {α β : Type*} [SigmaAlgebra α] [SigmaAlgebra β] :
     Measurable (fun (μ : FiniteMeasure α × FiniteMeasure β)
       ↦ μ.1.toMeasure.prod μ.2.toMeasure) := by
   have Heval {u v} (Hu : MeasurableSet u) (Hv : MeasurableSet v) :
@@ -355,7 +355,7 @@ theorem measurable_fun_prod {α β : Type*} [MeasurableSpace α] [MeasurableSpac
       ((Measure.measurable_coe Hv).comp (measurable_subtype_coe.comp measurable_snd))
   apply Measurable.measure_of_isPiSystem generateFrom_prod.symm isPiSystem_prod _
   · simp_rw [← Set.univ_prod_univ, Measure.prod_prod, Heval MeasurableSet.univ MeasurableSet.univ]
-  simp only [mem_image2, mem_ofPred_eq, forall_exists_index, and_imp]
+  simp only [mem_image2, forall_exists_index, and_imp]
   intro _ _ Hu _ Hv Heq
   simp_rw [← Heq, Measure.prod_prod, Heval Hu Hv]
 
@@ -434,7 +434,7 @@ theorem smul_testAgainstNN_apply (c : ℝ≥0) (μ : FiniteMeasure Ω) (f : Ω �
 
 section weak_convergence
 
-variable [OpensMeasurableSpace Ω]
+variable [OpensSigmaAlgebra Ω]
 
 theorem testAgainstNN_add (μ : FiniteMeasure Ω) (f₁ f₂ : Ω →ᵇ ℝ≥0) :
     μ.testAgainstNN (f₁ + f₂) = μ.testAgainstNN f₁ + μ.testAgainstNN f₂ := by
@@ -627,7 +627,7 @@ This section is about bounded convergence theorems for finite measures.
 -/
 
 
-variable {Ω : Type*} [MeasurableSpace Ω] [TopologicalSpace Ω] [OpensMeasurableSpace Ω]
+variable {Ω : Type*} [SigmaAlgebra Ω] [TopologicalSpace Ω] [OpensSigmaAlgebra Ω]
 
 /-- A bounded convergence theorem for a finite measure:
 If a sequence of bounded continuous non-negative functions are uniformly bounded by a constant
@@ -697,7 +697,7 @@ condition that the integrals of all bounded continuous real-valued functions con
 -/
 
 
-variable {Ω : Type*} [MeasurableSpace Ω] [TopologicalSpace Ω] [OpensMeasurableSpace Ω]
+variable {Ω : Type*} [SigmaAlgebra Ω] [TopologicalSpace Ω] [OpensSigmaAlgebra Ω]
 
 theorem tendsto_of_forall_integral_tendsto {γ : Type*} {F : Filter γ} {μs : γ → FiniteMeasure Ω}
     {μ : FiniteMeasure Ω}
@@ -807,12 +807,12 @@ lemma continuous_iff_forall_continuous_integral :
     forall_comm (α := X)]
 
 @[fun_prop]
-lemma continuous_lintegral_boundedContinuousFunction [MeasurableSpace X] [OpensMeasurableSpace X]
+lemma continuous_lintegral_boundedContinuousFunction [SigmaAlgebra X] [OpensSigmaAlgebra X]
     (f : X →ᵇ ℝ≥0) : Continuous fun μ : FiniteMeasure X ↦ ∫⁻ x, f x ∂μ :=
   continuous_iff_forall_continuous_lintegral.1 continuous_id _
 
 @[fun_prop]
-lemma continuous_integral_boundedContinuousFunction [MeasurableSpace X] [OpensMeasurableSpace X]
+lemma continuous_integral_boundedContinuousFunction [SigmaAlgebra X] [OpensSigmaAlgebra X]
     (f : X →ᵇ ℝ) : Continuous fun μ : FiniteMeasure X ↦ ∫ x, f x ∂μ :=
   continuous_iff_forall_continuous_integral.1 continuous_id _
 
@@ -832,7 +832,7 @@ lemma continuous_iff_forall_continuousMap_continuous_integral :
   continuous_iff_forall_continuous_integral.trans
     (ContinuousMap.equivBoundedOfCompact ..).symm.forall_congr_left
 
-variable [CompactSpace X] [MeasurableSpace X] [OpensMeasurableSpace X] {F : Type*}
+variable [CompactSpace X] [SigmaAlgebra X] [OpensSigmaAlgebra X] {F : Type*}
 
 lemma continuous_lintegral_continuousMap [FunLike F X ℝ≥0] [ContinuousMapClass F X ℝ≥0] (f : F) :
     Continuous fun μ : FiniteMeasure X ↦ ∫⁻ x, f x ∂μ :=
@@ -847,7 +847,7 @@ end FiniteMeasureConvergenceByBoundedContinuousFunctions -- section
 
 section comap
 
-variable {Ω Ω' : Type*} [MeasurableSpace Ω] [MeasurableSpace Ω']
+variable {Ω Ω' : Type*} [SigmaAlgebra Ω] [SigmaAlgebra Ω']
 
 /-- The pullback of a finite measure under a map.
 If `f` is injective and sends each measurable set to a null-measurable set, then for each
@@ -899,7 +899,7 @@ end comap
 
 section map
 
-variable {Ω Ω' : Type*} [MeasurableSpace Ω] [MeasurableSpace Ω']
+variable {Ω Ω' : Type*} [SigmaAlgebra Ω] [SigmaAlgebra Ω']
 
 /-- The push-forward of a finite measure by a function between measurable spaces. -/
 noncomputable def map (ν : FiniteMeasure Ω) (f : Ω → Ω') : FiniteMeasure Ω' :=
@@ -948,7 +948,7 @@ lemma mass_map_le {f : Ω → Ω'} {μ : FiniteMeasure Ω} (hf : AEMeasurable f 
   rw [Measure.map_apply_of_aemeasurable hf MeasurableSet.univ]
   exact measure_mono (subset_univ _)
 
-variable [TopologicalSpace Ω] [OpensMeasurableSpace Ω]
+variable [TopologicalSpace Ω] [OpensSigmaAlgebra Ω]
 variable [TopologicalSpace Ω'] [BorelSpace Ω']
 
 /-- If `f : X → Y` is continuous and `Y` is equipped with the Borel sigma algebra, then
@@ -983,7 +983,7 @@ noncomputable def mapCLM {f : Ω → Ω'} (f_cont : Continuous f) :
   map_smul' m _ := map_smul m f_cont.aemeasurable
 
 lemma Topology.IsClosedEmbedding.isEmbedding_map_finiteMeasure {Ω : Type*}
-    [MeasurableSpace Ω] [TopologicalSpace Ω] [BorelSpace Ω] [NormalSpace Ω']
+    [SigmaAlgebra Ω] [TopologicalSpace Ω] [BorelSpace Ω] [NormalSpace Ω']
     (f : Ω → Ω') (hf : IsClosedEmbedding f) :
     IsEmbedding (fun (μ : FiniteMeasure Ω) ↦ μ.map f) := by
   let M : Set (FiniteMeasure Ω') := {μ | μ (range f)ᶜ = 0}

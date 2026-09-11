@@ -51,7 +51,7 @@ open Filter MeasureTheory Measure Module Metric Set Asymptotics
 open scoped NNReal ENNReal Topology
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [MeasurableSpace E] [BorelSpace E]
+  [SigmaAlgebra E] [BorelSpace E]
   {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F] {C D : ℝ≥0} {f g : E → ℝ} {s : Set E}
   {μ : Measure E}
 
@@ -260,7 +260,7 @@ theorem ae_exists_fderiv_of_countable
   have J : L v = lineDeriv ℝ f x v := by convert! (hx v hv).symm <;> simp [L, B.sum_repr v]
   simpa [J] using (h'x v hv).hasLineDerivAt
 
-omit [MeasurableSpace E] in
+omit [SigmaAlgebra E] in
 /-- If a Lipschitz functions has line derivatives in a dense set of directions, all of them given by
 a single continuous linear map `L`, then it admits `L` as Fréchet derivative. -/
 theorem hasFDerivAt_of_hasLineDerivAt_of_closure
@@ -394,12 +394,12 @@ theorem LipschitzWith.ae_differentiableAt {f : E → F} (h : LipschitzWith C f) 
 theorem ae_differentiableAt_norm :
     ∀ᵐ x ∂μ, DifferentiableAt ℝ (‖·‖) x := lipschitzWith_one_norm.ae_differentiableAt
 
-omit [MeasurableSpace E] in
+omit [SigmaAlgebra E] in
 /-- In a real finite-dimensional normed vector space,
   the set of points where the norm is differentiable at is dense. -/
 theorem dense_differentiableAt_norm :
     Dense {x : E | DifferentiableAt ℝ (‖·‖) x} :=
-  let _ : MeasurableSpace E := borel E
+  let _ : SigmaAlgebra E := borel E
   have _ : BorelSpace E := ⟨rfl⟩
   let w := Basis.ofVectorSpace ℝ E
   MeasureTheory.Measure.dense_of_ae (ae_differentiableAt_norm (μ := w.addHaar))

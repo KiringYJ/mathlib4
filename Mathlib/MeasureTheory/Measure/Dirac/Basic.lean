@@ -5,7 +5,7 @@ Authors: Johannes Hölzl
 -/
 module
 
-public import Mathlib.MeasureTheory.MeasurableSpace.CountablyGenerated
+public import Mathlib.MeasureTheory.SigmaAlgebra.CountablyGenerated
 public import Mathlib.MeasureTheory.Measure.Dirac.Def
 public import Mathlib.MeasureTheory.Measure.MutuallySingular
 public import Mathlib.MeasureTheory.Measure.Typeclasses.NullSingletonClass
@@ -26,7 +26,7 @@ open scoped ENNReal NNReal
 
 noncomputable section
 
-variable {α β δ : Type*} [MeasurableSpace α] [MeasurableSpace β] {s : Set α} {a : α}
+variable {α β δ : Type*} [SigmaAlgebra α] [SigmaAlgebra β] {s : Set α} {a : α}
 
 namespace MeasureTheory
 
@@ -35,7 +35,10 @@ namespace Measure
 @[simp]
 theorem map_dirac' {f : α → β} (hf : Measurable f) (a : α) : (dirac a).map f = dirac (f a) := by
   classical
-  exact ext fun s hs => by simp [hs, map_apply hf hs, hf hs, indicator_apply]
+  apply ext
+  intro s hs
+  rw [map_apply hf hs, dirac_apply' _ (hf hs), dirac_apply' _ hs]
+  simp [indicator_apply]
 
 @[simp]
 lemma map_const (μ : Measure α) (c : β) : μ.map (fun _ ↦ c) = (μ Set.univ) • dirac c := by
@@ -96,23 +99,27 @@ lemma sum_smul_dirac_singleton [MeasurableSingletonClass α] {f : α → ℝ≥0
 /-- A measure on a countable type is a sum of Dirac measures.
 If `α` has measurable singletons, `sum_smul_dirac` gives a simpler sum. -/
 lemma exists_sum_smul_dirac [Countable α] (μ : Measure α) :
-    ∃ s : Set α, μ = Measure.sum (fun x : s ↦ μ (measurableAtom x) • dirac (x : α)) := by
-  let measurableAtoms := measurableAtom '' (Set.univ : Set α)
-  have h_nonempty (s : measurableAtoms) : Set.Nonempty s.1 := by
+    ∃ s : Set α, μ = Measure.sum (fun x : s ↦
+      μ ((inferInstance : SigmaAlgebra α).indistinguishabilityClass x) • dirac (x : α)) := by
+  let m := (inferInstance : SigmaAlgebra α)
+  let classes := m.indistinguishabilityClass '' (Set.univ : Set α)
+  have h_nonempty (s : classes) : Set.Nonempty s.1 := by
     obtain ⟨y, _, hy⟩ := s.2
     rw [← hy]
-    exact ⟨y, mem_measurableAtom_self y⟩
-  let points : measurableAtoms → α := fun s ↦ (h_nonempty s).some
-  have h_points_mem (s : measurableAtoms) : points s ∈ s.1 := (h_nonempty s).some_mem
-  refine ⟨Set.range points, ext_of_measurableAtoms fun x ↦ ?_⟩
-  rw [sum_apply _ (MeasurableSet.measurableAtom_of_countable x)]
+    exact ⟨y, m.self_mem_indistinguishabilityClass y⟩
+  let points : classes → α := fun s ↦ (h_nonempty s).some
+  have h_points_mem (s : classes) : points s ∈ s.1 := (h_nonempty s).some_mem
+  refine ⟨Set.range points, ext_of_indistinguishabilityClasses fun x ↦ ?_⟩
+  have hx : MeasurableSet (m.indistinguishabilityClass x) :=
+    SigmaAlgebra.indistinguishabilityClass_mem_of_countable x
+  rw [sum_apply _ hx]
   simp only [Measure.smul_apply, smul_eq_mul]
-  simp_rw [dirac_apply' _ (MeasurableSet.measurableAtom_of_countable x)]
-  rw [tsum_eq_single ⟨points ⟨measurableAtom x, by simp [measurableAtoms]⟩, by simp⟩]
+  simp_rw [dirac_apply' _ hx]
+  rw [tsum_eq_single ⟨points ⟨m.indistinguishabilityClass x, by simp [classes]⟩, by simp⟩]
   · rw [indicator_of_mem]
     · simp only [Pi.one_apply, mul_one]
       congr 1
-      refine (measurableAtom_eq_of_mem ?_).symm
+      refine (m.indistinguishabilityClass_eq_of_mem ?_).symm
       convert! h_points_mem _
       simp
     · convert! h_points_mem _
@@ -122,13 +129,14 @@ lemma exists_sum_smul_dirac [Countable α] (μ : Measure α) :
     refine fun y s hs hsy hyx ↦ .inr fun hyx' ↦ hyx ?_
     rw [← hsy]
     congr
-    have h1 : measurableAtom y = measurableAtom x := measurableAtom_eq_of_mem hyx'
-    have h2 : measurableAtom y = s := by
+    have h1 : m.indistinguishabilityClass y = m.indistinguishabilityClass x :=
+      m.indistinguishabilityClass_eq_of_mem hyx'
+    have h2 : m.indistinguishabilityClass y = s := by
       specialize h_points_mem ⟨s, hs⟩
       obtain ⟨z, _, hz⟩ := hs
       simp only at h_points_mem
       rw [← hz, ← hsy]
-      refine measurableAtom_eq_of_mem ?_
+      refine m.indistinguishabilityClass_eq_of_mem ?_
       convert! h_points_mem
     rw [← h2, h1]
 
@@ -183,17 +191,17 @@ theorem Measure.map_dirac [MeasurableSingletonClass α] [MeasurableSingletonClas
 instance Measure.dirac.isProbabilityMeasure {x : α} : IsProbabilityMeasure (dirac x) :=
   ⟨dirac_apply_of_mem <| mem_univ x⟩
 
-lemma _root_.HasSum.isProbabilityMeasure_sum_dirac_ennreal {ι : Type*} {mδ : MeasurableSpace δ}
+lemma _root_.HasSum.isProbabilityMeasure_sum_dirac_ennreal {ι : Type*} {mδ : SigmaAlgebra δ}
     {c : ι → ℝ≥0∞} {d : ι → δ} (h : HasSum c 1) :
     IsProbabilityMeasure (Measure.sum fun i ↦ c i • .dirac (d i)) where
   measure_univ := by simp [h.tsum_eq]
 
-lemma _root_.HasSum.isProbabilityMeasure_sum_dirac_nnreal {ι : Type*} {mδ : MeasurableSpace δ}
+lemma _root_.HasSum.isProbabilityMeasure_sum_dirac_nnreal {ι : Type*} {mδ : SigmaAlgebra δ}
     {c : ι → ℝ≥0} {d : ι → δ} (h : HasSum c 1) :
     IsProbabilityMeasure (Measure.sum fun i ↦ c i • .dirac (d i)) :=
   (ENNReal.hasSum_coe.2 h).isProbabilityMeasure_sum_dirac_ennreal
 
-lemma _root_.HasSum.isProbabilityMeasure_sum_dirac {ι : Type*} {mδ : MeasurableSpace δ}
+lemma _root_.HasSum.isProbabilityMeasure_sum_dirac {ι : Type*} {mδ : SigmaAlgebra δ}
     {c : ι → ℝ} {d : ι → δ} (h1 : ∀ i, 0 ≤ c i) (h2 : HasSum c 1) :
     IsProbabilityMeasure (Measure.sum fun i ↦ ENNReal.ofReal (c i) • .dirac (d i)) :=
   HasSum.isProbabilityMeasure_sum_dirac_nnreal (by simpa using h2.toNNReal h1)
@@ -268,7 +276,7 @@ lemma dirac_ne_dirac_iff_exists_measurableSet {x y : α} :
   · simp only [x_in_A, h A A_mble x_in_A]
   · simpa only [x_in_A, false_iff] using! h Aᶜ (MeasurableSet.compl_iff.mpr A_mble) x_in_A
 
-open MeasurableSpace
+open SigmaAlgebra
 /-- Dirac delta measures at two different points are different, assuming the measurable space
 separates points. -/
 lemma dirac_ne_dirac [SeparatesPoints α] {x y : α} (x_ne_y : x ≠ y) :
@@ -296,7 +304,7 @@ end dirac_injective
 end MeasureTheory
 
 namespace MeasureTheory.Measure
-variable {α β : Type*} {mα : MeasurableSpace α} {mβ : MeasurableSpace β}
+variable {α β : Type*} {mα : SigmaAlgebra α} {mβ : SigmaAlgebra β}
   [MeasurableSingletonClass α] {f : β → α} {μ : Measure α} {s : Finset α} {a₁ a₂ : α}
 
 lemma ae_mem_finset_iff : (∀ᵐ a ∂μ, a ∈ s) ↔ μ = ∑ a ∈ s, μ {a} • .dirac a where

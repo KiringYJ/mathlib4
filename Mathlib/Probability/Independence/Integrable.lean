@@ -24,9 +24,9 @@ open scoped ENNReal NNReal Topology
 
 namespace MeasureTheory
 
-variable {Ω E F : Type*} [MeasurableSpace Ω] {μ : Measure Ω}
-  [NormedAddCommGroup E] [MeasurableSpace E] [OpensMeasurableSpace E]
-  [MeasurableSpace F]
+variable {Ω E F : Type*} [SigmaAlgebra Ω] {μ : Measure Ω}
+  [NormedAddCommGroup E] [SigmaAlgebra E] [OpensSigmaAlgebra E]
+  [SigmaAlgebra F]
 
 /-- If a nonzero function belongs to `ℒ^p` and is independent of another function, then
 the space is a probability space. -/

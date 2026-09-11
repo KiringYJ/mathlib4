@@ -43,7 +43,7 @@ namespace ProbabilityTheory
 
 section AuxLemmas
 
-variable {Ω F : Type*} {m mΩ : MeasurableSpace Ω} {μ : Measure Ω} {f : Ω → F}
+variable {Ω F : Type*} {m mΩ : SigmaAlgebra Ω} {μ : Measure Ω} {f : Ω → F}
 
 theorem _root_.MeasureTheory.AEStronglyMeasurable.comp_snd_map_prod_id (hm : m ≤ mΩ)
     [TopologicalSpace F] (hf : AEStronglyMeasurable f μ) :
@@ -58,7 +58,7 @@ theorem _root_.MeasureTheory.Integrable.comp_snd_map_prod_id (hm : m ≤ mΩ) [N
 
 end AuxLemmas
 
-variable {Ω F : Type*} {m : MeasurableSpace Ω} [mΩ : MeasurableSpace Ω]
+variable {Ω F : Type*} {m : SigmaAlgebra Ω} [mΩ : SigmaAlgebra Ω]
   [StandardBorelSpace Ω] {μ : Measure Ω} [IsFiniteMeasure μ]
 
 open scoped Classical in
@@ -69,14 +69,14 @@ identity is understood as a map from `Ω` with the σ-algebra `mΩ` to `Ω` with
 We use `m ⊓ mΩ` instead of `m` to ensure that it is a sub-σ-algebra of `mΩ`. We then use
 `Kernel.comap` to get a kernel from `m` to `mΩ` instead of from `m ⊓ mΩ` to `mΩ`. -/
 noncomputable irreducible_def condExpKernel (μ : Measure Ω) [IsFiniteMeasure μ]
-    (m : MeasurableSpace Ω) : @Kernel Ω Ω m mΩ :=
+    (m : SigmaAlgebra Ω) : @Kernel Ω Ω m mΩ :=
   if _h : Nonempty Ω then
     Kernel.comap (@condDistrib Ω Ω Ω mΩ _ _ mΩ (m ⊓ mΩ) id id μ _) id
       (measurable_id'' (inf_le_left : m ⊓ mΩ ≤ m))
   else 0
 
 lemma condExpKernel_eq (μ : Measure Ω) [IsFiniteMeasure μ] [h : Nonempty Ω]
-    (m : MeasurableSpace Ω) :
+    (m : SigmaAlgebra Ω) :
     condExpKernel (mΩ := mΩ) μ m = Kernel.comap (@condDistrib Ω Ω Ω mΩ _ _ mΩ (m ⊓ mΩ) id id μ _) id
       (measurable_id'' (inf_le_left : m ⊓ mΩ ≤ m)) := by
   simp [condExpKernel, h]
@@ -149,7 +149,7 @@ theorem aestronglyMeasurable_integral_condExpKernel [NormedSpace ℝ F]
   have h := aestronglyMeasurable_integral_condDistrib
     (aemeasurable_id'' μ (inf_le_right : m ⊓ mΩ ≤ mΩ)) aemeasurable_id
     (hf.comp_snd_map_prod_id inf_le_right)
-  rw [MeasurableSpace.comap_id] at h
+  rw [SigmaAlgebra.comap_id] at h
   exact h.mono inf_le_left
 
 lemma aestronglyMeasurable_trim_condExpKernel (hm : m ≤ mΩ) (hf : AEStronglyMeasurable f μ) :
@@ -213,7 +213,7 @@ lemma condExpKernel_ae_eq_condExp' {s : Set Ω} (hs : MeasurableSet s) :
     simpa [this] using! trivial
   have h := condDistrib_ae_eq_condExp (μ := μ)
     (measurable_id'' (inf_le_right : m ⊓ mΩ ≤ mΩ)) measurable_id hs
-  simp only [id_eq, MeasurableSpace.comap_id, preimage_id_eq] at h
+  simp only [id_eq, SigmaAlgebra.comap_id, preimage_id_eq] at h
   simp_rw [condExpKernel_apply_eq_condDistrib]
   exact h
 
@@ -230,8 +230,8 @@ lemma condExpKernel_ae_eq_trim_condExp
     stronglyMeasurable_condExp]
   exact condExpKernel_ae_eq_condExp hm hs
 
-lemma condDistrib_apply_ae_eq_condExpKernel_map {β γ : Type*} {mβ : MeasurableSpace β}
-    {mγ : MeasurableSpace γ} [StandardBorelSpace β] [Nonempty β] {X : Ω → β} {Y : Ω → γ}
+lemma condDistrib_apply_ae_eq_condExpKernel_map {β γ : Type*} {mβ : SigmaAlgebra β}
+    {mγ : SigmaAlgebra γ} [StandardBorelSpace β] [Nonempty β] {X : Ω → β} {Y : Ω → γ}
     (hX : Measurable X) (hY : Measurable Y) {s : Set β} (hs : MeasurableSet s) :
     (fun a ↦ condDistrib X Y μ (Y a) s)
       =ᵐ[μ] fun a ↦ (condExpKernel μ (mγ.comap Y)).map X a s := by
@@ -249,7 +249,7 @@ theorem condExp_ae_eq_integral_condExpKernel' [NormedAddCommGroup F] {f : Ω →
   have hX : @Measurable Ω Ω mΩ (m ⊓ mΩ) id := measurable_id.mono le_rfl (inf_le_right : m ⊓ mΩ ≤ mΩ)
   simp_rw [condExpKernel_apply_eq_condDistrib]
   have h := condExp_ae_eq_integral_condDistrib_id hX hf_int
-  simpa only [MeasurableSpace.comap_id, id_eq] using! h
+  simpa only [SigmaAlgebra.comap_id, id_eq] using! h
 
 /-- The conditional expectation of `f` with respect to a σ-algebra `m` is almost everywhere equal to
 the integral `∫ y, f y ∂(condExpKernel μ m ω)`. -/
@@ -284,7 +284,7 @@ section Cond
 
 /-! ### Relation between conditional expectation, conditional kernel and the conditional measure. -/
 
-open MeasurableSpace
+open SigmaAlgebra
 
 variable {s t : Set Ω} [NormedAddCommGroup F] [NormedSpace ℝ F] [CompleteSpace F]
 
@@ -297,7 +297,7 @@ lemma condExp_generateFrom_singleton (hs : MeasurableSet s) {f : Ω → F} (hf :
     rfl
   refine ae_eq_trans (condExp_restrict_ae_eq_restrict
     (generateFrom_singleton_le hs)
-    (measurableSet_generateFrom rfl) hf).symm ?_
+    (SigmaAlgebra.mem_generateFrom rfl) hf).symm ?_
   · refine (ae_eq_condExp_of_forall_setIntegral_eq (generateFrom_singleton_le hs) hf.restrict ?_ ?_
       stronglyMeasurable_const.aestronglyMeasurable).symm
     · rintro t - -

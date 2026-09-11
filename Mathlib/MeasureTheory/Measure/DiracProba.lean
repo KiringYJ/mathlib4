@@ -46,14 +46,14 @@ namespace MeasureTheory
 
 section embed_to_probabilityMeasure
 
-variable {X : Type*} [MeasurableSpace X]
+variable {X : Type*} [SigmaAlgebra X]
 
 /-- The Dirac delta mass at a point `x : X` as a `ProbabilityMeasure`. -/
 noncomputable def diracProba (x : X) : ProbabilityMeasure X :=
   ⟨Measure.dirac x, Measure.dirac.isProbabilityMeasure⟩
 
 /-- The assignment `x ↦ diracProba x` is injective if all singletons are measurable. -/
-lemma injective_diracProba {X : Type*} [MeasurableSpace X] [MeasurableSpace.SeparatesPoints X] :
+lemma injective_diracProba {X : Type*} [SigmaAlgebra X] [SigmaAlgebra.SeparatesPoints X] :
     Function.Injective (fun (x : X) ↦ diracProba x) := by
   intro x y x_eq_y
   simpa [diracProba, dirac_eq_dirac_iff] using congr(ProbabilityMeasure.toMeasure $x_eq_y)
@@ -67,7 +67,7 @@ lemma injective_diracProba {X : Type*} [MeasurableSpace X] [MeasurableSpace.Sepa
 @[simp] lemma diracProba_toMeasure_apply [MeasurableSingletonClass X] (x : X) (A : Set X) :
     (diracProba x).toMeasure A = A.indicator 1 x := Measure.dirac_apply _ _
 
-variable [TopologicalSpace X] [OpensMeasurableSpace X]
+variable [TopologicalSpace X] [OpensSigmaAlgebra X]
 
 /-- The assignment `x ↦ diracProba x` is continuous `X → ProbabilityMeasure X`. -/
 lemma continuous_diracProba : Continuous (fun (x : X) ↦ diracProba x) := by
@@ -115,7 +115,7 @@ noncomputable def diracProbaInverse : range (diracProba (X := X)) → X :=
   fun μ' ↦ (mem_range.mp μ'.prop).choose
 
 -- We redeclare `X` here to temporarily avoid the `[TopologicalSpace X]` instance.
-@[simp] lemma diracProba_diracProbaInverse {X : Type*} [MeasurableSpace X]
+@[simp] lemma diracProba_diracProbaInverse {X : Type*} [SigmaAlgebra X]
     (μ : range (diracProba (X := X))) :
     diracProba (diracProbaInverse μ) = μ := (mem_range.mp μ.prop).choose_spec
 

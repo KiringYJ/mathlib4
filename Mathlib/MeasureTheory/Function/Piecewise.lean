@@ -22,16 +22,19 @@ open MeasureTheory Set Filter
 
 namespace IndexedPartition
 
-variable {ι α β : Type*} [MeasurableSpace α] {s : ι → Set α} {f : ι → α → β}
+variable {ι α β : Type*} [SigmaAlgebra α] {s : ι → Set α} {f : ι → α → β}
 
 @[fun_prop]
-theorem measurable_piecewise [MeasurableSpace β] [Countable ι]
+theorem measurable_piecewise [SigmaAlgebra β] [Countable ι]
     (hs : IndexedPartition s) (hm : ∀ i, MeasurableSet (s i)) (hf : ∀ i, Measurable (f i)) :
-    Measurable (hs.piecewise f) :=
-  fun t ht => by simpa [piecewise_preimage] using .iUnion (fun i => (hm i).inter ((hf i) ht))
+  Measurable (hs.piecewise f) :=
+  fun t ht => by
+    change MeasurableSet ((hs.piecewise f) ⁻¹' t)
+    rw [piecewise_preimage]
+    exact MeasurableSet.iUnion fun i => MeasurableSet.inter (hm i) ((hf i) ht)
 
 @[fun_prop]
-theorem aemeasurable_piecewise {μ : Measure α} [MeasurableSpace β] [Countable ι]
+theorem aemeasurable_piecewise {μ : Measure α} [SigmaAlgebra β] [Countable ι]
     (hs : IndexedPartition s) (hm : ∀ i, MeasurableSet (s i)) (hf : ∀ i, AEMeasurable (f i) μ) :
     AEMeasurable (hs.piecewise f) μ := by
   choose p hp hq using hf
@@ -43,7 +46,7 @@ def simpleFunc_piecewise [Finite ι] (hs : IndexedPartition s)
     (hm : ∀ i, MeasurableSet (s i)) (f : ι → SimpleFunc α β) : SimpleFunc α β where
   toFun := hs.piecewise (fun i => f i)
   measurableSet_fiber' := fun _ =>
-    letI : MeasurableSpace β := ⊤
+    letI : SigmaAlgebra β := ⊤
     hs.measurable_piecewise hm (fun i => (f i).measurable) trivial
   finite_range' := (finite_iUnion (fun i => (f i).finite_range)).subset
     (hs.range_piecewise_subset _)
@@ -54,7 +57,8 @@ theorem stronglyMeasurable_piecewise [Countable ι] (hs : IndexedPartition s)
     StronglyMeasurable (hs.piecewise f) := by
   by_cases Fi : Finite ι
   · refine ⟨fun n => simpleFunc_piecewise hs hm (fun i => (hf i).approx n), fun x => ?_⟩
-    simp [simpleFunc_piecewise, piecewise_apply, StronglyMeasurable.tendsto_approx]
+    change Tendsto (fun n => (hf (hs.index x)).approx n x) atTop (nhds (f (hs.index x) x))
+    exact (hf (hs.index x)).tendsto_approx x
   simp only [not_finite_iff_infinite] at Fi
   obtain ⟨e, -⟩ := exists_true_iff_nonempty.mpr (nonempty_equiv_of_countable (α := ℕ) (β := ι))
   classical
@@ -72,8 +76,8 @@ theorem stronglyMeasurable_piecewise [Countable ι] (hs : IndexedPartition s)
   have G (n : ℕ) := hs.coarserPartition (g n) (sg n)
   refine ⟨fun n => (G n).simpleFunc_piecewise (fun i => ?_) (fun i => (hf (e i)).approx n),
     fun x => ?_⟩
-  · exact .biUnion (to_countable _) fun _ _ ↦ hm _
-  simp only [simpleFunc_piecewise, SimpleFunc.coe_mk, piecewise_apply]
+  · exact MeasurableSet.biUnion (to_countable _) fun _ _ ↦ hm _
+  simp only [simpleFunc_piecewise, piecewise_apply]
   have : ∀ᶠ n in atTop, e ((G n).index x) = hs.index x := by
     obtain ⟨y, hy⟩ := e.bijective.2 (hs.index x)
     refine eventually_atTop.mpr ⟨y + 1, fun b hb => ?_⟩

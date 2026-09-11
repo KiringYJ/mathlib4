@@ -44,7 +44,7 @@ weak\*-closed two-sided ideals of `A`.
 ## Implementation notes
 
 The approach to showing that the L-projections form a Boolean algebra is inspired by
-`MeasureTheory.MeasurableSpace`.
+`MeasureTheory.SigmaAlgebra`.
 
 Instead of using `P : X →L[𝕜] X` to represent projections, we use an arbitrary ring `M` with a
 faithful action on `X`. `ContinuousLinearMap.apply_module` can be used to recover the `X →L[𝕜] X`

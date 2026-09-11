@@ -50,7 +50,7 @@ open scoped MeasureTheory NNReal ENNReal
 
 open Set
 
-variable {α : Type*} {m : MeasurableSpace α} {μ : MeasureTheory.Measure α}
+variable {α : Type*} {m : SigmaAlgebra α} {μ : MeasureTheory.Measure α}
 
 namespace MeasureTheory
 

@@ -43,7 +43,7 @@ open scoped ENNReal
 
 namespace MeasureTheory
 
-variable {ι : Type*} {α : ι → Type*} {mα : ∀ i, MeasurableSpace (α i)}
+variable {ι : Type*} {α : ι → Type*} {mα : ∀ i, SigmaAlgebra (α i)}
   {P : ∀ J : Finset ι, Measure (Π j : J, α j)} {s t : Set (Π i, α i)} {I : Finset ι}
   {S : Set (Π i : I, α i)}
 

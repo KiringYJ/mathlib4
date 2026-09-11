@@ -39,28 +39,28 @@ open scoped ENNReal
 
 namespace ProbabilityTheory
 
-variable {Θ 𝓧 𝓨 : Type*} {mΘ : MeasurableSpace Θ} {m𝓧 : MeasurableSpace 𝓧}
+variable {Θ 𝓧 𝓨 : Type*} {mΘ : SigmaAlgebra Θ} {m𝓧 : SigmaAlgebra 𝓧}
 
 /-- The average risk of an estimator `κ` on an estimation task with loss `ℓ` and
 data generating kernel `P` with respect to a prior `π`. -/
 noncomputable
-def avgRisk {m𝓨 : MeasurableSpace 𝓨}
+def avgRisk {m𝓨 : SigmaAlgebra 𝓨}
     (ℓ : Θ → 𝓨 → ℝ≥0∞) (P : Kernel Θ 𝓧) (κ : Kernel 𝓧 𝓨) (π : Measure Θ) : ℝ≥0∞ :=
   ∫⁻ θ, ∫⁻ y, ℓ θ y ∂((κ ∘ₖ P) θ) ∂π
 
 /-- The Bayes risk with respect to a prior `π`, defined as the infimum of the average risks of all
 estimators. -/
 noncomputable
-def bayesRisk [MeasurableSpace 𝓨] (ℓ : Θ → 𝓨 → ℝ≥0∞) (P : Kernel Θ 𝓧) (π : Measure Θ) : ℝ≥0∞ :=
+def bayesRisk [SigmaAlgebra 𝓨] (ℓ : Θ → 𝓨 → ℝ≥0∞) (P : Kernel Θ 𝓧) (π : Measure Θ) : ℝ≥0∞ :=
   ⨅ (κ : Kernel 𝓧 𝓨) (_ : IsMarkovKernel κ), avgRisk ℓ P κ π
 
 /-- The minimax risk, defined as the infimum over estimators of the maximal risk of
 the estimator. -/
 noncomputable
-def minimaxRisk [MeasurableSpace 𝓨] (ℓ : Θ → 𝓨 → ℝ≥0∞) (P : Kernel Θ 𝓧) : ℝ≥0∞ :=
+def minimaxRisk [SigmaAlgebra 𝓨] (ℓ : Θ → 𝓨 → ℝ≥0∞) (P : Kernel Θ 𝓧) : ℝ≥0∞ :=
   ⨅ (κ : Kernel 𝓧 𝓨) (_ : IsMarkovKernel κ), ⨆ θ, ∫⁻ y, ℓ θ y ∂((κ ∘ₖ P) θ)
 
-variable {m𝓨 : MeasurableSpace 𝓨}
+variable {m𝓨 : SigmaAlgebra 𝓨}
   {ℓ : Θ → 𝓨 → ℝ≥0∞} {P : Kernel Θ 𝓧} {κ : Kernel 𝓧 𝓨} {π : Measure Θ}
 
 section Zero

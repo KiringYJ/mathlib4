@@ -20,7 +20,7 @@ public section
 
 namespace MeasureTheory
 
-variable {α : Type*} {m : MeasurableSpace α}
+variable {α : Type*} {m : SigmaAlgebra α}
 
 open Measure VectorMeasure
 

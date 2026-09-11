@@ -25,10 +25,10 @@ namespace MeasureTheory
 
 open Set Measure Filter TopologicalSpace
 
-variable {α : Type*} {m0 : MeasurableSpace α} {μ : Measure α} {s : Set α}
+variable {α : Type*} {m0 : SigmaAlgebra α} {μ : Measure α} {s : Set α}
 
 /-- Measure `μ` has value zero on singletons. -/
-class NullSingletonClass {m0 : MeasurableSpace α} (μ : Measure α) : Prop where
+class NullSingletonClass {m0 : SigmaAlgebra α} (μ : Measure α) : Prop where
   measure_singleton : ∀ x, μ {x} = 0
 
 @[deprecated (since := "2026-06-09")]
@@ -91,7 +91,7 @@ theorem insert_ae_eq_self (a : α) (s : Set α) : (insert a s : Set α) =ᵐ[μ]
 /-
 If a set has positive measure under an atomless measure, then it has an accumulation point.
 -/
-theorem exists_accPt_of_nullSingletonClass {X : Type*} [TopologicalSpace X] [MeasurableSpace X]
+theorem exists_accPt_of_nullSingletonClass {X : Type*} [TopologicalSpace X] [SigmaAlgebra X]
     {μ : Measure X} [NullSingletonClass μ] {E : Set X} [SeparableSpace E] (hE : 0 < μ E) :
     ∃ x, AccPt x (𝓟 E) := by
   by_contra! h

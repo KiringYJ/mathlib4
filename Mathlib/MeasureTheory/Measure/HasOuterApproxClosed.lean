@@ -46,7 +46,7 @@ section auxiliary
 
 namespace MeasureTheory
 
-variable {Ω : Type*} [TopologicalSpace Ω] [MeasurableSpace Ω] [OpensMeasurableSpace Ω]
+variable {Ω : Type*} [TopologicalSpace Ω] [SigmaAlgebra Ω] [OpensSigmaAlgebra Ω]
 
 /-- A bounded convergence theorem for a finite measure:
 If bounded continuous non-negative functions are uniformly bounded by a constant and tend to a
@@ -109,8 +109,8 @@ theorem measure_of_cont_bdd_of_tendsto_indicator
 
 /-- The integrals of thickened indicators of a closed set against a finite measure tend to the
 measure of the closed set if the thickening radii tend to zero. -/
-theorem tendsto_lintegral_thickenedIndicator_of_isClosed {Ω : Type*} {mΩ : MeasurableSpace Ω}
-    [PseudoEMetricSpace Ω] [OpensMeasurableSpace Ω] (μ : Measure Ω) [IsFiniteMeasure μ] {F : Set Ω}
+theorem tendsto_lintegral_thickenedIndicator_of_isClosed {Ω : Type*} {mΩ : SigmaAlgebra Ω}
+    [PseudoEMetricSpace Ω] [OpensSigmaAlgebra Ω] (μ : Measure Ω) [IsFiniteMeasure μ] {F : Set Ω}
     (F_closed : IsClosed F) {δs : ℕ → ℝ} (δs_pos : ∀ n, 0 < δs n)
     (δs_lim : Tendsto δs atTop (𝓝 0)) :
     Tendsto (fun n ↦ lintegral μ fun ω ↦ (thickenedIndicator (δs_pos n) F ω : ℝ≥0∞)) atTop
@@ -121,8 +121,8 @@ theorem tendsto_lintegral_thickenedIndicator_of_isClosed {Ω : Type*} {mΩ : Mea
   rwa [F_closed.closure_eq] at key
 
 /-- A thickened indicator is integrable. -/
-lemma integrable_thickenedIndicator {Ω : Type*} {mΩ : MeasurableSpace Ω}
-    [PseudoEMetricSpace Ω] [OpensMeasurableSpace Ω] {μ : Measure Ω} [IsFiniteMeasure μ] (F : Set Ω)
+lemma integrable_thickenedIndicator {Ω : Type*} {mΩ : SigmaAlgebra Ω}
+    [PseudoEMetricSpace Ω] [OpensSigmaAlgebra Ω] {μ : Measure Ω} [IsFiniteMeasure μ] (F : Set Ω)
     {δ : ℝ} (δ_pos : 0 < δ) :
     Integrable (fun ω ↦ (thickenedIndicator δ_pos F ω : ℝ)) μ := by
   refine .of_bound (by fun_prop) 1 (ae_of_all _ fun x ↦ ?_)
@@ -130,8 +130,8 @@ lemma integrable_thickenedIndicator {Ω : Type*} {mΩ : MeasurableSpace Ω}
 
 /-- The integrals of thickened indicators of a closed set against a finite measure tend to the
 measure of the closed set if the thickening radii tend to zero. -/
-lemma tendsto_integral_thickenedIndicator_of_isClosed {Ω : Type*} {mΩ : MeasurableSpace Ω}
-    [PseudoEMetricSpace Ω] [OpensMeasurableSpace Ω] (μ : Measure Ω) [IsFiniteMeasure μ] {F : Set Ω}
+lemma tendsto_integral_thickenedIndicator_of_isClosed {Ω : Type*} {mΩ : SigmaAlgebra Ω}
+    [PseudoEMetricSpace Ω] [OpensSigmaAlgebra Ω] (μ : Measure Ω) [IsFiniteMeasure μ] {F : Set Ω}
     (F_closed : IsClosed F) {δs : ℕ → ℝ} (δs_pos : ∀ (n : ℕ), 0 < δs n)
     (δs_lim : Tendsto δs atTop (𝓝 0)) :
     Tendsto (fun n : ℕ ↦ ∫ ω, (thickenedIndicator (δs_pos n) F ω : ℝ) ∂μ) atTop (𝓝 (μ.real F)) := by
@@ -194,7 +194,7 @@ lemma indicator_le_apprSeq (n : ℕ) :
 
 /-- The measure of a closed set is at most the integral of any function in a decreasing
 approximating sequence to the indicator of the set. -/
-theorem measure_le_lintegral [MeasurableSpace X] [OpensMeasurableSpace X] (μ : Measure X) (n : ℕ) :
+theorem measure_le_lintegral [SigmaAlgebra X] [OpensSigmaAlgebra X] (μ : Measure X) (n : ℕ) :
     μ F ≤ ∫⁻ x, (hF.apprSeq n x : ℝ≥0∞) ∂μ := by
   convert_to ∫⁻ x, (F.indicator (fun _ ↦ (1 : ℝ≥0∞))) x ∂μ ≤ ∫⁻ x, hF.apprSeq n x ∂μ
   · rw [lintegral_indicator hF.measurableSet]
@@ -207,7 +207,7 @@ theorem measure_le_lintegral [MeasurableSpace X] [OpensMeasurableSpace X] (μ : 
 
 /-- The integrals along a decreasing approximating sequence to the indicator of a closed set
 tend to the measure of the closed set. -/
-lemma tendsto_lintegral_apprSeq [MeasurableSpace X] [OpensMeasurableSpace X]
+lemma tendsto_lintegral_apprSeq [SigmaAlgebra X] [OpensSigmaAlgebra X]
     (μ : Measure X) [IsFiniteMeasure μ] :
     Tendsto (fun n ↦ ∫⁻ x, hF.apprSeq n x ∂μ) atTop (𝓝 ((μ : Measure X) F)) :=
   measure_of_cont_bdd_of_tendsto_indicator μ hF.measurableSet hF.apprSeq
@@ -236,8 +236,8 @@ namespace MeasureTheory
 /-- Two finite measures give equal values to all closed sets if the integrals of all bounded
 continuous functions with respect to the two measures agree. -/
 theorem measure_isClosed_eq_of_forall_lintegral_eq_of_isFiniteMeasure {Ω : Type*}
-    [MeasurableSpace Ω] [TopologicalSpace Ω] [HasOuterApproxClosed Ω]
-    [OpensMeasurableSpace Ω] {μ ν : Measure Ω} [IsFiniteMeasure μ]
+    [SigmaAlgebra Ω] [TopologicalSpace Ω] [HasOuterApproxClosed Ω]
+    [OpensSigmaAlgebra Ω] {μ ν : Measure Ω} [IsFiniteMeasure μ]
     (h : ∀ (f : Ω →ᵇ ℝ≥0), ∫⁻ x, f x ∂μ = ∫⁻ x, f x ∂ν) {F : Set Ω} (F_closed : IsClosed F) :
     μ F = ν F := by
   have ν_finite : IsFiniteMeasure ν := by
@@ -254,7 +254,7 @@ theorem measure_isClosed_eq_of_forall_lintegral_eq_of_isFiniteMeasure {Ω : Type
 /-- Two finite Borel measures are equal if the integrals of all non-negative bounded continuous
 functions with respect to both agree. -/
 theorem ext_of_forall_lintegral_eq_of_IsFiniteMeasure {Ω : Type*}
-    [MeasurableSpace Ω] [TopologicalSpace Ω] [HasOuterApproxClosed Ω]
+    [SigmaAlgebra Ω] [TopologicalSpace Ω] [HasOuterApproxClosed Ω]
     [BorelSpace Ω] {μ ν : Measure Ω} [IsFiniteMeasure μ]
     (h : ∀ (f : Ω →ᵇ ℝ≥0), ∫⁻ x, f x ∂μ = ∫⁻ x, f x ∂ν) :
     μ = ν := by
@@ -262,12 +262,12 @@ theorem ext_of_forall_lintegral_eq_of_IsFiniteMeasure {Ω : Type*}
   apply ext_of_generate_finite _ ?_ isPiSystem_isClosed
   · exact fun F F_closed ↦ key F_closed
   · exact key isClosed_univ
-  · rw [BorelSpace.measurable_eq (α := Ω), borel_eq_generateFrom_isClosed]
+  · rw [BorelSpace.sigmaAlgebra_eq (α := Ω), borel_eq_generateFrom_isClosed]
 
 /-- Two finite Borel measures are equal if the integrals of all bounded continuous functions with
 respect to both agree. -/
 theorem ext_of_forall_integral_eq_of_IsFiniteMeasure {Ω : Type*}
-    [MeasurableSpace Ω] [TopologicalSpace Ω] [HasOuterApproxClosed Ω]
+    [SigmaAlgebra Ω] [TopologicalSpace Ω] [HasOuterApproxClosed Ω]
     [BorelSpace Ω] {μ ν : Measure Ω} [IsFiniteMeasure μ] [IsFiniteMeasure ν]
     (h : ∀ (f : Ω →ᵇ ℝ), ∫ x, f x ∂μ = ∫ x, f x ∂ν) :
     μ = ν := by

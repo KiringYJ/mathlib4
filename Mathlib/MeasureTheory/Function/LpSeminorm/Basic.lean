@@ -21,7 +21,7 @@ open TopologicalSpace MeasureTheory Filter
 
 open scoped NNReal ENNReal Topology ComplexConjugate
 
-variable {α ε ε' E F G : Type*} {m m0 : MeasurableSpace α} {p : ℝ≥0∞} {q : ℝ} {μ ν : Measure α}
+variable {α ε ε' E F G : Type*} {m m0 : SigmaAlgebra α} {p : ℝ≥0∞} {q : ℝ} {μ ν : Measure α}
   [NormedAddCommGroup E] [NormedAddCommGroup F] [NormedAddCommGroup G] [ENorm ε] [ENorm ε']
 
 namespace MeasureTheory
@@ -109,7 +109,7 @@ theorem eLpNorm_zero' : eLpNorm (fun _ : α => (0 : ε)) p μ = 0 := eLpNorm_zer
 
 @[simp] lemma MemLp.zero' : MemLp (fun _ : α => (0 : ε)) p μ := MemLp.zero
 
-variable [MeasurableSpace α]
+variable [SigmaAlgebra α]
 
 theorem eLpNorm'_measure_zero_of_pos {f : α → ε} (hq_pos : 0 < q) :
     eLpNorm' f q (0 : Measure α) = 0 := by simp [eLpNorm', hq_pos]
@@ -796,7 +796,7 @@ lemma eLpNorm_lt_top_of_finite [Finite α] [IsFiniteMeasure μ] : eLpNorm f p μ
   norm_cast
   exact Finite.exists_le _
 
-@[simp] lemma MemLp.of_discrete [DiscreteMeasurableSpace α] [Finite α] [IsFiniteMeasure μ] :
+@[simp] lemma MemLp.of_discrete [DiscreteSigmaAlgebra α] [Finite α] [IsFiniteMeasure μ] :
     MemLp f p μ :=
   let ⟨C, hC⟩ := Finite.exists_le (‖f ·‖₊); .of_bound .of_discrete C <| .of_forall hC
 
@@ -823,7 +823,7 @@ theorem eLpNorm'_eq_zero_iff (hq0_lt : 0 < q) {f : α → ε} (hf : AEStronglyMe
   ⟨ae_eq_zero_of_eLpNorm'_eq_zero (le_of_lt hq0_lt) hf, eLpNorm'_eq_zero_of_ae_zero hq0_lt⟩
 
 variable {ε : Type*} [ENorm ε] in
-theorem enorm_ae_le_eLpNormEssSup {_ : MeasurableSpace α} (f : α → ε) (μ : Measure α) :
+theorem enorm_ae_le_eLpNormEssSup {_ : SigmaAlgebra α} (f : α → ε) (μ : Measure α) :
     ∀ᵐ x ∂μ, ‖f x‖ₑ ≤ eLpNormEssSup f μ :=
   ENNReal.ae_le_essSup fun x => ‖f x‖ₑ
 
@@ -843,7 +843,7 @@ end ENormedAddMonoid
 section MapMeasure
 
 variable {ε : Type*} [TopologicalSpace ε] [ContinuousENorm ε]
-  {β : Type*} {mβ : MeasurableSpace β} {f : α → β} {g : β → ε}
+  {β : Type*} {mβ : SigmaAlgebra β} {f : α → β} {g : β → ε}
 
 theorem eLpNormEssSup_map_measure (hg : AEStronglyMeasurable g (Measure.map f μ))
     (hf : AEMeasurable f μ) : eLpNormEssSup g (Measure.map f μ) = eLpNormEssSup (g ∘ f) μ :=
@@ -906,7 +906,7 @@ end MapMeasure
 
 section Liminf
 
-variable [MeasurableSpace E] [OpensMeasurableSpace E] {R : ℝ≥0}
+variable [SigmaAlgebra E] [OpensSigmaAlgebra E] {R : ℝ≥0}
 
 theorem ae_bdd_liminf_atTop_rpow_of_eLpNorm_bdd {p : ℝ≥0∞} {f : ℕ → α → E}
     (hfmeas : ∀ n, Measurable (f n)) (hbdd : ∀ n, eLpNorm (f n) p μ ≤ R) :
@@ -962,7 +962,7 @@ end Liminf
 /-- A continuous function with compact support belongs to `L^∞`.
 See `Continuous.memLp_of_hasCompactSupport` for a version for `L^p`. -/
 theorem _root_.Continuous.memLp_top_of_hasCompactSupport
-    {X : Type*} [TopologicalSpace X] [MeasurableSpace X] [OpensMeasurableSpace X]
+    {X : Type*} [TopologicalSpace X] [SigmaAlgebra X] [OpensSigmaAlgebra X]
     {f : X → E} (hf : Continuous f) (h'f : HasCompactSupport f) (μ : Measure X) : MemLp f ⊤ μ := by
   borelize E
   rcases hf.bounded_above_of_compact_support h'f with ⟨C, hC⟩

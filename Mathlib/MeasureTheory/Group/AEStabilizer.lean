@@ -34,7 +34,7 @@ open Filter Set MeasureTheory
 open scoped Pointwise
 
 variable (G : Type*) {α : Type*} [Group G] [MulAction G α]
-  {_ : MeasurableSpace α} (μ : Measure α) [SMulInvariantMeasure G α μ]
+  {_ : SigmaAlgebra α} (μ : Measure α) [SMulInvariantMeasure G α μ]
 
 namespace MulAction
 

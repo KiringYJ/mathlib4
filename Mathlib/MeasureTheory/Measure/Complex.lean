@@ -38,14 +38,14 @@ noncomputable section
 
 open scoped MeasureTheory ENNReal NNReal
 
-variable {α : Type*} {m : MeasurableSpace α}
+variable {α : Type*} {m : SigmaAlgebra α}
 
 namespace MeasureTheory
 
 open VectorMeasure
 
 /-- A `ComplexMeasure` is a `ℂ`-vector measure. -/
-abbrev ComplexMeasure (α : Type*) [MeasurableSpace α] :=
+abbrev ComplexMeasure (α : Type*) [SigmaAlgebra α] :=
   VectorMeasure α ℂ
 
 namespace ComplexMeasure

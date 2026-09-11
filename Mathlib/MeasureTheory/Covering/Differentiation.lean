@@ -80,7 +80,7 @@ open MeasureTheory Metric Set Filter TopologicalSpace MeasureTheory.Measure
 
 open scoped Filter ENNReal MeasureTheory NNReal Topology
 
-variable {α : Type*} [PseudoMetricSpace α] {m0 : MeasurableSpace α} {μ : Measure α}
+variable {α : Type*} [PseudoMetricSpace α] {m0 : SigmaAlgebra α} {μ : Measure α}
   (v : VitaliFamily μ)
   {E : Type*} [NormedAddCommGroup E]
 

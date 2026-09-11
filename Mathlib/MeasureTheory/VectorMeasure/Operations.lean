@@ -33,7 +33,7 @@ open NNReal ENNReal
 
 namespace MeasureTheory
 
-variable {α β : Type*} {m : MeasurableSpace α}
+variable {α β : Type*} {m : SigmaAlgebra α}
 
 open Set
 
@@ -142,10 +142,10 @@ open Measure
 section
 
 /-- A vector measure over `ℝ≥0∞` is a measure. -/
-def ennrealToMeasure {_ : MeasurableSpace α} (v : VectorMeasure α ℝ≥0∞) : Measure α :=
+def ennrealToMeasure {_ : SigmaAlgebra α} (v : VectorMeasure α ℝ≥0∞) : Measure α :=
   ofMeasurable (fun s _ => v s) v.empty fun _ hf₁ hf₂ => v.of_disjoint_iUnion hf₁ hf₂
 
-theorem ennrealToMeasure_apply {m : MeasurableSpace α} {v : VectorMeasure α ℝ≥0∞} {s : Set α}
+theorem ennrealToMeasure_apply {m : SigmaAlgebra α} {v : VectorMeasure α ℝ≥0∞} {s : Set α}
     (hs : MeasurableSet s) : ennrealToMeasure v s = v s := by
   rw [ennrealToMeasure, ofMeasurable_apply _ hs]
 
@@ -168,7 +168,7 @@ theorem ennrealToMeasure_toENNRealVectorMeasure (μ : Measure α) :
 `MeasureTheory.VectorMeasure.ennrealToMeasure` and
 `MeasureTheory.Measure.toENNRealVectorMeasure`. -/
 @[simps]
-def equivMeasure [MeasurableSpace α] : VectorMeasure α ℝ≥0∞ ≃ Measure α where
+def equivMeasure [SigmaAlgebra α] : VectorMeasure α ℝ≥0∞ ≃ Measure α where
   toFun := ennrealToMeasure
   invFun := toENNRealVectorMeasure
   left_inv := toENNRealVectorMeasure_ennrealToMeasure
@@ -178,7 +178,7 @@ end
 
 section
 
-variable {mα : MeasurableSpace α} [MeasurableSpace β]
+variable {mα : SigmaAlgebra α} [SigmaAlgebra β]
 variable {M : Type*} [AddCommMonoid M] [TopologicalSpace M]
 variable (v : VectorMeasure α M)
 
@@ -254,7 +254,7 @@ theorem mapRange_add {v w : VectorMeasure α M} {f : M →+ N} (hf : Continuous 
 
 /-- Given a continuous `AddMonoidHom` `f : M → N`, `mapRangeHom` is the `AddMonoidHom` mapping the
 vector measure `v` on `M` to the vector measure `f ∘ v` on `N`. -/
-def mapRangeHom {α : Type*} [MeasurableSpace α] (f : M →+ N) (hf : Continuous f) :
+def mapRangeHom {α : Type*} [SigmaAlgebra α] (f : M →+ N) (hf : Continuous f) :
     VectorMeasure α M →+ VectorMeasure α N where
   toFun v := v.mapRange f hf
   map_zero' := mapRange_zero hf
@@ -278,7 +278,7 @@ variable [ContinuousAdd M] [ContinuousAdd N]
 
 /-- Given a continuous linear map `f : M → N`, `mapRangeL` is the linear map mapping the
 vector measure `v` on `M` to the vector measure `f ∘ v` on `N`. -/
-def mapRangeL {α : Type*} [MeasurableSpace α] (f : M →L[R] N) :
+def mapRangeL {α : Type*} [SigmaAlgebra α] (f : M →L[R] N) :
     VectorMeasure α M →ₗ[R] VectorMeasure α N where
   toFun v := v.mapRange f.toAddMonoidHom f.continuous
   map_add' _ _ := mapRange_add f.continuous
@@ -376,7 +376,9 @@ theorem restrict_restrict {s t : Set α} (hs : MeasurableSet s) (ht : Measurable
 theorem restrict_map {f : α → β} (hf : Measurable f) {s : Set β} (hs : MeasurableSet s) :
     (v.map f).restrict s = (v.restrict (f ⁻¹' s)).map f := by
   ext t ht
-  simp [map_apply, hs, hf hs, restrict_apply, ht, hf, hf ht]
+  rw [restrict_apply (v := v.map f) hs ht, map_apply (v := v) hf (ht.inter hs),
+    map_apply (v := v.restrict (f ⁻¹' s)) hf ht,
+    restrict_apply (v := v) (hf hs) (hf ht), preimage_inter]
 
 theorem restrict_toSignedMeasure {μ : Measure α} [IsFiniteMeasure μ]
     {s : Set α} (hs : MeasurableSet s) :
@@ -397,7 +399,7 @@ theorem map_add (v w : VectorMeasure α M) (f : α → β) : (v + w).map f = v.m
 
 /-- `VectorMeasure.map` as an additive monoid homomorphism. -/
 @[simps]
-def mapGm {α : Type*} [MeasurableSpace α] (f : α → β) : VectorMeasure α M →+ VectorMeasure β M where
+def mapGm {α : Type*} [SigmaAlgebra α] (f : α → β) : VectorMeasure α M →+ VectorMeasure β M where
   toFun v := v.map f
   map_zero' := map_zero f
   map_add' _ _ := map_add _ _ f
@@ -412,7 +414,7 @@ theorem restrict_add (v w : VectorMeasure α M) (i : Set α) :
 
 /-- `VectorMeasure.restrict` as an additive monoid homomorphism. -/
 @[simps]
-def restrictGm {α : Type*} [MeasurableSpace α] (i : Set α) :
+def restrictGm {α : Type*} [SigmaAlgebra α] (i : Set α) :
     VectorMeasure α M →+ VectorMeasure α M where
   toFun v := v.restrict i
   map_zero' := restrict_zero
@@ -477,7 +479,7 @@ end
 
 section
 
-variable [MeasurableSpace β]
+variable [SigmaAlgebra β]
 variable {M : Type*} [AddCommMonoid M] [TopologicalSpace M]
 variable {R : Type*} [Semiring R] [DistribMulAction R M] [ContinuousConstSMul R M]
 
@@ -506,7 +508,7 @@ end
 
 section
 
-variable [MeasurableSpace β]
+variable [SigmaAlgebra β]
 variable {M : Type*} [AddCommMonoid M] [TopologicalSpace M]
 variable {R : Type*} [Semiring R] [Module R M] [ContinuousConstSMul R M] [ContinuousAdd M]
 
@@ -534,20 +536,20 @@ variable {M : Type*} [AddCommMonoid M] [TopologicalSpace M]
 open scoped Classical in
 /-- Restriction of a vector measure onto a sub-σ-algebra. -/
 @[simps]
-def trim {m n : MeasurableSpace α} (v : VectorMeasure α M) (hle : m ≤ n) :
+def trim {m n : SigmaAlgebra α} (v : VectorMeasure α M) (hle : m ≤ n) :
     @VectorMeasure α m M _ _ :=
   @VectorMeasure.mk α m M _ _
     (fun i => if MeasurableSet[m] i then v i else 0)
     (by rw [ite_eq_left (@MeasurableSet.empty _ m), v.empty])
     (fun i hi => by rw [ite_eq_right hi])
     (fun f hf₁ hf₂ => by
-      have hf₁' : ∀ k, MeasurableSet[n] (f k) := fun k => hle _ (hf₁ k)
+      have hf₁' : ∀ k, MeasurableSet[n] (f k) := fun k => hle (hf₁ k)
       convert! v.m_iUnion hf₁' hf₂ using 1
       · ext n
         rw [ite_eq_left (hf₁ n)]
       · rw [ite_eq_left (@MeasurableSet.iUnion _ _ m _ _ hf₁)])
 
-variable {n : MeasurableSpace α} {v : VectorMeasure α M}
+variable {n : SigmaAlgebra α} {v : VectorMeasure α M}
 
 theorem trim_eq_self : v.trim le_rfl = v := by
   ext i hi

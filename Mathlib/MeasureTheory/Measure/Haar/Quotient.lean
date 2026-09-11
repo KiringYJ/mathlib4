@@ -54,7 +54,7 @@ section
 /-- Measurability of the action of the topological group `G` on the left-coset space `G / Γ`. -/
 @[to_additive /-- Measurability of the action of the additive topological group `G` on the
   left-coset space `G / Γ`. -/]
-instance QuotientGroup.measurableSMul {G : Type*} [Group G] {Γ : Subgroup G} [MeasurableSpace G]
+instance QuotientGroup.measurableSMul {G : Type*} [Group G] {Γ : Subgroup G} [SigmaAlgebra G]
     [TopologicalSpace G] [IsTopologicalGroup G] [BorelSpace G] [BorelSpace (G ⧸ Γ)] :
     MeasurableSMul G (G ⧸ Γ) where
 
@@ -62,7 +62,7 @@ end
 
 section smulInvariantMeasure
 
-variable {G : Type*} [Group G] [MeasurableSpace G] (ν : Measure G) {Γ : Subgroup G}
+variable {G : Type*} [Group G] [SigmaAlgebra G] (ν : Measure G) {Γ : Subgroup G}
   {μ : Measure (G ⧸ Γ)}
   [QuotientMeasureEqMeasurePreimage ν μ]
 
@@ -113,7 +113,7 @@ end smulInvariantMeasure
 
 section normal
 
-variable {G : Type*} [Group G] [MeasurableSpace G] [TopologicalSpace G] [IsTopologicalGroup G]
+variable {G : Type*} [Group G] [SigmaAlgebra G] [TopologicalSpace G] [IsTopologicalGroup G]
   [BorelSpace G] [PolishSpace G] {Γ : Subgroup G} [Subgroup.Normal Γ]
   [T2Space (G ⧸ Γ)] [SecondCountableTopology (G ⧸ Γ)] {μ : Measure (G ⧸ Γ)}
 
@@ -313,13 +313,13 @@ end normal
 
 section UnfoldingTrick
 
-variable {G : Type*} [Group G] [MeasurableSpace G] [TopologicalSpace G] [IsTopologicalGroup G]
+variable {G : Type*} [Group G] [SigmaAlgebra G] [TopologicalSpace G] [IsTopologicalGroup G]
   [BorelSpace G] {μ : Measure G} {Γ : Subgroup G}
 
 variable {𝓕 : Set G} (h𝓕 : IsFundamentalDomain Γ.op 𝓕 μ)
 include h𝓕
 
-variable [Countable Γ] [MeasurableSpace (G ⧸ Γ)] [BorelSpace (G ⧸ Γ)]
+variable [Countable Γ] [SigmaAlgebra (G ⧸ Γ)] [BorelSpace (G ⧸ Γ)]
 
 local notation "μ_𝓕" => Measure.map (@QuotientGroup.mk G _ Γ) (μ.restrict 𝓕)
 
@@ -367,7 +367,7 @@ lemma _root_.MeasureTheory.IsFundamentalDomain.absolutelyContinuous_map
     convert! QuotientGroup.mk_mul_of_mem g (γ⁻¹).2 using 1
   exact MeasurableSet.preimage s_meas meas_π
 
-attribute [-instance] Quotient.instMeasurableSpace
+attribute [-instance] Quotient.instSigmaAlgebra
 
 /-- This is a simple version of the **Unfolding Trick**: Given a subgroup `Γ` of a group `G`, the
   integral of a function `f` on `G` with respect to a right-invariant measure `μ` is equal to the
@@ -425,10 +425,10 @@ end UnfoldingTrick
 
 section
 
-variable {G' : Type*} [AddGroup G'] [MeasurableSpace G'] [TopologicalSpace G']
+variable {G' : Type*} [AddGroup G'] [SigmaAlgebra G'] [TopologicalSpace G']
   [IsTopologicalAddGroup G'] [BorelSpace G'] {μ' : Measure G'} {Γ' : AddSubgroup G'}
   {𝓕' : Set G'} (h𝓕 : IsAddFundamentalDomain Γ'.op 𝓕' μ')
-  [Countable Γ'] [MeasurableSpace (G' ⧸ Γ')] [BorelSpace (G' ⧸ Γ')]
+  [Countable Γ'] [SigmaAlgebra (G' ⧸ Γ')] [BorelSpace (G' ⧸ Γ')]
 include h𝓕
 
 local notation "μ_𝓕" => Measure.map (@QuotientAddGroup.mk G' _ Γ') (μ'.restrict 𝓕')

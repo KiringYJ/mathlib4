@@ -35,7 +35,7 @@ noncomputable section
 section FourierTransform
 
 variable {E F : Type*}
-  [NormedAddCommGroup E] [MeasurableSpace E] [BorelSpace E]
+  [NormedAddCommGroup E] [SigmaAlgebra E] [BorelSpace E]
   [NormedAddCommGroup F] [InnerProductSpace ℂ F] [CompleteSpace F]
 
 open SchwartzMap MeasureTheory FourierTransform

@@ -9,7 +9,7 @@ public import Mathlib.Probability.Distributions.Bernoulli
 public import Mathlib.Probability.ProductMeasure
 public import Mathlib.Probability.HasLaw
 
-import Mathlib.MeasureTheory.MeasurableSpace.NCard
+import Mathlib.MeasureTheory.SigmaAlgebra.NCard
 
 /-!
 # Product of bernoulli distributions on a set
@@ -34,7 +34,7 @@ open MeasureTheory Measure unitInterval
 open scoped ENNReal Finset
 
 namespace ProbabilityTheory
-variable {ι Ω : Type*} {m : MeasurableSpace Ω} {X Y : Ω → Set ι} {s u : Set ι} {i : ι} {p : I}
+variable {ι Ω : Type*} {m : SigmaAlgebra Ω} {X Y : Ω → Set ι} {s u : Set ι} {i : ι} {p : I}
   {P : Measure Ω}
 
 variable (u p) in

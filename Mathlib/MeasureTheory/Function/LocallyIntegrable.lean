@@ -30,8 +30,8 @@ open MeasureTheory MeasureTheory.Measure Set Function TopologicalSpace Bornology
 
 open scoped Topology Interval ENNReal
 
-variable {X Y ε ε' ε'' E F R : Type*} [MeasurableSpace X] [TopologicalSpace X]
-variable [MeasurableSpace Y] [TopologicalSpace Y]
+variable {X Y ε ε' ε'' E F R : Type*} [SigmaAlgebra X] [TopologicalSpace X]
+variable [SigmaAlgebra Y] [TopologicalSpace Y]
 variable [TopologicalSpace ε] [ContinuousENorm ε] [TopologicalSpace ε'] [ContinuousENorm ε']
   [TopologicalSpace ε''] [ESeminormedAddMonoid ε'']
   [NormedAddCommGroup E] [NormedAddCommGroup F] {f g : X → ε} {μ ν : Measure X} {s : Set X}
@@ -79,7 +79,7 @@ theorem LocallyIntegrableOn.mono {f : X → E} (hf : LocallyIntegrableOn f s μ)
   rcases hf x hx with ⟨t, t_mem, ht⟩
   exact ⟨t, t_mem, Integrable.mono ht hg.restrict (ae_restrict_of_ae h)⟩
 
-lemma LocallyIntegrableOn.mono_measure' [OpensMeasurableSpace X] (hf : LocallyIntegrableOn f s μ)
+lemma LocallyIntegrableOn.mono_measure' [OpensSigmaAlgebra X] (hf : LocallyIntegrableOn f s μ)
     (h : ν.restrict s ≤ μ.restrict s) : LocallyIntegrableOn f s ν := by
   intro x hx
   obtain ⟨t, ht, hf⟩ := hf x hx
@@ -282,7 +282,7 @@ lemma locallyIntegrable_congr (h : f =ᵐ[μ] g) :
 /-- If `f` is locally integrable with respect to `μ.restrict s`, it is locally integrable on `s`.
 (See `locallyIntegrableOn_iff_locallyIntegrable_restrict` for an iff statement when `s` is
 closed.) -/
-theorem locallyIntegrableOn_of_locallyIntegrable_restrict [OpensMeasurableSpace X]
+theorem locallyIntegrableOn_of_locallyIntegrable_restrict [OpensSigmaAlgebra X]
     (hf : LocallyIntegrable f (μ.restrict s)) : LocallyIntegrableOn f s μ := by
   intro x _
   obtain ⟨t, ht_mem, ht_int⟩ := hf x
@@ -294,7 +294,7 @@ theorem locallyIntegrableOn_of_locallyIntegrable_restrict [OpensMeasurableSpace 
 /-- If `s` is closed, being locally integrable on `s` w.r.t. `μ` is equivalent to being locally
 integrable with respect to `μ.restrict s`. For the one-way implication without assuming `s` closed,
 see `locallyIntegrableOn_of_locallyIntegrable_restrict`. -/
-theorem locallyIntegrableOn_iff_locallyIntegrable_restrict [OpensMeasurableSpace X]
+theorem locallyIntegrableOn_iff_locallyIntegrable_restrict [OpensSigmaAlgebra X]
     (hs : IsClosed s) : LocallyIntegrableOn f s μ ↔ LocallyIntegrable f (μ.restrict s) := by
   refine ⟨fun hf x => ?_, locallyIntegrableOn_of_locallyIntegrable_restrict⟩
   by_cases h : x ∈ s
@@ -447,7 +447,7 @@ alias locallyIntegrable_finset_sum := locallyIntegrable_finsetSum
 then `g • f` is integrable. -/
 theorem LocallyIntegrable.integrable_smul_left_of_hasCompactSupport
     {𝕜 : Type*} [NormedRing 𝕜] [Module 𝕜 E] [IsBoundedSMul 𝕜 E]
-    [OpensMeasurableSpace X] [T2Space X] {f : X → E} (hf : LocallyIntegrable f μ)
+    [OpensSigmaAlgebra X] [T2Space X] {f : X → E} (hf : LocallyIntegrable f μ)
     {g : X → 𝕜} (hg : Continuous g) (h'g : HasCompactSupport g) :
     Integrable (fun x ↦ g x • f x) μ := by
   let K := tsupport g
@@ -467,7 +467,7 @@ theorem LocallyIntegrable.integrable_smul_left_of_hasCompactSupport
 then `f • g` is integrable. -/
 theorem LocallyIntegrable.integrable_smul_right_of_hasCompactSupport
      {𝕜 : Type*} [NormedRing 𝕜] [Module 𝕜 E] [IsBoundedSMul 𝕜 E]
-     [OpensMeasurableSpace X] [T2Space X] {f : X → 𝕜} (hf : LocallyIntegrable f μ)
+     [OpensSigmaAlgebra X] [T2Space X] {f : X → 𝕜} (hf : LocallyIntegrable f μ)
      {g : X → E} (hg : Continuous g) (h'g : HasCompactSupport g) :
     Integrable (fun x ↦ f x • g x) μ := by
   let K := tsupport g
@@ -553,7 +553,7 @@ open MeasureTheory
 
 section borel
 
-variable [OpensMeasurableSpace X]
+variable [OpensSigmaAlgebra X]
 variable {K : Set X} {f : X → E} {a b : X}
 
 /-- A continuous function `f` is locally integrable with respect to any locally finite measure. -/
@@ -717,7 +717,7 @@ end Monotone
 
 namespace MeasureTheory
 
-variable [OpensMeasurableSpace X] {A K : Set X}
+variable [OpensSigmaAlgebra X] {A K : Set X}
 
 section Mul
 

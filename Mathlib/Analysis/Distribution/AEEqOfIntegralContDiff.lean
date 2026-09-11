@@ -36,7 +36,7 @@ section Manifold
 
 variable {H : Type*} [TopologicalSpace H] (I : ModelWithCorners ℝ E H)
   {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-  [MeasurableSpace M] [BorelSpace M] [T2Space M]
+  [SigmaAlgebra M] [BorelSpace M] [T2Space M]
   {f f' : M → F} {μ : Measure M}
 
 /-- If a locally integrable function `f` on a finite-dimensional real manifold has zero integral
@@ -179,7 +179,7 @@ end Manifold
 
 section VectorSpace
 
-variable [MeasurableSpace E] [BorelSpace E] {f f' : E → F} {μ : Measure E}
+variable [SigmaAlgebra E] [BorelSpace E] {f f' : E → F} {μ : Measure E}
 
 /-- If a locally integrable function `f` on a finite-dimensional real vector space has zero integral
 when multiplied by any smooth compactly supported function, then `f` vanishes almost everywhere. -/

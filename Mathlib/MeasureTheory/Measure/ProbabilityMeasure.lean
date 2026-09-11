@@ -91,7 +91,7 @@ In this section we define the type of probability measures on a measurable space
 `MeasureTheory.ProbabilityMeasure Ω`.
 
 If `Ω` is moreover a topological space and the sigma algebra on `Ω` is finer than the Borel sigma
-algebra (i.e. `[OpensMeasurableSpace Ω]`), then `MeasureTheory.ProbabilityMeasure Ω` is
+algebra (i.e. `[OpensSigmaAlgebra Ω]`), then `MeasureTheory.ProbabilityMeasure Ω` is
 equipped with the topology of weak convergence of measures. Since every probability measure is a
 finite measure, this is implemented as the induced topology from the mapping
 `MeasureTheory.ProbabilityMeasure.toFiniteMeasure`.
@@ -100,10 +100,10 @@ finite measure, this is implemented as the induced topology from the mapping
 
 /-- Probability measures are defined as the subtype of measures that have the property of being
 probability measures (i.e., their total mass is one). -/
-def ProbabilityMeasure (Ω : Type*) [MeasurableSpace Ω] : Type _ :=
+def ProbabilityMeasure (Ω : Type*) [SigmaAlgebra Ω] : Type _ :=
   { μ : Measure Ω // IsProbabilityMeasure μ }
 
-variable {Ω : Type*} [MeasurableSpace Ω]
+variable {Ω : Type*} [SigmaAlgebra Ω]
 
 /-- Type conversion from `Measure` to `ProbabilityMeasure`. -/
 def Measure.toProbabilityMeasure (μ : Measure Ω) [IsProbabilityMeasure μ] :
@@ -263,8 +263,8 @@ theorem toFiniteMeasure_nonzero (μ : ProbabilityMeasure Ω) : μ.toFiniteMeasur
   simp [← FiniteMeasure.mass_nonzero_iff]
 
 /-- The type of probability measures is a measurable space when equipped with the Giry monad. -/
-instance : MeasurableSpace (ProbabilityMeasure Ω) :=
-  inferInstanceAs <| MeasurableSpace (Subtype _)
+instance : SigmaAlgebra (ProbabilityMeasure Ω) :=
+  inferInstanceAs <| SigmaAlgebra (Subtype _)
 
 lemma measurableSet_isProbabilityMeasure :
     MeasurableSet { μ : Measure Ω | IsProbabilityMeasure μ } := by
@@ -277,12 +277,12 @@ lemma measurableSet_isProbabilityMeasure :
 /-- The monoidal product is a measurable function from the product of probability spaces over
 `α` and `β` into the type of probability spaces over `α × β`. Lemma 4.1 of [A synthetic approach to
 Markov kernels, conditional independence and theorems on sufficient statistics][fritz2020]. -/
-theorem measurable_fun_prod {α β : Type*} [MeasurableSpace α] [MeasurableSpace β] :
+theorem measurable_fun_prod {α β : Type*} [SigmaAlgebra α] [SigmaAlgebra β] :
     Measurable (fun (μ : ProbabilityMeasure α × ProbabilityMeasure β)
       ↦ μ.1.toMeasure.prod μ.2.toMeasure) := by
   apply Measurable.measure_of_isPiSystem_of_isProbabilityMeasure generateFrom_prod.symm
     isPiSystem_prod _
-  simp only [mem_image2, mem_ofPred_eq, forall_exists_index, and_imp]
+  simp only [mem_image2, forall_exists_index, and_imp]
   intro _ u Hu v Hv Heq
   simp_rw [← Heq, Measure.prod_prod]
   apply Measurable.mul
@@ -296,7 +296,7 @@ lemma apply_iUnion_le {μ : ProbabilityMeasure Ω} {f : ℕ → Set Ω}
 
 section convergence_in_distribution
 
-variable [TopologicalSpace Ω] [OpensMeasurableSpace Ω]
+variable [TopologicalSpace Ω] [OpensSigmaAlgebra Ω]
 
 theorem testAgainstNN_lipschitz (μ : ProbabilityMeasure Ω) :
     LipschitzWith 1 fun f : Ω →ᵇ ℝ≥0 ↦ μ.toFiniteMeasure.testAgainstNN f :=
@@ -335,8 +335,8 @@ theorem continuous_testAgainstNN_eval (f : Ω →ᵇ ℝ≥0) :
   (FiniteMeasure.continuous_testAgainstNN_eval f).comp toFiniteMeasure_continuous
 
 /-- The canonical mapping from probability measures to finite measures is an embedding. -/
-theorem toFiniteMeasure_isEmbedding (Ω : Type*) [MeasurableSpace Ω] [TopologicalSpace Ω]
-    [OpensMeasurableSpace Ω] :
+theorem toFiniteMeasure_isEmbedding (Ω : Type*) [SigmaAlgebra Ω] [TopologicalSpace Ω]
+    [OpensSigmaAlgebra Ω] :
     IsEmbedding (toFiniteMeasure : ProbabilityMeasure Ω → FiniteMeasure Ω) where
   eq_induced := rfl
   injective _μ _ν h := Subtype.ext <| congr_arg FiniteMeasure.toMeasure h
@@ -394,11 +394,11 @@ lemma continuous_iff_forall_continuous_integral :
   simp [continuous_iff_continuousAt, ContinuousAt, tendsto_iff_forall_integral_tendsto,
     forall_comm (α := X)]
 
-lemma continuous_lintegral_boundedContinuousFunction [MeasurableSpace X] [OpensMeasurableSpace X]
+lemma continuous_lintegral_boundedContinuousFunction [SigmaAlgebra X] [OpensSigmaAlgebra X]
     (f : X →ᵇ ℝ≥0) : Continuous fun μ : ProbabilityMeasure X ↦ ∫⁻ x, f x ∂μ :=
   continuous_iff_forall_continuous_lintegral.1 continuous_id _
 
-lemma continuous_integral_boundedContinuousFunction [MeasurableSpace X] [OpensMeasurableSpace X]
+lemma continuous_integral_boundedContinuousFunction [SigmaAlgebra X] [OpensSigmaAlgebra X]
     (f : X →ᵇ ℝ) : Continuous fun μ : ProbabilityMeasure X ↦ ∫ x, f x ∂μ :=
   continuous_iff_forall_continuous_integral.1 continuous_id _
 
@@ -418,7 +418,7 @@ lemma continuous_iff_forall_continuousMap_continuous_integral :
   continuous_iff_forall_continuous_integral.trans
     (ContinuousMap.equivBoundedOfCompact ..).symm.forall_congr_left
 
-variable [CompactSpace X] [MeasurableSpace X] [OpensMeasurableSpace X] {F : Type*}
+variable [CompactSpace X] [SigmaAlgebra X] [OpensSigmaAlgebra X] {F : Type*}
 
 lemma continuous_lintegral_continuousMap [FunLike F X ℝ≥0] [ContinuousMapClass F X ℝ≥0] (f : F) :
     Continuous fun μ : ProbabilityMeasure X ↦ ∫⁻ x, f x ∂μ :=
@@ -461,7 +461,7 @@ measures.
 
 namespace FiniteMeasure
 
-variable {Ω : Type*} [Nonempty Ω] {m0 : MeasurableSpace Ω} (μ : FiniteMeasure Ω)
+variable {Ω : Type*} [Nonempty Ω] {m0 : SigmaAlgebra Ω} (μ : FiniteMeasure Ω)
 
 /-- Normalize a finite measure so that it becomes a probability measure, i.e., divide by the
 total mass. -/
@@ -510,7 +510,7 @@ theorem toMeasure_normalize_eq_of_nonzero (nonzero : μ ≠ 0) :
   exact Measure.coe_nnreal_smul_apply _ _ _
 
 @[simp]
-theorem _root_.ProbabilityMeasure.toFiniteMeasure_normalize_eq_self {m0 : MeasurableSpace Ω}
+theorem _root_.ProbabilityMeasure.toFiniteMeasure_normalize_eq_self {m0 : SigmaAlgebra Ω}
     (μ : ProbabilityMeasure Ω) : μ.toFiniteMeasure.normalize = μ := by
   apply ProbabilityMeasure.eq_of_forall_apply_eq
   intro s _s_mble
@@ -537,7 +537,7 @@ theorem normalize_testAgainstNN (nonzero : μ ≠ 0) (f : Ω →ᵇ ℝ≥0) :
     μ.normalize.toFiniteMeasure.testAgainstNN f = μ.mass⁻¹ * μ.testAgainstNN f := by
   simp [μ.testAgainstNN_eq_mass_mul, inv_mul_cancel_left₀ <| μ.mass_nonzero_iff.mpr nonzero]
 
-variable [OpensMeasurableSpace Ω]
+variable [OpensSigmaAlgebra Ω]
 variable {μ}
 
 theorem tendsto_testAgainstNN_of_tendsto_normalize_testAgainstNN_of_tendsto_mass {γ : Type*}
@@ -619,7 +619,7 @@ end NormalizeFiniteMeasure -- section
 
 section map
 
-variable {Ω Ω' : Type*} [MeasurableSpace Ω] [MeasurableSpace Ω']
+variable {Ω Ω' : Type*} [SigmaAlgebra Ω] [SigmaAlgebra Ω']
 
 namespace ProbabilityMeasure
 
@@ -649,7 +649,7 @@ lemma map_apply (ν : ProbabilityMeasure Ω) {f : Ω → Ω'} (f_aemble : AEMeas
     (ν.map f) A = ν (f ⁻¹' A) :=
   map_apply_of_aemeasurable ν f_aemble A_mble
 
-variable [TopologicalSpace Ω] [OpensMeasurableSpace Ω]
+variable [TopologicalSpace Ω] [OpensSigmaAlgebra Ω]
 variable [TopologicalSpace Ω'] [BorelSpace Ω']
 
 /-- If `f : X → Y` is continuous and `Y` is equipped with the Borel sigma algebra, then
@@ -680,14 +680,14 @@ end map -- section
 
 section join_bind
 
-theorem isProbabilityMeasure_join {α : Type*} [MeasurableSpace α] {m : Measure (Measure α)}
+theorem isProbabilityMeasure_join {α : Type*} [SigmaAlgebra α] {m : Measure (Measure α)}
     [IsProbabilityMeasure m] (hm : ∀ᵐ μ ∂m, IsProbabilityMeasure μ) :
     IsProbabilityMeasure (m.join) := by
   simp only [isProbabilityMeasure_iff, MeasurableSet.univ, Measure.join_apply]
   simp_rw [isProbabilityMeasure_iff] at hm
   exact lintegral_eq_const hm
 
-theorem isProbabilityMeasure_bind {α : Type*} {β : Type*} [MeasurableSpace α] [MeasurableSpace β]
+theorem isProbabilityMeasure_bind {α : Type*} {β : Type*} [SigmaAlgebra α] [SigmaAlgebra β]
     {m : Measure α} [IsProbabilityMeasure m] {f : α → Measure β} (hf₀ : AEMeasurable f m)
     (hf₁ : ∀ᵐ μ ∂m, IsProbabilityMeasure (f μ)) : IsProbabilityMeasure (m.bind f) := by
   simp only [isProbabilityMeasure_iff, MeasurableSet.univ, Measure.bind_apply _ hf₀]

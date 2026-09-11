@@ -5,7 +5,7 @@ Authors: Kexing Ying
 -/
 module
 
-public import Mathlib.MeasureTheory.MeasurableSpace.Defs
+public import Mathlib.MeasureTheory.SigmaAlgebra.Defs
 public import Mathlib.Topology.Algebra.InfiniteSum.Defs
 public import Mathlib.Topology.MetricSpace.Pseudo.Defs
 
@@ -43,11 +43,11 @@ public section
 open scoped Function -- required for scoped `on` notation
 namespace MeasureTheory
 
-variable {α : Type*} {m : MeasurableSpace α}
+variable {α : Type*} {m : SigmaAlgebra α}
 
 /-- A vector measure on a measurable space `α` is a σ-additive `M`-valued function (for some `M`
 an additive monoid) such that the empty set and non-measurable sets are mapped to zero. -/
-structure VectorMeasure (α : Type*) [MeasurableSpace α] (M : Type*) [AddCommMonoid M]
+structure VectorMeasure (α : Type*) [SigmaAlgebra α] (M : Type*) [AddCommMonoid M]
     [TopologicalSpace M] where
   /-- The measure of sets -/
   measureOf' : Set α → M
@@ -60,7 +60,7 @@ structure VectorMeasure (α : Type*) [MeasurableSpace α] (M : Type*) [AddCommMo
     HasSum (fun i => measureOf' (f i)) (measureOf' (⋃ i, f i))
 
 /-- A `SignedMeasure` is an `ℝ`-vector measure. -/
-abbrev SignedMeasure (α : Type*) [MeasurableSpace α] :=
+abbrev SignedMeasure (α : Type*) [SigmaAlgebra α] :=
   VectorMeasure α ℝ
 
 namespace VectorMeasure

@@ -38,7 +38,7 @@ noncomputable section
 
 open scoped NNReal ENNReal
 
-variable {α ε E : Type*} {m0 : MeasurableSpace α} {p : ℝ≥0∞} {q : ℝ} {f : α → E}
+variable {α ε E : Type*} {m0 : SigmaAlgebra α} {p : ℝ≥0∞} {q : ℝ} {f : α → E}
   [NormedAddCommGroup E] [ENorm ε]
 
 namespace MeasureTheory
@@ -66,7 +66,7 @@ this quantity is finite.
 
 Note: this is a purely auxiliary quantity; lemmas about `eLpNorm'` should only be used to
 prove results about `eLpNorm`; every `eLpNorm'` lemma should have a `eLpNorm` version. -/
-def eLpNorm' {_ : MeasurableSpace α} (f : α → ε) (q : ℝ) (μ : Measure α) : ℝ≥0∞ :=
+def eLpNorm' {_ : SigmaAlgebra α} (f : α → ε) (q : ℝ) (μ : Measure α) : ℝ≥0∞ :=
   (∫⁻ a, ‖f a‖ₑ ^ q ∂μ) ^ (1 / q)
 
 lemma eLpNorm'_eq_lintegral_enorm (f : α → ε) (q : ℝ) (μ : Measure α) :
@@ -82,7 +82,7 @@ lemma eLpNormEssSup_eq_essSup_enorm (f : α → ε) (μ : Measure α) :
 
 /-- `ℒp` seminorm, equal to `0` for `p=0`, to `(∫ ‖f a‖^p ∂μ) ^ (1/p)` for `0 < p < ∞` and to
 `essSup ‖f‖ μ` for `p = ∞`. -/
-def eLpNorm {_ : MeasurableSpace α}
+def eLpNorm {_ : SigmaAlgebra α}
     (f : α → ε) (p : ℝ≥0∞) (μ : Measure α := by volume_tac) : ℝ≥0∞ :=
   if p = 0 then 0 else if p = ∞ then eLpNormEssSup f μ else eLpNorm' f (ENNReal.toReal p) μ
 
@@ -119,7 +119,7 @@ theorem MemLp.aestronglyMeasurable [TopologicalSpace ε] {f : α → ε} {p : �
     AEStronglyMeasurable f μ :=
   h.1
 
-lemma MemLp.aemeasurable [MeasurableSpace ε] [TopologicalSpace ε]
+lemma MemLp.aemeasurable [SigmaAlgebra ε] [TopologicalSpace ε]
     [TopologicalSpace.PseudoMetrizableSpace ε] [BorelSpace ε]
     {f : α → ε} {p : ℝ≥0∞} (hf : MemLp f p μ) :
     AEMeasurable f μ :=

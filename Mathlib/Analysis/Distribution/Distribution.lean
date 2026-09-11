@@ -292,7 +292,7 @@ section ofFun
 
 open MeasureTheory
 
-variable [MeasurableSpace E] [OpensMeasurableSpace E]
+variable [SigmaAlgebra E] [OpensSigmaAlgebra E]
 variable {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
 
 variable (Ω) in

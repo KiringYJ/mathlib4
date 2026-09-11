@@ -24,7 +24,7 @@ open scoped Topology
 
 namespace MeasureTheory
 
-variable {α : Type*} [MeasurableSpace α] {μ : Measure α}
+variable {α : Type*} [SigmaAlgebra α] {μ : Measure α}
 
 theorem limsup_lintegral_le {f : ℕ → α → ℝ≥0∞} (g : α → ℝ≥0∞) (hf_meas : ∀ n, Measurable (f n))
     (h_bound : ∀ n, f n ≤ᵐ[μ] g) (h_fin : ∫⁻ a, g a ∂μ ≠ ∞) :
@@ -121,7 +121,7 @@ theorem tendsto_lintegral_filter_of_dominated_convergence {ι} {l : Filter ι}
 functions tends to the integral of the upper bound, then the sequence of functions converges
 almost everywhere to the upper bound. Auxiliary version assuming moreover that the
 functions in the sequence are ae measurable. -/
-lemma tendsto_of_lintegral_tendsto_of_monotone_aux {α : Type*} {mα : MeasurableSpace α}
+lemma tendsto_of_lintegral_tendsto_of_monotone_aux {α : Type*} {mα : SigmaAlgebra α}
     {f : ℕ → α → ℝ≥0∞} {F : α → ℝ≥0∞} {μ : Measure α}
     (hf_meas : ∀ n, AEMeasurable (f n) μ) (hF_meas : AEMeasurable F μ)
     (hf_tendsto : Tendsto (fun i ↦ ∫⁻ a, f i a ∂μ) atTop (𝓝 (∫⁻ a, F a ∂μ)))
@@ -160,7 +160,7 @@ lemma tendsto_of_lintegral_tendsto_of_monotone_aux {α : Type*} {mα : Measurabl
 /-- If a monotone sequence of functions has an upper bound and the sequence of integrals of these
 functions tends to the integral of the upper bound, then the sequence of functions converges
 almost everywhere to the upper bound. -/
-lemma tendsto_of_lintegral_tendsto_of_monotone {α : Type*} {mα : MeasurableSpace α}
+lemma tendsto_of_lintegral_tendsto_of_monotone {α : Type*} {mα : SigmaAlgebra α}
     {f : ℕ → α → ℝ≥0∞} {F : α → ℝ≥0∞} {μ : Measure α}
     (hF_meas : AEMeasurable F μ)
     (hf_tendsto : Tendsto (fun i ↦ ∫⁻ a, f i a ∂μ) atTop (𝓝 (∫⁻ a, F a ∂μ)))
@@ -202,7 +202,7 @@ lemma tendsto_of_lintegral_tendsto_of_monotone {α : Type*} {mα : MeasurableSpa
 /-- If an antitone sequence of functions has a lower bound and the sequence of integrals of these
 functions tends to the integral of the lower bound, then the sequence of functions converges
 almost everywhere to the lower bound. -/
-lemma tendsto_of_lintegral_tendsto_of_antitone {α : Type*} {mα : MeasurableSpace α}
+lemma tendsto_of_lintegral_tendsto_of_antitone {α : Type*} {mα : SigmaAlgebra α}
     {f : ℕ → α → ℝ≥0∞} {F : α → ℝ≥0∞} {μ : Measure α}
     (hf_meas : ∀ n, AEMeasurable (f n) μ)
     (hf_tendsto : Tendsto (fun i ↦ ∫⁻ a, f i a ∂μ) atTop (𝓝 (∫⁻ a, F a ∂μ)))

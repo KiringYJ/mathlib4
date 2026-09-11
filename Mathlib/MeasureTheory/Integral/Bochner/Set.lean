@@ -51,7 +51,7 @@ variable {X Y E F : Type*}
 
 namespace MeasureTheory
 
-variable {mX : MeasurableSpace X}
+variable {mX : SigmaAlgebra X}
 
 section NormedAddCommGroup
 
@@ -188,7 +188,7 @@ theorem integral_indicator₀ (hs : NullMeasurableSet s μ) :
     integral_indicator (measurableSet_toMeasurable _ _),
     Measure.restrict_congr_set hs.toMeasurable_ae_eq]
 
-lemma integral_integral_indicator {mY : MeasurableSpace Y} {ν : Measure Y} (f : X → Y → E)
+lemma integral_integral_indicator {mY : SigmaAlgebra Y} {ν : Measure Y} (f : X → Y → E)
     {s : Set X} (hs : MeasurableSet s) :
     ∫ x, ∫ y, s.indicator (f · y) x ∂ν ∂μ = ∫ x in s, ∫ y, f x y ∂ν ∂μ := by
   simp_rw [← integral_indicator hs, integral_indicator₂]
@@ -226,7 +226,7 @@ theorem integral_biUnion_eq_sum_powerset {ι : Type*} {t : Finset ι} {s : ι �
   rw [indicator_smul_apply]
   norm_cast
 
-theorem ofReal_setIntegral_one_of_measure_ne_top {X : Type*} {m : MeasurableSpace X}
+theorem ofReal_setIntegral_one_of_measure_ne_top {X : Type*} {m : SigmaAlgebra X}
     {μ : Measure X} {s : Set X} (hs : μ s ≠ ∞ := by finiteness) :
     ENNReal.ofReal (∫ _ in s, (1 : ℝ) ∂μ) = μ s :=
   calc
@@ -235,11 +235,11 @@ theorem ofReal_setIntegral_one_of_measure_ne_top {X : Type*} {m : MeasurableSpac
     _ = ∫⁻ _ in s, 1 ∂μ := by simp [measureReal_def, hs]
     _ = μ s := setLIntegral_one _
 
-theorem ofReal_setIntegral_one {X : Type*} {_ : MeasurableSpace X} (μ : Measure X)
+theorem ofReal_setIntegral_one {X : Type*} {_ : SigmaAlgebra X} (μ : Measure X)
     [IsFiniteMeasure μ] (s : Set X) : ENNReal.ofReal (∫ _ in s, (1 : ℝ) ∂μ) = μ s :=
   ofReal_setIntegral_one_of_measure_ne_top
 
-theorem setIntegral_one_eq_measureReal {X : Type*} {m : MeasurableSpace X}
+theorem setIntegral_one_eq_measureReal {X : Type*} {m : SigmaAlgebra X}
     {μ : Measure X} {s : Set X} :
     ∫ _ in s, (1 : ℝ) ∂μ = μ.real s := by simp
 
@@ -553,34 +553,34 @@ theorem integral_indicatorConstLp [CompleteSpace E]
     _ = μ.real (t ∩ univ) • e := setIntegral_indicatorConstLp MeasurableSet.univ ht hμt e
     _ = μ.real t • e := by rw [inter_univ]
 
-theorem setIntegral_map {Y} [MeasurableSpace Y] {g : X → Y} {f : Y → E} {s : Set Y}
+theorem setIntegral_map {Y} [SigmaAlgebra Y] {g : X → Y} {f : Y → E} {s : Set Y}
     (hs : MeasurableSet s) (hf : AEStronglyMeasurable f (Measure.map g μ)) (hg : AEMeasurable g μ) :
     ∫ y in s, f y ∂Measure.map g μ = ∫ x in g ⁻¹' s, f (g x) ∂μ := by
   rw [Measure.restrict_map_of_aemeasurable hg hs,
     integral_map (hg.mono_measure Measure.restrict_le_self) (hf.mono_measure _)]
   exact Measure.map_mono_of_aemeasurable Measure.restrict_le_self hg
 
-theorem _root_.MeasurableEmbedding.setIntegral_map {Y} {_ : MeasurableSpace Y} {f : X → Y}
+theorem _root_.MeasurableEmbedding.setIntegral_map {Y} {_ : SigmaAlgebra Y} {f : X → Y}
     (hf : MeasurableEmbedding f) (g : Y → E) (s : Set Y) :
     ∫ y in s, g y ∂Measure.map f μ = ∫ x in f ⁻¹' s, g (f x) ∂μ := by
   rw [hf.restrict_map, hf.integral_map]
 
 theorem _root_.Topology.IsClosedEmbedding.setIntegral_map [TopologicalSpace X] [BorelSpace X] {Y}
-    [MeasurableSpace Y] [TopologicalSpace Y] [BorelSpace Y] {g : X → Y} {f : Y → E} (s : Set Y)
+    [SigmaAlgebra Y] [TopologicalSpace Y] [BorelSpace Y] {g : X → Y} {f : Y → E} (s : Set Y)
     (hg : IsClosedEmbedding g) : ∫ y in s, f y ∂Measure.map g μ = ∫ x in g ⁻¹' s, f (g x) ∂μ :=
   hg.measurableEmbedding.setIntegral_map _ _
 
-theorem MeasurePreserving.setIntegral_preimage_emb {Y} {_ : MeasurableSpace Y} {f : X → Y} {ν}
+theorem MeasurePreserving.setIntegral_preimage_emb {Y} {_ : SigmaAlgebra Y} {f : X → Y} {ν}
     (h₁ : MeasurePreserving f μ ν) (h₂ : MeasurableEmbedding f) (g : Y → E) (s : Set Y) :
     ∫ x in f ⁻¹' s, g (f x) ∂μ = ∫ y in s, g y ∂ν :=
   (h₁.restrict_preimage_emb h₂ s).integral_comp h₂ _
 
-theorem MeasurePreserving.setIntegral_image_emb {Y} {_ : MeasurableSpace Y} {f : X → Y} {ν}
+theorem MeasurePreserving.setIntegral_image_emb {Y} {_ : SigmaAlgebra Y} {f : X → Y} {ν}
     (h₁ : MeasurePreserving f μ ν) (h₂ : MeasurableEmbedding f) (g : Y → E) (s : Set X) :
     ∫ y in f '' s, g y ∂ν = ∫ x in s, g (f x) ∂μ :=
   Eq.symm <| (h₁.restrict_image_emb h₂ s).integral_comp h₂ _
 
-theorem setIntegral_map_equiv {Y} [MeasurableSpace Y] (e : X ≃ᵐ Y) (f : Y → E) (s : Set Y) :
+theorem setIntegral_map_equiv {Y} [SigmaAlgebra Y] (e : X ≃ᵐ Y) (f : Y → E) (s : Set Y) :
     ∫ y in s, f y ∂Measure.map e μ = ∫ x in e ⁻¹' s, f (e x) ∂μ :=
   e.measurableEmbedding.setIntegral_map f s
 
@@ -657,7 +657,7 @@ theorem setIntegral_gt_gt {R : ℝ} {f : X → ℝ} (hR : 0 ≤ R)
     · exact nullMeasurableSet_le aemeasurable_zero (hfint.1.aemeasurable.sub aemeasurable_const)
   · exact Integrable.sub hfint this
 
-theorem setIntegral_trim {X} {m m0 : MeasurableSpace X} {μ : Measure X} (hm : m ≤ m0) {f : X → E}
+theorem setIntegral_trim {X} {m m0 : SigmaAlgebra X} {μ : Measure X} (hm : m ≤ m0) {f : X → E}
     (hf_meas : StronglyMeasurable[m] f) {s : Set X} (hs : MeasurableSet[m] s) :
     ∫ x in s, f x ∂μ = ∫ x in s, f x ∂μ.trim hm := by
   rwa [integral_trim hm hf_meas, restrict_trim hm μ]
@@ -1026,7 +1026,7 @@ section OpenPos
 
 open Measure
 
-variable [MeasurableSpace X] [TopologicalSpace X] [OpensMeasurableSpace X]
+variable [SigmaAlgebra X] [TopologicalSpace X] [OpensSigmaAlgebra X]
   {μ : Measure X} [IsOpenPosMeasure μ]
 
 theorem Continuous.integral_pos_of_hasCompactSupport_nonneg_nonzero [IsFiniteMeasureOnCompacts μ]
@@ -1039,7 +1039,7 @@ end OpenPos
 
 section Support
 
-variable {M : Type*} [NormedAddCommGroup M] [NormedSpace ℝ M] {mX : MeasurableSpace X}
+variable {M : Type*} [NormedAddCommGroup M] [NormedSpace ℝ M] {mX : SigmaAlgebra X}
   {ν : Measure X} {F : X → M}
 
 theorem MeasureTheory.setIntegral_support : ∫ x in support F, F x ∂ν = ∫ x, F x ∂ν := by
@@ -1058,7 +1058,7 @@ end Support
 
 section thickenedIndicator
 
-variable [MeasurableSpace X] [PseudoEMetricSpace X]
+variable [SigmaAlgebra X] [PseudoEMetricSpace X]
 
 theorem measure_le_lintegral_thickenedIndicatorAux (μ : Measure X) {E : Set X}
     (E_mble : MeasurableSet E) (δ : ℝ) : μ E ≤ ∫⁻ x, (thickenedIndicatorAux δ E x : ℝ≥0∞) ∂μ := by
@@ -1078,7 +1078,7 @@ theorem measure_le_lintegral_thickenedIndicator (μ : Measure X) {E : Set X}
 
 end thickenedIndicator
 
--- We declare a new `{X : Type*}` to discard the instance `[MeasurableSpace X]`
+-- We declare a new `{X : Type*}` to discard the instance `[SigmaAlgebra X]`
 -- which has been in scope for the entire file up to this point.
 variable {X : Type*}
 
@@ -1086,7 +1086,7 @@ section BilinearMap
 
 namespace MeasureTheory
 
-variable {X : Type*} {f : X → ℝ} {m m0 : MeasurableSpace X} {μ : Measure X}
+variable {X : Type*} {f : X → ℝ} {m m0 : SigmaAlgebra X} {μ : Measure X}
 
 theorem Integrable.simpleFunc_mul (g : SimpleFunc X ℝ) (hf : Integrable f μ) :
     Integrable (⇑g * f) μ := by
@@ -1117,7 +1117,7 @@ end BilinearMap
 section ParametricIntegral
 
 variable {G 𝕜 : Type*} [TopologicalSpace X]
-  [TopologicalSpace Y] [MeasurableSpace Y] [OpensMeasurableSpace Y] {μ : Measure Y}
+  [TopologicalSpace Y] [SigmaAlgebra Y] [OpensSigmaAlgebra Y] {μ : Measure Y}
   [NontriviallyNormedField 𝕜] [NormedAddCommGroup E] [NormedSpace ℝ E]
   [NormedAddCommGroup F] [NormedSpace 𝕜 F] [NormedAddCommGroup G] [NormedSpace 𝕜 G]
 

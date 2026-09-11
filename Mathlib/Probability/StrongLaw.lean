@@ -81,7 +81,7 @@ variable {α : Type*}
 def truncation (f : α → ℝ) (A : ℝ) :=
   indicator (Set.Ioc (-A) A) id ∘ f
 
-variable {m : MeasurableSpace α} {μ : Measure α} {f : α → ℝ}
+variable {m : SigmaAlgebra α} {μ : Measure α} {f : α → ℝ}
 
 theorem _root_.MeasureTheory.AEStronglyMeasurable.truncation (hf : AEStronglyMeasurable f μ)
     {A : ℝ} : AEStronglyMeasurable (truncation f A) μ := by
@@ -202,7 +202,7 @@ theorem tendsto_integral_truncation {f : α → ℝ} (hf : Integrable f μ) :
     filter_upwards [Ioi_mem_atTop (abs (f x))] with A hA
     exact (truncation_eq_self hA).symm
 
-theorem IdentDistrib.truncation {β : Type*} [MeasurableSpace β] {ν : Measure β} {f : α → ℝ}
+theorem IdentDistrib.truncation {β : Type*} [SigmaAlgebra β] {ν : Measure β} {f : α → ℝ}
     {g : β → ℝ} (h : IdentDistrib f g μ ν) {A : ℝ} :
     IdentDistrib (truncation f A) (truncation g A) μ ν :=
   h.comp (measurable_id.indicator measurableSet_Ioc)
@@ -594,7 +594,7 @@ identically distributed integrable real-valued random variables, then `∑ i ∈
 converges almost surely to `𝔼[X 0]`. We give here the strong version, due to Etemadi, that only
 requires pairwise independence. Superseded by `strong_law_ae`, which works for random variables
 taking values in any Banach space. -/
-theorem strong_law_ae_real {Ω : Type*} {m : MeasurableSpace Ω} {μ : Measure Ω}
+theorem strong_law_ae_real {Ω : Type*} {m : SigmaAlgebra Ω} {μ : Measure Ω}
     (X : ℕ → Ω → ℝ) (hint : Integrable (X 0) μ)
     (hindep : Pairwise ((· ⟂ᵢ[μ] ·) on X))
     (hident : ∀ i, IdentDistrib (X i) (X 0) μ μ) :
@@ -633,9 +633,9 @@ end StrongLawAeReal
 
 section StrongLawVectorSpace
 
-variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]
+variable {Ω : Type*} {mΩ : SigmaAlgebra Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]
   {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]
-  [MeasurableSpace E]
+  [SigmaAlgebra E]
 
 open Set TopologicalSpace
 
@@ -820,9 +820,9 @@ end StrongLawVectorSpace
 
 section StrongLawLp
 
-variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}
+variable {Ω : Type*} {mΩ : SigmaAlgebra Ω} {μ : Measure Ω}
   {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]
-  [MeasurableSpace E] [BorelSpace E]
+  [SigmaAlgebra E] [BorelSpace E]
 
 /-- **Strong law of large numbers**, Lᵖ version: if `X n` is a sequence of independent
 identically distributed random variables in Lᵖ, then `n⁻¹ • ∑ i ∈ range n, X i`

@@ -30,10 +30,10 @@ namespace ProbabilityTheory
 
 namespace Kernel
 
-variable {α β γ : Type*} {mα : MeasurableSpace α} {mβ : MeasurableSpace β} {mγ : MeasurableSpace γ}
+variable {α β γ : Type*} {mα : SigmaAlgebra α} {mβ : SigmaAlgebra β} {mγ : SigmaAlgebra γ}
 
 
-variable {γ δ : Type*} {mγ : MeasurableSpace γ} {mδ : MeasurableSpace δ} {f : β → γ} {g : γ → α}
+variable {γ δ : Type*} {mγ : SigmaAlgebra γ} {mδ : SigmaAlgebra δ} {f : β → γ} {g : γ → α}
 
 theorem deterministic_comp_eq_map (hf : Measurable f) (κ : Kernel α β) :
     deterministic f hf ∘ₖ κ = map κ f := by

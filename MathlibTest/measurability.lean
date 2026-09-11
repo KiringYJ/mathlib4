@@ -3,7 +3,7 @@ Copyright (c) 2021 Rémy Degenne. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Rémy Degenne
 -/
-import Mathlib.MeasureTheory.MeasurableSpace.Basic
+import Mathlib.MeasureTheory.SigmaAlgebra.Basic
 import Mathlib.MeasureTheory.Constructions.BorelSpace.Basic
 import Mathlib.MeasureTheory.Function.SpecialFunctions.Basic
 import Mathlib.MeasureTheory.Function.SpecialFunctions.Inner
@@ -12,7 +12,7 @@ import Mathlib.MeasureTheory.Function.StronglyMeasurable.Lemmas
 
 open MeasureTheory TopologicalSpace
 
-variable {α β : Type*} [MeasurableSpace α] [MeasurableSpace β]
+variable {α β : Type*} [SigmaAlgebra α] [SigmaAlgebra β]
   {f g : α → β} {s₁ s₂ : Set α} {t₁ t₂ : Set β} {μ ν : MeasureTheory.Measure α}
 
 set_option linter.unusedVariables false
@@ -99,8 +99,8 @@ open scoped RealInnerProductSpace
 /- We use a general inner product space to prevent the inner product from being simplified to
 multiplication. An earlier version of the tactic failed on the following examples without this
 simplification. -/
-variable {E : Type*} (v : E) [NormedAddCommGroup E] [InnerProductSpace ℝ E] [MeasurableSpace E]
-  [OpensMeasurableSpace E] [SecondCountableTopology E]
+variable {E : Type*} (v : E) [NormedAddCommGroup E] [InnerProductSpace ℝ E] [SigmaAlgebra E]
+  [OpensSigmaAlgebra E] [SecondCountableTopology E]
 
 example : Measurable (fun x : E => Real.exp (2 * ⟪v, x⟫)) := by measurability
 

@@ -24,7 +24,7 @@ open Measure TopologicalSpace
 
 open scoped ENNReal
 
-variable {G : Type*} [MeasurableSpace G] {μ : Measure G}
+variable {G : Type*} [SigmaAlgebra G] {μ : Measure G}
 
 section MeasurableInv
 

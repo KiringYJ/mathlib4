@@ -45,7 +45,7 @@ open MeasureTheory Real ENNReal BoundedContinuousFunction Filter
 
 open scoped Topology
 
-variable {E : Type*} [TopologicalSpace E] [MeasurableSpace E] [BorelSpace E]
+variable {E : Type*} [TopologicalSpace E] [SigmaAlgebra E] [BorelSpace E]
     {P : Measure E} [IsFiniteMeasure P] {ε : ℝ}
 
 theorem integrable_mulExpNegMulSq_comp (f : C(E, ℝ)) (hε : 0 < ε) :
@@ -150,7 +150,7 @@ theorem abs_setIntegral_mulExpNegMulSq_comp_sub_le_mul_measure {K : Set E} (hK :
   exact norm_setIntegral_le_of_norm_le_const hK.measure_lt_top
     (fun x hxK => le_trans (dist_mulExpNegMulSq_le_dist hε) (hfg x hxK).le)
 
-variable {E : Type*} [MeasurableSpace E] [PseudoEMetricSpace E] [BorelSpace E] [CompleteSpace E]
+variable {E : Type*} [SigmaAlgebra E] [PseudoEMetricSpace E] [BorelSpace E] [CompleteSpace E]
     [SecondCountableTopology E]
     {P P' : Measure E} [IsFiniteMeasure P] [IsFiniteMeasure P']
 

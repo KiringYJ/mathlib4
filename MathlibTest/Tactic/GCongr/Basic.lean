@@ -16,7 +16,7 @@ variable {α : Type*} (a : Set α) {μ : OuterMeasure α} {μ' : OuterMeasure α
 @[gcongr high] lemma mono_outerMeasure (h : μ ≤ μ') : μ a ≤ μ' a := h a
 example (h : μ ≤ μ') : μ a ≤ μ' a := by gcongr
 
-variable [MeasurableSpace α] {ν : Measure α} {ν' : Measure α}
+variable [SigmaAlgebra α] {ν : Measure α} {ν' : Measure α}
 
 @[gcongr] lemma mono_measure (h : ν ≤ ν') : ν a ≤ ν' a := h a
 example (h : ν ≤ ν') : ν a ≤ ν' a := by gcongr

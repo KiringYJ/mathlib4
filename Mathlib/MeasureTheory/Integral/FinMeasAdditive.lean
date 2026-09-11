@@ -43,7 +43,7 @@ namespace MeasureTheory
 
 variable {α E F F' G 𝕜 : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [NormedAddCommGroup F] [NormedSpace ℝ F] [NormedAddCommGroup F'] [NormedSpace ℝ F']
-  [NormedAddCommGroup G] {m : MeasurableSpace α} {μ : Measure α}
+  [NormedAddCommGroup G] {m : SigmaAlgebra α} {μ : Measure α}
 
 local infixr:25 " →ₛ " => SimpleFunc
 
@@ -51,7 +51,7 @@ section FinMeasAdditive
 
 /-- A set function is `FinMeasAdditive` if its value on the union of two disjoint measurable
 sets with finite measure is the sum of its values on each set. -/
-def FinMeasAdditive {β} [AddMonoid β] {_ : MeasurableSpace α} (μ : Measure α) (T : Set α → β) :
+def FinMeasAdditive {β} [AddMonoid β] {_ : SigmaAlgebra α} (μ : Measure α) (T : Set α → β) :
     Prop :=
   ∀ s t, MeasurableSet s → MeasurableSet t → μ s ≠ ∞ → μ t ≠ ∞ → Disjoint s t →
     T (s ∪ t) = T s + T t
@@ -171,7 +171,7 @@ end FinMeasAdditive
 
 /-- A `FinMeasAdditive` set function whose norm on every set is less than the measure of the
 set (up to a multiplicative constant). -/
-def DominatedFinMeasAdditive {β} [SeminormedAddCommGroup β] {_ : MeasurableSpace α} (μ : Measure α)
+def DominatedFinMeasAdditive {β} [SeminormedAddCommGroup β] {_ : SigmaAlgebra α} (μ : Measure α)
     (T : Set α → β) (C : ℝ) : Prop :=
   FinMeasAdditive μ T ∧ ∀ s, MeasurableSet s → μ s < ∞ → ‖T s‖ ≤ C * μ.real s
 
@@ -179,7 +179,7 @@ namespace DominatedFinMeasAdditive
 
 variable {β : Type*} [SeminormedAddCommGroup β] {T T' : Set α → β} {C C' : ℝ}
 
-theorem zero {m : MeasurableSpace α} (μ : Measure α) (hC : 0 ≤ C) :
+theorem zero {m : SigmaAlgebra α} (μ : Measure α) (hC : 0 ≤ C) :
     DominatedFinMeasAdditive μ (0 : Set α → β) C := by
   refine ⟨FinMeasAdditive.zero, fun s _ _ => ?_⟩
   rw [Pi.zero_apply, norm_zero]
@@ -192,7 +192,7 @@ theorem eq_zero_of_measure_zero {β : Type*} [NormedAddCommGroup β] {T : Set α
   refine ((hT.2 s hs (by simp [hs_zero])).trans (le_of_eq ?_)).antisymm (norm_nonneg _)
   rw [measureReal_def, hs_zero, ENNReal.toReal_zero, mul_zero]
 
-theorem eq_zero {β : Type*} [NormedAddCommGroup β] {T : Set α → β} {C : ℝ} {_ : MeasurableSpace α}
+theorem eq_zero {β : Type*} [NormedAddCommGroup β] {T : Set α → β} {C : ℝ} {_ : SigmaAlgebra α}
     (hT : DominatedFinMeasAdditive (0 : Measure α) T C) {s : Set α} (hs : MeasurableSet s) :
     T s = 0 :=
   eq_zero_of_measure_zero hT hs (by simp only [Measure.coe_zero, Pi.zero_apply])
@@ -250,11 +250,11 @@ theorem sub_measure {C' : ℝ} (μ ν : Measure α)
     DominatedFinMeasAdditive (μ + ν) (T - T') (max C C') :=
   sub_eq_add_neg T T' ▸ hT.add_measure μ ν hT'.neg
 
-theorem add_measure_right {_ : MeasurableSpace α} (μ ν : Measure α)
+theorem add_measure_right {_ : SigmaAlgebra α} (μ ν : Measure α)
     (hT : DominatedFinMeasAdditive μ T C) (hC : 0 ≤ C) : DominatedFinMeasAdditive (μ + ν) T C :=
   of_measure_le (Measure.le_add_right le_rfl) hT hC
 
-theorem add_measure_left {_ : MeasurableSpace α} (μ ν : Measure α)
+theorem add_measure_left {_ : SigmaAlgebra α} (μ ν : Measure α)
     (hT : DominatedFinMeasAdditive ν T C) (hC : 0 ≤ C) : DominatedFinMeasAdditive (μ + ν) T C :=
   of_measure_le (Measure.le_add_left le_rfl) hT hC
 
@@ -292,11 +292,11 @@ end FinMeasAdditive
 namespace SimpleFunc
 
 /-- Extend `Set α → (F →L[ℝ] F')` to `(α →ₛ F) → F'`. -/
-def setToSimpleFunc {_ : MeasurableSpace α} (T : Set α → F →L[ℝ] F') (f : α →ₛ F) : F' :=
+def setToSimpleFunc {_ : SigmaAlgebra α} (T : Set α → F →L[ℝ] F') (f : α →ₛ F) : F' :=
   ∑ x ∈ f.range, T (f ⁻¹' {x}) x
 
 @[simp]
-theorem setToSimpleFunc_zero {m : MeasurableSpace α} (f : α →ₛ F) :
+theorem setToSimpleFunc_zero {m : SigmaAlgebra α} (f : α →ₛ F) :
     setToSimpleFunc (0 : Set α → F →L[ℝ] F') f = 0 := by simp [setToSimpleFunc]
 
 theorem setToSimpleFunc_zero' {T : Set α → E →L[ℝ] F'}
@@ -310,12 +310,12 @@ theorem setToSimpleFunc_zero' {T : Set α → E →L[ℝ] F'}
       (measure_preimage_lt_top_of_integrable f hf hx0), zero_apply]
 
 @[simp]
-theorem setToSimpleFunc_zero_apply {m : MeasurableSpace α} (T : Set α → F →L[ℝ] F') :
+theorem setToSimpleFunc_zero_apply {m : SigmaAlgebra α} (T : Set α → F →L[ℝ] F') :
     setToSimpleFunc T (0 : α →ₛ F) = 0 := by
   cases isEmpty_or_nonempty α <;> simp [setToSimpleFunc]
 
 theorem setToSimpleFunc_eq_sum_filter [DecidablePred fun x ↦ x ≠ (0 : F)]
-    {m : MeasurableSpace α} (T : Set α → F →L[ℝ] F') (f : α →ₛ F) :
+    {m : SigmaAlgebra α} (T : Set α → F →L[ℝ] F') (f : α →ₛ F) :
     setToSimpleFunc T f = ∑ x ∈ f.range with x ≠ 0, T (f ⁻¹' {x}) x := by
   symm
   refine sum_filter_of_ne fun x _ => mt fun hx0 => ?_
@@ -408,7 +408,7 @@ theorem setToSimpleFunc_congr_left (T T' : Set α → E →L[ℝ] F)
   · rw [h (f ⁻¹' {x}) (SimpleFunc.measurableSet_fiber _ _)
         (SimpleFunc.measure_preimage_lt_top_of_integrable _ hf hx0)]
 
-theorem setToSimpleFunc_add_left {m : MeasurableSpace α} (T T' : Set α → F →L[ℝ] F') {f : α →ₛ F} :
+theorem setToSimpleFunc_add_left {m : SigmaAlgebra α} (T T' : Set α → F →L[ℝ] F') {f : α →ₛ F} :
     setToSimpleFunc (T + T') f = setToSimpleFunc T f + setToSimpleFunc T' f := by
   simp_rw [setToSimpleFunc, Pi.add_apply]
   push_cast
@@ -431,7 +431,7 @@ theorem setToSimpleFunc_add_left' (T T' T'' : Set α → E →L[ℝ] F)
   rw [mem_filter] at hx
   exact hx.2
 
-theorem setToSimpleFunc_smul_left {m : MeasurableSpace α} (T : Set α → F →L[ℝ] F') (c : ℝ)
+theorem setToSimpleFunc_smul_left {m : SigmaAlgebra α} (T : Set α → F →L[ℝ] F') (c : ℝ)
     (f : α →ₛ F) : setToSimpleFunc (fun s => c • T s) f = c • setToSimpleFunc T f := by
   simp_rw [setToSimpleFunc, _root_.smul_apply, smul_sum]
 
@@ -512,7 +512,7 @@ variable {G' G'' : Type*}
   [NormedAddCommGroup G''] [PartialOrder G''] [IsOrderedAddMonoid G''] [NormedSpace ℝ G'']
   [NormedAddCommGroup G'] [PartialOrder G'] [NormedSpace ℝ G']
 
-theorem setToSimpleFunc_mono_left {m : MeasurableSpace α} (T T' : Set α → F →L[ℝ] G'')
+theorem setToSimpleFunc_mono_left {m : SigmaAlgebra α} (T T' : Set α → F →L[ℝ] G'')
     (hTT' : ∀ s x, T s x ≤ T' s x) (f : α →ₛ F) : setToSimpleFunc T f ≤ setToSimpleFunc T' f := by
   simp_rw [setToSimpleFunc]; gcongr; apply hTT'
 
@@ -525,7 +525,7 @@ theorem setToSimpleFunc_mono_left' (T T' : Set α → E →L[ℝ] G'')
   · simp [h0]
   · exact hTT' _ (measurableSet_fiber _ _) (measure_preimage_lt_top_of_integrable _ hf h0) i
 
-theorem setToSimpleFunc_nonneg {m : MeasurableSpace α} (T : Set α → G' →L[ℝ] G'')
+theorem setToSimpleFunc_nonneg {m : SigmaAlgebra α} (T : Set α → G' →L[ℝ] G'')
     (hT_nonneg : ∀ s x, 0 ≤ x → 0 ≤ T s x) (f : α →ₛ G') (hf : 0 ≤ f) :
     0 ≤ setToSimpleFunc T f := by
   refine sum_nonneg fun i hi => hT_nonneg _ i ?_
@@ -561,7 +561,7 @@ theorem setToSimpleFunc_mono [IsOrderedAddMonoid G']
 
 end Order
 
-theorem norm_setToSimpleFunc_le_sum_opNorm {m : MeasurableSpace α} (T : Set α → F' →L[ℝ] F)
+theorem norm_setToSimpleFunc_le_sum_opNorm {m : SigmaAlgebra α} (T : Set α → F' →L[ℝ] F)
     (f : α →ₛ F') : ‖f.setToSimpleFunc T‖ ≤ ∑ x ∈ f.range, ‖T (f ⁻¹' {x})‖ * ‖x‖ :=
   calc
     ‖∑ x ∈ f.range, T (f ⁻¹' {x}) x‖ ≤ ∑ x ∈ f.range, ‖T (f ⁻¹' {x}) x‖ := norm_sum_le _ _
@@ -596,7 +596,7 @@ theorem norm_setToSimpleFunc_le_sum_mul_norm_of_integrable (T : Set α → E →
     _ ≤ C * ∑ x ∈ f.range, μ.real (f ⁻¹' {x}) * ‖x‖ := by simp_rw [mul_sum, ← mul_assoc]; rfl
 
 theorem setToSimpleFunc_indicator (T : Set α → F →L[ℝ] F') (hT_empty : T ∅ = 0)
-    {m : MeasurableSpace α} {s : Set α} (hs : MeasurableSet s) (x : F) :
+    {m : SigmaAlgebra α} {s : Set α} (hs : MeasurableSet s) (x : F) :
     SimpleFunc.setToSimpleFunc T
         (SimpleFunc.piecewise s hs (SimpleFunc.const α x) (SimpleFunc.const α 0)) =
       T s x := by
@@ -624,12 +624,12 @@ theorem setToSimpleFunc_indicator (T : Set α → F →L[ℝ] F') (hT_empty : T 
   simp
 
 theorem setToSimpleFunc_const' [Nonempty α] (T : Set α → F →L[ℝ] F') (x : F)
-    {m : MeasurableSpace α} : SimpleFunc.setToSimpleFunc T (SimpleFunc.const α x) = T univ x := by
+    {m : SigmaAlgebra α} : SimpleFunc.setToSimpleFunc T (SimpleFunc.const α x) = T univ x := by
   simp only [setToSimpleFunc, range_const, Set.mem_singleton, preimage_const_of_mem,
     sum_singleton, ← Function.const_def, coe_const]
 
 theorem setToSimpleFunc_const (T : Set α → F →L[ℝ] F') (hT_empty : T ∅ = 0) (x : F)
-    {m : MeasurableSpace α} : SimpleFunc.setToSimpleFunc T (SimpleFunc.const α x) = T univ x := by
+    {m : SigmaAlgebra α} : SimpleFunc.setToSimpleFunc T (SimpleFunc.const α x) = T univ x := by
   cases isEmpty_or_nonempty α
   · have h_univ_empty : (univ : Set α) = ∅ := Subsingleton.elim _ _
     rw [h_univ_empty, hT_empty]

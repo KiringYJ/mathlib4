@@ -60,8 +60,8 @@ noncomputable section
 
 open scoped Topology MeasureTheory ENNReal NNReal
 
-variable {α β γ δ : Type*} [MeasurableSpace α] [MeasurableSpace β] [MeasurableSpace γ]
-  [MeasurableSpace δ]
+variable {α β γ δ : Type*} [SigmaAlgebra α] [SigmaAlgebra β] [SigmaAlgebra γ]
+  [SigmaAlgebra δ]
 
 namespace ProbabilityTheory
 
@@ -153,7 +153,7 @@ theorem hasLaw {κ : Measure γ} (h₀ : IdentDistrib f g μ ν) (h₁ : HasLaw 
 strongly measurable. So is the second function, but use `h.symm.aestronglyMeasurable_fst` as
 `h.aestronglyMeasurable_snd` has a different meaning. -/
 theorem aestronglyMeasurable_fst [TopologicalSpace γ] [PseudoMetrizableSpace γ]
-    [OpensMeasurableSpace γ] [SecondCountableTopology γ] (h : IdentDistrib f g μ ν) :
+    [OpensSigmaAlgebra γ] [SecondCountableTopology γ] (h : IdentDistrib f g μ ν) :
     AEStronglyMeasurable f μ :=
   h.aemeasurable_fst.aestronglyMeasurable
 
@@ -170,7 +170,7 @@ theorem aestronglyMeasurable_iff [TopologicalSpace γ] [PseudoMetrizableSpace γ
     (h : IdentDistrib f g μ ν) : AEStronglyMeasurable f μ ↔ AEStronglyMeasurable g ν :=
   ⟨fun hf => h.aestronglyMeasurable_snd hf, fun hg => h.symm.aestronglyMeasurable_snd hg⟩
 
-theorem essSup_eq [ConditionallyCompleteLinearOrder γ] [TopologicalSpace γ] [OpensMeasurableSpace γ]
+theorem essSup_eq [ConditionallyCompleteLinearOrder γ] [TopologicalSpace γ] [OpensSigmaAlgebra γ]
     [OrderClosedTopology γ] (h : IdentDistrib f g μ ν) : essSup f μ = essSup g ν := by
   have I : ∀ a, μ {x : α | a < f x} = ν {x : β | a < g x} := fun a =>
     h.measure_mem_eq measurableSet_Ioi
@@ -200,7 +200,7 @@ theorem integral_eq [NormedAddCommGroup γ] [NormedSpace ℝ γ] [BorelSpace γ]
     rw [h.aestronglyMeasurable_iff] at hf
     rw [integral_non_aestronglyMeasurable hf]
 
-theorem eLpNorm_eq [NormedAddCommGroup γ] [OpensMeasurableSpace γ] (h : IdentDistrib f g μ ν)
+theorem eLpNorm_eq [NormedAddCommGroup γ] [OpensSigmaAlgebra γ] (h : IdentDistrib f g μ ν)
     (p : ℝ≥0∞) : eLpNorm f p μ = eLpNorm g p ν := by
   by_cases h0 : p = 0
   · simp [h0]
@@ -234,11 +234,11 @@ theorem integrable_iff [NormedAddCommGroup γ] [BorelSpace γ] (h : IdentDistrib
     Integrable f μ ↔ Integrable g ν :=
   ⟨fun hf => h.integrable_snd hf, fun hg => h.symm.integrable_snd hg⟩
 
-protected theorem norm [NormedAddCommGroup γ] [OpensMeasurableSpace γ] (h : IdentDistrib f g μ ν) :
+protected theorem norm [NormedAddCommGroup γ] [OpensSigmaAlgebra γ] (h : IdentDistrib f g μ ν) :
     IdentDistrib (fun x => ‖f x‖) (fun x => ‖g x‖) μ ν :=
   h.comp measurable_norm
 
-protected theorem nnnorm [NormedAddCommGroup γ] [OpensMeasurableSpace γ]
+protected theorem nnnorm [NormedAddCommGroup γ] [OpensSigmaAlgebra γ]
     (h : IdentDistrib f g μ ν) :
     IdentDistrib (fun x => ‖f x‖₊) (fun x => ‖g x‖₊) μ ν :=
   h.comp measurable_nnnorm
@@ -292,7 +292,7 @@ end IdentDistrib
 
 section UniformIntegrable
 
-variable {E : Type*} [MeasurableSpace E] [NormedAddCommGroup E] [BorelSpace E]
+variable {E : Type*} [SigmaAlgebra E] [NormedAddCommGroup E] [BorelSpace E]
   {μ : Measure α} [IsFiniteMeasure μ]
 
 /-- This lemma is superseded by `MemLp.uniformIntegrable_of_identDistrib` which only requires

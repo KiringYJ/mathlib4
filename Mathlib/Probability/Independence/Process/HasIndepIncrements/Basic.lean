@@ -40,8 +40,8 @@ open MeasureTheory Filter
 
 namespace ProbabilityTheory
 
-variable {T Ω E : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} {X : T → Ω → E}
-  [Preorder T] [MeasurableSpace E]
+variable {T Ω E : Type*} {mΩ : SigmaAlgebra Ω} {P : Measure Ω} {X : T → Ω → E}
+  [Preorder T] [SigmaAlgebra E]
 
 section Def
 
@@ -105,7 +105,7 @@ lemma HasIndepIncrements.indepFun_eval_sub [SubNegZeroMonoid E] (hX : HasIndepIn
   refine (hX.indepFun_sub_sub hrs hst).congr ?_ .rfl
   filter_upwards [h] with ω hω using by simp [hω]
 
-protected lemma HasIndepIncrements.map' {F G : Type*} [MeasurableSpace G] [FunLike F E G]
+protected lemma HasIndepIncrements.map' {F G : Type*} [SigmaAlgebra G] [FunLike F E G]
     [AddGroup E] [SubtractionMonoid G] [AddMonoidHomClass F E G] {f : F} (hf : Measurable f)
     (hX : HasIndepIncrements X P) :
     HasIndepIncrements (fun t ω ↦ f (X t ω)) P := by
@@ -114,8 +114,8 @@ protected lemma HasIndepIncrements.map' {F G : Type*} [MeasurableSpace G] [FunLi
   exact (hX n t ht).comp (fun _ ↦ f) (fun _ ↦ hf)
 
 protected lemma HasIndepIncrements.map {R F : Type*} [Semiring R] [SeminormedAddCommGroup E]
-    [Module R E] [OpensMeasurableSpace E] [SeminormedAddCommGroup F] [Module R F]
-    [MeasurableSpace F] [BorelSpace F] (L : E →L[R] F) (hX : HasIndepIncrements X P) :
+    [Module R E] [OpensSigmaAlgebra E] [SeminormedAddCommGroup F] [Module R F]
+    [SigmaAlgebra F] [BorelSpace F] (L : E →L[R] F) (hX : HasIndepIncrements X P) :
     HasIndepIncrements (fun t ω ↦ L (X t ω)) P :=
   hX.map' L.measurable
 

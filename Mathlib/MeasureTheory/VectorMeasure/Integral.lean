@@ -67,7 +67,7 @@ public section
 open Set MeasureTheory VectorMeasure ContinuousLinearMap Filter Topology
 open scoped ENNReal NNReal
 
-variable {ι X Y E F G : Type*} {mX : MeasurableSpace X} [MeasurableSpace Y]
+variable {ι X Y E F G : Type*} {mX : SigmaAlgebra X} [SigmaAlgebra Y]
   [NormedAddCommGroup E] [NormedSpace ℝ E]
   [NormedAddCommGroup F] [NormedSpace ℝ F]
   [NormedAddCommGroup G] [NormedSpace ℝ G]
@@ -681,7 +681,7 @@ theorem exists_ne_zero_of_integral_ne_zero
   rfl
 
 @[simp]
-theorem integral_dirac' [MeasurableSpace X] [CompleteSpace G] {a : X} {v : F}
+theorem integral_dirac' [SigmaAlgebra X] [CompleteSpace G] {a : X} {v : F}
     (hfm : StronglyMeasurable f) :
     ∫ᵛ x, f x ∂[B; VectorMeasure.dirac a v] = B (f a) v := by
   borelize E
@@ -697,7 +697,7 @@ theorem integral_dirac' [MeasurableSpace X] [CompleteSpace G] {a : X} {v : F}
     _ = B (f a) v := by simp
 
 @[simp]
-theorem integral_dirac [MeasurableSpace X] [MeasurableSingletonClass X] [CompleteSpace G]
+theorem integral_dirac [SigmaAlgebra X] [MeasurableSingletonClass X] [CompleteSpace G]
     {a : X} {v : F} :
     ∫ᵛ x, f x ∂[B; VectorMeasure.dirac a v] = B (f a) v := by
   have : IsFiniteMeasure ((dirac a v).transpose B).variation := by
@@ -807,14 +807,14 @@ theorem nndist_integral_add_vectorMeasure_le_lintegral
   rw [integral_add_vectorMeasure h₁ h₂, nndist_comm, nndist_eq_nnnorm, add_sub_cancel_left]
   exact enorm_integral_le_lintegral_enorm
 
-variable {β : Type*} [MeasurableSpace β] {φ : X → β} {a : X}
+variable {β : Type*} [SigmaAlgebra β] {φ : X → β} {a : X}
 
 lemma variation_transpose_map_le :
     ((μ.map φ).transpose B).variation ≤ Measure.map φ (μ.transpose B).variation := by
   grw [transpose_map, variation_map_le]
 
 omit [NormedSpace ℝ E] [NormedSpace ℝ F] in
-theorem Integrable.map {β : Type*} [MeasurableSpace β] {φ : X → β}
+theorem Integrable.map {β : Type*} [SigmaAlgebra β] {φ : X → β}
     {f : β → E} (hfm : AEStronglyMeasurable f (μ.variation.map φ))
     (h : μ.Integrable (f ∘ φ)) : (μ.map φ).Integrable f := by
   by_cases hφ : Measurable φ; swap
@@ -824,7 +824,7 @@ theorem Integrable.map {β : Type*} [MeasurableSpace β] {φ : X → β}
   apply variation_map_le
 
 set_option backward.isDefEq.respectTransparency.types false in
-theorem integral_map {β : Type*} [MeasurableSpace β]
+theorem integral_map {β : Type*} [SigmaAlgebra β]
     {φ : X → β} (hφ : Measurable φ) {f : β → E}
     (hfm : AEStronglyMeasurable f (μ.variation.map φ))
     (hfi' : μ.Integrable (f ∘ φ)) :
@@ -862,7 +862,7 @@ theorem _root_.Topology.IsClosedEmbedding.integral_map_vectorMeasure
     {f : β → E} : ∫ᵛ y, f y ∂[B; μ.map φ] = ∫ᵛ x, f (φ x) ∂[B; μ] :=
   hφ.measurableEmbedding.integral_map_vectorMeasure
 
-theorem integral_map_equiv {β} [MeasurableSpace β] (e : X ≃ᵐ β) (f : β → E) :
+theorem integral_map_equiv {β} [SigmaAlgebra β] (e : X ≃ᵐ β) (f : β → E) :
     ∫ᵛ y, f y ∂[B; μ.map e] = ∫ᵛ x, f (e x) ∂[B; μ] :=
   e.measurableEmbedding.integral_map_vectorMeasure
 

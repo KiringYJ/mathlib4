@@ -33,7 +33,7 @@ open scoped Topology
 
 namespace MeasureTheory
 
-variable {α β ι : Type*} {m : MeasurableSpace α} [PseudoEMetricSpace β] {μ : Measure α}
+variable {α β ι : Type*} {m : SigmaAlgebra α} [PseudoEMetricSpace β] {μ : Measure α}
 
 namespace Egorov
 

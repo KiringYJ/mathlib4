@@ -9,23 +9,22 @@ public import Mathlib.MeasureTheory.Constructions.BorelSpace.Basic
 public import Mathlib.Topology.Instances.Matrix
 
 /-!
-# Measurable space structure on Matrices
+# Sigma-algebra on matrices
 
-If `α` is a measurable space, we set the measurable space structure on `Matrix m n α` to be the
-same as the one on `m → n → α`.
+The sigma-algebra on `Matrix m n α` is the one transported from `m → n → α`.
 -/
 
 @[expose] public section
 
 namespace Matrix
 
-section MeasurableSpace
+section SigmaAlgebra
 
-variable {m n α : Type*} [MeasurableSpace α]
+variable {m n α : Type*} [SigmaAlgebra α]
 
-instance : MeasurableSpace (Matrix m n α) := inferInstanceAs <| MeasurableSpace (m → n → α)
+instance : SigmaAlgebra (Matrix m n α) := inferInstanceAs <| SigmaAlgebra (m → n → α)
 
-variable {β : Type*} [MeasurableSpace β]
+variable {β : Type*} [SigmaAlgebra β]
 
 lemma _root_.Measurable.eval_matrix {i : m} {j : n} {M : β → Matrix m n α} (hM : Measurable M) :
     Measurable (M · i j) := hM.eval.eval
@@ -42,11 +41,11 @@ protected lemma measurable_iff {M : β → Matrix m n α} :
 protected lemma measurable_apply {i : m} {j : n} :
     Measurable (fun M : Matrix m n α ↦ M i j) := measurable_id.eval_matrix
 
-end MeasurableSpace
+end SigmaAlgebra
 
 section MeasurableEquiv
 
-variable (m n α : Type*) [MeasurableSpace α]
+variable (m n α : Type*) [SigmaAlgebra α]
 
 @[fun_prop]
 lemma measurable_of : Measurable <| Matrix.of (m := m) (n := n) (α := α) :=

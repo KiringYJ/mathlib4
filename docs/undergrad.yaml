@@ -500,13 +500,13 @@ Multivariable calculus:
 Measures and integral calculus:
   Measure theory:
     measurable spaces: 'MeasurableSpace'
-    sigma-algebras: 'MeasurableSpace'
-    product of sigma-algebras: 'MeasurableSpace.pi'
+    sigma-algebras: 'SigmaAlgebra'
+    product of sigma-algebras: 'SigmaAlgebra.pi'
     Borel sigma-algebras: 'BorelSpace'
     positive measure: 'MeasureTheory.Measure'
     counting measure: 'MeasureTheory.Measure.count'
     Lebesgue measure: 'MeasureTheory.MeasureSpace'
-    product measure: 'MeasurableSpace.pi'
+    product measure: 'SigmaAlgebra.pi'
     measurable functions: 'Measurable'
     approximation by step functions: 'MeasureTheory.SimpleFunc.tendsto_approxOn'
   Integration:
@@ -546,7 +546,7 @@ Probability Theory:
     probability measure: 'MeasureTheory.IsProbabilityMeasure'
     events: 'MeasurableSet'
     independent events: 'ProbabilityTheory.iIndepSet'
-    sigma-algebra: 'MeasurableSpace'
+    sigma-algebra: 'SigmaAlgebra'
     independent sigma-algebra: 'ProbabilityTheory.iIndep'
     $0$-$1$ law: 'ProbabilityTheory.measure_zero_or_one_of_measurableSet_limsup_atTop'
     Borel-Cantelli lemma (easy direction): 'MeasureTheory.measure_limsup_atTop_eq_zero'

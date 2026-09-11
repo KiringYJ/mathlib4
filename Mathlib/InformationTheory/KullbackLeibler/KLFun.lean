@@ -46,7 +46,7 @@ open Real MeasureTheory Filter Set
 
 namespace InformationTheory
 
-variable {α : Type*} {mα : MeasurableSpace α} {μ ν : Measure α} {x : ℝ}
+variable {α : Type*} {mα : SigmaAlgebra α} {μ ν : Measure α} {x : ℝ}
 
 /-- The function `x : ℝ ↦ x * log x + 1 - x`.
 The Kullback-Leibler divergence is an f-divergence for this function. -/

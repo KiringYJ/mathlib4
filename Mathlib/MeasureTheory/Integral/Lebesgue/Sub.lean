@@ -23,7 +23,7 @@ open scoped Topology
 
 namespace MeasureTheory
 
-variable {α β : Type*} [MeasurableSpace α] {μ : Measure α}
+variable {α β : Type*} [SigmaAlgebra α] {μ : Measure α}
 
 theorem lintegral_sub' {f g : α → ℝ≥0∞} (hg : AEMeasurable g μ) (hg_fin : ∫⁻ a, g a ∂μ ≠ ∞)
     (h_le : g ≤ᵐ[μ] f) : ∫⁻ a, f a - g a ∂μ = ∫⁻ a, f a ∂μ - ∫⁻ a, g a ∂μ := by

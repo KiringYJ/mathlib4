@@ -52,12 +52,12 @@ noncomputable section
 
 namespace MeasureTheory
 
-variable {E : Type*} [MeasurableSpace E] {μ : Measure E}
+variable {E : Type*} [SigmaAlgebra E] {μ : Measure E}
 
 namespace pdf
 
 variable {Ω : Type*}
-variable {_ : MeasurableSpace Ω} {P : Measure Ω}
+variable {_ : SigmaAlgebra Ω} {P : Measure Ω}
 
 /-- A random variable `X` has uniform distribution on `s` if its push-forward measure is
 `(μ s)⁻¹ • μ.restrict s`. -/
@@ -261,7 +261,7 @@ theorem toOuterMeasure_uniformOfFinset_apply :
 
 open scoped Classical in
 @[simp]
-theorem toMeasure_uniformOfFinset_apply [MeasurableSpace α] (ht : MeasurableSet t) :
+theorem toMeasure_uniformOfFinset_apply [SigmaAlgebra α] (ht : MeasurableSet t) :
     (uniformOfFinset s hs).toMeasure t = #{x ∈ s | x ∈ t} / #s :=
   (toMeasure_apply_eq_toOuterMeasure_apply _ ht).trans (toOuterMeasure_uniformOfFinset_apply hs t)
 
@@ -298,7 +298,7 @@ theorem toOuterMeasure_uniformOfFintype_apply [Fintype s] :
   rw [uniformOfFintype, toOuterMeasure_uniformOfFinset_apply, Fintype.card_subtype,
     Finset.card_univ]
 
-theorem toMeasure_uniformOfFintype_apply [MeasurableSpace α] (hs : MeasurableSet s) [Fintype s] :
+theorem toMeasure_uniformOfFintype_apply [SigmaAlgebra α] (hs : MeasurableSet s) [Fintype s] :
     (uniformOfFintype α).toMeasure s = Fintype.card s / Fintype.card α := by
   classical
   simp [uniformOfFintype, Fintype.card_subtype, hs]
@@ -364,7 +364,7 @@ theorem toOuterMeasure_ofMultiset_apply :
 
 open scoped Classical in
 @[simp]
-theorem toMeasure_ofMultiset_apply [MeasurableSpace α] (ht : MeasurableSet t) :
+theorem toMeasure_ofMultiset_apply [SigmaAlgebra α] (ht : MeasurableSet t) :
     (ofMultiset s hs).toMeasure t = (∑' x, (s.filter (· ∈ t)).count x : ℝ≥0∞) / (Multiset.card s) :=
   (toMeasure_apply_eq_toOuterMeasure_apply _ ht).trans (toOuterMeasure_ofMultiset_apply hs t)
 

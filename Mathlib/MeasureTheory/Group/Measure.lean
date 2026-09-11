@@ -36,7 +36,7 @@ open scoped NNReal ENNReal Pointwise Topology
 
 open Inv Set Function MeasureTheory.Measure Filter
 
-variable {G H : Type*} [MeasurableSpace G] [MeasurableSpace H]
+variable {G H : Type*} [SigmaAlgebra G] [SigmaAlgebra H]
 
 namespace MeasureTheory
 
@@ -89,7 +89,7 @@ theorem measurePreserving_mul_left (μ : Measure G) [IsMulLeftInvariant μ] (g :
 
 @[to_additive]
 theorem MeasurePreserving.mul_left (μ : Measure G) [IsMulLeftInvariant μ] (g : G) {X : Type*}
-    [MeasurableSpace X] {μ' : Measure X} {f : X → G} (hf : MeasurePreserving f μ' μ) :
+    [SigmaAlgebra X] {μ' : Measure X} {f : X → G} (hf : MeasurePreserving f μ' μ) :
     MeasurePreserving (fun x => g * f x) μ' μ :=
   (measurePreserving_mul_left μ g).comp hf
 
@@ -100,12 +100,12 @@ theorem measurePreserving_mul_right (μ : Measure G) [IsMulRightInvariant μ] (g
 
 @[to_additive]
 theorem MeasurePreserving.mul_right (μ : Measure G) [IsMulRightInvariant μ] (g : G) {X : Type*}
-    [MeasurableSpace X] {μ' : Measure X} {f : X → G} (hf : MeasurePreserving f μ' μ) :
+    [SigmaAlgebra X] {μ' : Measure X} {f : X → G} (hf : MeasurePreserving f μ' μ) :
     MeasurePreserving (fun x => f x * g) μ' μ :=
   (measurePreserving_mul_right μ g).comp hf
 
 @[to_additive]
-instance Subgroup.smulInvariantMeasure {G α : Type*} [Group G] [MulAction G α] [MeasurableSpace α]
+instance Subgroup.smulInvariantMeasure {G α : Type*} [Group G] [MulAction G α] [SigmaAlgebra α]
     {μ : Measure α} [SMulInvariantMeasure G α μ] (H : Subgroup G) : SMulInvariantMeasure H α μ :=
   ⟨fun y s hs => by convert! SMulInvariantMeasure.measure_preimage_smul (μ := μ) (y : G) hs⟩
 
@@ -133,7 +133,7 @@ theorem forall_measure_preimage_mul_right_iff (μ : Measure G) :
 
 @[to_additive]
 instance Measure.prod.instIsMulLeftInvariant [IsMulLeftInvariant μ] [SFinite μ] {H : Type*}
-    [Mul H] {mH : MeasurableSpace H} {ν : Measure H} [MeasurableMul H] [IsMulLeftInvariant ν]
+    [Mul H] {mH : SigmaAlgebra H} {ν : Measure H} [MeasurableMul H] [IsMulLeftInvariant ν]
     [SFinite ν] : IsMulLeftInvariant (μ.prod ν) := by
   constructor
   rintro ⟨g, h⟩
@@ -143,7 +143,7 @@ instance Measure.prod.instIsMulLeftInvariant [IsMulLeftInvariant μ] [SFinite μ
 
 @[to_additive]
 instance Measure.prod.instIsMulRightInvariant [IsMulRightInvariant μ] [SFinite μ] {H : Type*}
-    [Mul H] {mH : MeasurableSpace H} {ν : Measure H} [MeasurableMul H] [IsMulRightInvariant ν]
+    [Mul H] {mH : SigmaAlgebra H} {ν : Measure H} [MeasurableMul H] [IsMulRightInvariant ν]
     [SFinite ν] : IsMulRightInvariant (μ.prod ν) := by
   constructor
   rintro ⟨g, h⟩
@@ -152,7 +152,7 @@ instance Measure.prod.instIsMulRightInvariant [IsMulRightInvariant μ] [SFinite 
     map_mul_right_eq_self μ g, map_mul_right_eq_self ν h]
 
 @[to_additive]
-theorem isMulLeftInvariant_map {H : Type*} [MeasurableSpace H] [Mul H] [MeasurableMul H]
+theorem isMulLeftInvariant_map {H : Type*} [SigmaAlgebra H] [Mul H] [MeasurableMul H]
     [IsMulLeftInvariant μ] (f : G →ₙ* H) (hf : Measurable f) (h_surj : Surjective f) :
     IsMulLeftInvariant (Measure.map f μ) := by
   refine ⟨fun h => ?_⟩
@@ -440,7 +440,7 @@ instance : (count : Measure G).IsMulRightInvariant where
 a similar result about `SMulInvariantMeasure`. -/
 
 @[to_additive]
-protected theorem IsMulLeftInvariant.comap {H} [Group H] {mH : MeasurableSpace H} [MeasurableMul H]
+protected theorem IsMulLeftInvariant.comap {H} [Group H] {mH : SigmaAlgebra H} [MeasurableMul H]
     (μ : Measure H) [IsMulLeftInvariant μ] {f : G →* H} (hf : MeasurableEmbedding f) :
     (μ.comap f).IsMulLeftInvariant where
   map_mul_left_eq_self g := by
@@ -458,7 +458,7 @@ protected theorem IsMulLeftInvariant.comap {H} [Group H] {mH : MeasurableSpace H
     exact hf.measurableSet_image.mpr hs
 
 @[to_additive]
-protected theorem IsMulRightInvariant.comap {H} [Group H] {mH : MeasurableSpace H} [MeasurableMul H]
+protected theorem IsMulRightInvariant.comap {H} [Group H] {mH : SigmaAlgebra H} [MeasurableMul H]
     (μ : Measure H) [IsMulRightInvariant μ] {f : G →* H} (hf : MeasurableEmbedding f) :
     (μ.comap f).IsMulRightInvariant where
   map_mul_right_eq_self g := by
@@ -769,7 +769,7 @@ arbitrary locally compact groups. Use `[IsAddHaarMeasure μ] [Regular μ]` or
 `[IsAddHaarMeasure μ] [InnerRegular μ]` in these situations. Note that a Haar measure in our
 sense is automatically regular and inner regular on second countable locally compact groups, as
 checked just below this definition. -/
-class IsAddHaarMeasure {G : Type*} [AddGroup G] [TopologicalSpace G] [MeasurableSpace G]
+class IsAddHaarMeasure {G : Type*} [AddGroup G] [TopologicalSpace G] [SigmaAlgebra G]
     (μ : Measure G) : Prop
     extends IsFiniteMeasureOnCompacts μ, IsAddLeftInvariant μ, IsOpenPosMeasure μ
 
@@ -782,7 +782,7 @@ arbitrary locally compact groups. Use `[IsHaarMeasure μ] [Regular μ]` or
 sense is automatically regular and inner regular on second countable locally compact groups, as
 checked just below this definition. -/
 @[to_additive existing]
-class IsHaarMeasure {G : Type*} [Group G] [TopologicalSpace G] [MeasurableSpace G]
+class IsHaarMeasure {G : Type*} [Group G] [TopologicalSpace G] [SigmaAlgebra G]
     (μ : Measure G) : Prop
     extends IsFiniteMeasureOnCompacts μ, IsMulLeftInvariant μ, IsOpenPosMeasure μ
 
@@ -823,7 +823,7 @@ a Haar measure. See also `MulEquiv.isHaarMeasure_map` and `ContinuousMulEquiv.is
 homomorphism is again an additive Haar measure. See also `AddEquiv.isAddHaarMeasure_map`,
 `ContinuousAddEquiv.isAddHaarMeasure_map` and `ContinuousLinearEquiv.isAddHaarMeasure_map`. -/]
 theorem isHaarMeasure_map [BorelSpace G] [ContinuousMul G] {H : Type*} [Group H]
-    [TopologicalSpace H] [MeasurableSpace H] [BorelSpace H] [IsTopologicalGroup H]
+    [TopologicalSpace H] [SigmaAlgebra H] [BorelSpace H] [IsTopologicalGroup H]
     (f : G →* H) (hf : Continuous f) (h_surj : Surjective f)
     (h_prop : Tendsto f (cocompact G) (cocompact H)) : IsHaarMeasure (Measure.map f μ) :=
   { toIsMulLeftInvariant := isMulLeftInvariant_map f.toMulHom hf.measurable h_surj
@@ -851,7 +851,7 @@ a Haar measure. See also `isHaarMeasure_map`. -/
 homomorphism is again an additive Haar measure. See also `isAddHaarMeasure_map`. -/]
 theorem isHaarMeasure_map_of_isFiniteMeasure
     [BorelSpace G] [ContinuousMul G] {H : Type*} [Group H]
-    [TopologicalSpace H] [MeasurableSpace H] [BorelSpace H] [ContinuousMul H]
+    [TopologicalSpace H] [SigmaAlgebra H] [BorelSpace H] [ContinuousMul H]
     [IsFiniteMeasure μ] (f : G →* H) (hf : Continuous f) (h_surj : Surjective f) :
     IsHaarMeasure (Measure.map f μ) where
   toIsMulLeftInvariant := isMulLeftInvariant_map f.toMulHom hf.measurable h_surj
@@ -882,7 +882,7 @@ instance isHaarMeasure_map_mul_right [BorelSpace G] [IsTopologicalGroup G] (g : 
 /-- A convenience wrapper for `MeasureTheory.Measure.isHaarMeasure_map`. -/
 @[to_additive /-- A convenience wrapper for `MeasureTheory.Measure.isAddHaarMeasure_map`. -/]
 nonrec theorem _root_.MulEquiv.isHaarMeasure_map [BorelSpace G] [ContinuousMul G] {H : Type*}
-    [Group H] [TopologicalSpace H] [MeasurableSpace H] [BorelSpace H]
+    [Group H] [TopologicalSpace H] [SigmaAlgebra H] [BorelSpace H]
     [IsTopologicalGroup H] (e : G ≃* H) (he : Continuous e) (hesymm : Continuous e.symm) :
     IsHaarMeasure (Measure.map e μ) :=
   let f : G ≃ₜ H := .mk e he hesymm
@@ -894,7 +894,7 @@ A convenience wrapper for `MeasureTheory.Measure.isHaarMeasure_map`.
 -/
 @[to_additive /-- A convenience wrapper for `MeasureTheory.Measure.isAddHaarMeasure_map`. -/]
 instance _root_.ContinuousMulEquiv.isHaarMeasure_map [BorelSpace G] [IsTopologicalGroup G]
-    {H : Type*} [Group H] [TopologicalSpace H] [MeasurableSpace H] [BorelSpace H]
+    {H : Type*} [Group H] [TopologicalSpace H] [SigmaAlgebra H] [BorelSpace H]
     [IsTopologicalGroup H] (e : G ≃ₜ* H) : (μ.map e).IsHaarMeasure :=
   e.toMulEquiv.isHaarMeasure_map μ e.continuous e.symm.continuous
 
@@ -905,7 +905,7 @@ instance _root_.ContinuousLinearEquiv.isAddHaarMeasure_map
     [TopologicalSpace E] [IsTopologicalAddGroup E] [TopologicalSpace F]
     [IsTopologicalAddGroup F]
     {σ : R →+* S} {σ' : S →+* R} [RingHomInvPair σ σ'] [RingHomInvPair σ' σ]
-    [MeasurableSpace E] [BorelSpace E] [MeasurableSpace F] [BorelSpace F]
+    [SigmaAlgebra E] [BorelSpace E] [SigmaAlgebra F] [BorelSpace F]
     (L : E ≃SL[σ] F) (μ : Measure E) [IsAddHaarMeasure μ] :
     IsAddHaarMeasure (μ.map L) :=
   AddEquiv.isAddHaarMeasure_map _ (L : E ≃+ F) L.continuous L.symm.continuous
@@ -924,8 +924,8 @@ instance (priority := 100) IsHaarMeasure.sigmaFinite [SigmaCompactSpace G] : Sig
         spanning := iUnion_compactCovering G }⟩⟩
 
 @[to_additive]
-instance prod.instIsHaarMeasure {G : Type*} [Group G] [TopologicalSpace G] {_ : MeasurableSpace G}
-    {H : Type*} [Group H] [TopologicalSpace H] {_ : MeasurableSpace H} (μ : Measure G)
+instance prod.instIsHaarMeasure {G : Type*} [Group G] [TopologicalSpace G] {_ : SigmaAlgebra G}
+    {H : Type*} [Group H] [TopologicalSpace H] {_ : SigmaAlgebra H} (μ : Measure G)
     (ν : Measure H) [IsHaarMeasure μ] [IsHaarMeasure ν] [SFinite μ] [SFinite ν]
     [MeasurableMul G] [MeasurableMul H] : IsHaarMeasure (μ.prod ν) where
 
@@ -955,7 +955,7 @@ instance (priority := 100) IsHaarMeasure.nullSingletonClass [IsTopologicalGroup 
 alias IsHaarMeasure.noAtoms := IsHaarMeasure.nullSingletonClass
 
 instance IsAddHaarMeasure.domSMul {G A : Type*} [Group G] [AddCommGroup A] [DistribMulAction G A]
-    [MeasurableSpace A] [TopologicalSpace A] [BorelSpace A] [IsTopologicalAddGroup A]
+    [SigmaAlgebra A] [TopologicalSpace A] [BorelSpace A] [IsTopologicalAddGroup A]
     [ContinuousConstSMul G A] {μ : Measure A} [μ.IsAddHaarMeasure] (g : Gᵈᵐᵃ) :
     (g • μ).IsAddHaarMeasure :=
   (DistribMulAction.toAddEquiv _ (DomMulAct.mk.symm g⁻¹)).isAddHaarMeasure_map _

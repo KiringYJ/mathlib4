@@ -5,7 +5,7 @@ Authors: Rémy Degenne
 -/
 module
 
-public import Mathlib.MeasureTheory.MeasurableSpace.Prod
+public import Mathlib.MeasureTheory.SigmaAlgebra.Prod
 public import Mathlib.Probability.Kernel.Basic
 
 /-!
@@ -28,7 +28,7 @@ open MeasureTheory ProbabilityTheory Function Set
 
 open scoped MeasureTheory ENNReal Topology
 
-variable {α β γ : Type*} {mα : MeasurableSpace α} {mβ : MeasurableSpace β} {mγ : MeasurableSpace γ}
+variable {α β γ : Type*} {mα : SigmaAlgebra α} {mβ : SigmaAlgebra β} {mγ : SigmaAlgebra γ}
   {κ : Kernel α β} {η : Kernel (α × β) γ} {a : α}
 
 namespace ProbabilityTheory
@@ -41,10 +41,10 @@ theorem measurable_kernel_prodMk_left_of_finite {t : Set (α × β)} (ht : Measu
   -- `t` is a measurable set in the product `α × β`: we use that the product σ-algebra is generated
   -- by boxes to prove the result by induction.
   induction t, ht
-    using MeasurableSpace.induction_on_inter generateFrom_prod.symm isPiSystem_prod with
+    using SigmaAlgebra.induction_on_inter generateFrom_prod.symm isPiSystem_prod with
   | empty => simp only [preimage_empty, measure_empty, measurable_const]
   | basic t ht =>
-    simp only [Set.mem_image2, Set.mem_ofPred_eq] at ht
+    simp only [Set.mem_image2] at ht
     obtain ⟨t₁, ht₁, t₂, ht₂, rfl⟩ := ht
     classical
     simp_rw [mk_preimage_prod_right_eq_if]
@@ -64,7 +64,7 @@ theorem measurable_kernel_prodMk_left_of_finite {t : Set (α × β)} (ht : Measu
         fun a => κ a Set.univ - κ a (Prod.mk a ⁻¹' t) := by
       ext1 a
       rw [← Set.sdiff_inter_self_eq_sdiff, Set.inter_univ, measure_sdiff (Set.subset_univ _)]
-      · exact (measurable_prodMk_left htm).nullMeasurableSet
+      · exact MeasurableSet.nullMeasurableSet (measurable_prodMk_left htm)
       · exact measure_ne_top _ _
     rw [this]
     exact Measurable.sub (Kernel.measurable_coe κ MeasurableSet.univ) iht

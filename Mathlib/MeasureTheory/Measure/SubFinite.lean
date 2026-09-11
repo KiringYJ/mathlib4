@@ -34,7 +34,7 @@ open scoped ENNReal
 
 namespace MeasureTheory.Measure
 
-variable {α : Type*} {mα : MeasurableSpace α} {μ ν ξ : Measure α}
+variable {α : Type*} {mα : SigmaAlgebra α} {μ ν ξ : Measure α}
 
 lemma sub_le_iff_le_add [IsFiniteMeasure μ] [IsFiniteMeasure ν] : μ - ν ≤ ξ ↔ μ ≤ ξ + ν := by
   refine ⟨fun h ↦ ?_, sub_le_of_le_add⟩

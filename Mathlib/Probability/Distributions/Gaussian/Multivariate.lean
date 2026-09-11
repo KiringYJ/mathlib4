@@ -6,7 +6,7 @@ Authors: Rémy Degenne, Etienne Marion
 module
 
 public import Mathlib.Analysis.Matrix.Order
-public import Mathlib.Analysis.Matrix.MeasurableSpace
+public import Mathlib.Analysis.Matrix.SigmaAlgebra
 public import Mathlib.Probability.Distributions.Gaussian.CharFun
 
 import Mathlib.Probability.Distributions.Gaussian.Fernique
@@ -52,7 +52,7 @@ section stdGaussian
 /-! ### Standard Gaussian measure over a Euclidean space -/
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
-  [MeasurableSpace E]
+  [SigmaAlgebra E]
 
 variable (E) in
 /-- Standard Gaussian distribution on a finite-dimensional real inner product space `E`.
@@ -123,7 +123,7 @@ lemma covarianceBilin_stdGaussian :
   · exact LinearMap.BilinForm.isPosSemidef_iff.2 isPosSemidef_inner
   · simp [charFun_stdGaussian, neg_div, innerSL_apply_apply ℝ]
 
-lemma stdGaussian_map {F : Type*} [NormedAddCommGroup F] [InnerProductSpace ℝ F] [MeasurableSpace F]
+lemma stdGaussian_map {F : Type*} [NormedAddCommGroup F] [InnerProductSpace ℝ F] [SigmaAlgebra F]
     [BorelSpace F] (f : E ≃ₗᵢ[ℝ] F) :
     haveI := f.finiteDimensional; (stdGaussian E).map f = stdGaussian F := by
   have := f.finiteDimensional

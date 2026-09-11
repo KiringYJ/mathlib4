@@ -7,7 +7,7 @@ module
 
 public import Mathlib.MeasureTheory.Measure.Haar.Unique
 public import Mathlib.MeasureTheory.Measure.Hausdorff
-public import Mathlib.Analysis.Normed.Lp.MeasurableSpace
+public import Mathlib.Analysis.Normed.Lp.SigmaAlgebra
 import Mathlib.MeasureTheory.Measure.Haar.InnerProductSpace
 
 /-!
@@ -52,8 +52,8 @@ instance (d : ℕ) : (μH[d] : Measure (EuclideanSpace ℝ (Fin d))).IsAddHaarMe
   simpa using MeasureTheory.isAddHaarMeasure_hausdorffMeasure (E := EuclideanSpace ℝ (Fin d))
 
 variable {X Y : Type*}
-variable [EMetricSpace X] [MeasurableSpace X] [BorelSpace X]
-variable [EMetricSpace Y] [MeasurableSpace Y] [BorelSpace Y]
+variable [EMetricSpace X] [SigmaAlgebra X] [BorelSpace X]
+variable [EMetricSpace Y] [SigmaAlgebra Y] [BorelSpace Y]
 
 /--
 Euclidean Hausdorff measure `μHE[d]`, defined as `μH[d]` scaled to agree with Lebesgue measure
@@ -99,7 +99,7 @@ theorem MeasureTheory.Measure.addHaarScalarFactor_volume_hausdorffMeasure_ne_zer
 
 set_option backward.isDefEq.respectTransparency false in -- needed by `ENNReal.smul_def`
 instance MeasureTheory.isAddHaarMeasure_euclideanHausdorffMeasure {E : Type*}
-    [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E] [MeasurableSpace E]
+    [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E] [SigmaAlgebra E]
     [BorelSpace E] : (μHE[Module.finrank ℝ E] : Measure E).IsAddHaarMeasure := by
   rw [euclideanHausdorffMeasure_def, ENNReal.smul_def]
   exact IsAddHaarMeasure.smul _
@@ -148,7 +148,7 @@ theorem Isometry.map_euclideanHausdorffMeasure {f : X → Y} {d : ℕ} (hf : Iso
 open scoped Pointwise in
 theorem MeasureTheory.Measure.euclideanHausdorffMeasure_smul₀ {𝕜 : Type*} {E : Type*}
     [NormedAddCommGroup E] [NormedDivisionRing 𝕜] [Module 𝕜 E] [NormSMulClass 𝕜 E]
-    [MeasurableSpace E] [BorelSpace E] (d : ℕ) {r : 𝕜} (hr : r ≠ 0) (s : Set E) :
+    [SigmaAlgebra E] [BorelSpace E] (d : ℕ) {r : 𝕜} (hr : r ≠ 0) (s : Set E) :
     μHE[d] (r • s) = ‖r‖₊ ^ d • μHE[d] s := by
   rw [euclideanHausdorffMeasure_def, Measure.smul_apply, hausdorffMeasure_smul₀ (by simp) hr,
     Measure.smul_apply, smul_comm]
@@ -156,7 +156,7 @@ theorem MeasureTheory.Measure.euclideanHausdorffMeasure_smul₀ {𝕜 : Type*} {
 
 section Homothety
 variable {𝕜 V P : Type*} [NormedField 𝕜] [NormedAddCommGroup V] [NormedSpace 𝕜 V]
-  [MeasurableSpace P] [MetricSpace P] [NormedAddTorsor V P] [BorelSpace P]
+  [SigmaAlgebra P] [MetricSpace P] [NormedAddTorsor V P] [BorelSpace P]
 
 theorem MeasureTheory.euclideanHausdorffMeasure_homothety_image (d : ℕ) (x : P) {c : 𝕜}
     (hc : c ≠ 0) (s : Set P) :
@@ -173,9 +173,9 @@ theorem MeasureTheory.euclideanHausdorffMeasure_homothety_preimage (d : ℕ) (x 
 end Homothety
 
 variable {V P : Type*}
-variable [NormedAddCommGroup V] [InnerProductSpace ℝ V] [MeasurableSpace V] [BorelSpace V]
+variable [NormedAddCommGroup V] [InnerProductSpace ℝ V] [SigmaAlgebra V] [BorelSpace V]
 variable [FiniteDimensional ℝ V]
-variable [MetricSpace P] [MeasurableSpace P] [BorelSpace P] [NormedAddTorsor V P]
+variable [MetricSpace P] [SigmaAlgebra P] [BorelSpace P] [NormedAddTorsor V P]
 
 /-!
 ### `μHE[d]` agree with the volume measure on inner product spaces
@@ -217,7 +217,7 @@ open EuclideanGeometry
 ### `μHE[d]` is preserved through subspace inclusion
 -/
 
-omit [MeasurableSpace V] [BorelSpace V] [FiniteDimensional ℝ V] in
+omit [SigmaAlgebra V] [BorelSpace V] [FiniteDimensional ℝ V] in
 theorem AffineSubspace.euclideanHausdorffMeasure_coe_image (d : ℕ) (s : AffineSubspace ℝ P)
     (t : Set s) : μHE[d] (Subtype.val '' t) = μHE[d] t :=
   isometry_subtype_coe.euclideanHausdorffMeasure_image _

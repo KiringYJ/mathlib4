@@ -53,7 +53,7 @@ The bundled variant of `TemperedDistribution.MemSobolev` is called `BesselPotent
 
 variable {E F : Type*}
   [NormedAddCommGroup E] [NormedAddCommGroup F]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [MeasurableSpace E] [BorelSpace E]
+  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [SigmaAlgebra E] [BorelSpace E]
 
 open FourierTransform TemperedDistribution ENNReal MeasureTheory
 open scoped SchwartzMap

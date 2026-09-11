@@ -65,7 +65,7 @@ open scoped MeasureTheory ProbabilityTheory ENNReal NNReal Topology
 
 namespace ProbabilityTheory
 
-variable {Ω : Type*} {m : MeasurableSpace Ω} {X : Ω → ℝ} {μ : Measure Ω} {t u : ℝ} {z ε : ℂ}
+variable {Ω : Type*} {m : SigmaAlgebra Ω} {X : Ω → ℝ} {μ : Measure Ω} {t u : ℝ} {z ε : ℂ}
 
 /-- Complex extension of the moment-generating function. -/
 noncomputable
@@ -83,7 +83,7 @@ lemma complexMGF_id_map (hX : AEMeasurable X μ) : complexMGF id (μ.map X) = co
   · rfl
   · fun_prop
 
-lemma complexMGF_congr_identDistrib {Ω' : Type*} {mΩ' : MeasurableSpace Ω'} {μ' : Measure Ω'}
+lemma complexMGF_congr_identDistrib {Ω' : Type*} {mΩ' : SigmaAlgebra Ω'} {μ' : Measure Ω'}
     {Y : Ω' → ℝ} (h : IdentDistrib X Y μ μ') :
     complexMGF X μ = complexMGF Y μ' := by
   rw [← complexMGF_id_map h.aemeasurable_fst, ← complexMGF_id_map h.aemeasurable_snd, h.map_eq]
@@ -234,7 +234,7 @@ section EqOfMGF
 /-! We prove that if two random variables have the same `mgf`, then
 they also have the same `complexMGF`. -/
 
-variable {Ω' : Type*} {mΩ' : MeasurableSpace Ω'} {Y : Ω' → ℝ} {μ' : Measure Ω'}
+variable {Ω' : Type*} {mΩ' : SigmaAlgebra Ω'} {Y : Ω' → ℝ} {μ' : Measure Ω'}
 
 /-- If two random variables have the same moment-generating function then they have
 the same `integrableExpSet`. -/
@@ -311,7 +311,7 @@ end EqOfMGF
 
 section ext
 
-variable {Ω' : Type*} {mΩ' : MeasurableSpace Ω'} {Y : Ω' → ℝ} {μ' : Measure Ω'}
+variable {Ω' : Type*} {mΩ' : SigmaAlgebra Ω'} {Y : Ω' → ℝ} {μ' : Measure Ω'}
 
 /-- If the complex moment-generating functions of two random variables `X` and `Y` with respect to
 the finite measures `μ`, `μ'`, respectively, coincide, then `μ.map X = μ'.map Y`. In other words,

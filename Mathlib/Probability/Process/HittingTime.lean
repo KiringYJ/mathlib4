@@ -41,7 +41,7 @@ open scoped MeasureTheory NNReal ENNReal Topology
 
 namespace MeasureTheory
 
-variable {Ω β ι : Type*} {m : MeasurableSpace Ω}
+variable {Ω β ι : Type*} {m : SigmaAlgebra Ω}
 
 section Basic
 
@@ -397,7 +397,7 @@ end Inequalities
 
 /-- A discrete hitting time is a stopping time. -/
 theorem Adapted.isStoppingTime_hittingBtwn [ConditionallyCompleteLinearOrder ι] [WellFoundedLT ι]
-    [Countable ι] {_ : MeasurableSpace β} {f : Filtration ι m} {u : ι → Ω → β} {s : Set β}
+    [Countable ι] {_ : SigmaAlgebra β} {f : Filtration ι m} {u : ι → Ω → β} {s : Set β}
     {n n' : ι} (hu : Adapted f u) (hs : MeasurableSet s) :
     IsStoppingTime f (fun ω ↦ (hittingBtwn u s n n' ω : ι)) := by
   intro i
@@ -407,17 +407,17 @@ theorem Adapted.isStoppingTime_hittingBtwn [ConditionallyCompleteLinearOrder ι]
   · have h_set_eq_Union : {ω | hittingBtwn u s n n' ω ≤ i} = ⋃ j ∈ Set.Icc n i, u j ⁻¹' s := by
       ext; simp [hittingBtwn_le_iff_of_lt _ hi]
     simpa [h_set_eq_Union] using MeasurableSet.iUnion fun j =>
-      MeasurableSet.iUnion fun hj => f.mono hj.2 _ ((hu j) hs)
+      MeasurableSet.iUnion fun hj => f.mono hj.2 ((hu j) hs)
 
 theorem Adapted.isStoppingTime_hittingAfter [ConditionallyCompleteLinearOrder ι]
-    [WellFoundedLT ι] [Countable ι] {_ : MeasurableSpace β} {f : Filtration ι m} {u : ι → Ω → β}
+    [WellFoundedLT ι] [Countable ι] {_ : SigmaAlgebra β} {f : Filtration ι m} {u : ι → Ω → β}
     {s : Set β} {n : ι} (hu : Adapted f u) (hs : MeasurableSet s) :
     IsStoppingTime f (hittingAfter u s n) := by
   intro i
   have h_set_eq_Union : {ω | hittingAfter u s n ω ≤ i} = ⋃ j ∈ Set.Icc n i, u j ⁻¹' s := by
     ext; simp [hittingAfter_le_iff]
   simpa [h_set_eq_Union] using MeasurableSet.iUnion fun j =>
-    MeasurableSet.iUnion fun hj => f.mono hj.2 _ ((hu j) hs)
+    MeasurableSet.iUnion fun hj => f.mono hj.2 ((hu j) hs)
 
 theorem stoppedValue_hittingBtwn_mem [ConditionallyCompleteLinearOrder ι] [WellFoundedLT ι]
     {u : ι → Ω → β} {s : Set β} {n m : ι} {ω : Ω} (h : ∃ j ∈ Set.Icc n m, u j ω ∈ s) :
@@ -432,7 +432,7 @@ theorem stoppedValue_hittingBtwn_mem [ConditionallyCompleteLinearOrder ι] [Well
 is a stopping time. -/
 theorem Adapted.isStoppingTime_hittingBtwn_isStoppingTime [ConditionallyCompleteLinearOrder ι]
     [WellFoundedLT ι] [Countable ι] [TopologicalSpace ι] [OrderTopology ι]
-    [FirstCountableTopology ι] [MeasurableSpace β] {f : Filtration ι m} {u : ι → Ω → β}
+    [FirstCountableTopology ι] [SigmaAlgebra β] {f : Filtration ι m} {u : ι → Ω → β}
     {τ : Ω → WithTop ι} (hτ : IsStoppingTime f τ)
     {N : ι} (hτbdd : ∀ x, τ x ≤ N) {s : Set β} (hs : MeasurableSet s) (hf : Adapted f u) :
     IsStoppingTime f fun x ↦ (hittingBtwn u s (τ x).untopA N x : ι) := by
@@ -459,7 +459,7 @@ theorem Adapted.isStoppingTime_hittingBtwn_isStoppingTime [ConditionallyComplete
     exact mod_cast hτbdd
   simp only [WithTop.coe_le_coe, h₁, h₂, Set.union_empty]
   refine MeasurableSet.iUnion fun i => MeasurableSet.iUnion fun hi =>
-    (f.mono hi _ (hτ.measurableSet_eq i)).inter ?_
+    MeasurableSet.inter (f.mono hi (hτ.measurableSet_eq i)) ?_
   simpa using hf.isStoppingTime_hittingBtwn hs n
 
 section CompleteLattice

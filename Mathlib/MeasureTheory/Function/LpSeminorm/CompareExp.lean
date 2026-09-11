@@ -25,7 +25,7 @@ namespace MeasureTheory
 
 section SameSpace
 
-variable {α ε ε' : Type*} {m : MeasurableSpace α} {μ : Measure α} {f : α → ε}
+variable {α ε ε' : Type*} {m : SigmaAlgebra α} {μ : Measure α} {f : α → ε}
   [TopologicalSpace ε] [ContinuousENorm ε]
   [TopologicalSpace ε'] [ESeminormedAddMonoid ε']
 
@@ -157,7 +157,7 @@ end SameSpace
 
 section Bilinear
 
-variable {α E F G : Type*} {m : MeasurableSpace α}
+variable {α E F G : Type*} {m : SigmaAlgebra α}
   [NormedAddCommGroup E] [NormedAddCommGroup F] [NormedAddCommGroup G] {μ : Measure α}
   {f : α → E} {g : α → F}
 
@@ -295,7 +295,7 @@ end Bilinear
 
 section IsBoundedSMul
 
-variable {𝕜 α E : Type*} {m : MeasurableSpace α} {μ : Measure α} [NormedRing 𝕜]
+variable {𝕜 α E : Type*} {m : SigmaAlgebra α} {μ : Measure α} [NormedRing 𝕜]
   [NormedAddCommGroup E] [MulActionWithZero 𝕜 E] [IsBoundedSMul 𝕜 E]
   {f : α → E}
 
@@ -333,7 +333,7 @@ end IsBoundedSMul
 
 section Mul
 
-variable {α : Type*} {_ : MeasurableSpace α} {𝕜 : Type*} [NormedRing 𝕜] {μ : Measure α}
+variable {α : Type*} {_ : SigmaAlgebra α} {𝕜 : Type*} [NormedRing 𝕜] {μ : Measure α}
   {p q r : ℝ≥0∞} {f : α → 𝕜} {φ : α → 𝕜}
 
 theorem MemLp.mul (hf : MemLp f q μ) (hφ : MemLp φ p μ) [hpqr : HolderTriple p q r] :
@@ -349,7 +349,7 @@ theorem MemLp.mul' (hf : MemLp f q μ) (hφ : MemLp φ p μ) [hpqr : HolderTripl
 end Mul
 
 section Prod
-variable {ι α 𝕜 : Type*} {_ : MeasurableSpace α} [NormedCommRing 𝕜] {μ : Measure α} {f : ι → α → 𝕜}
+variable {ι α 𝕜 : Type*} {_ : SigmaAlgebra α} [NormedCommRing 𝕜] {μ : Measure α} {f : ι → α → 𝕜}
   {p : ι → ℝ≥0∞} {s : Finset ι}
 
 open Finset in

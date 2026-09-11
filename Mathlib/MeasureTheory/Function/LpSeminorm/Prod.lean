@@ -18,7 +18,7 @@ open scoped ENNReal
 
 namespace MeasureTheory
 
-variable {α β ε : Type*} {mα : MeasurableSpace α} {mβ : MeasurableSpace β}
+variable {α β ε : Type*} {mα : SigmaAlgebra α} {mβ : SigmaAlgebra β}
   [TopologicalSpace ε] [ContinuousENorm ε]
   {μ : Measure α} {ν : Measure β} {p : ℝ≥0∞}
 

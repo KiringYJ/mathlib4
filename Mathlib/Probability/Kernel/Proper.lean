@@ -33,7 +33,7 @@ open MeasureTheory ENNReal Set
 open scoped ProbabilityTheory
 
 namespace ProbabilityTheory.Kernel
-variable {X : Type*} {𝓑 𝓧 : MeasurableSpace X} {π : Kernel[𝓑, 𝓧] X X} {A B : Set X}
+variable {X : Type*} {𝓑 𝓧 : SigmaAlgebra X} {π : Kernel[𝓑, 𝓧] X X} {A B : Set X}
   {f g : X → ℝ≥0∞} {x₀ : X}
 
 /-- For two σ-algebras `𝓑 ≤ 𝓧` on a space `X`, a `𝓑, 𝓧`-kernel `π : X → Measure X` is proper if
@@ -46,23 +46,28 @@ is the same as `π` times the indicator of `B`.
 To avoid assuming `𝓑 ≤ 𝓧` in the definition, we replace `𝓑` by `𝓑 ⊓ 𝓧` in the restriction. -/
 structure IsProper (π : Kernel[𝓑, 𝓧] X X) : Prop where
   restrict_eq_indicator_smul' :
-    ∀ ⦃B : Set X⦄ (hB : MeasurableSet[𝓑 ⊓ 𝓧] B) (x : X),
-      π.restrict (inf_le_right (b := 𝓧) _ hB) x = B.indicator (fun _ ↦ (1 : ℝ≥0∞)) x • π x
+    ∀ ⦃B : Set X⦄ (hB : B ∈ 𝓑 ⊓ 𝓧) (x : X),
+      π.restrict (show @MeasurableSet X 𝓧 B from inf_le_right (b := 𝓧) hB) x =
+        B.indicator (fun _ ↦ (1 : ℝ≥0∞)) x • π x
 
 lemma isProper_iff_restrict_eq_indicator_smul (h𝓑𝓧 : 𝓑 ≤ 𝓧) :
-    IsProper π ↔ ∀ ⦃B : Set X⦄ (hB : MeasurableSet[𝓑] B) (x : X),
-      π.restrict (h𝓑𝓧 _ hB) x = B.indicator (fun _ ↦ (1 : ℝ≥0∞)) x • π x := by
+    IsProper π ↔ ∀ ⦃B : Set X⦄ (hB : B ∈ 𝓑) (x : X),
+      π.restrict (show @MeasurableSet X 𝓧 B from h𝓑𝓧 hB) x =
+        B.indicator (fun _ ↦ (1 : ℝ≥0∞)) x • π x := by
   refine ⟨fun ⟨h⟩ ↦ ?_, fun h ↦ ⟨?_⟩⟩ <;> simpa +instances only [inf_eq_left.2 h𝓑𝓧] using h
 
 lemma isProper_iff_inter_eq_indicator_mul (h𝓑𝓧 : 𝓑 ≤ 𝓧) :
     IsProper π ↔
-      ∀ ⦃A : Set X⦄ (_hA : MeasurableSet[𝓧] A) ⦃B : Set X⦄ (_hB : MeasurableSet[𝓑] B) (x : X),
+      ∀ ⦃A : Set X⦄ (_hA : A ∈ 𝓧) ⦃B : Set X⦄ (_hB : B ∈ 𝓑) (x : X),
         π x (A ∩ B) = B.indicator 1 x * π x A := by
   calc
-    _ ↔ ∀ ⦃A : Set X⦄ (_hA : MeasurableSet[𝓧] A) ⦃B : Set X⦄ (hB : MeasurableSet[𝓑] B) (x : X),
-          π.restrict (h𝓑𝓧 _ hB) x A = B.indicator 1 x * π x A := by
+    _ ↔ ∀ ⦃A : Set X⦄ (_hA : A ∈ 𝓧) ⦃B : Set X⦄ (hB : B ∈ 𝓑) (x : X),
+          π.restrict (show @MeasurableSet X 𝓧 B from h𝓑𝓧 hB) x A =
+            B.indicator 1 x * π x A := by
       simp [isProper_iff_restrict_eq_indicator_smul h𝓑𝓧, Measure.ext_iff]; aesop
-    _ ↔ _ := by congr! 5 with A hA B hB x; rw [restrict_apply, Measure.restrict_apply hA]
+    _ ↔ _ := by
+      congr! 5 with A hA B hB x
+      rw [restrict_apply, Measure.restrict_apply (show @MeasurableSet X 𝓧 A from hA)]
 
 alias ⟨IsProper.restrict_eq_indicator_smul, IsProper.of_restrict_eq_indicator_smul⟩ :=
   isProper_iff_restrict_eq_indicator_smul
@@ -71,21 +76,23 @@ alias ⟨IsProper.inter_eq_indicator_mul, IsProper.of_inter_eq_indicator_mul⟩ 
   isProper_iff_inter_eq_indicator_mul
 
 lemma IsProper.setLIntegral_eq_comp (hπ : IsProper π) (h𝓑𝓧 : 𝓑 ≤ 𝓧) {μ : Measure[𝓧] X}
-    (hA : MeasurableSet[𝓧] A) (hB : MeasurableSet[𝓑] B) :
+    (hA : A ∈ 𝓧) (hB : B ∈ 𝓑) :
     ∫⁻ a in B, π a A ∂μ = (π ∘ₘ μ) (A ∩ B) := by
   rw [Measure.bind_apply (by measurability) (π.measurable.mono h𝓑𝓧 le_rfl).aemeasurable]
   simp only [hπ.inter_eq_indicator_mul h𝓑𝓧 hA hB, ← indicator_mul_const, Pi.one_apply, one_mul]
-  rw [← lintegral_indicator (h𝓑𝓧 _ hB)]
+  rw [← lintegral_indicator (show @MeasurableSet X 𝓧 B from h𝓑𝓧 hB)]
   rfl
 
 /-- Auxiliary lemma for `IsProper.lintegral_mul` and
 `IsProper.setLIntegral_eq_indicator_mul_lintegral`. -/
 private lemma IsProper.lintegral_indicator_mul_indicator (hπ : IsProper π) (h𝓑𝓧 : 𝓑 ≤ 𝓧)
-    (hA : MeasurableSet[𝓧] A) (hB : MeasurableSet[𝓑] B) :
+    (hA : A ∈ 𝓧) (hB : B ∈ 𝓑) :
     ∫⁻ x, B.indicator 1 x * A.indicator 1 x ∂(π x₀) =
       B.indicator 1 x₀ * ∫⁻ x, A.indicator 1 x ∂(π x₀) := by
   simp_rw [← inter_indicator_mul]
-  rw [lintegral_indicator ((h𝓑𝓧 _ hB).inter hA), lintegral_indicator hA]
+  rw [lintegral_indicator (show @MeasurableSet X 𝓧 (B ∩ A) from
+      𝓧.inter_mem (h𝓑𝓧 hB) hA),
+    lintegral_indicator (show @MeasurableSet X 𝓧 A from hA)]
   simp only [MeasureTheory.lintegral_const, MeasurableSet.univ, Measure.restrict_apply, univ_inter,
     Pi.one_apply, one_mul]
   rw [← hπ.inter_eq_indicator_mul h𝓑𝓧 hA hB, inter_comm]
@@ -93,7 +100,7 @@ private lemma IsProper.lintegral_indicator_mul_indicator (hπ : IsProper π) (h�
 /-- Auxiliary lemma for `IsProper.lintegral_mul` and
 `IsProper.setLIntegral_eq_indicator_mul_lintegral`. -/
 private lemma IsProper.lintegral_indicator_mul (hπ : IsProper π) (h𝓑𝓧 : 𝓑 ≤ 𝓧)
-    (hf : Measurable[𝓧] f) (hB : MeasurableSet[𝓑] B) :
+    (hf : Measurable[𝓧] f) (hB : B ∈ 𝓑) :
     ∫⁻ x, B.indicator 1 x * f x ∂(π x₀) = B.indicator 1 x₀ * ∫⁻ x, f x ∂(π x₀) := by
   refine hf.ennreal_induction ?_ ?_ ?_
   · rintro c A hA
@@ -110,15 +117,16 @@ private lemma IsProper.lintegral_indicator_mul (hπ : IsProper π) (h𝓑𝓧 : 
     · exact hf'_mono.const_mul zero_le
 
 lemma IsProper.setLIntegral_eq_indicator_mul_lintegral (hπ : IsProper π) (h𝓑𝓧 : 𝓑 ≤ 𝓧)
-    (hf : Measurable[𝓧] f) (hB : MeasurableSet[𝓑] B) (x₀ : X) :
+    (hf : Measurable[𝓧] f) (hB : B ∈ 𝓑) (x₀ : X) :
     ∫⁻ x in B, f x ∂(π x₀) = B.indicator 1 x₀ * ∫⁻ x, f x ∂(π x₀) := by
   simp [← hπ.lintegral_indicator_mul h𝓑𝓧 hf hB, ← indicator_mul_left,
-    lintegral_indicator (h𝓑𝓧 _ hB)]
+    lintegral_indicator (show @MeasurableSet X 𝓧 B from h𝓑𝓧 hB)]
 
 lemma IsProper.setLIntegral_inter_eq_indicator_mul_setLIntegral (hπ : IsProper π) (h𝓑𝓧 : 𝓑 ≤ 𝓧)
-    (hf : Measurable[𝓧] f) (hA : MeasurableSet[𝓧] A) (hB : MeasurableSet[𝓑] B) (x₀ : X) :
+    (hf : Measurable[𝓧] f) (hA : A ∈ 𝓧) (hB : B ∈ 𝓑) (x₀ : X) :
     ∫⁻ x in A ∩ B, f x ∂(π x₀) = B.indicator 1 x₀ * ∫⁻ x in A, f x ∂(π x₀) := by
-  rw [← lintegral_indicator hA, ← hπ.setLIntegral_eq_indicator_mul_lintegral h𝓑𝓧 _ hB,
+  rw [← lintegral_indicator (show @MeasurableSet X 𝓧 A from hA),
+    ← hπ.setLIntegral_eq_indicator_mul_lintegral h𝓑𝓧 _ hB,
     setLIntegral_indicator] <;> measurability
 
 lemma IsProper.lintegral_mul (hπ : IsProper π) (h𝓑𝓧 : 𝓑 ≤ 𝓧) (hf : Measurable[𝓧] f)

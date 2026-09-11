@@ -40,8 +40,8 @@ open scoped ENNReal NNReal
 
 namespace ProbabilityTheory
 
-variable {Θ 𝓧 𝓧' 𝓨 : Type*} {mΘ : MeasurableSpace Θ}
-  {m𝓧 : MeasurableSpace 𝓧} {m𝓧' : MeasurableSpace 𝓧'} {m𝓨 : MeasurableSpace 𝓨}
+variable {Θ 𝓧 𝓧' 𝓨 : Type*} {mΘ : SigmaAlgebra Θ}
+  {m𝓧 : SigmaAlgebra 𝓧} {m𝓧' : SigmaAlgebra 𝓧'} {m𝓨 : SigmaAlgebra 𝓨}
   {ℓ : Θ → 𝓨 → ℝ≥0∞} {P : Kernel Θ 𝓧} {κ : Kernel 𝓧 𝓨} {π : Measure Θ}
 
 section BayesRiskLeMinimaxRisk

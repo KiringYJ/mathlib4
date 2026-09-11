@@ -6,7 +6,7 @@ Authors: Yaël Dillies
 module
 
 public import Mathlib.Combinatorics.SimpleGraph.Basic
-public import Mathlib.MeasureTheory.MeasurableSpace.Embedding
+public import Mathlib.MeasureTheory.SigmaAlgebra.Embedding
 
 /-!
 # Sigma-algebra on simple graphs
@@ -22,10 +22,10 @@ open scoped Finset
 namespace SimpleGraph
 variable {V : Type*}
 
-instance : MeasurableSpace (SimpleGraph V) := .comap Adj inferInstance
+instance : SigmaAlgebra (SimpleGraph V) := .comap Adj inferInstance
 
 /-- A simple graph-valued map is measurable iff all induced adjacency maps are measurable. -/
-lemma measurable_iff_adj {Ω : Type*} {m : MeasurableSpace Ω} {G : Ω → SimpleGraph V} :
+lemma measurable_iff_adj {Ω : Type*} {m : SigmaAlgebra Ω} {G : Ω → SimpleGraph V} :
     Measurable G ↔ ∀ u v, Measurable fun ω ↦ (G ω).Adj u v := by
   simp [measurable_comap_iff, measurable_pi_iff]
 

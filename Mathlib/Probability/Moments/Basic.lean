@@ -49,7 +49,7 @@ open scoped MeasureTheory ProbabilityTheory ENNReal NNReal
 
 namespace ProbabilityTheory
 
-variable {Ω ι : Type*} {m : MeasurableSpace Ω} {X : Ω → ℝ} {p : ℕ} {μ : Measure Ω}
+variable {Ω ι : Type*} {m : SigmaAlgebra Ω} {X : Ω → ℝ} {p : ℕ} {μ : Measure Ω}
 
 /-- Moment of a real random variable, `μ[X ^ p]`. -/
 def moment (X : Ω → ℝ) (p : ℕ) (μ : Measure Ω) : ℝ :=
@@ -211,7 +211,7 @@ lemma mgf_pos_iff [hμ : NeZero μ] :
 lemma exp_cgf [hμ : NeZero μ] (hX : Integrable (fun ω ↦ exp (t * X ω)) μ) :
     exp (cgf X μ t) = mgf X μ t := by rw [cgf, exp_log (mgf_pos' hμ.out hX)]
 
-lemma mgf_map {Ω' : Type*} {mΩ' : MeasurableSpace Ω'} {μ : Measure Ω'} {Y : Ω' → Ω} {X : Ω → ℝ}
+lemma mgf_map {Ω' : Type*} {mΩ' : SigmaAlgebra Ω'} {μ : Measure Ω'} {Y : Ω' → Ω} {X : Ω → ℝ}
     (hY : AEMeasurable Y μ) {t : ℝ} (hX : AEStronglyMeasurable (fun ω ↦ exp (t * X ω)) (μ.map Y)) :
     mgf X (μ.map Y) t = mgf (X ∘ Y) μ t := by
   simp_rw [mgf, integral_map hY hX, Function.comp_apply]
@@ -224,7 +224,7 @@ lemma mgf_id_map (hX : AEMeasurable X μ) : mgf id (μ.map X) = mgf X μ := by
 lemma mgf_congr {Y : Ω → ℝ} (h : X =ᵐ[μ] Y) : mgf X μ t = mgf Y μ t :=
   integral_congr_ae <| by filter_upwards [h] with ω hω using by rw [hω]
 
-lemma mgf_congr_identDistrib {Ω' : Type*} {mΩ' : MeasurableSpace Ω'} {μ' : Measure Ω'}
+lemma mgf_congr_identDistrib {Ω' : Type*} {mΩ' : SigmaAlgebra Ω'} {μ' : Measure Ω'}
     {Y : Ω' → ℝ} (h : IdentDistrib X Y μ μ') :
     mgf X μ = mgf Y μ' := by
   rw [← mgf_id_map h.aemeasurable_fst, ← mgf_id_map h.aemeasurable_snd, h.map_eq]
@@ -399,7 +399,7 @@ theorem iIndepFun.cgf_sum {X : ι → Ω → ℝ}
 end IndepFun
 
 theorem mgf_congr_of_identDistrib
-    (X : Ω → ℝ) {Ω' : Type*} {m' : MeasurableSpace Ω'} {μ' : Measure Ω'} (X' : Ω' → ℝ)
+    (X : Ω → ℝ) {Ω' : Type*} {m' : SigmaAlgebra Ω'} {μ' : Measure Ω'} (X' : Ω' → ℝ)
     (hident : IdentDistrib X X' μ μ') (t : ℝ) :
     mgf X μ t = mgf X' μ' t := hident.comp (measurable_const_mul t).exp |>.integral_eq
 
@@ -513,7 +513,7 @@ namespace ContinuousLinearMap
 
 variable {𝕜 E F : Type*} [RCLike 𝕜] [NormedAddCommGroup E] [NormedAddCommGroup F]
     [NormedSpace 𝕜 E] [NormedSpace ℝ E] [NormedSpace 𝕜 F] [NormedSpace ℝ F] [CompleteSpace E]
-    [CompleteSpace F] [MeasurableSpace E] {μ : Measure E}
+    [CompleteSpace F] [SigmaAlgebra E] {μ : Measure E}
 
 lemma integral_comp_id_comm' (h : Integrable id μ) (L : E →L[𝕜] F) :
     μ[L] = L μ[id] := by
@@ -524,7 +524,7 @@ lemma integral_comp_id_comm (h : Integrable id μ) (L : E →L[𝕜] F) :
     μ[L] = L (∫ x, x ∂μ) :=
   L.integral_comp_id_comm' h
 
-variable [OpensMeasurableSpace E] [MeasurableSpace F] [BorelSpace F] [SecondCountableTopology F]
+variable [OpensSigmaAlgebra E] [SigmaAlgebra F] [BorelSpace F] [SecondCountableTopology F]
 
 lemma integral_id_map (h : Integrable id μ) (L : E →L[𝕜] F) :
     ∫ x, x ∂(μ.map L) = L (∫ x, x ∂μ) := by
@@ -537,7 +537,7 @@ namespace ContinuousLinearEquiv
 
 variable {𝕜 E F : Type*} [RCLike 𝕜] [NormedAddCommGroup E] [NormedAddCommGroup F]
     [NormedSpace 𝕜 E] [NormedSpace ℝ E] [NormedSpace 𝕜 F] [NormedSpace ℝ F] [CompleteSpace E]
-    [CompleteSpace F] [MeasurableSpace E] {μ : Measure E}
+    [CompleteSpace F] [SigmaAlgebra E] {μ : Measure E}
 
 lemma integral_comp_id_comm' (L : E ≃L[𝕜] F) :
     μ[L] = L μ[id] := by
@@ -549,7 +549,7 @@ lemma integral_comp_id_comm' (L : E ≃L[𝕜] F) :
 lemma integral_comp_id_comm (L : E ≃L[𝕜] F) :
     μ[L] = L (∫ x, x ∂μ) := L.integral_comp_id_comm'
 
-variable [BorelSpace E] [MeasurableSpace F] [BorelSpace F]
+variable [BorelSpace E] [SigmaAlgebra F] [BorelSpace F]
 
 lemma integral_id_map (L : E ≃L[𝕜] F) :
     ∫ x, x ∂(μ.map L) = L (∫ x, x ∂μ) := by

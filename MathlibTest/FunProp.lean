@@ -1,6 +1,6 @@
 import Mathlib.Analysis.Calculus.ContDiff.Basic
 import Mathlib.Analysis.SpecialFunctions.Log.Deriv
-import Mathlib.MeasureTheory.MeasurableSpace.Basic
+import Mathlib.MeasureTheory.SigmaAlgebra.Basic
 import Mathlib.MeasureTheory.Measure.Haar.OfBasis
 import Mathlib.MeasureTheory.Function.StronglyMeasurable.AEStronglyMeasurable
 import Mathlib.Analysis.Complex.Trigonometric
@@ -139,7 +139,7 @@ Issues:
   No theorems found for `f` in order to prove `MeasureTheory.AEStronglyMeasurable (fun a => f a) μ`
 -/
 #guard_msgs in
-example {α : Type*} {m₀ : MeasurableSpace α} {μ : MeasureTheory.Measure α} {M : Type*}
+example {α : Type*} {m₀ : SigmaAlgebra α} {μ : MeasureTheory.Measure α} {M : Type*}
     [CommMonoid M] [TopologicalSpace M] [ContinuousMul M] (l : Multiset (α → M))
     (hl : ∀ f ∈ l, MeasureTheory.AEStronglyMeasurable f μ) :
     MeasureTheory.AEStronglyMeasurable l.prod μ := by
@@ -149,10 +149,10 @@ example {α : Type*} {m₀ : MeasurableSpace α} {μ : MeasureTheory.Measure α}
 
 attribute [fun_prop] Measurable.imp Measurable.forall
 
-example {α : Type*} [MeasurableSpace α] {p q : α → Prop} (hp : Measurable p) (hq : Measurable q) :
+example {α : Type*} [SigmaAlgebra α] {p q : α → Prop} (hp : Measurable p) (hq : Measurable q) :
     Measurable fun x => p x → q x := by
   fun_prop
 
-example {α ι : Type*} [MeasurableSpace α] [Countable ι] {p : ι → α → Prop}
+example {α ι : Type*} [SigmaAlgebra α] [Countable ι] {p : ι → α → Prop}
     (hp : ∀ i, Measurable (p i)) : Measurable fun x => ∀ i, p i x := by
   fun_prop

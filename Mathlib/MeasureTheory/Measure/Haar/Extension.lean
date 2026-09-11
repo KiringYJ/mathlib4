@@ -56,7 +56,7 @@ theorem pullback_def (f : CompactlySupportedContinuousMap B E) (b : B) (a : A) :
     pullback H f b a = f (b * φ a) :=
   f.pullback_monoidHom_def H.isClosedEmbedding b a
 
-variable [MeasurableSpace A] [BorelSpace A] (μA : Measure A) [hμA : IsHaarMeasure μA]
+variable [SigmaAlgebra A] [BorelSpace A] (μA : Measure A) [hμA : IsHaarMeasure μA]
   [NormedSpace ℝ E]
 
 @[to_additive]
@@ -146,7 +146,7 @@ theorem pushforward_mono {f g : CompactlySupportedContinuousMap B ℝ} (h : f �
     pushforward H μA f ≤ pushforward H μA g :=
   fun _ ↦ integral_mono (pullback H f _).integrable (pullback H g _).integrable (fun _ ↦ h _)
 
-variable [MeasurableSpace C] [BorelSpace C] (μC : Measure C) [hμC : IsHaarMeasure μC]
+variable [SigmaAlgebra C] [BorelSpace C] (μC : Measure C) [hμC : IsHaarMeasure μC]
 
 /-- If `φ : A →* B` and `ψ : B →* C` define a short exact sequence of topological groups, then we
 can integrate a continuous compactly supported function on `B` by integrating over `A` and `C`. -/
@@ -173,7 +173,7 @@ theorem integrate_mono {f g : CompactlySupportedContinuousMap B ℝ} (h : f ≤ 
   integral_mono (pushforward H μA f).integrable (pushforward H μA g).integrable
     (pushforward_mono H μA h)
 
-variable [T2Space B] [MeasurableSpace B] [BorelSpace B]
+variable [T2Space B] [SigmaAlgebra B] [BorelSpace B]
 
 /-- If `φ : A →* B` and `ψ : B →* C` define a short exact sequence of topological groups, then we
 can define a Haar measure on `B` induced by the Haar measures on `A` and `C`. -/

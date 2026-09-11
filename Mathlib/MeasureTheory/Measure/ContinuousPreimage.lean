@@ -30,8 +30,8 @@ open scoped ENNReal symmDiff Topology
 namespace MeasureTheory
 
 variable {α X Y Z : Type*}
-  [TopologicalSpace X] [MeasurableSpace X] [BorelSpace X] [R1Space X]
-  [TopologicalSpace Y] [MeasurableSpace Y] [BorelSpace Y] [R1Space Y]
+  [TopologicalSpace X] [SigmaAlgebra X] [BorelSpace X] [R1Space X]
+  [TopologicalSpace Y] [SigmaAlgebra Y] [BorelSpace Y] [R1Space Y]
   [TopologicalSpace Z]
   {μ : Measure X} {ν : Measure Y} [μ.InnerRegularCompactLTTop] [IsLocallyFiniteMeasure ν]
 
@@ -82,7 +82,8 @@ theorem tendsto_measure_symmDiff_preimage_nhds_zero
   have hνs' : μ (g ⁻¹' s) ≠ ∞ := by rwa [hg.measure_preimage hs]
   obtain ⟨K, hKg, hKco, hKcl, hKμ⟩ :
       ∃ K, MapsTo g K s ∧ IsCompact K ∧ IsClosed K ∧ μ (g ⁻¹' s \ K) < ε / 2 :=
-    (hg.measurable hso.measurableSet).exists_isCompact_isClosed_sdiff_lt hνs' <| by simp [hε.ne']
+    MeasurableSet.exists_isCompact_isClosed_sdiff_lt (hg.measurable hso.measurableSet) hνs' <| by
+      simp [hε.ne']
   have hKm : NullMeasurableSet K μ := hKcl.nullMeasurableSet
   -- Take `a` such that `f a` is measure preserving and maps `K` to `s`.
   -- This is possible, because `K` is a compact set and `s` is an open set.

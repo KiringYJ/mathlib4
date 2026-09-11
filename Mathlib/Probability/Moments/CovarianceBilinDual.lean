@@ -45,7 +45,7 @@ The hypothesis that `μ` has a second moment is written as `MemLp id 2 μ` in th
 open MeasureTheory ProbabilityTheory NormedSpace
 open scoped ENNReal NNReal Real Topology
 
-variable {E : Type*} [NormedAddCommGroup E] {mE : MeasurableSpace E} {μ : Measure E} {p : ℝ≥0∞}
+variable {E : Type*} [NormedAddCommGroup E] {mE : SigmaAlgebra E} {μ : Measure E} {p : ℝ≥0∞}
 
 namespace StrongDual
 
@@ -74,7 +74,7 @@ lemma toLpₗ_of_not_memLp (h_Lp : ¬ MemLp id p μ) (L : StrongDual 𝕜 E) :
     L.toLpₗ μ p = 0 := by
   simp [toLpₗ, dite_eq_right h_Lp]
 
-lemma norm_toLpₗ_le [OpensMeasurableSpace E] (L : StrongDual 𝕜 E) :
+lemma norm_toLpₗ_le [OpensSigmaAlgebra E] (L : StrongDual 𝕜 E) :
     ‖L.toLpₗ μ p‖ ≤ ‖L‖ * (eLpNorm id p μ).toReal := by
   by_cases h_Lp : MemLp id p μ
   swap
@@ -126,7 +126,7 @@ end LinearMap
 
 section ContinuousLinearMap
 
-variable {𝕜 : Type*} [RCLike 𝕜] [NormedSpace 𝕜 E] [OpensMeasurableSpace E]
+variable {𝕜 : Type*} [RCLike 𝕜] [NormedSpace 𝕜 E] [OpensSigmaAlgebra E]
 
 /-- Continuous linear map from the dual to `Lp` equal to `MemLp.toLp` if `MemLp id p μ`
 and to 0 otherwise. -/
@@ -162,7 +162,7 @@ namespace ProbabilityTheory
 
 section Centered
 
-variable [NormedSpace ℝ E] [OpensMeasurableSpace E]
+variable [NormedSpace ℝ E] [OpensSigmaAlgebra E]
 
 /-- Continuous bilinear form with value `∫ x, L₁ x * L₂ x ∂μ` on `(L₁, L₂)`.
 This is equal to the covariance only if `μ` is centered. -/

@@ -34,7 +34,7 @@ open CompactlySupportedContinuousMap MeasureTheory
 
 open scoped CompactlySupported
 
-variable {X : Type*} [TopologicalSpace X] [T2Space X] [LocallyCompactSpace X] [MeasurableSpace X]
+variable {X : Type*} [TopologicalSpace X] [T2Space X] [LocallyCompactSpace X] [SigmaAlgebra X]
   [BorelSpace X]
 variable (Λ : C_c(X, ℝ≥0) →ₗ[ℝ≥0] ℝ≥0)
 

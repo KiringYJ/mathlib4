@@ -37,7 +37,7 @@ open MeasureTheory
 
 namespace ProbabilityTheory
 
-variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {X Y Z T : Ω → ℝ} {μ : Measure Ω}
+variable {Ω : Type*} {mΩ : SigmaAlgebra Ω} {X Y Z T : Ω → ℝ} {μ : Measure Ω}
 
 /-- The covariance of two real-valued random variables defined as
 the integral of `(X - 𝔼[X])(Y - 𝔼[Y])`. -/
@@ -300,7 +300,7 @@ end Sum
 
 section Map
 
-variable {Ω' : Type*} {mΩ' : MeasurableSpace Ω'} {μ : Measure Ω'}
+variable {Ω' : Type*} {mΩ' : SigmaAlgebra Ω'} {μ : Measure Ω'}
 
 lemma covariance_map_equiv (X Y : Ω → ℝ) (Z : Ω' ≃ᵐ Ω) :
     cov[X, Y; μ.map Z] = cov[X ∘ Z, Y ∘ Z; μ] := by
@@ -333,7 +333,7 @@ lemma IndepFun.covariance_eq_zero (h : X ⟂ᵢ[μ] Y) (hX : MemLp X 2 μ) (hY :
 
 section Prod
 
-variable {Ω' : Type*} {mΩ' : MeasurableSpace Ω'} {ν : Measure Ω'}
+variable {Ω' : Type*} {mΩ' : SigmaAlgebra Ω'} {ν : Measure Ω'}
   [IsProbabilityMeasure μ] [IsProbabilityMeasure ν] {X : Ω → ℝ} {Y : Ω' → ℝ}
 
 lemma covariance_fst_snd_prod (hfμ : MemLp X 2 μ) (hgν : MemLp Y 2 ν) :

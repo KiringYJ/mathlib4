@@ -6,7 +6,7 @@ Authors: Yaël Dillies
 module
 
 public import Mathlib.LinearAlgebra.Quotient.Defs
-public import Mathlib.MeasureTheory.MeasurableSpace.Constructions
+public import Mathlib.MeasureTheory.SigmaAlgebra.Constructions
 
 /-!
 # Measurability on the quotient of a module by a submodule
@@ -17,8 +17,8 @@ public section
 namespace Submodule.Quotient
 variable {R M : Type*} [Ring R] [AddCommGroup M] [Module R M] {p : Submodule R M}
 
-instance [MeasurableSpace M] : MeasurableSpace (M ⧸ p) := Quotient.instMeasurableSpace
-instance [MeasurableSpace M] [DiscreteMeasurableSpace M] : DiscreteMeasurableSpace (M ⧸ p) :=
-  Quotient.instDiscreteMeasurableSpace
+instance [SigmaAlgebra M] : SigmaAlgebra (M ⧸ p) := Quotient.instSigmaAlgebra
+instance [SigmaAlgebra M] [DiscreteSigmaAlgebra M] : DiscreteSigmaAlgebra (M ⧸ p) :=
+  Quotient.instDiscreteSigmaAlgebra
 
 end Submodule.Quotient

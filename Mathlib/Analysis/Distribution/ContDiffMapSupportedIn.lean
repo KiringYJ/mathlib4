@@ -915,7 +915,7 @@ section Integral
 
 open MeasureTheory
 
-variable {𝕜} {m : MeasurableSpace E} [OpensMeasurableSpace E] {F₁ F₂ F₃ : Type*}
+variable {𝕜} {m : SigmaAlgebra E} [OpensSigmaAlgebra E] {F₁ F₂ F₃ : Type*}
   [NormedAddCommGroup F₁] [NormedSpace 𝕜 F₁] [NormedSpace ℝ F₁]
   [NormedAddCommGroup F₂] [NormedSpace 𝕜 F₂]
   [NormedAddCommGroup F₃] [NormedSpace 𝕜 F₃]

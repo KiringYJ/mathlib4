@@ -44,13 +44,13 @@ open ENNReal Module MeasureTheory MeasureTheory.Measure Set Filter
 
 open scoped Pointwise NNReal
 
-variable {E L : Type*} [MeasurableSpace E] {μ : Measure E} {F s : Set E}
+variable {E L : Type*} [SigmaAlgebra E] {μ : Measure E} {F s : Set E}
 
 /-- **Blichfeldt's Theorem**. If the volume of the set `s` is larger than the covolume of the
 countable subgroup `L` of `E`, then there exist two distinct points `x, y ∈ L` such that `(x + s)`
 and `(y + s)` are not disjoint. -/
 theorem exists_pair_mem_lattice_not_disjoint_vadd [AddGroup L] [Countable L] [AddAction L E]
-    [MeasurableSpace L] [MeasurableVAdd L E] [VAddInvariantMeasure L E μ]
+    [SigmaAlgebra L] [MeasurableVAdd L E] [VAddInvariantMeasure L E μ]
     (fund : IsAddFundamentalDomain L F μ) (hS : NullMeasurableSet s μ) (h : μ F < μ s) :
     ∃ x y : L, x ≠ y ∧ ¬Disjoint (x +ᵥ s) (y +ᵥ s) := by
   contrapose! h

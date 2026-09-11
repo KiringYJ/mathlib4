@@ -42,7 +42,7 @@ variable {α β γ : Type*}
 
 open SimpleFunc
 
-variable {m : MeasurableSpace α} {μ ν : Measure α} {s : Set α}
+variable {m : SigmaAlgebra α} {μ ν : Measure α} {s : Set α}
 
 /-- The **lower Lebesgue integral** of a function `f` with respect to a measure `μ`. -/
 noncomputable irreducible_def lintegral (μ : Measure α) (f : α → ℝ≥0∞) : ℝ≥0∞ :=
@@ -64,14 +64,14 @@ notation3"∫⁻ "(...)" in "s", "r:60:(scoped f => f)" ∂"μ:70 => lintegral (
 @[inherit_doc MeasureTheory.lintegral]
 notation3"∫⁻ "(...)" in "s", "r:60:(scoped f => lintegral (Measure.restrict volume s) f) => r
 
-theorem SimpleFunc.lintegral_eq_lintegral {m : MeasurableSpace α} (f : α →ₛ ℝ≥0∞) (μ : Measure α) :
+theorem SimpleFunc.lintegral_eq_lintegral {m : SigmaAlgebra α} (f : α →ₛ ℝ≥0∞) (μ : Measure α) :
     ∫⁻ a, f a ∂μ = f.lintegral μ := by
   rw [MeasureTheory.lintegral]
   exact le_antisymm (iSup₂_le fun g hg => lintegral_mono hg <| le_rfl)
     (le_iSup₂_of_le f le_rfl le_rfl)
 
 @[gcongr, mono]
-theorem lintegral_mono' {m : MeasurableSpace α} ⦃μ ν : Measure α⦄ (hμν : μ ≤ ν) ⦃f g : α → ℝ≥0∞⦄
+theorem lintegral_mono' {m : SigmaAlgebra α} ⦃μ ν : Measure α⦄ (hμν : μ ≤ ν) ⦃f g : α → ℝ≥0∞⦄
     (hfg : f ≤ g) : ∫⁻ a, f a ∂μ ≤ ∫⁻ a, g a ∂ν := by
   rw [lintegral, lintegral]
   exact iSup_mono fun φ => iSup_mono' fun hφ => ⟨le_trans hφ hfg, lintegral_mono (le_refl φ) hμν⟩
@@ -95,15 +95,15 @@ theorem iSup_lintegral_measurable_le_eq_lintegral (f : α → ℝ≥0∞) :
     refine iSup₂_le fun i hi => le_iSup₂_of_le i i.measurable <| le_iSup_of_le hi ?_
     exact le_of_eq (i.lintegral_eq_lintegral _).symm
 
-theorem lintegral_mono_set {_ : MeasurableSpace α} ⦃μ : Measure α⦄ {s t : Set α} {f : α → ℝ≥0∞}
+theorem lintegral_mono_set {_ : SigmaAlgebra α} ⦃μ : Measure α⦄ {s t : Set α} {f : α → ℝ≥0∞}
     (hst : s ⊆ t) : ∫⁻ x in s, f x ∂μ ≤ ∫⁻ x in t, f x ∂μ :=
   lintegral_mono' (Measure.restrict_mono hst (le_refl μ)) (le_refl f)
 
-theorem lintegral_mono_set' {_ : MeasurableSpace α} ⦃μ : Measure α⦄ {s t : Set α} {f : α → ℝ≥0∞}
+theorem lintegral_mono_set' {_ : SigmaAlgebra α} ⦃μ : Measure α⦄ {s t : Set α} {f : α → ℝ≥0∞}
     (hst : s ≤ᵐ[μ] t) : ∫⁻ x in s, f x ∂μ ≤ ∫⁻ x in t, f x ∂μ :=
   lintegral_mono' (Measure.restrict_mono' hst (le_refl μ)) (le_refl f)
 
-theorem monotone_lintegral {_ : MeasurableSpace α} (μ : Measure α) : Monotone (lintegral μ) :=
+theorem monotone_lintegral {_ : SigmaAlgebra α} (μ : Measure α) : Monotone (lintegral μ) :=
   lintegral_mono
 
 @[simp]
@@ -155,7 +155,7 @@ theorem exists_measurable_le_lintegral_eq (f : α → ℝ≥0∞) :
 /-- `∫⁻ a in s, f a ∂μ` is defined as the supremum of integrals of simple functions
 `φ : α →ₛ ℝ≥0∞` such that `φ ≤ f`. This lemma says that it suffices to take
 functions `φ : α →ₛ ℝ≥0`. -/
-theorem lintegral_eq_nnreal {m : MeasurableSpace α} (f : α → ℝ≥0∞) (μ : Measure α) :
+theorem lintegral_eq_nnreal {m : SigmaAlgebra α} (f : α → ℝ≥0∞) (μ : Measure α) :
     ∫⁻ a, f a ∂μ =
       ⨆ (φ : α →ₛ ℝ≥0) (_ : ∀ x, ↑(φ x) ≤ f x), (φ.map ((↑) : ℝ≥0 → ℝ≥0∞)).lintegral μ := by
   rw [lintegral]
@@ -412,7 +412,7 @@ lemma setLIntegral_smul_measure {R : Type*} [SMul R ℝ≥0∞] [IsScalarTower R
   rw [Measure.restrict_smul, lintegral_smul_measure]
 
 @[simp]
-theorem lintegral_zero_measure {m : MeasurableSpace α} (f : α → ℝ≥0∞) :
+theorem lintegral_zero_measure {m : SigmaAlgebra α} (f : α → ℝ≥0∞) :
     ∫⁻ a, f a ∂(0 : Measure α) = 0 := by
   simp [lintegral]
 
@@ -440,18 +440,18 @@ theorem lintegral_finsetSum_measure {ι} (s : Finset ι) (f : α → ℝ≥0∞)
 alias lintegral_finset_sum_measure := lintegral_finsetSum_measure
 
 @[simp]
-theorem lintegral_sum_measure {m : MeasurableSpace α} {ι} (f : α → ℝ≥0∞) (μ : ι → Measure α) :
+theorem lintegral_sum_measure {m : SigmaAlgebra α} {ι} (f : α → ℝ≥0∞) (μ : ι → Measure α) :
     ∫⁻ a, f a ∂Measure.sum μ = ∑' i, ∫⁻ a, f a ∂μ i := by
   simp_rw [ENNReal.tsum_eq_iSup_sum, ← lintegral_finsetSum_measure,
     lintegral, SimpleFunc.lintegral_sum, ENNReal.tsum_eq_iSup_sum,
     SimpleFunc.lintegral_finsetSum, iSup_comm (ι := Finset ι)]
 
-theorem hasSum_lintegral_measure {ι} {_ : MeasurableSpace α} (f : α → ℝ≥0∞) (μ : ι → Measure α) :
+theorem hasSum_lintegral_measure {ι} {_ : SigmaAlgebra α} (f : α → ℝ≥0∞) (μ : ι → Measure α) :
     HasSum (fun i => ∫⁻ a, f a ∂μ i) (∫⁻ a, f a ∂Measure.sum μ) :=
   (lintegral_sum_measure f μ).symm ▸ ENNReal.summable.hasSum
 
 @[simp]
-theorem lintegral_of_isEmpty {α} [MeasurableSpace α] [IsEmpty α] (μ : Measure α) (f : α → ℝ≥0∞) :
+theorem lintegral_of_isEmpty {α} [SigmaAlgebra α] [IsEmpty α] (μ : Measure α) (f : α → ℝ≥0∞) :
     ∫⁻ x, f x ∂μ = 0 := by
   have : Subsingleton (Measure α) := inferInstance
   convert! lintegral_zero_measure f

@@ -39,14 +39,14 @@ namespace ProbabilityTheory
 
 namespace Kernel
 
-variable {α β γ : Type*} {mα : MeasurableSpace α} {mβ : MeasurableSpace β} {mγ : MeasurableSpace γ}
+variable {α β γ : Type*} {mα : SigmaAlgebra α} {mβ : SigmaAlgebra β} {mγ : SigmaAlgebra γ}
 
 section MapComap
 
 /-! ### map, comap -/
 
 
-variable {γ δ : Type*} {mγ : MeasurableSpace γ} {mδ : MeasurableSpace δ} {f : β → γ} {g : γ → α}
+variable {γ δ : Type*} {mγ : SigmaAlgebra γ} {mδ : SigmaAlgebra δ} {f : β → γ} {g : γ → α}
 
 /-- The pushforward of a kernel along a measurable function. This is an implementation detail,
 use `map κ f` instead. -/
@@ -60,7 +60,7 @@ open scoped Classical in
 If the function is not measurable, we use zero instead. This choice of junk
 value ensures that typeclass inference can infer that the `map` of a kernel
 satisfying `IsZeroOrMarkovKernel` again satisfies this property. -/
-noncomputable def map [MeasurableSpace γ] (κ : Kernel α β) (f : β → γ) : Kernel α γ :=
+noncomputable def map [SigmaAlgebra γ] (κ : Kernel α β) (f : β → γ) : Kernel α γ :=
   if hf : Measurable f then mapOfMeasurable κ f hf else 0
 
 theorem map_of_not_measurable (κ : Kernel α β) {f : β → γ} (hf : ¬(Measurable f)) :
@@ -231,14 +231,14 @@ lemma deterministic_map {f : α → β} (hf : Measurable f) {g : β → γ} (hg 
 
 section FstSnd
 
-variable {δ : Type*} {mδ : MeasurableSpace δ}
+variable {δ : Type*} {mδ : SigmaAlgebra δ}
 
 /-- Define a `Kernel (γ × α) β` from a `Kernel α β` by taking the comap of the projection. -/
-def prodMkLeft (γ : Type*) [MeasurableSpace γ] (κ : Kernel α β) : Kernel (γ × α) β :=
+def prodMkLeft (γ : Type*) [SigmaAlgebra γ] (κ : Kernel α β) : Kernel (γ × α) β :=
   comap κ Prod.snd measurable_snd
 
 /-- Define a `Kernel (α × γ) β` from a `Kernel α β` by taking the comap of the projection. -/
-def prodMkRight (γ : Type*) [MeasurableSpace γ] (κ : Kernel α β) : Kernel (α × γ) β :=
+def prodMkRight (γ : Type*) [SigmaAlgebra γ] (κ : Kernel α β) : Kernel (α × γ) β :=
   comap κ Prod.fst measurable_fst
 
 @[simp]
@@ -323,14 +323,14 @@ lemma isSFiniteKernel_prodMkRight_unit {κ : Kernel α β} :
   change IsSFiniteKernel ((prodMkRight Unit κ).comap (fun a ↦ (a, ())) (by fun_prop))
   infer_instance
 
-lemma map_prodMkLeft (γ : Type*) [MeasurableSpace γ] (κ : Kernel α β) (f : β → δ) :
+lemma map_prodMkLeft (γ : Type*) [SigmaAlgebra γ] (κ : Kernel α β) (f : β → δ) :
     map (prodMkLeft γ κ) f = prodMkLeft γ (map κ f) := by
   by_cases hf : Measurable f
   · simp only [map, hf, ↓reduceDIte]
     rfl
   · simp [map_of_not_measurable _ hf]
 
-lemma map_prodMkRight (κ : Kernel α β) (γ : Type*) {mγ : MeasurableSpace γ} (f : β → δ) :
+lemma map_prodMkRight (κ : Kernel α β) (γ : Type*) {mγ : SigmaAlgebra γ} (f : β → δ) :
     map (prodMkRight γ κ) f = prodMkRight γ (map κ f) := by
   by_cases hf : Measurable f
   · simp only [map, hf, ↓reduceDIte]
@@ -363,10 +363,10 @@ instance IsFiniteKernel.swapLeft (κ : Kernel (α × β) γ) [IsFiniteKernel κ]
 instance IsSFiniteKernel.swapLeft (κ : Kernel (α × β) γ) [IsSFiniteKernel κ] :
     IsSFiniteKernel (swapLeft κ) := by rw [Kernel.swapLeft]; infer_instance
 
-@[simp] lemma swapLeft_prodMkLeft (κ : Kernel α β) (γ : Type*) {_ : MeasurableSpace γ} :
+@[simp] lemma swapLeft_prodMkLeft (κ : Kernel α β) (γ : Type*) {_ : SigmaAlgebra γ} :
     swapLeft (prodMkLeft γ κ) = prodMkRight γ κ := rfl
 
-@[simp] lemma swapLeft_prodMkRight (κ : Kernel α β) (γ : Type*) {_ : MeasurableSpace γ} :
+@[simp] lemma swapLeft_prodMkRight (κ : Kernel α β) (γ : Type*) {_ : SigmaAlgebra γ} :
     swapLeft (prodMkRight γ κ) = prodMkLeft γ κ := rfl
 
 /-- Define a `Kernel α (γ × β)` from a `Kernel α (β × γ)` by taking the map of `Prod.swap`.
@@ -464,10 +464,10 @@ lemma fst_map_id_prod (κ : Kernel α β) {f : β → γ} (hf : Measurable f) :
     fst (map κ (fun a ↦ (a, f a))) = κ := by
   rw [fst_map_prod _ hf, Kernel.map_id']
 
-lemma fst_prodMkLeft (δ : Type*) [MeasurableSpace δ] (κ : Kernel α (β × γ)) :
+lemma fst_prodMkLeft (δ : Type*) [SigmaAlgebra δ] (κ : Kernel α (β × γ)) :
     fst (prodMkLeft δ κ) = prodMkLeft δ (fst κ) := rfl
 
-lemma fst_prodMkRight (κ : Kernel α (β × γ)) (δ : Type*) [MeasurableSpace δ] :
+lemma fst_prodMkRight (κ : Kernel α (β × γ)) (δ : Type*) [SigmaAlgebra δ] :
     fst (prodMkRight δ κ) = prodMkRight δ (fst κ) := rfl
 
 /-- Define a `Kernel α γ` from a `Kernel α (β × γ)` by taking the map of the second projection.
@@ -526,10 +526,10 @@ lemma snd_map_prod_id (κ : Kernel α β) {f : β → γ} (hf : Measurable f) :
     snd (map κ (fun a ↦ (f a, a))) = κ := by
   rw [snd_map_prod _ hf, Kernel.map_id']
 
-lemma snd_prodMkLeft (δ : Type*) [MeasurableSpace δ] (κ : Kernel α (β × γ)) :
+lemma snd_prodMkLeft (δ : Type*) [SigmaAlgebra δ] (κ : Kernel α (β × γ)) :
     snd (prodMkLeft δ κ) = prodMkLeft δ (snd κ) := rfl
 
-lemma snd_prodMkRight (κ : Kernel α (β × γ)) (δ : Type*) [MeasurableSpace δ] :
+lemma snd_prodMkRight (κ : Kernel α (β × γ)) (δ : Type*) [SigmaAlgebra δ] :
     snd (prodMkRight δ κ) = prodMkRight δ (snd κ) := rfl
 
 @[simp]
@@ -550,7 +550,7 @@ end FstSnd
 
 section sectLsectR
 
-variable {γ δ : Type*} {mγ : MeasurableSpace γ} {mδ : MeasurableSpace δ}
+variable {γ δ : Type*} {mγ : SigmaAlgebra γ} {mδ : SigmaAlgebra δ}
 
 /-- Define a `Kernel α γ` from a `Kernel (α × β) γ` by taking the comap of `fun a ↦ (a, b)` for
 a given `b : β`. -/
@@ -589,11 +589,11 @@ lemma comap_sectL (κ : Kernel (α × β) γ) (b : β) {f : δ → α} (hf : Mea
   rw [comap_apply, sectL_apply, comap_apply]
 
 @[simp]
-lemma sectL_prodMkLeft (α : Type*) [MeasurableSpace α] (κ : Kernel β γ) (a : α) {b : β} :
+lemma sectL_prodMkLeft (α : Type*) [SigmaAlgebra α] (κ : Kernel β γ) (a : α) {b : β} :
     sectL (prodMkLeft α κ) b a = κ b := rfl
 
 @[simp]
-lemma sectL_prodMkRight (β : Type*) [MeasurableSpace β] (κ : Kernel α γ) (b : β) :
+lemma sectL_prodMkRight (β : Type*) [SigmaAlgebra β] (κ : Kernel α γ) (b : β) :
     sectL (prodMkRight β κ) b = κ := rfl
 
 /-- Define a `Kernel β γ` from a `Kernel (α × β) γ` by taking the comap of `fun b ↦ (a, b)` for
@@ -633,11 +633,11 @@ lemma comap_sectR (κ : Kernel (α × β) γ) (a : α) {f : δ → β} (hf : Mea
   rw [comap_apply, sectR_apply, comap_apply]
 
 @[simp]
-lemma sectR_prodMkLeft (α : Type*) [MeasurableSpace α] (κ : Kernel β γ) (a : α) :
+lemma sectR_prodMkLeft (α : Type*) [SigmaAlgebra α] (κ : Kernel β γ) (a : α) :
     sectR (prodMkLeft α κ) a = κ := rfl
 
 @[simp]
-lemma sectR_prodMkRight (β : Type*) [MeasurableSpace β] (κ : Kernel α γ) (b : β) {a : α} :
+lemma sectR_prodMkRight (β : Type*) [SigmaAlgebra β] (κ : Kernel α γ) (b : β) {a : α} :
     sectR (prodMkRight β κ) a b = κ a := rfl
 
 @[simp] lemma sectL_swapRight (κ : Kernel (α × β) γ) : sectL (swapLeft κ) = sectR κ := rfl

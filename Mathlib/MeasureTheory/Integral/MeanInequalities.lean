@@ -61,7 +61,7 @@ noncomputable section
 open NNReal ENNReal MeasureTheory Finset
 
 
-variable {α : Type*} [MeasurableSpace α] {μ : Measure α}
+variable {α : Type*} [SigmaAlgebra α] {μ : Measure α}
 
 namespace ENNReal
 
@@ -219,7 +219,7 @@ theorem lintegral_mul_le_Lp_mul_Lq (μ : Measure α) {p q : ℝ} (hpq : p.Holder
 
 /-- A different formulation of Hölder's inequality for two functions, with two exponents that sum to
 1, instead of reciprocals of -/
-theorem lintegral_mul_norm_pow_le {α} [MeasurableSpace α] {μ : Measure α}
+theorem lintegral_mul_norm_pow_le {α} [SigmaAlgebra α] {μ : Measure α}
     {f g : α → ℝ≥0∞} (hf : AEMeasurable f μ) (hg : AEMeasurable g μ)
     {p q : ℝ} (hp : 0 ≤ p) (hq : 0 ≤ q) (hpq : p + q = 1) :
     ∫⁻ a, f a ^ p * g a ^ q ∂μ ≤ (∫⁻ a, f a ∂μ) ^ p * (∫⁻ a, g a ∂μ) ^ q := by
@@ -238,7 +238,7 @@ theorem lintegral_mul_norm_pow_le {α} [MeasurableSpace α] {μ : Measure α}
   simpa [← ENNReal.rpow_mul, hp.ne', hq.ne'] using this
 
 /-- A version of Hölder with multiple arguments -/
-theorem lintegral_prod_norm_pow_le {α ι : Type*} [MeasurableSpace α] {μ : Measure α}
+theorem lintegral_prod_norm_pow_le {α ι : Type*} [SigmaAlgebra α] {μ : Measure α}
     (s : Finset ι) {f : ι → α → ℝ≥0∞} (hf : ∀ i ∈ s, AEMeasurable (f i) μ)
     {p : ι → ℝ} (hp : ∑ i ∈ s, p i = 1) (h2p : ∀ i ∈ s, 0 ≤ p i) :
     ∫⁻ a, ∏ i ∈ s, f i a ^ p i ∂μ ≤ ∏ i ∈ s, (∫⁻ a, f i a ∂μ) ^ p i := by
@@ -290,7 +290,7 @@ theorem lintegral_prod_norm_pow_le {α ι : Type*} [MeasurableSpace α] {μ : Me
         _ = ∏ i ∈ insert i₀ s, (∫⁻ a, f i a ∂μ) ^ p i := by simp [hi₀]
 
 /-- A version of Hölder with multiple arguments, one of which plays a distinguished role. -/
-theorem lintegral_mul_prod_norm_pow_le {α ι : Type*} [MeasurableSpace α] {μ : Measure α}
+theorem lintegral_mul_prod_norm_pow_le {α ι : Type*} [SigmaAlgebra α] {μ : Measure α}
     (s : Finset ι) {g : α → ℝ≥0∞} {f : ι → α → ℝ≥0∞} (hg : AEMeasurable g μ)
     (hf : ∀ i ∈ s, AEMeasurable (f i) μ) (q : ℝ) {p : ι → ℝ} (hpq : q + ∑ i ∈ s, p i = 1)
     (hq : 0 ≤ q) (hp : ∀ i ∈ s, 0 ≤ p i) :
@@ -326,7 +326,7 @@ theorem lintegral_rpow_add_lt_top_of_lintegral_rpow_lt_top {p : ℝ} {f g : α �
       · constructor <;> finiteness
       · fun_prop
 
-theorem lintegral_Lp_mul_le_Lq_mul_Lr {α} [MeasurableSpace α] {p q r : ℝ} (hp0_lt : 0 < p)
+theorem lintegral_Lp_mul_le_Lq_mul_Lr {α} [SigmaAlgebra α] {p q r : ℝ} (hp0_lt : 0 < p)
     (hpq : p < q) (hpqr : 1 / p = 1 / q + 1 / r) (μ : Measure α) {f g : α → ℝ≥0∞}
     (hf : AEMeasurable f μ) (hg : AEMeasurable g μ) :
     (∫⁻ a, (f * g) a ^ p ∂μ) ^ (1 / p) ≤

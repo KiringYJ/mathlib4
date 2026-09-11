@@ -67,7 +67,7 @@ the file `Mathlib/MeasureTheory/Measure/Haar/Unique.lean`.
 
 noncomputable section
 
-open Set Inv Function TopologicalSpace MeasurableSpace
+open Set Inv Function TopologicalSpace SigmaAlgebra
 
 open scoped NNReal ENNReal Pointwise Topology
 
@@ -512,7 +512,7 @@ open haar
 ### The Haar measure
 -/
 
-variable [TopologicalSpace G] [IsTopologicalGroup G] [MeasurableSpace G] [BorelSpace G]
+variable [TopologicalSpace G] [IsTopologicalGroup G] [SigmaAlgebra G] [BorelSpace G]
 
 /-- The Haar measure on the locally compact group `G`, scaled so that `haarMeasure K₀ K₀ = 1`. -/
 @[to_additive

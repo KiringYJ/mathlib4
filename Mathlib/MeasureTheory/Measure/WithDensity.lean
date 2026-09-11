@@ -31,12 +31,12 @@ open Filter ENNReal NNReal MeasureTheory.Measure
 
 namespace MeasureTheory
 
-variable {α : Type*} {m0 : MeasurableSpace α} {μ : Measure α}
+variable {α : Type*} {m0 : SigmaAlgebra α} {μ : Measure α}
 
 /-- Given a measure `μ : Measure α` and a function `f : α → ℝ≥0∞`, `μ.withDensity f` is the
 measure such that for a measurable set `s` we have `μ.withDensity f s = ∫⁻ a in s, f a ∂μ`. -/
 noncomputable
-def Measure.withDensity {m : MeasurableSpace α} (μ : Measure α) (f : α → ℝ≥0∞) : Measure α :=
+def Measure.withDensity {m : SigmaAlgebra α} (μ : Measure α) (f : α → ℝ≥0∞) : Measure α :=
   Measure.ofMeasurable (fun s _ => ∫⁻ a in s, f a ∂μ) (by simp) fun _ hs hd =>
     lintegral_iUnion hs hd _
 
@@ -109,12 +109,12 @@ theorem withDensity_add_right (f : α → ℝ≥0∞) {g : α → ℝ≥0∞} (h
     μ.withDensity (f + g) = μ.withDensity f + μ.withDensity g := by
   simpa only [add_comm] using withDensity_add_left hg f
 
-theorem withDensity_add_measure {m : MeasurableSpace α} (μ ν : Measure α) (f : α → ℝ≥0∞) :
+theorem withDensity_add_measure {m : SigmaAlgebra α} (μ ν : Measure α) (f : α → ℝ≥0∞) :
     (μ + ν).withDensity f = μ.withDensity f + ν.withDensity f := by
   ext1 s hs
   simp only [withDensity_apply f hs, restrict_add, lintegral_add_measure, Measure.add_apply]
 
-theorem withDensity_sum {ι : Type*} {m : MeasurableSpace α} (μ : ι → Measure α) (f : α → ℝ≥0∞) :
+theorem withDensity_sum {ι : Type*} {m : SigmaAlgebra α} (μ : ι → Measure α) (f : α → ℝ≥0∞) :
     (sum μ).withDensity f = sum fun n => (μ n).withDensity f := by
   ext1 s hs
   simp_rw [sum_apply _ hs, withDensity_apply f hs, restrict_sum μ hs, lintegral_sum_measure]
@@ -143,7 +143,7 @@ theorem isFiniteMeasure_withDensity {f : α → ℝ≥0∞} (hf : ∫⁻ a, f a 
   { measure_univ_lt_top := by
       rwa [withDensity_apply _ MeasurableSet.univ, Measure.restrict_univ, lt_top_iff_ne_top] }
 
-theorem withDensity_absolutelyContinuous {m : MeasurableSpace α} (μ : Measure α) (f : α → ℝ≥0∞) :
+theorem withDensity_absolutelyContinuous {m : SigmaAlgebra α} (μ : Measure α) (f : α → ℝ≥0∞) :
     μ.withDensity f ≪ μ := by
   refine AbsolutelyContinuous.mk fun s hs₁ hs₂ => ?_
   rw [withDensity_apply _ hs₁]
@@ -224,12 +224,12 @@ theorem restrict_withDensity' [SFinite μ] (s : Set α) (f : α → ℝ≥0∞) 
   rw [restrict_apply ht, withDensity_apply _ ht, withDensity_apply' _ (t ∩ s),
     restrict_restrict ht]
 
-lemma trim_withDensity {m m0 : MeasurableSpace α} {μ : Measure α}
+lemma trim_withDensity {m m0 : SigmaAlgebra α} {μ : Measure α}
     (hm : m ≤ m0) {f : α → ℝ≥0∞} (hf : Measurable[m] f) :
     (μ.withDensity f).trim hm = (μ.trim hm).withDensity f := by
   refine @Measure.ext _ m _ _ (fun s hs ↦ ?_)
   rw [withDensity_apply _ hs, restrict_trim _ _ hs, lintegral_trim _ hf, trim_measurableSet_eq _ hs,
-    withDensity_apply _ (hm s hs)]
+    withDensity_apply _ (hm hs)]
 
 lemma Measure.MutuallySingular.withDensity {ν : Measure α} {f : α → ℝ≥0∞} (h : μ ⟂ₘ ν) :
     μ.withDensity f ⟂ₘ ν :=
@@ -376,7 +376,7 @@ theorem count_withDensity [MeasurableSingletonClass α] (f : α → ℝ≥0∞) 
   simp [count, withDensity_sum, dirac_withDensity]
 
 @[fun_prop]
-theorem measurable_withDensity {β : Type*} [MeasurableSpace β] {f : β → α → ℝ≥0∞}
+theorem measurable_withDensity {β : Type*} [SigmaAlgebra β] {f : β → α → ℝ≥0∞}
     [SFinite μ] (hf : Measurable f.uncurry) :
     Measurable fun b ↦ μ.withDensity (f b) := by
   rw [Measure.measurable_measure]
@@ -436,7 +436,8 @@ theorem lintegral_withDensity_eq_lintegral_mul₀' {μ : Measure α} {f : α →
         intro x hx
         simp only [g', hx, Pi.mul_apply]
       · have M : MeasurableSet { x : α | f' x ≠ 0 }ᶜ :=
-          (hf.measurable_mk (measurableSet_singleton 0).compl).compl
+          MeasurableSet.compl
+            (hf.measurable_mk (MeasurableSet.compl (measurableSet_singleton 0)))
         filter_upwards [ae_restrict_mem M]
         intro x hx
         simp only [Classical.not_not, mem_ofPred_eq, mem_compl_iff] at hx
@@ -686,7 +687,7 @@ end SFinite
 
 section Prod
 
-variable {β : Type*} {mβ : MeasurableSpace β} {ν : Measure β} [SFinite ν]
+variable {β : Type*} {mβ : SigmaAlgebra β} {ν : Measure β} [SFinite ν]
 
 theorem prod_withDensity_left₀ {f : α → ℝ≥0∞} (hf : AEMeasurable f μ) :
     (μ.withDensity f).prod ν = (μ.prod ν).withDensity (fun z ↦ f z.1) := by
@@ -739,7 +740,7 @@ lemma Measure.prod_smul_right {R : Type*} [SMul R ℝ≥0∞] [IsScalarTower R �
 
 end Prod
 
-variable [TopologicalSpace α] [OpensMeasurableSpace α] [IsLocallyFiniteMeasure μ]
+variable [TopologicalSpace α] [OpensSigmaAlgebra α] [IsLocallyFiniteMeasure μ]
 
 lemma IsLocallyFiniteMeasure.withDensity_coe {f : α → ℝ≥0} (hf : Continuous f) :
     IsLocallyFiniteMeasure (μ.withDensity fun x ↦ f x) := by
@@ -756,7 +757,7 @@ lemma IsLocallyFiniteMeasure.withDensity_ofReal {f : α → ℝ} (hf : Continuou
 
 section Conv
 
-variable {M : Type*} [Monoid M] [MeasurableSpace M]
+variable {M : Type*} [Monoid M] [SigmaAlgebra M]
 
 -- `mconv_smul_left` is in the `Convolution` file. This lemma is here because this is the file in
 -- which we prove the instance that gives `SFinite (c • ν)`.
@@ -767,7 +768,7 @@ theorem Measure.mconv_smul_right [MeasurableMul₂ M] (μ : Measure M) (ν : Mea
   unfold mconv
   rw [Measure.prod_smul_right, Measure.map_smul _ (by fun_prop)]
 
-variable {G : Type*} [Group G] {mG : MeasurableSpace G} [MeasurableMul₂ G] [MeasurableInv G]
+variable {G : Type*} [Group G] {mG : SigmaAlgebra G} [MeasurableMul₂ G] [MeasurableInv G]
   {μ : Measure G} [SFinite μ] [IsMulLeftInvariant μ]
 
 @[to_additive]

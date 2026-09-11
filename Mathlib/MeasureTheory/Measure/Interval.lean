@@ -27,7 +27,7 @@ open scoped Topology
 
 namespace MeasureTheory
 
-variable {α : Type*} {mα : MeasurableSpace α} {μ : Measure α}
+variable {α : Type*} {mα : SigmaAlgebra α} {μ : Measure α}
 
 section Preorder
 

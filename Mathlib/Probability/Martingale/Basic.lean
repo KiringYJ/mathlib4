@@ -45,7 +45,7 @@ open scoped NNReal ENNReal MeasureTheory ProbabilityTheory
 
 namespace MeasureTheory
 
-variable {Ω E ι : Type*} [Preorder ι] {m0 : MeasurableSpace Ω} {μ : Measure Ω}
+variable {Ω E ι : Type*} [Preorder ι] {m0 : SigmaAlgebra Ω} {μ : Measure Ω}
   [NormedAddCommGroup E] [NormedSpace ℝ E] {f g : ι → Ω → E} {ℱ : Filtration ι m0}
 
 /-- A family of functions `f : ι → Ω → E` is a martingale with respect to a filtration `ℱ` if `f`
@@ -100,7 +100,7 @@ protected theorem integrable (hf : Martingale f ℱ μ) (i : ι) : Integrable (f
 theorem setIntegral_eq [SigmaFiniteFiltration μ ℱ] (hf : Martingale f ℱ μ) {i j : ι} (hij : i ≤ j)
     {s : Set Ω} (hs : MeasurableSet[ℱ i] s) : ∫ ω in s, f i ω ∂μ = ∫ ω in s, f j ω ∂μ := by
   rw [← setIntegral_condExp (ℱ.le i) (hf.integrable j) hs]
-  refine setIntegral_congr_ae (ℱ.le i s hs) ?_
+  refine setIntegral_congr_ae (ℱ.le i hs) ?_
   filter_upwards [hf.2 i j hij] with _ heq _ using heq.symm
 
 lemma congr (hf : Martingale f ℱ μ) (hg : StronglyAdapted ℱ g) (h_eq : ∀ t, f t =ᵐ[μ] g t) :
@@ -392,7 +392,7 @@ theorem submartingale_of_setIntegral_le_succ [IsFiniteMeasure μ] {f : ℕ → �
   refine submartingale_of_setIntegral_le hadp hint fun i j hij s hs => ?_
   induction hij with
   | refl => rfl
-  | step hk₁ hk₂ => exact hk₂.trans (hf _ s (𝒢.mono hk₁ _ hs))
+  | step hk₁ hk₂ => exact hk₂.trans (hf _ s (𝒢.mono hk₁ hs))
 
 theorem supermartingale_of_setIntegral_succ_le [IsFiniteMeasure μ] {f : ℕ → Ω → ℝ}
     (hadp : StronglyAdapted 𝒢 f) (hint : ∀ i, Integrable (f i) μ)

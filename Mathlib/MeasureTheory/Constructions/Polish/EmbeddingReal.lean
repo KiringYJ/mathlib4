@@ -17,7 +17,7 @@ public import Mathlib.MeasureTheory.Constructions.Polish.Basic
 open Set Function PolishSpace TopologicalSpace Topology MeasureTheory
 
 namespace MeasureTheory
-variable (α : Type*) [MeasurableSpace α] [StandardBorelSpace α]
+variable (α : Type*) [SigmaAlgebra α] [StandardBorelSpace α]
 
 theorem exists_nat_measurableEquiv_range_coe_fin_of_finite [Finite α] :
     ∃ n : ℕ, Nonempty (α ≃ᵐ range ((↑) : Fin n → ℝ)) := by
@@ -55,15 +55,15 @@ theorem exists_measurableEmbedding_real : ∃ f : α → ℝ, MeasurableEmbeddin
 
 /-- A measurable embedding of a standard Borel space into `ℝ`. -/
 noncomputable
-def embeddingReal (Ω : Type*) [MeasurableSpace Ω] [StandardBorelSpace Ω] : Ω → ℝ :=
+def embeddingReal (Ω : Type*) [SigmaAlgebra Ω] [StandardBorelSpace Ω] : Ω → ℝ :=
   (exists_measurableEmbedding_real Ω).choose
 
-lemma measurableEmbedding_embeddingReal (Ω : Type*) [MeasurableSpace Ω] [StandardBorelSpace Ω] :
+lemma measurableEmbedding_embeddingReal (Ω : Type*) [SigmaAlgebra Ω] [StandardBorelSpace Ω] :
     MeasurableEmbedding (embeddingReal Ω) :=
   (exists_measurableEmbedding_real Ω).choose_spec
 
 @[fun_prop]
-lemma measurable_embeddingReal (Ω : Type*) [MeasurableSpace Ω] [StandardBorelSpace Ω] :
+lemma measurable_embeddingReal (Ω : Type*) [SigmaAlgebra Ω] [StandardBorelSpace Ω] :
     Measurable (embeddingReal Ω) :=
   (measurableEmbedding_embeddingReal Ω).measurable
 

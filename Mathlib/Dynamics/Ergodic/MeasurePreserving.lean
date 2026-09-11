@@ -33,7 +33,7 @@ public section
 open MeasureTheory.Measure Function Set
 open scoped ENNReal
 
-variable {α β γ : Type*} [MeasurableSpace α] [MeasurableSpace β] [MeasurableSpace γ]
+variable {α β γ : Type*} [SigmaAlgebra α] [SigmaAlgebra β] [SigmaAlgebra γ]
 
 namespace MeasureTheory
 

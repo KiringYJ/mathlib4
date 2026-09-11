@@ -29,7 +29,7 @@ namespace MeasureTheory.VectorMeasure
 
 local infixr:25 " →ₛ " => SimpleFunc
 
-variable {X E F G : Type*} {mX : MeasurableSpace X}
+variable {X E F G : Type*} {mX : SigmaAlgebra X}
   [NormedAddCommGroup E] [NormedSpace ℝ E]
   [NormedAddCommGroup F] [NormedSpace ℝ F]
   [NormedAddCommGroup G] [NormedSpace ℝ G]

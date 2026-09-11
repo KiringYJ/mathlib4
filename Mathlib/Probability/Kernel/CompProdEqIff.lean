@@ -28,13 +28,13 @@ open ProbabilityTheory MeasureTheory
 
 open scoped ENNReal
 
-variable {α β : Type*} {mα : MeasurableSpace α} {mβ : MeasurableSpace β}
+variable {α β : Type*} {mα : SigmaAlgebra α} {mβ : SigmaAlgebra β}
   {μ : Measure α} {κ : Kernel α β}
   {f : α → β → ℝ≥0∞}
 
 namespace ProbabilityTheory.Kernel
 
-variable {η : Kernel α β} [MeasurableSpace.CountableOrCountablyGenerated α β]
+variable {η : Kernel α β} [SigmaAlgebra.CountableOrCountablyGenerated α β]
 
 lemma ae_eq_of_compProd_eq [IsFiniteMeasure μ] [IsFiniteKernel κ] [IsFiniteKernel η]
     (h : μ ⊗ₘ κ = μ ⊗ₘ η) :

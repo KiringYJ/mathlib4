@@ -37,7 +37,7 @@ open Set
 
 namespace MeasureTheory
 
-variable {ι : Type*} {α : ι → Type*} [∀ i, MeasurableSpace (α i)]
+variable {ι : Type*} {α : ι → Type*} [∀ i, SigmaAlgebra (α i)]
   {P : ∀ J : Finset ι, Measure (∀ j : J, α j)}
 
 /-- A family of measures indexed by finite sets of `ι` is projective if, for finite sets `J ⊆ I`,

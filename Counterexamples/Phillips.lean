@@ -113,7 +113,7 @@ of all bounded functions, coinciding with the integral on the integrable ones.
 /-- The subspace of integrable functions in the space of all bounded functions on a type.
 This is a technical device, used to apply Hahn-Banach theorem to construct an extension of the
 integral to all bounded functions. -/
-def boundedIntegrableFunctions [MeasurableSpace α] (μ : Measure α) :
+def boundedIntegrableFunctions [SigmaAlgebra α] (μ : Measure α) :
     Subspace ℝ (DiscreteCopy α →ᵇ ℝ) where
   carrier := {f | Integrable f μ}
   zero_mem' := integrable_zero _ _ _
@@ -123,7 +123,7 @@ def boundedIntegrableFunctions [MeasurableSpace α] (μ : Measure α) :
 /-- The integral, as a continuous linear map on the subspace of integrable functions in the space
 of all bounded functions on a type. This is a technical device, that we will extend through
 Hahn-Banach. -/
-def boundedIntegrableFunctionsIntegralCLM [MeasurableSpace α] (μ : Measure α) [IsFiniteMeasure μ] :
+def boundedIntegrableFunctionsIntegralCLM [SigmaAlgebra α] (μ : Measure α) [IsFiniteMeasure μ] :
     boundedIntegrableFunctions μ →L[ℝ] ℝ :=
   LinearMap.mkContinuous (E := ↥(boundedIntegrableFunctions μ))
     { toFun := fun f => ∫ x, f.1 x ∂μ
@@ -139,7 +139,7 @@ def boundedIntegrableFunctionsIntegralCLM [MeasurableSpace α] (μ : Measure α)
 
 /-- Given a measure, there exists a continuous linear form on the space of all bounded functions
 (not necessarily measurable) that coincides with the integral on bounded measurable functions. -/
-theorem exists_linear_extension_to_boundedFunctions [MeasurableSpace α] (μ : Measure α)
+theorem exists_linear_extension_to_boundedFunctions [SigmaAlgebra α] (μ : Measure α)
     [IsFiniteMeasure μ] :
     ∃ φ : (DiscreteCopy α →ᵇ ℝ) →L[ℝ] ℝ,
       ∀ f : DiscreteCopy α →ᵇ ℝ, Integrable f μ → φ f = ∫ x, f x ∂μ := by
@@ -148,11 +148,11 @@ theorem exists_linear_extension_to_boundedFunctions [MeasurableSpace α] (μ : M
 
 /-- An arbitrary extension of the integral to all bounded functions, as a continuous linear map.
 It is not at all canonical, and constructed using Hahn-Banach. -/
-def _root_.MeasureTheory.Measure.extensionToBoundedFunctions [MeasurableSpace α] (μ : Measure α)
+def _root_.MeasureTheory.Measure.extensionToBoundedFunctions [SigmaAlgebra α] (μ : Measure α)
     [IsFiniteMeasure μ] : (DiscreteCopy α →ᵇ ℝ) →L[ℝ] ℝ :=
   (exists_linear_extension_to_boundedFunctions μ).choose
 
-theorem extensionToBoundedFunctions_apply [MeasurableSpace α] (μ : Measure α) [IsFiniteMeasure μ]
+theorem extensionToBoundedFunctions_apply [SigmaAlgebra α] (μ : Measure α) [IsFiniteMeasure μ]
     (f : DiscreteCopy α →ᵇ ℝ) (hf : Integrable f μ) :
     μ.extensionToBoundedFunctions f = ∫ x, f x ∂μ :=
   (exists_linear_extension_to_boundedFunctions μ).choose_spec f hf
@@ -418,7 +418,7 @@ theorem continuousPart_evalCLM_eq_zero [TopologicalSpace α] [DiscreteTopology �
     _ = 0 := by simp
 
 set_option backward.isDefEq.respectTransparency false in
-theorem toFunctions_toMeasure [MeasurableSpace α] (μ : Measure α) [IsFiniteMeasure μ] (s : Set α)
+theorem toFunctions_toMeasure [SigmaAlgebra α] (μ : Measure α) [IsFiniteMeasure μ] (s : Set α)
     (hs : MeasurableSet s) :
     μ.extensionToBoundedFunctions.toBoundedAdditiveMeasure s = μ.real s := by
   simp only [ContinuousLinearMap.toBoundedAdditiveMeasure]
@@ -432,7 +432,7 @@ theorem toFunctions_toMeasure [MeasurableSpace α] (μ : Measure α) [IsFiniteMe
     exact norm_indicator_le_one _
 
 set_option backward.isDefEq.respectTransparency false in
-theorem toFunctions_toMeasure_continuousPart [MeasurableSpace α] [MeasurableSingletonClass α]
+theorem toFunctions_toMeasure_continuousPart [SigmaAlgebra α] [MeasurableSingletonClass α]
     (μ : Measure α) [IsFiniteMeasure μ] [NullSingletonClass μ] (s : Set α) (hs : MeasurableSet s) :
     μ.extensionToBoundedFunctions.toBoundedAdditiveMeasure.continuousPart s = μ.real s := by
   let f := μ.extensionToBoundedFunctions.toBoundedAdditiveMeasure

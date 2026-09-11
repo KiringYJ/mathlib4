@@ -40,7 +40,7 @@ open scoped Topology ENNReal NNReal InnerProductSpace
 
 namespace MeasureTheory
 
-variable {E : Type*} {mE : MeasurableSpace E} {S : Set (Measure E)}
+variable {E : Type*} {mE : SigmaAlgebra E} {S : Set (Measure E)}
 
 section PseudoMetricSpace
 

@@ -8,7 +8,7 @@ module
 public import Mathlib.Probability.Distributions.Bernoulli
 public import Mathlib.Probability.Distributions.SetBernoulli
 
-import Mathlib.MeasureTheory.MeasurableSpace.NCard
+import Mathlib.MeasureTheory.SigmaAlgebra.NCard
 import Mathlib.Order.Interval.Set.Nat
 
 /-!
@@ -49,7 +49,7 @@ open MeasureTheory Set Measure
 open scoped NNReal ProbabilityTheory unitInterval ENNReal
 
 namespace ProbabilityTheory
-variable {R Ω : Type*} [MeasurableSpace R] [AddMonoidWithOne R] {m : MeasurableSpace Ω}
+variable {R Ω : Type*} [SigmaAlgebra R] [AddMonoidWithOne R] {m : SigmaAlgebra Ω}
   {P : Measure Ω} {X : Ω → R} {n : ℕ} {p : I}
 
 /-- The binomial probability distribution with parameter `p`. -/

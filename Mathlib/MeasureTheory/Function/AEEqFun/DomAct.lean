@@ -29,7 +29,7 @@ open MeasureTheory
 
 namespace DomMulAct
 
-variable {M N α β} [MeasurableSpace N] [MeasurableSpace α]
+variable {M N α β} [SigmaAlgebra N] [SigmaAlgebra α]
   {μ : MeasureTheory.Measure α} [TopologicalSpace β]
 
 section SMul

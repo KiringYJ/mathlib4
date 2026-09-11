@@ -193,7 +193,7 @@ lemma norm_fourierSMulRight_le (L : V →L[ℝ] W →L[ℝ] ℝ) (f : V → E) (
   _ = 2 * π * ‖L‖ * ‖v‖ * ‖f v‖ := by ring
 
 lemma _root_.MeasureTheory.AEStronglyMeasurable.fourierSMulRight
-    [SecondCountableTopologyEither V (W →L[ℝ] ℝ)] [MeasurableSpace V] [BorelSpace V]
+    [SecondCountableTopologyEither V (W →L[ℝ] ℝ)] [SigmaAlgebra V] [BorelSpace V]
     {L : V →L[ℝ] W →L[ℝ] ℝ} {f : V → E} {μ : Measure V}
     (hf : AEStronglyMeasurable f μ) :
     AEStronglyMeasurable (fun v ↦ fourierSMulRight L f v) μ := by
@@ -211,7 +211,7 @@ variable {f}
 Fourier transform of `f` has a Fréchet derivative (everywhere in its domain) and its derivative is
 the Fourier transform of `smulRight L f`. -/
 theorem hasFDerivAt_fourierIntegral
-    [MeasurableSpace V] [BorelSpace V] [SecondCountableTopology V] {μ : Measure V}
+    [SigmaAlgebra V] [BorelSpace V] [SecondCountableTopology V] {μ : Measure V}
     (hf : Integrable f μ) (hf' : Integrable (fun v : V ↦ ‖v‖ * ‖f v‖) μ) (w : W) :
     HasFDerivAt (fourierIntegral 𝐞 μ L.toLinearMap₁₂ f)
       (fourierIntegral 𝐞 μ L.toLinearMap₁₂ (fourierSMulRight L f) w) w := by
@@ -238,7 +238,7 @@ theorem hasFDerivAt_fourierIntegral
     h3 h4 h5 h6
 
 lemma fderiv_fourierIntegral
-    [MeasurableSpace V] [BorelSpace V] [SecondCountableTopology V] {μ : Measure V}
+    [SigmaAlgebra V] [BorelSpace V] [SecondCountableTopology V] {μ : Measure V}
     (hf : Integrable f μ) (hf' : Integrable (fun v : V ↦ ‖v‖ * ‖f v‖) μ) :
     fderiv ℝ (fourierIntegral 𝐞 μ L.toLinearMap₁₂ f) =
       fourierIntegral 𝐞 μ L.toLinearMap₁₂ (fourierSMulRight L f) := by
@@ -246,14 +246,14 @@ lemma fderiv_fourierIntegral
   exact (hasFDerivAt_fourierIntegral L hf hf' w).fderiv
 
 lemma differentiable_fourierIntegral
-    [MeasurableSpace V] [BorelSpace V] [SecondCountableTopology V] {μ : Measure V}
+    [SigmaAlgebra V] [BorelSpace V] [SecondCountableTopology V] {μ : Measure V}
     (hf : Integrable f μ) (hf' : Integrable (fun v : V ↦ ‖v‖ * ‖f v‖) μ) :
     Differentiable ℝ (fourierIntegral 𝐞 μ L.toLinearMap₁₂ f) :=
   fun w ↦ (hasFDerivAt_fourierIntegral L hf hf' w).differentiableAt
 
 /-- The Fourier integral of the derivative of a function is obtained by multiplying the Fourier
 integral of the original function by `-L w v`. -/
-theorem fourierIntegral_fderiv [MeasurableSpace V] [BorelSpace V] [FiniteDimensional ℝ V]
+theorem fourierIntegral_fderiv [SigmaAlgebra V] [BorelSpace V] [FiniteDimensional ℝ V]
     {μ : Measure V} [Measure.IsAddHaarMeasure μ]
     (hf : Integrable f μ) (h'f : Differentiable ℝ f) (hf' : Integrable (fderiv ℝ f) μ) :
     fourierIntegral 𝐞 μ L.toLinearMap₁₂ (fderiv ℝ f)
@@ -423,7 +423,7 @@ lemma norm_iteratedFDeriv_fourierPowSMulRight
     simp only [← Finset.sum_mul, ← Nat.cast_sum, Nat.sum_range_choose, mul_one, ← mul_assoc,
       Nat.cast_pow, Nat.cast_ofNat, Nat.cast_add, Nat.cast_one, ← mul_pow, mul_add]
 
-variable [MeasurableSpace V] [BorelSpace V] {μ : Measure V}
+variable [SigmaAlgebra V] [BorelSpace V] {μ : Measure V}
 
 section SecondCountableTopology
 
@@ -671,7 +671,7 @@ namespace Real
 open VectorFourier
 
 variable {V : Type*} [NormedAddCommGroup V] [InnerProductSpace ℝ V] [FiniteDimensional ℝ V]
-  [MeasurableSpace V] [BorelSpace V] {f : V → E}
+  [SigmaAlgebra V] [BorelSpace V] {f : V → E}
 
 /-- The Fréchet derivative of the Fourier transform of `f` is the Fourier transform of
 `fun v ↦ -2 * π * I ⟪v, ⬝⟫ f v`. -/

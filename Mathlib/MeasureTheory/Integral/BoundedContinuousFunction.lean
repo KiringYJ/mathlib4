@@ -38,13 +38,13 @@ lemma apply_le_edist_zero (f : X →ᵇ ℝ≥0) (x : X) :
     f x ≤ edist 0 f := by
   simpa [← ENNReal.coe_le_coe] using f.apply_le_nndist_zero x
 
-variable [MeasurableSpace X]
+variable [SigmaAlgebra X]
 
 lemma lintegral_le_edist_mul (f : X →ᵇ ℝ≥0) (μ : Measure X) :
     (∫⁻ x, f x ∂μ) ≤ edist 0 f * (μ Set.univ) :=
   le_trans (lintegral_mono (fun x ↦ ENNReal.coe_le_coe.mpr (f.apply_le_nndist_zero x))) (by simp)
 
-theorem measurable_coe_ennreal_comp [OpensMeasurableSpace X] (f : X →ᵇ ℝ≥0) :
+theorem measurable_coe_ennreal_comp [OpensSigmaAlgebra X] (f : X →ᵇ ℝ≥0) :
     Measurable fun x ↦ (f x : ℝ≥0∞) :=
   measurable_coe_nnreal_ennreal.comp f.continuous.measurable
 
@@ -56,13 +56,13 @@ theorem lintegral_lt_top_of_nnreal (f : X →ᵇ ℝ≥0) : ∫⁻ x, f x ∂μ 
   have key := BoundedContinuousFunction.NNReal.upper_bound f x
   rwa [ENNReal.coe_le_coe]
 
-theorem integrable_of_nnreal [OpensMeasurableSpace X] (f : X →ᵇ ℝ≥0) :
+theorem integrable_of_nnreal [OpensSigmaAlgebra X] (f : X →ᵇ ℝ≥0) :
     Integrable (((↑) : ℝ≥0 → ℝ) ∘ ⇑f) μ := by
   refine ⟨(NNReal.continuous_coe.comp f.continuous).measurable.aestronglyMeasurable, ?_⟩
   simp only [hasFiniteIntegral_iff_enorm, Function.comp_apply, NNReal.enorm_eq]
   exact lintegral_lt_top_of_nnreal _ f
 
-theorem integral_eq_integral_nnrealPart_sub [OpensMeasurableSpace X] (f : X →ᵇ ℝ) :
+theorem integral_eq_integral_nnrealPart_sub [OpensSigmaAlgebra X] (f : X →ᵇ ℝ) :
     ∫ x, f x ∂μ = (∫ x, (f.nnrealPart x : ℝ) ∂μ) - ∫ x, ((-f).nnrealPart x : ℝ) ∂μ := by
   simp only [f.self_eq_nnrealPart_sub_nnrealPart_neg, Pi.sub_apply, integral_sub,
              integrable_of_nnreal]
@@ -71,7 +71,7 @@ theorem integral_eq_integral_nnrealPart_sub [OpensMeasurableSpace X] (f : X →�
 theorem lintegral_of_real_lt_top (f : X →ᵇ ℝ) :
     ∫⁻ x, ENNReal.ofReal (f x) ∂μ < ∞ := lintegral_lt_top_of_nnreal _ f.nnrealPart
 
-theorem toReal_lintegral_coe_eq_integral [OpensMeasurableSpace X] (f : X →ᵇ ℝ≥0) (μ : Measure X) :
+theorem toReal_lintegral_coe_eq_integral [OpensSigmaAlgebra X] (f : X →ᵇ ℝ≥0) (μ : Measure X) :
     (∫⁻ x, (f x : ℝ≥0∞) ∂μ).toReal = ∫ x, (f x : ℝ) ∂μ := by
   rw [integral_eq_lintegral_of_nonneg_ae _ (by simpa [Function.comp_apply] using!
         (NNReal.continuous_coe.comp f.continuous).measurable.aestronglyMeasurable)]
@@ -82,7 +82,7 @@ end NNRealValued
 
 section BochnerIntegral
 
-variable {X : Type*} [MeasurableSpace X] [TopologicalSpace X]
+variable {X : Type*} [SigmaAlgebra X] [TopologicalSpace X]
 variable (μ : Measure X)
 variable {E : Type*} [NormedAddCommGroup E]
 
@@ -93,7 +93,7 @@ lemma lintegral_nnnorm_le (f : X →ᵇ E) :
     _ ≤ ∫⁻ _, ‖f‖₊ ∂μ       := by gcongr; apply nnnorm_coe_le_nnnorm
     _ = ‖f‖₊ * (μ Set.univ) := by rw [lintegral_const]
 
-variable [OpensMeasurableSpace X] [SecondCountableTopology E] [MeasurableSpace E] [BorelSpace E]
+variable [OpensSigmaAlgebra X] [SecondCountableTopology E] [SigmaAlgebra E] [BorelSpace E]
 
 set_option linter.style.whitespace false in -- manual alignment is not recognised
 lemma integrable [IsFiniteMeasure μ] (f : X →ᵇ E) :
@@ -133,7 +133,7 @@ end BochnerIntegral
 section RealValued
 
 variable {X : Type*} [TopologicalSpace X]
-variable [MeasurableSpace X] [OpensMeasurableSpace X] {μ : Measure X} [IsFiniteMeasure μ]
+variable [SigmaAlgebra X] [OpensSigmaAlgebra X] {μ : Measure X} [IsFiniteMeasure μ]
 
 lemma integral_add_const (f : X →ᵇ ℝ) (c : ℝ) :
     ∫ x, (f + const X c) x ∂μ = ∫ x, f x ∂μ + μ.real Set.univ • c := by
@@ -147,7 +147,7 @@ end RealValued
 
 section tendsto_integral
 
-variable {X : Type*} [TopologicalSpace X] [MeasurableSpace X] [OpensMeasurableSpace X]
+variable {X : Type*} [TopologicalSpace X] [SigmaAlgebra X] [OpensSigmaAlgebra X]
 
 lemma tendsto_integral_of_forall_limsup_integral_le_integral {ι : Type*} {L : Filter ι}
     {μ : Measure X} [IsProbabilityMeasure μ] {μs : ι → Measure X} [∀ i, IsProbabilityMeasure (μs i)]

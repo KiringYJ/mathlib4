@@ -21,10 +21,10 @@ We introduce the following typeclasses for measures:
 
 namespace MeasureTheory
 
-open Set Filter Function Measure MeasurableSpace NNReal ENNReal
+open Set Filter Function Measure SigmaAlgebra NNReal ENNReal
 open scoped Topology
 
-variable {α β ι : Type*} {m0 : MeasurableSpace α} [MeasurableSpace β] {μ ν : Measure α}
+variable {α β ι : Type*} {m0 : SigmaAlgebra α} [SigmaAlgebra β] {μ ν : Measure α}
   {s t : Set α} {a : α}
 
 section SFinite
@@ -94,7 +94,7 @@ end SFinite
 
 /-- A measure `μ` is called σ-finite if there is a countable collection of sets
 `{ A i | i ∈ ℕ }` such that `μ (A i) < ∞` and `⋃ i, A i = s`. -/
-class SigmaFinite {m0 : MeasurableSpace α} (μ : Measure α) : Prop where
+class SigmaFinite {m0 : SigmaAlgebra α} (μ : Measure α) : Prop where
   out' : Nonempty (μ.FiniteSpanningSetsIn univ)
 
 theorem sigmaFinite_iff : SigmaFinite μ ↔ Nonempty (μ.FiniteSpanningSetsIn univ) :=
@@ -202,7 +202,7 @@ namespace Measure
 /-- A set in a σ-finite space has zero measure if and only if its intersection with
 all members of the countable family of finite measure spanning sets has zero measure. -/
 @[deprecated forall_measure_inter_isCountablySpanning_eq_zero (since := "2026-03-13")]
-theorem forall_measure_inter_spanningSets_eq_zero [MeasurableSpace α] {μ : Measure α}
+theorem forall_measure_inter_spanningSets_eq_zero [SigmaAlgebra α] {μ : Measure α}
     [SigmaFinite μ] (s : Set α) : (∀ n, μ (s ∩ spanningSets μ n) = 0) ↔ μ s = 0 := by
   nth_rw 2 [show s = ⋃ n, s ∩ spanningSets μ n by
       rw [← inter_iUnion, iUnion_spanningSets, inter_univ]]
@@ -210,7 +210,7 @@ theorem forall_measure_inter_spanningSets_eq_zero [MeasurableSpace α] {μ : Mea
 
 /-- A set in a σ-finite space has positive measure if and only if its intersection with
 some member of the countable family of finite measure spanning sets has positive measure. -/
-theorem exists_measure_inter_spanningSets_pos [MeasurableSpace α] {μ : Measure α} [SigmaFinite μ]
+theorem exists_measure_inter_spanningSets_pos [SigmaAlgebra α] {μ : Measure α} [SigmaFinite μ]
     (s : Set α) : (∃ n, 0 < μ (s ∩ spanningSets μ n)) ↔ 0 < μ s := by
   contrapose!
   rw [nonpos_iff_eq_zero, ← forall_measure_inter_isCountablySpanning_eq_zero
@@ -219,7 +219,7 @@ theorem exists_measure_inter_spanningSets_pos [MeasurableSpace α] {μ : Measure
 
 /-- If the union of a.e.-disjoint null-measurable sets has finite measure, then there are only
 finitely many members of the union whose measure exceeds any given positive number. -/
-theorem finite_const_le_meas_of_disjoint_iUnion₀ {ι : Type*} [MeasurableSpace α] (μ : Measure α)
+theorem finite_const_le_meas_of_disjoint_iUnion₀ {ι : Type*} [SigmaAlgebra α] (μ : Measure α)
     {ε : ℝ≥0∞} (ε_pos : 0 < ε) {As : ι → Set α} (As_mble : ∀ i : ι, NullMeasurableSet (As i) μ)
     (As_disj : Pairwise (AEDisjoint μ on As)) (Union_As_finite : μ (⋃ i, As i) ≠ ∞) :
     Set.Finite { i : ι | ε ≤ μ (As i) } :=
@@ -229,7 +229,7 @@ theorem finite_const_le_meas_of_disjoint_iUnion₀ {ι : Type*} [MeasurableSpace
 
 /-- If the union of disjoint measurable sets has finite measure, then there are only
 finitely many members of the union whose measure exceeds any given positive number. -/
-theorem finite_const_le_meas_of_disjoint_iUnion {ι : Type*} [MeasurableSpace α] (μ : Measure α)
+theorem finite_const_le_meas_of_disjoint_iUnion {ι : Type*} [SigmaAlgebra α] (μ : Measure α)
     {ε : ℝ≥0∞} (ε_pos : 0 < ε) {As : ι → Set α} (As_mble : ∀ i : ι, MeasurableSet (As i))
     (As_disj : Pairwise (Disjoint on As)) (Union_As_finite : μ (⋃ i, As i) ≠ ∞) :
     Set.Finite { i : ι | ε ≤ μ (As i) } :=
@@ -250,7 +250,7 @@ theorem _root_.Set.Infinite.meas_eq_top [MeasurableSingletonClass α]
 
 /-- If the union of a.e.-disjoint null-measurable sets has finite measure, then there are only
 countably many members of the union whose measure is positive. -/
-theorem countable_meas_pos_of_disjoint_of_meas_iUnion_ne_top₀ {ι : Type*} {_ : MeasurableSpace α}
+theorem countable_meas_pos_of_disjoint_of_meas_iUnion_ne_top₀ {ι : Type*} {_ : SigmaAlgebra α}
     (μ : Measure α) {As : ι → Set α} (As_mble : ∀ i : ι, NullMeasurableSet (As i) μ)
     (As_disj : Pairwise (AEDisjoint μ on As)) (Union_As_finite : μ (⋃ i, As i) ≠ ∞) :
     Set.Countable { i : ι | 0 < μ (As i) } := by
@@ -270,7 +270,7 @@ theorem countable_meas_pos_of_disjoint_of_meas_iUnion_ne_top₀ {ι : Type*} {_ 
 
 /-- If the union of disjoint measurable sets has finite measure, then there are only
 countably many members of the union whose measure is positive. -/
-theorem countable_meas_pos_of_disjoint_of_meas_iUnion_ne_top {ι : Type*} {_ : MeasurableSpace α}
+theorem countable_meas_pos_of_disjoint_of_meas_iUnion_ne_top {ι : Type*} {_ : SigmaAlgebra α}
     (μ : Measure α) {As : ι → Set α} (As_mble : ∀ i : ι, MeasurableSet (As i))
     (As_disj : Pairwise (Disjoint on As)) (Union_As_finite : μ (⋃ i, As i) ≠ ∞) :
     Set.Countable { i : ι | 0 < μ (As i) } :=
@@ -279,7 +279,7 @@ theorem countable_meas_pos_of_disjoint_of_meas_iUnion_ne_top {ι : Type*} {_ : M
 
 /-- In an s-finite space, among disjoint null-measurable sets, only countably many can have positive
 measure. -/
-theorem countable_meas_pos_of_disjoint_iUnion₀ {ι : Type*} {_ : MeasurableSpace α} {μ : Measure α}
+theorem countable_meas_pos_of_disjoint_iUnion₀ {ι : Type*} {_ : SigmaAlgebra α} {μ : Measure α}
     [SFinite μ] {As : ι → Set α} (As_mble : ∀ i : ι, NullMeasurableSet (As i) μ)
     (As_disj : Pairwise (AEDisjoint μ on As)) :
     Set.Countable { i : ι | 0 < μ (As i) } := by
@@ -302,14 +302,14 @@ theorem countable_meas_pos_of_disjoint_iUnion₀ {ι : Type*} {_ : MeasurableSpa
 
 /-- In an s-finite space, among disjoint measurable sets, only countably many can have positive
 measure. -/
-theorem countable_meas_pos_of_disjoint_iUnion {ι : Type*} {_ : MeasurableSpace α} {μ : Measure α}
+theorem countable_meas_pos_of_disjoint_iUnion {ι : Type*} {_ : SigmaAlgebra α} {μ : Measure α}
     [SFinite μ] {As : ι → Set α} (As_mble : ∀ i : ι, MeasurableSet (As i))
     (As_disj : Pairwise (Disjoint on As)) : Set.Countable { i : ι | 0 < μ (As i) } :=
   countable_meas_pos_of_disjoint_iUnion₀ (fun i ↦ (As_mble i).nullMeasurableSet)
     ((fun _ _ h ↦ Disjoint.aedisjoint (As_disj h)))
 
-theorem countable_meas_level_set_pos₀ {α β : Type*} {_ : MeasurableSpace α} {μ : Measure α}
-    [SFinite μ] [MeasurableSpace β] [MeasurableSingletonClass β] {g : α → β}
+theorem countable_meas_level_set_pos₀ {α β : Type*} {_ : SigmaAlgebra α} {μ : Measure α}
+    [SFinite μ] [SigmaAlgebra β] [MeasurableSingletonClass β] {g : α → β}
     (g_mble : NullMeasurable g μ) : Set.Countable { t : β | 0 < μ { a : α | g a = t } } := by
   have level_sets_disjoint : Pairwise (Disjoint on fun t : β => { a : α | g a = t }) :=
     fun s t hst => Disjoint.preimage g (disjoint_singleton.mpr hst)
@@ -317,8 +317,8 @@ theorem countable_meas_level_set_pos₀ {α β : Type*} {_ : MeasurableSpace α}
     (fun b => g_mble (‹MeasurableSingletonClass β›.measurableSet_singleton b))
     ((fun _ _ h ↦ Disjoint.aedisjoint (level_sets_disjoint h)))
 
-theorem countable_meas_level_set_pos {α β : Type*} {_ : MeasurableSpace α} {μ : Measure α}
-    [SFinite μ] [MeasurableSpace β] [MeasurableSingletonClass β] {g : α → β}
+theorem countable_meas_level_set_pos {α β : Type*} {_ : SigmaAlgebra α} {μ : Measure α}
+    [SFinite μ] [SigmaAlgebra β] [MeasurableSingletonClass β] {g : α → β}
     (g_mble : Measurable g) : Set.Countable { t : β | 0 < μ { a : α | g a = t } } :=
   countable_meas_level_set_pos₀ g_mble.nullMeasurable
 
@@ -578,7 +578,7 @@ theorem sigmaFinite_of_le (μ : Measure α) [hs : SigmaFinite μ] (h : ν ≤ μ
 end Measure
 
 /-- Every finite measure is σ-finite. -/
-instance (priority := 100) IsFiniteMeasure.toSigmaFinite {_m0 : MeasurableSpace α} (μ : Measure α)
+instance (priority := 100) IsFiniteMeasure.toSigmaFinite {_m0 : SigmaAlgebra α} (μ : Measure α)
     [IsFiniteMeasure μ] : SigmaFinite μ :=
   ⟨⟨⟨fun _ => univ, fun _ => trivial, fun _ => measure_lt_top μ _, iUnion_const _⟩⟩⟩
 
@@ -600,8 +600,8 @@ theorem sigmaFinite_bot_iff (μ : @Measure α ⊥) : SigmaFinite μ ↔ IsFinite
   have : SigmaFinite μ := h
   let s := spanningSets μ
   have hs_univ : ⋃ i, s i = Set.univ := iUnion_spanningSets μ
-  have hs_meas : ∀ i, MeasurableSet[⊥] (s i) := measurableSet_spanningSets μ
-  simp_rw [MeasurableSpace.measurableSet_bot_iff] at hs_meas
+  have hs_meas : ∀ i, s i ∈ (⊥ : SigmaAlgebra α) := measurableSet_spanningSets μ
+  simp_rw [SigmaAlgebra.mem_bot_iff] at hs_meas
   by_cases h_univ_empty : (Set.univ : Set α) = ∅
   · rw [h_univ_empty, measure_empty]
     exact ENNReal.zero_ne_top.lt_top

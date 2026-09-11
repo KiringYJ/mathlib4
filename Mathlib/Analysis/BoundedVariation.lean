@@ -152,14 +152,14 @@ namespace BoundedVariationOn
 
 variable {α E M : Type*} [LinearOrder α] [TopologicalSpace α] [OrderTopology α]
   [PseudoEMetricSpace M]
-  [SecondCountableTopologyEither α M] [MeasurableSpace α] [BorelSpace α]
+  [SecondCountableTopologyEither α M] [SigmaAlgebra α] [BorelSpace α]
   [NormedAddCommGroup E] [SecondCountableTopologyEither α E]
 
 theorem stronglyMeasurable {f : α → M} (hf : BoundedVariationOn f univ) :
     StronglyMeasurable f :=
   StronglyMeasurable.of_countable_not_continuousAt hf.countable_not_continuousAt
 
-theorem measurable [MeasurableSpace M] [BorelSpace M] {f : α → M} (hf : BoundedVariationOn f univ) :
+theorem measurable [SigmaAlgebra M] [BorelSpace M] {f : α → M} (hf : BoundedVariationOn f univ) :
     Measurable f :=
   hf.stronglyMeasurable.measurable
 

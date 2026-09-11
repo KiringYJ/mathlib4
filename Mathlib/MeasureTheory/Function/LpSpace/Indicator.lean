@@ -29,7 +29,7 @@ noncomputable section
 open MeasureTheory Filter
 open scoped NNReal ENNReal Topology symmDiff
 
-variable {α E : Type*} {m : MeasurableSpace α} {p : ℝ≥0∞} {μ : Measure α} [NormedAddCommGroup E]
+variable {α E : Type*} {m : SigmaAlgebra α} {p : ℝ≥0∞} {μ : Measure α} [NormedAddCommGroup E]
 
 namespace MeasureTheory
 
@@ -59,7 +59,7 @@ theorem exists_eLpNorm_indicator_le (hp : p ≠ ∞) (c : E) {ε : ℝ≥0∞} (
   grw [eLpNorm_indicator_const_le, ← hη_le, hs]
 
 section Topology
-variable {X : Type*} [TopologicalSpace X] [MeasurableSpace X]
+variable {X : Type*} [TopologicalSpace X] [SigmaAlgebra X]
   {μ : Measure X} [IsFiniteMeasureOnCompacts μ]
 
 /-- A bounded measurable function with compact support is in L^p. -/
@@ -80,7 +80,7 @@ theorem _root_.HasCompactSupport.memLp_of_enorm_bound {f : X → E} (hf : HasCom
     (fun x ↦ image_eq_zero_of_notMem_tsupport) hf.measure_ne_top le_top
 
 /-- A continuous function with compact support is in L^p. -/
-theorem _root_.Continuous.memLp_of_hasCompactSupport [OpensMeasurableSpace X]
+theorem _root_.Continuous.memLp_of_hasCompactSupport [OpensSigmaAlgebra X]
     {f : X → E} (hf : Continuous f) (h'f : HasCompactSupport f) : MemLp f p μ := by
   have := hf.memLp_top_of_hasCompactSupport h'f μ
   exact this.mono_exponent_of_measure_support_ne_top
@@ -284,7 +284,7 @@ end const
 
 namespace Lp
 
-variable {β : Type*} [MeasurableSpace β] {μb : MeasureTheory.Measure β} {f : α → β}
+variable {β : Type*} [SigmaAlgebra β] {μb : MeasureTheory.Measure β} {f : α → β}
 
 theorem indicatorConstLp_compMeasurePreserving {s : Set β} (hs : MeasurableSet s)
     (hμs : μb s ≠ ∞) (c : E) (hf : MeasurePreserving f μ μb) :

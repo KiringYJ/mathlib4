@@ -21,7 +21,7 @@ open MeasureTheory
 open scoped ProbabilityTheory
 
 namespace MeasureTheory
-variable {Ω : Type*} {m : MeasurableSpace Ω} {X : Ω → ℝ} {μ : Measure Ω}
+variable {Ω : Type*} {m : SigmaAlgebra Ω} {X : Ω → ℝ} {μ : Measure Ω}
 
 /-- If an `AEMeasurable` function is ae equal to `0` or `1`, then its integral is equal to the
 measure of the set where it equals `1`. -/
@@ -49,11 +49,11 @@ end MeasureTheory
 
 
 namespace ProbabilityTheory
-variable {Ω : Type*} {m : MeasurableSpace Ω} {X Y : Ω → ℝ} {μ : Measure ℝ}
+variable {Ω : Type*} {m : SigmaAlgebra Ω} {X Y : Ω → ℝ} {μ : Measure ℝ}
 
 /-- If a random variable is ae equal to `0` or `1`, then its conditional variance is the product of
 the conditional probabilities that it's equal to `0` and that it's equal to `1`. -/
-lemma condVar_of_ae_eq_zero_or_one {m₀ : MeasurableSpace Ω} (hm : m ≤ m₀) {μ : Measure[m₀] Ω}
+lemma condVar_of_ae_eq_zero_or_one {m₀ : SigmaAlgebra Ω} (hm : m ≤ m₀) {μ : Measure[m₀] Ω}
     [IsFiniteMeasure μ] (hXmeas : AEMeasurable[m₀] X μ) (hX : ∀ᵐ ω ∂μ, X ω = 0 ∨ X ω = 1) :
     Var[X; μ | m] =ᵐ[μ] μ[X | m] * μ[1 - X | m] := by
   wlog hXmeas : Measurable[m₀] X

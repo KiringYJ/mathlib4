@@ -110,7 +110,7 @@ lemma _root_.ContinuousLinearMap.rotation_apply (θ : ℝ) (x : E × E) :
     ContinuousLinearMap.rotation θ x
      = (Real.cos θ • x.1 + Real.sin θ • x.2, -Real.sin θ • x.1 + Real.cos θ • x.2) := rfl
 
-variable [SecondCountableTopology E] [MeasurableSpace E] [BorelSpace E] {μ : Measure E} {a : ℝ}
+variable [SecondCountableTopology E] [SigmaAlgebra E] [BorelSpace E] {μ : Measure E} {a : ℝ}
 
 /-- If a measure `μ` is such that `μ.prod μ` is invariant by rotation of angle `-π/4` then
 `μ {x | ‖x‖ ≤ a} * μ {x | b < ‖x‖} ≤ μ {x | (b - a) / √2 < ‖x‖} ^ 2`. -/

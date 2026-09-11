@@ -12,7 +12,7 @@ public import Mathlib.MeasureTheory.Measure.GiryMonad
 
 A kernel from a measurable space `α` to another measurable space `β` is a measurable map
 `α → MeasureTheory.Measure β`, where the measurable space instance on `measure β` is the one defined
-in `MeasureTheory.Measure.instMeasurableSpace`. That is, a kernel `κ` verifies that for all
+in `MeasureTheory.Measure.instSigmaAlgebra`. That is, a kernel `κ` verifies that for all
 measurable sets `s` of `β`, `a ↦ κ a s` is measurable.
 
 ## Main definitions
@@ -50,9 +50,9 @@ namespace ProbabilityTheory
 
 /-- A kernel from a measurable space `α` to another measurable space `β` is a measurable function
 `κ : α → Measure β`. The measurable space structure on `MeasureTheory.Measure β` is given by
-`MeasureTheory.Measure.instMeasurableSpace`. A map `κ : α → MeasureTheory.Measure β` is measurable
+`MeasureTheory.Measure.instSigmaAlgebra`. A map `κ : α → MeasureTheory.Measure β` is measurable
 iff `∀ s : Set β, MeasurableSet s → Measurable (fun a ↦ κ a s)`. -/
-structure Kernel (α β : Type*) [MeasurableSpace α] [MeasurableSpace β] where
+structure Kernel (α β : Type*) [SigmaAlgebra α] [SigmaAlgebra β] where
   /-- The underlying function of a kernel.
 
   Do not use this function directly. Instead use the coercion coming from the `DFunLike`
@@ -69,7 +69,7 @@ scoped notation "Kernel[" mα "] " α:arg β:arg => @Kernel α β mα _
 /-- Notation for `Kernel` with respect to a non-standard σ-algebra in the domain and codomain. -/
 scoped notation "Kernel[" mα ", " mβ "] " α:arg β:arg => @Kernel α β mα mβ
 
-variable {α β ι : Type*} {mα : MeasurableSpace α} {mβ : MeasurableSpace β}
+variable {α β ι : Type*} {mα : SigmaAlgebra α} {mβ : SigmaAlgebra β}
 
 namespace Kernel
 
@@ -114,12 +114,12 @@ noncomputable instance instAddCommMonoid : AddCommMonoid (Kernel α β) :=
 
 instance instPartialOrder : PartialOrder (Kernel α β) := .lift _ DFunLike.coe_injective
 
-instance {α β : Type*} [MeasurableSpace α] [MeasurableSpace β] :
+instance {α β : Type*} [SigmaAlgebra α] [SigmaAlgebra β] :
     AddLeftMono (Kernel α β) :=
   ⟨fun _ _ _ hμ a ↦ add_le_add_right (hμ a) _⟩
 
 noncomputable
-instance instOrderBot {α β : Type*} [MeasurableSpace α] [MeasurableSpace β] :
+instance instOrderBot {α β : Type*} [SigmaAlgebra α] [SigmaAlgebra β] :
     OrderBot (Kernel α β) where
   bot := 0
   bot_le κ a := by simp only [zero_apply, Measure.zero_le]
@@ -194,7 +194,7 @@ lemma bound_zero : bound (0 : Kernel α β) = 0 := by
 
 end Kernel
 
-instance isFiniteKernel_zero (α β : Type*) {_ : MeasurableSpace α} {_ : MeasurableSpace β} :
+instance isFiniteKernel_zero (α β : Type*) {_ : SigmaAlgebra α} {_ : SigmaAlgebra β} :
     IsFiniteKernel (0 : Kernel α β) :=
   ⟨⟨0, ENNReal.coe_lt_top, fun _ => by simp⟩⟩
 
@@ -289,10 +289,12 @@ protected theorem measurable_coe (κ : Kernel α β) {s : Set β} (hs : Measurab
     Measurable fun a => κ a s :=
   (Measure.measurable_coe hs).comp κ.measurable
 
-lemma apply_congr_of_mem_measurableAtom (κ : Kernel α β) {y' y : α} (hy' : y' ∈ measurableAtom y) :
+lemma apply_congr_of_indistinguishable (κ : Kernel α β) {y' y : α}
+    (hy' : y' ∈ (inferInstance : SigmaAlgebra α).indistinguishabilityClass y) :
     κ y' = κ y := by
   ext s hs
-  exact mem_of_mem_measurableAtom hy' (κ.measurable_coe hs (measurableSet_singleton (κ y s))) rfl
+  exact SigmaAlgebra.mem_of_mem_indistinguishabilityClass hy'
+    (κ.measurable_coe hs (measurableSet_singleton (κ y s))) rfl
 
 lemma eq_zero_of_isEmpty_left (κ : Kernel α β) [h : IsEmpty α] : κ = 0 := by
   ext a

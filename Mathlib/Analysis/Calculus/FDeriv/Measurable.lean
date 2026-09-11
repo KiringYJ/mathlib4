@@ -94,9 +94,9 @@ namespace ContinuousLinearMap
 variable {𝕜 E F : Type*} [NontriviallyNormedField 𝕜] [NormedAddCommGroup E] [NormedSpace 𝕜 E]
   [NormedAddCommGroup F] [NormedSpace 𝕜 F]
 
-theorem measurable_apply₂ [MeasurableSpace E] [OpensMeasurableSpace E]
+theorem measurable_apply₂ [SigmaAlgebra E] [OpensSigmaAlgebra E]
     [SecondCountableTopologyEither (E →L[𝕜] F) E]
-    [MeasurableSpace F] [BorelSpace F] : Measurable fun p : (E →L[𝕜] F) × E => p.1 p.2 :=
+    [SigmaAlgebra F] [BorelSpace F] : Measurable fun p : (E →L[𝕜] F) × E => p.1 p.2 :=
   isBoundedBilinearMap_apply.continuous.measurable
 
 end ContinuousLinearMap
@@ -355,7 +355,7 @@ end FDerivMeasurableAux
 
 open FDerivMeasurableAux
 
-variable [MeasurableSpace E] [OpensMeasurableSpace E]
+variable [SigmaAlgebra E] [OpensSigmaAlgebra E]
 variable (𝕜 f)
 
 /-- The set of differentiability points of a function, with derivative in a given complete set,
@@ -390,18 +390,18 @@ theorem measurable_fderiv : Measurable (fderiv 𝕜 f) := by
       ((measurableSet_of_differentiableAt _ _).compl.inter (MeasurableSet.const _))
 
 @[fun_prop]
-theorem measurable_fderiv_apply_const [MeasurableSpace F] [BorelSpace F] (y : E) :
+theorem measurable_fderiv_apply_const [SigmaAlgebra F] [BorelSpace F] (y : E) :
     Measurable fun x => fderiv 𝕜 f x y :=
   (ContinuousLinearMap.measurable_apply y).comp (measurable_fderiv 𝕜 f)
 
 variable {𝕜}
 
 @[fun_prop]
-theorem measurable_deriv [MeasurableSpace 𝕜] [OpensMeasurableSpace 𝕜] [MeasurableSpace F]
+theorem measurable_deriv [SigmaAlgebra 𝕜] [OpensSigmaAlgebra 𝕜] [SigmaAlgebra F]
     [BorelSpace F] (f : 𝕜 → F) : Measurable (deriv f) := by
   simpa only [fderiv_apply_one_eq_deriv] using measurable_fderiv_apply_const 𝕜 f 1
 
-theorem stronglyMeasurable_deriv [MeasurableSpace 𝕜] [OpensMeasurableSpace 𝕜]
+theorem stronglyMeasurable_deriv [SigmaAlgebra 𝕜] [OpensSigmaAlgebra 𝕜]
     [h : SecondCountableTopologyEither 𝕜 F] (f : 𝕜 → F) : StronglyMeasurable (deriv f) := by
   borelize F
   rcases h.out with h𝕜 | hF
@@ -409,11 +409,11 @@ theorem stronglyMeasurable_deriv [MeasurableSpace 𝕜] [OpensMeasurableSpace �
       ⟨measurable_deriv f, isSeparable_range_deriv _⟩
   · exact (measurable_deriv f).stronglyMeasurable
 
-theorem aemeasurable_deriv [MeasurableSpace 𝕜] [OpensMeasurableSpace 𝕜] [MeasurableSpace F]
+theorem aemeasurable_deriv [SigmaAlgebra 𝕜] [OpensSigmaAlgebra 𝕜] [SigmaAlgebra F]
     [BorelSpace F] (f : 𝕜 → F) (μ : Measure 𝕜) : AEMeasurable (deriv f) μ :=
   (measurable_deriv f).aemeasurable
 
-theorem aestronglyMeasurable_deriv [MeasurableSpace 𝕜] [OpensMeasurableSpace 𝕜]
+theorem aestronglyMeasurable_deriv [SigmaAlgebra 𝕜] [OpensSigmaAlgebra 𝕜]
     [SecondCountableTopologyEither 𝕜 F] (f : 𝕜 → F) (μ : Measure 𝕜) :
     AEStronglyMeasurable (deriv f) μ :=
   (stronglyMeasurable_deriv f).aestronglyMeasurable
@@ -705,7 +705,7 @@ theorem measurableSet_of_differentiableWithinAt_Ici :
   simp
 
 @[fun_prop]
-theorem measurable_derivWithin_Ici [MeasurableSpace F] [BorelSpace F] :
+theorem measurable_derivWithin_Ici [SigmaAlgebra F] [BorelSpace F] :
     Measurable fun x => derivWithin f (Ici x) x := by
   refine measurable_of_isClosed fun s hs => ?_
   have :
@@ -738,7 +738,7 @@ theorem stronglyMeasurable_derivWithin_Ici :
       rw [closure_closure]
       exact closure_mono (inter_subset_inter_left _ Ioi_subset_Ici_self)
 
-theorem aemeasurable_derivWithin_Ici [MeasurableSpace F] [BorelSpace F] (μ : Measure ℝ) :
+theorem aemeasurable_derivWithin_Ici [SigmaAlgebra F] [BorelSpace F] (μ : Measure ℝ) :
     AEMeasurable (fun x => derivWithin f (Ici x) x) μ :=
   (measurable_derivWithin_Ici f).aemeasurable
 
@@ -753,7 +753,7 @@ theorem measurableSet_of_differentiableWithinAt_Ioi :
   simpa [differentiableWithinAt_Ioi_iff_Ici] using measurableSet_of_differentiableWithinAt_Ici f
 
 @[fun_prop]
-theorem measurable_derivWithin_Ioi [MeasurableSpace F] [BorelSpace F] :
+theorem measurable_derivWithin_Ioi [SigmaAlgebra F] [BorelSpace F] :
     Measurable fun x => derivWithin f (Ioi x) x := by
   simpa [derivWithin_Ioi_eq_Ici] using measurable_derivWithin_Ici f
 
@@ -761,7 +761,7 @@ theorem stronglyMeasurable_derivWithin_Ioi :
     StronglyMeasurable (fun x ↦ derivWithin f (Ioi x) x) := by
   simpa [derivWithin_Ioi_eq_Ici] using stronglyMeasurable_derivWithin_Ici f
 
-theorem aemeasurable_derivWithin_Ioi [MeasurableSpace F] [BorelSpace F] (μ : Measure ℝ) :
+theorem aemeasurable_derivWithin_Ioi [SigmaAlgebra F] [BorelSpace F] (μ : Measure ℝ) :
     AEMeasurable (fun x => derivWithin f (Ioi x) x) μ :=
   (measurable_derivWithin_Ioi f).aemeasurable
 
@@ -865,7 +865,7 @@ end FDerivMeasurableAux
 
 open FDerivMeasurableAux
 
-variable [MeasurableSpace α] [OpensMeasurableSpace α] [MeasurableSpace E] [OpensMeasurableSpace E]
+variable [SigmaAlgebra α] [OpensSigmaAlgebra α] [SigmaAlgebra E] [OpensSigmaAlgebra E]
 
 theorem measurableSet_of_differentiableAt_of_isComplete_with_param
     (hf : Continuous f.uncurry) {K : Set (E →L[𝕜] F)} (hK : IsComplete K) :
@@ -908,21 +908,21 @@ theorem measurable_fderiv_with_param (hf : Continuous f.uncurry) :
     (measurableSet_of_differentiableAt_of_isComplete_with_param hf hs.isComplete).union
       ((measurableSet_of_differentiableAt_with_param _ hf).compl.inter (MeasurableSet.const _))
 
-theorem measurable_fderiv_apply_const_with_param [MeasurableSpace F] [BorelSpace F]
+theorem measurable_fderiv_apply_const_with_param [SigmaAlgebra F] [BorelSpace F]
     (hf : Continuous f.uncurry) (y : E) :
     Measurable (fun (p : α × E) ↦ fderiv 𝕜 (f p.1) p.2 y) :=
   (ContinuousLinearMap.measurable_apply y).comp (measurable_fderiv_with_param 𝕜 hf)
 
 variable {𝕜}
 
-theorem measurable_deriv_with_param [LocallyCompactSpace 𝕜] [MeasurableSpace 𝕜]
-    [OpensMeasurableSpace 𝕜] [MeasurableSpace F]
+theorem measurable_deriv_with_param [LocallyCompactSpace 𝕜] [SigmaAlgebra 𝕜]
+    [OpensSigmaAlgebra 𝕜] [SigmaAlgebra F]
     [BorelSpace F] {f : α → 𝕜 → F} (hf : Continuous f.uncurry) :
     Measurable (fun (p : α × 𝕜) ↦ deriv (f p.1) p.2) := by
   simpa only [fderiv_apply_one_eq_deriv] using measurable_fderiv_apply_const_with_param 𝕜 hf 1
 
-theorem stronglyMeasurable_deriv_with_param [LocallyCompactSpace 𝕜] [MeasurableSpace 𝕜]
-    [OpensMeasurableSpace 𝕜] [h : SecondCountableTopologyEither α F]
+theorem stronglyMeasurable_deriv_with_param [LocallyCompactSpace 𝕜] [SigmaAlgebra 𝕜]
+    [OpensSigmaAlgebra 𝕜] [h : SecondCountableTopologyEither α F]
     {f : α → 𝕜 → F} (hf : Continuous f.uncurry) :
     StronglyMeasurable (fun (p : α × 𝕜) ↦ deriv (f p.1) p.2) := by
   borelize F
@@ -942,14 +942,14 @@ theorem stronglyMeasurable_deriv_with_param [LocallyCompactSpace 𝕜] [Measurab
     exact (isSeparable_range hf).span.closure.mono this
   · exact (measurable_deriv_with_param hf).stronglyMeasurable
 
-theorem aemeasurable_deriv_with_param [LocallyCompactSpace 𝕜] [MeasurableSpace 𝕜]
-    [OpensMeasurableSpace 𝕜] [MeasurableSpace F]
+theorem aemeasurable_deriv_with_param [LocallyCompactSpace 𝕜] [SigmaAlgebra 𝕜]
+    [OpensSigmaAlgebra 𝕜] [SigmaAlgebra F]
     [BorelSpace F] {f : α → 𝕜 → F} (hf : Continuous f.uncurry) (μ : Measure (α × 𝕜)) :
     AEMeasurable (fun (p : α × 𝕜) ↦ deriv (f p.1) p.2) μ :=
   (measurable_deriv_with_param hf).aemeasurable
 
-theorem aestronglyMeasurable_deriv_with_param [LocallyCompactSpace 𝕜] [MeasurableSpace 𝕜]
-    [OpensMeasurableSpace 𝕜] [SecondCountableTopologyEither α F]
+theorem aestronglyMeasurable_deriv_with_param [LocallyCompactSpace 𝕜] [SigmaAlgebra 𝕜]
+    [OpensSigmaAlgebra 𝕜] [SecondCountableTopologyEither α F]
     {f : α → 𝕜 → F} (hf : Continuous f.uncurry) (μ : Measure (α × 𝕜)) :
     AEStronglyMeasurable (fun (p : α × 𝕜) ↦ deriv (f p.1) p.2) μ :=
   (stronglyMeasurable_deriv_with_param hf).aestronglyMeasurable

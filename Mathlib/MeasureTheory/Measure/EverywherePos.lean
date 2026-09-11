@@ -45,7 +45,7 @@ open Set Filter
 
 namespace MeasureTheory.Measure
 
-variable {α : Type*} [TopologicalSpace α] [MeasurableSpace α]
+variable {α : Type*} [TopologicalSpace α] [SigmaAlgebra α]
 
 /-- A set `s` is *everywhere positive* (also called *self-supporting*) with respect to a
 measure `μ` if it has positive measure around each of its points, i.e., if all neighborhoods `n`
@@ -82,7 +82,7 @@ alias exists_isOpen_everywherePosSubset_eq_diff := exists_isOpen_everywherePosSu
 
 variable {μ ν : Measure α} {s k : Set α}
 
-protected lemma _root_.MeasurableSet.everywherePosSubset [OpensMeasurableSpace α]
+protected lemma _root_.MeasurableSet.everywherePosSubset [OpensSigmaAlgebra α]
     (hs : MeasurableSet s) :
     MeasurableSet (μ.everywherePosSubset s) := by
   rcases exists_isOpen_everywherePosSubset_eq_sdiff μ s with ⟨u, u_open, hu⟩
@@ -115,7 +115,7 @@ lemma measure_eq_zero_of_subset_sdiff_everywherePosSubset
 
 /-- In a space with an inner regular measure, any measurable set coincides almost everywhere with
 its everywhere positive subset. -/
-lemma everywherePosSubset_ae_eq [OpensMeasurableSpace α] [InnerRegular μ] (hs : MeasurableSet s) :
+lemma everywherePosSubset_ae_eq [OpensSigmaAlgebra α] [InnerRegular μ] (hs : MeasurableSet s) :
     μ.everywherePosSubset s =ᵐ[μ] s := by
   simp only [ae_eq_set, sdiff_eq_empty.mpr (everywherePosSubset_subset μ s), measure_empty,
     true_and, (hs.diff hs.everywherePosSubset).measure_eq_iSup_isCompact, ENNReal.iSup_eq_zero]
@@ -125,7 +125,7 @@ lemma everywherePosSubset_ae_eq [OpensMeasurableSpace α] [InnerRegular μ] (hs 
 /-- In a space with an inner regular measure for finite measure sets, any measurable set of finite
 measure coincides almost everywhere with its everywhere positive subset. -/
 lemma everywherePosSubset_ae_eq_of_measure_ne_top
-    [OpensMeasurableSpace α] [InnerRegularCompactLTTop μ] (hs : MeasurableSet s) (h's : μ s ≠ ∞) :
+    [OpensSigmaAlgebra α] [InnerRegularCompactLTTop μ] (hs : MeasurableSet s) (h's : μ s ≠ ∞) :
     μ.everywherePosSubset s =ᵐ[μ] s := by
   have A : μ (s \ μ.everywherePosSubset s) ≠ ∞ :=
     ((measure_mono sdiff_subset).trans_lt h's.lt_top).ne
@@ -140,7 +140,7 @@ is itself everywhere positive. This is not obvious as `μ.everywherePosSubset s`
 the points whose neighborhoods intersect `s` along positive measure subsets, but this does not
 say they also intersect `μ.everywherePosSubset s` along positive measure subsets. -/
 lemma isEverywherePos_everywherePosSubset
-    [OpensMeasurableSpace α] [InnerRegular μ] (hs : MeasurableSet s) :
+    [OpensSigmaAlgebra α] [InnerRegular μ] (hs : MeasurableSet s) :
     μ.IsEverywherePos (μ.everywherePosSubset s) := by
   intro x hx n hn
   rcases mem_nhdsWithin_iff_exists_mem_nhds_inter.1 hn with ⟨u, u_mem, hu⟩
@@ -158,7 +158,7 @@ of a measurable set of finite measure is itself everywhere positive. This is not
 measure subsets, but this does not say they also intersect `μ.everywherePosSubset s` along positive
 measure subsets. -/
 lemma isEverywherePos_everywherePosSubset_of_measure_ne_top
-    [OpensMeasurableSpace α] [InnerRegularCompactLTTop μ] (hs : MeasurableSet s) (h's : μ s ≠ ∞) :
+    [OpensSigmaAlgebra α] [InnerRegularCompactLTTop μ] (hs : MeasurableSet s) (h's : μ s ≠ ∞) :
     μ.IsEverywherePos (μ.everywherePosSubset s) := by
   intro x hx n hn
   rcases mem_nhdsWithin_iff_exists_mem_nhds_inter.1 hn with ⟨u, u_mem, hu⟩
@@ -207,7 +207,7 @@ lemma _root_.IsOpen.isEverywherePos [IsOpenPosMeasure μ] (hs : IsOpen s) : IsEv
 section IsTopologicalGroup
 
 variable {G : Type*} [Group G] [TopologicalSpace G] [IsTopologicalGroup G]
-  [LocallyCompactSpace G] [MeasurableSpace G] [BorelSpace G] {μ : Measure G}
+  [LocallyCompactSpace G] [SigmaAlgebra G] [BorelSpace G] {μ : Measure G}
   [IsMulLeftInvariant μ] [IsFiniteMeasureOnCompacts μ] [InnerRegularCompactLTTop μ]
 
 open scoped Pointwise

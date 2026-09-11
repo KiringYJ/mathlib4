@@ -37,7 +37,7 @@ open MeasureTheory
 
 namespace ProbabilityTheory
 
-variable {T Ω : Type*} {𝓧 : T → Type*} {mΩ : MeasurableSpace Ω} {mα : ∀ t, MeasurableSpace (𝓧 t)}
+variable {T Ω : Type*} {𝓧 : T → Type*} {mΩ : SigmaAlgebra Ω} {mα : ∀ t, SigmaAlgebra (𝓧 t)}
   {X Y : (t : T) → Ω → 𝓧 t} {P : Measure Ω}
 
 /-- The finite-dimensional distributions of a stochastic process are a projective measure family. -/

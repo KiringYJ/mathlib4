@@ -38,7 +38,7 @@ namespace MeasureTheory.Measure
 
 noncomputable section
 
-variable {X : Type*} {mX : MeasurableSpace X}
+variable {X : Type*} {mX : SigmaAlgebra X}
 variable {s : Set X}
 variable {μ ν : Measure X}
 

@@ -39,7 +39,7 @@ namespace MeasureTheory
 open Measure
 open scoped ENNReal
 
-variable {G : Type*} {mG : MeasurableSpace G}
+variable {G : Type*} {mG : SigmaAlgebra G}
 
 section NoGroup
 

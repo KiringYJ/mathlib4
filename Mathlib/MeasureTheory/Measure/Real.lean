@@ -35,7 +35,7 @@ open scoped ENNReal NNReal Function symmDiff
 
 namespace MeasureTheory
 
-variable {α β ι : Type*} {_ : MeasurableSpace α} {μ : Measure α} {s s₁ s₂ s₃ t t₁ t₂ u : Set α}
+variable {α β ι : Type*} {_ : SigmaAlgebra α} {μ : Measure α} {s s₁ s₂ s₃ t t₁ t₂ u : Set α}
 
 theorem measureReal_eq_zero_iff (h : μ s ≠ ∞ := by finiteness) :
     μ.real s = 0 ↔ μ s = 0 := by
@@ -76,12 +76,12 @@ theorem nonempty_of_measureReal_ne_zero (h : μ.real s ≠ 0) : s.Nonempty :=
     (c • μ).real s = c * μ.real s := by
   simp [measureReal_def]
 
-theorem map_measureReal_apply_of_aemeasurable [MeasurableSpace β] {f : α → β}
+theorem map_measureReal_apply_of_aemeasurable [SigmaAlgebra β] {f : α → β}
     (hf : AEMeasurable f μ) {s : Set β} (hs : MeasurableSet s) :
     (μ.map f).real s = μ.real (f ⁻¹' s) := by
   simp_rw [measureReal_def, map_apply_of_aemeasurable hf hs]
 
-theorem map_measureReal_apply [MeasurableSpace β] {f : α → β} (hf : Measurable f)
+theorem map_measureReal_apply [SigmaAlgebra β] {f : α → β} (hf : Measurable f)
     {s : Set β} (hs : MeasurableSet s) : (μ.map f).real s = μ.real (f ⁻¹' s) :=
   map_measureReal_apply_of_aemeasurable hf.aemeasurable hs
 
@@ -89,7 +89,7 @@ theorem map_measureReal_apply [MeasurableSpace β] {f : α → β} (hf : Measura
     μ.real s₁ ≤ μ.real s₂ :=
   ENNReal.toReal_mono h₂ (measure_mono h)
 
-theorem measureReal_eq_measureReal_iff {m : MeasurableSpace β} {ν : Measure β} {t : Set β}
+theorem measureReal_eq_measureReal_iff {m : SigmaAlgebra β} {ν : Measure β} {t : Set β}
     (h₁ : μ s ≠ ∞ := by finiteness) (h₂ : ν t ≠ ∞ := by finiteness) :
     μ.real s = ν.real t ↔ μ s = ν t := by
   simp [measureReal_def, ENNReal.toReal_eq_toReal_iff' h₁ h₂]

@@ -38,7 +38,7 @@ open scoped Topology
 
 open Set Filter TopologicalSpace ENNReal MeasureTheory
 
-variable {α β γ ε ε' ε'' : Type*} {m : MeasurableSpace α} {μ ν : Measure α}
+variable {α β γ ε ε' ε'' : Type*} {m : SigmaAlgebra α} {μ ν : Measure α}
 variable [NormedAddCommGroup β] [NormedAddCommGroup γ] [ENorm ε] [ENorm ε']
   [TopologicalSpace ε''] [ESeminormedAddMonoid ε'']
 
@@ -79,11 +79,11 @@ theorem lintegral_enorm_neg {f : α → β} : ∫⁻ a, ‖(-f) a‖ₑ ∂μ = 
 /-- `HasFiniteIntegral f μ` means that the integral `∫⁻ a, ‖f a‖ ∂μ` is finite.
   `HasFiniteIntegral f` means `HasFiniteIntegral f volume`. -/
 @[fun_prop]
-def HasFiniteIntegral {_ : MeasurableSpace α} (f : α → ε)
+def HasFiniteIntegral {_ : SigmaAlgebra α} (f : α → ε)
     (μ : Measure α := by volume_tac) : Prop :=
   ∫⁻ a, ‖f a‖ₑ ∂μ < ∞
 
-theorem hasFiniteIntegral_def {_ : MeasurableSpace α} (f : α → ε) (μ : Measure α) :
+theorem hasFiniteIntegral_def {_ : SigmaAlgebra α} (f : α → ε) (μ : Measure α) :
     HasFiniteIntegral f μ ↔ (∫⁻ a, ‖f a‖ₑ ∂μ < ∞) :=
   Iff.rfl
 
@@ -242,7 +242,7 @@ theorem HasFiniteIntegral.smul_measure {f : α → ε} (h : HasFiniteIntegral f 
   exact mul_lt_top hc.lt_top h
 
 @[fun_prop, simp]
-theorem hasFiniteIntegral_zero_measure {m : MeasurableSpace α} (f : α → ε) :
+theorem hasFiniteIntegral_zero_measure {m : SigmaAlgebra α} (f : α → ε) :
     HasFiniteIntegral f (0 : Measure α) := by
   simp only [HasFiniteIntegral, lintegral_zero_measure, zero_lt_top]
 

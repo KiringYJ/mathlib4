@@ -28,7 +28,7 @@ public section
 
 open MeasureTheory
 
-variable {α : Type*} [TopologicalSpace α] [MeasurableSpace α]
+variable {α : Type*} [TopologicalSpace α] [SigmaAlgebra α]
   {s : Set α} {f g : α → ℝ} {μ : Measure α}
 
 /-- **First mean value theorem for set integrals (a.e. nonnegativity).**

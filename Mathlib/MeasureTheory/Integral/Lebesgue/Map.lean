@@ -18,7 +18,7 @@ namespace MeasureTheory
 
 open Set Filter ENNReal SimpleFunc
 
-variable {α β : Type*} [MeasurableSpace α] [MeasurableSpace β] {μ : Measure α} {ν : Measure β}
+variable {α β : Type*} [SigmaAlgebra α] [SigmaAlgebra β] {μ : Measure α} {ν : Measure β}
 
 section Map
 

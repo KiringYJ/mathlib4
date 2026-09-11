@@ -28,7 +28,7 @@ open scoped ENNReal NNReal
 
 namespace MeasureTheory.SignedMeasure
 
-variable {X : Type*} {mX : MeasurableSpace X} (μ : SignedMeasure X)
+variable {X : Type*} {mX : SigmaAlgebra X} (μ : SignedMeasure X)
 
 /-- The pointwise bound `‖s i‖ ≤ s.totalVariation.real i` for any signed measure. -/
 theorem norm_le_totalVariation (s : SignedMeasure X) (i : Set X) :

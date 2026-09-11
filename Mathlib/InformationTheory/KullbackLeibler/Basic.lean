@@ -50,7 +50,7 @@ open scoped ENNReal NNReal
 
 namespace InformationTheory
 
-variable {α : Type*} {mα : MeasurableSpace α} {μ ν : Measure α}
+variable {α : Type*} {mα : SigmaAlgebra α} {μ ν : Measure α}
 
 open scoped Classical in
 /-- Kullback-Leibler divergence between two measures. -/

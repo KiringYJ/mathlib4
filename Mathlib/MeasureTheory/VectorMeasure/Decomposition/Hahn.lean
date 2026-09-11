@@ -42,7 +42,7 @@ noncomputable section
 
 open scoped NNReal ENNReal MeasureTheory
 
-variable {α β : Type*} [MeasurableSpace α]
+variable {α β : Type*} [SigmaAlgebra α]
 
 namespace MeasureTheory
 

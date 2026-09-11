@@ -6,7 +6,7 @@ Authors: Johannes Hölzl, Yury Kudryashov
 module
 
 public import Mathlib.MeasureTheory.Constructions.BorelSpace.Order
-public import Mathlib.MeasureTheory.MeasurableSpace.Prod
+public import Mathlib.MeasureTheory.SigmaAlgebra.Prod
 public import Mathlib.MeasureTheory.Measure.Typeclasses.NullSingletonClass
 public import Mathlib.Topology.Instances.Real.Lemmas
 
@@ -31,7 +31,7 @@ public import Mathlib.Topology.Instances.Real.Lemmas
 
 @[expose] public section
 
-open Set Filter MeasureTheory MeasurableSpace
+open Set Filter MeasureTheory SigmaAlgebra
 
 open scoped Topology NNReal ENNReal
 
@@ -137,7 +137,7 @@ theorem measure_ext_Ioo_rat {μ ν : Measure ℝ} [IsLocallyFiniteMeasure μ]
 
 end Real
 
-variable {mα : MeasurableSpace α}
+variable {mα : SigmaAlgebra α}
 
 @[fun_prop]
 theorem measurable_real_toNNReal : Measurable Real.toNNReal :=
@@ -224,7 +224,7 @@ def ennrealEquivSum : ℝ≥0∞ ≃ᵐ ℝ≥0 ⊕ Unit :=
 
 open Function (uncurry)
 
-theorem measurable_of_measurable_nnreal_prod {_ : MeasurableSpace β} {_ : MeasurableSpace γ}
+theorem measurable_of_measurable_nnreal_prod {_ : SigmaAlgebra β} {_ : SigmaAlgebra γ}
     {f : ℝ≥0∞ × β → γ} (H₁ : Measurable fun p : ℝ≥0 × β => f (p.1, p.2))
     (H₂ : Measurable fun x => f (∞, x)) : Measurable f :=
   let e : ℝ≥0∞ × β ≃ᵐ (ℝ≥0 × β) ⊕ (Unit × β) :=
@@ -232,7 +232,7 @@ theorem measurable_of_measurable_nnreal_prod {_ : MeasurableSpace β} {_ : Measu
       (MeasurableEquiv.sumProdDistrib _ _ _)
   e.symm.measurable_comp_iff.1 <| measurable_fun_sum H₁ (H₂.comp measurable_id.snd)
 
-theorem measurable_of_measurable_nnreal_nnreal {_ : MeasurableSpace β} {f : ℝ≥0∞ × ℝ≥0∞ → β}
+theorem measurable_of_measurable_nnreal_nnreal {_ : SigmaAlgebra β} {f : ℝ≥0∞ × ℝ≥0∞ → β}
     (h₁ : Measurable fun p : ℝ≥0 × ℝ≥0 => f (p.1, p.2)) (h₂ : Measurable fun r : ℝ≥0 => f (∞, r))
     (h₃ : Measurable fun r : ℝ≥0 => f (r, ∞)) : Measurable f :=
   measurable_of_measurable_nnreal_prod
@@ -383,7 +383,7 @@ theorem AEMeasurable.ennreal_tsum {ι} [Countable ι] {f : ι → α → ℝ≥0
 @[fun_prop, deprecated
   "Use `AEMeasurable.tsum` from `Mathlib.MeasureTheory.Constructions.Polish.Basic` instead"
   (since := "2026-04-30")]
-theorem AEMeasurable.nnreal_tsum {α : Type*} {_ : MeasurableSpace α} {ι : Type*} [Countable ι]
+theorem AEMeasurable.nnreal_tsum {α : Type*} {_ : SigmaAlgebra α} {ι : Type*} [Countable ι]
     {f : ι → α → NNReal} {μ : Measure α} (h : ∀ i : ι, AEMeasurable (f i) μ) :
     AEMeasurable (fun x : α => ∑' i : ι, f i x) μ := by
   simp_rw [NNReal.tsum_eq_toNNReal_tsum]
@@ -480,7 +480,7 @@ instance : MeasurableAdd₂ EReal := ⟨EReal.lowerSemicontinuous_add.measurable
 
 section MeasurableMul
 
-variable {β γ : Type*} {mβ : MeasurableSpace β} {mγ : MeasurableSpace γ}
+variable {β γ : Type*} {mβ : SigmaAlgebra β} {mγ : SigmaAlgebra γ}
 
 lemma measurable_of_real_prod {f : EReal × β → γ}
     (h_real : Measurable fun p : ℝ × β ↦ f (p.1, p.2))

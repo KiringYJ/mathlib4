@@ -6,7 +6,7 @@ Authors: Felix Weilacher
 module
 
 public import Mathlib.Topology.LocallyClosed
-public import Mathlib.MeasureTheory.MeasurableSpace.EventuallyMeasurable
+public import Mathlib.MeasureTheory.SigmaAlgebra.EventuallyMeasurable
 public import Mathlib.MeasureTheory.Constructions.BorelSpace.Basic
 
 /-!
@@ -89,7 +89,7 @@ a meager set. This forms a σ-algebra.
 It is equivalent, and a more standard definition, to say that the set differs from
 some *open* set by a meager set. See `BaireMeasurableSet.iff_residualEq_isOpen` -/
 def BaireMeasurableSet (s : Set α) : Prop :=
-  @MeasurableSet _ (eventuallyMeasurableSpace (borel _) (residual _)) s
+  @MeasurableSet _ (eventuallySigmaAlgebra (borel _) (residual _)) s
 
 variable {s t : Set α}
 
@@ -98,7 +98,7 @@ namespace BaireMeasurableSet
 theorem of_mem_residual (h : s ∈ residual _) : BaireMeasurableSet s :=
   eventuallyMeasurableSet_of_mem_filter (α := α) h
 
-theorem _root_.MeasurableSet.baireMeasurableSet [MeasurableSpace α] [BorelSpace α]
+theorem _root_.MeasurableSet.baireMeasurableSet [SigmaAlgebra α] [BorelSpace α]
     (h : MeasurableSet s) : BaireMeasurableSet s := by
   borelize α
   exact h.eventuallyMeasurableSet
@@ -158,7 +158,7 @@ end BaireMeasurableSet
 open Filter
 
 /-- Any Borel set differs from some open set by a meager set. -/
-theorem MeasurableSet.residualEq_isOpen [MeasurableSpace α] [BorelSpace α] (h : MeasurableSet s) :
+theorem MeasurableSet.residualEq_isOpen [SigmaAlgebra α] [BorelSpace α] (h : MeasurableSet s) :
     ∃ u : Set α, IsOpen u ∧ s =ᵇ u := by
   induction s, h using MeasurableSet.induction_on_open with
   | isOpen U hU => exact ⟨U, hU, .rfl⟩
@@ -175,7 +175,7 @@ theorem BaireMeasurableSet.residualEq_isOpen (h : BaireMeasurableSet s) :
     ∃ u : Set α, (IsOpen u) ∧ s =ᵇ u := by
   borelize α
   rcases h with ⟨t, ht, hst⟩
-  rcases ht.residualEq_isOpen with ⟨u, hu, htu⟩
+  rcases MeasurableSet.residualEq_isOpen ht with ⟨u, hu, htu⟩
   exact ⟨u, hu, hst.trans htu⟩
 
 /-- A set is Baire measurable if and only if it differs from some open set by a meager set. -/

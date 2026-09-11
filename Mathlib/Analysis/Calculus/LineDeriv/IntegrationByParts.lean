@@ -52,7 +52,7 @@ open MeasureTheory Measure Module Topology
 
 variable {E F G W : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [NormedAddCommGroup F]
   [NormedSpace ℝ F] [NormedAddCommGroup G] [NormedSpace ℝ G] [NormedAddCommGroup W]
-  [NormedSpace ℝ W] [MeasurableSpace E] {μ : Measure E}
+  [NormedSpace ℝ W] [SigmaAlgebra E] {μ : Measure E}
 
 lemma integral_bilinear_hasLineDerivAt_right_eq_neg_left_of_integrable_aux1 [SigmaFinite μ]
     {f f' : E × ℝ → F} {g g' : E × ℝ → G} {B : F →L[ℝ] G →L[ℝ] W}

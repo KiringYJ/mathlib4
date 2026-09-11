@@ -41,7 +41,7 @@ open scoped Topology
 
 namespace MeasureTheory
 
-variable {α : Type*} {mα : MeasurableSpace α}
+variable {α : Type*} {mα : SigmaAlgebra α}
 
 /-- **Hahn decomposition theorem** -/
 theorem hahn_decomposition (μ ν : Measure α) [IsFiniteMeasure μ] [IsFiniteMeasure ν] :

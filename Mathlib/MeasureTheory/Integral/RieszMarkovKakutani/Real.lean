@@ -51,7 +51,7 @@ open scoped ENNReal BoundedContinuousFunction CompactlySupported Topology
 
 namespace RealRMK
 
-variable {X : Type*} [TopologicalSpace X] [T2Space X] [MeasurableSpace X]
+variable {X : Type*} [TopologicalSpace X] [T2Space X] [SigmaAlgebra X]
   [BorelSpace X]
 variable (Λ : C_c(X, ℝ) →ₚ[ℝ] ℝ)
 
@@ -150,7 +150,8 @@ lemma range_cut_partition (f : C_c(X, ℝ)) (a : ℝ) {ε : ℝ} (hε : 0 < ε) 
     intro _ _ hx
     simp only [mem_inter_iff, mem_preimage, mem_Ioc, E, y] at hx
     constructor <;> linarith
-  · exact fun _ ↦ (f.1.measurable measurableSet_Ioc).inter measurableSet_closure
+  · exact fun _ ↦
+      MeasurableSet.inter (f.1.measurable measurableSet_Ioc) measurableSet_closure
 
 omit [LocallyCompactSpace X] in
 /-- Given a set `E`, a function `f : C_c(X, ℝ)`, `0 < ε` and `∀ x ∈ E, f x < c`, there exists an

@@ -22,7 +22,7 @@ is easier to use, and show that it is equivalent to `MemLp 1`.
 ## Main definition
 
 * Let `f : α → β` be a function, where `α` is a `MeasureSpace` and `β` a `NormedAddCommGroup`
-  which also a `MeasurableSpace`. Then `f` is called `Integrable` if
+  which also a `SigmaAlgebra`. Then `f` is called `Integrable` if
   `f` is `Measurable` and `HasFiniteIntegral f` holds.
 
 ## Implementation notes
@@ -45,7 +45,7 @@ open ENNReal Filter MeasureTheory NNReal Set TopologicalSpace
 
 open scoped Topology
 
-variable {α β γ δ ε ε' : Type*} {m : MeasurableSpace α} {μ ν : Measure α} [MeasurableSpace δ]
+variable {α β γ δ ε ε' : Type*} {m : SigmaAlgebra α} {μ ν : Measure α} [SigmaAlgebra δ]
 variable [NormedAddCommGroup β] [NormedAddCommGroup γ]
   [TopologicalSpace ε] [ContinuousENorm ε] [TopologicalSpace ε'] [ContinuousENorm ε']
 
@@ -56,7 +56,7 @@ namespace MeasureTheory
 /-- `Integrable f μ` means that `f` is measurable and that the integral `∫⁻ a, ‖f a‖ ∂μ` is finite.
   `Integrable f` means `Integrable f volume`. -/
 @[fun_prop, wikidata Q3153745]
-def Integrable {α} {_ : MeasurableSpace α} (f : α → ε)
+def Integrable {α} {_ : SigmaAlgebra α} (f : α → ε)
     (μ : Measure α := by volume_tac) : Prop :=
   AEStronglyMeasurable f μ ∧ HasFiniteIntegral f μ
 
@@ -72,7 +72,7 @@ theorem Integrable.aestronglyMeasurable {f : α → ε} (hf : Integrable f μ) :
   hf.1
 
 @[fun_prop]
-theorem Integrable.aemeasurable [MeasurableSpace ε] [BorelSpace ε] [PseudoMetrizableSpace ε]
+theorem Integrable.aemeasurable [SigmaAlgebra ε] [BorelSpace ε] [PseudoMetrizableSpace ε]
     {f : α → ε} (hf : Integrable f μ) : AEMeasurable f μ :=
   hf.aestronglyMeasurable.aemeasurable
 
@@ -299,7 +299,7 @@ lemma integrable_dirac' {a : α} {f : α → ε} (hf : StronglyMeasurable f) (hf
   ⟨hf.aestronglyMeasurable, by simpa [HasFiniteIntegral, lintegral_dirac' _ hf.enorm]⟩
 
 theorem integrable_finsetSum_measure [PseudoMetrizableSpace ε]
-    {ι} {m : MeasurableSpace α} {f : α → ε} {μ : ι → Measure α}
+    {ι} {m : SigmaAlgebra α} {f : α → ε} {μ : ι → Measure α}
     {s : Finset ι} : Integrable f (∑ i ∈ s, μ i) ↔ ∀ i ∈ s, Integrable f (μ i) := by
   classical
   induction s using Finset.induction_on <;> simp [*]
@@ -351,7 +351,7 @@ end
 
 section
 
-variable {α' : Type*} [MeasurableSpace α']
+variable {α' : Type*} [SigmaAlgebra α']
 
 theorem integrable_map_measure {f : α → α'} {g : α' → ε}
     (hg : AEStronglyMeasurable g (Measure.map f μ)) (hf : AEMeasurable f μ) :
@@ -773,7 +773,7 @@ lemma integrable_count_iff :
   have hs' : (Function.support f).Countable := by
     simpa only [Ne, Pi.zero_apply, eq_comm, Function.support, norm_eq_zero]
       using hs.countable_support
-  let : MeasurableSpace β := borel β
+  let : SigmaAlgebra β := borel β
   have : BorelSpace β := ⟨rfl⟩
   refine aestronglyMeasurable_iff_aemeasurable_separable.mpr ⟨?_, ?_⟩
   · refine (measurable_zero.measurable_of_countable_ne ?_).aemeasurable
@@ -1133,7 +1133,7 @@ end RCLike
 
 section Trim
 
-variable {H : Type*} [NormedAddCommGroup H] {m0 : MeasurableSpace α} {μ' : Measure α} {f : α → H}
+variable {H : Type*} [NormedAddCommGroup H] {m0 : SigmaAlgebra α} {μ' : Measure α} {f : α → H}
 
 theorem Integrable.trim (hm : m ≤ m0) (hf_int : Integrable f μ') (hf : StronglyMeasurable[m] f) :
     Integrable f (μ'.trim hm) := by
@@ -1152,7 +1152,7 @@ end Trim
 
 section SigmaFinite
 
-variable {m0 : MeasurableSpace α} {ε : Type*} [TopologicalSpace ε] [ContinuousENorm ε]
+variable {m0 : SigmaAlgebra α} {ε : Type*} [TopologicalSpace ε] [ContinuousENorm ε]
 
 theorem integrable_of_forall_fin_meas_le' {μ : Measure α} (hm : m ≤ m0) [SigmaFinite (μ.trim hm)]
     (C : ℝ≥0∞) (hC : C < ∞) {f : α → ε} (hf_meas : AEStronglyMeasurable f μ)

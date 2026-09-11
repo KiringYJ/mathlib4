@@ -43,7 +43,7 @@ open Set
 
 namespace MeasureTheory
 
-variable {α : Type*} [MeasurableSpace α] (μ : Measure α)
+variable {α : Type*} [SigmaAlgebra α] (μ : Measure α)
 
 section Layercake
 
@@ -101,7 +101,7 @@ theorem lintegral_rpow_eq_lintegral_meas_lt_mul
 end LayercakeLT
 
 variable {E F : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
-  [MeasurableSpace E] [BorelSpace E]
+  [SigmaAlgebra E] [BorelSpace E]
   [NormedAddCommGroup F]
   {μ : Measure E} [μ.IsAddHaarMeasure]
 

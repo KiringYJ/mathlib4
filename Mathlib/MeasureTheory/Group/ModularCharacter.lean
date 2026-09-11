@@ -43,13 +43,13 @@ variable {G : Type*} [TopologicalSpace G] [Group G] [IsTopologicalGroup G] [Loca
 @[to_additive /-- The additive modular character as a map is `g ↦ μ (· - g) / μ`, where `μ` is an
   left additive Haar measure. -/]
 noncomputable def modularCharacterFun (g : G) : ℝ≥0 :=
-  letI : MeasurableSpace G := borel G
+  letI : SigmaAlgebra G := borel G
   haveI : BorelSpace G := ⟨rfl⟩
   haarScalarFactor (map (· * g) MeasureTheory.Measure.haar) MeasureTheory.Measure.haar
 
 /-- Independence of modularCharacterFun from the chosen Haar measure. -/
 @[to_additive /-- Independence of addModularCharacterFun from the chosen Haar measure -/]
-lemma modularCharacterFun_eq_haarScalarFactor [MeasurableSpace G] [BorelSpace G] (μ : Measure G)
+lemma modularCharacterFun_eq_haarScalarFactor [SigmaAlgebra G] [BorelSpace G] (μ : Measure G)
     [IsHaarMeasure μ] (g : G) : modularCharacterFun g = haarScalarFactor (map (· * g) μ) μ := by
   let ν := MeasureTheory.Measure.haar (G := G)
   obtain ⟨⟨f, f_cont⟩, f_comp, f_nonneg, f_one⟩ :
@@ -90,7 +90,7 @@ lemma modularCharacterFun_eq_haarScalarFactor [MeasurableSpace G] [BorelSpace G]
     (haarScalarFactor_eq_integral_div _ _ f_cont f_comp (int_f_ne_zero μ)).symm
 
 @[to_additive]
-lemma map_right_mul_eq_modularCharacterFun_smul [MeasurableSpace G] [BorelSpace G] (μ : Measure G)
+lemma map_right_mul_eq_modularCharacterFun_smul [SigmaAlgebra G] [BorelSpace G] (μ : Measure G)
     [IsHaarMeasure μ] [InnerRegular μ] (g : G) : map (· * g) μ = modularCharacterFun g • μ := by
   rw [modularCharacterFun_eq_haarScalarFactor μ _]
   exact isMulLeftInvariant_eq_smul_of_innerRegular _ μ

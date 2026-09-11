@@ -27,7 +27,7 @@ open Filter MeasureTheory Asymptotics Metric
 
 open scoped Topology
 
-variable {X E ι : Type*} [MeasurableSpace X] [NormedAddCommGroup E] [NormedSpace ℝ E]
+variable {X E ι : Type*} [SigmaAlgebra X] [NormedAddCommGroup E] [NormedSpace ℝ E]
   [CompleteSpace E]
 
 /-- Fundamental theorem of calculus for set integrals:
@@ -73,7 +73,7 @@ Often there is a good formula for `μ.real (s i)`, so the formalization can take
 argument `m` with this formula and a proof of `(fun i => μ.real (s i)) =ᶠ[li] m`. Without these
 arguments, `m i = μ.real (s i)` is used in the output. -/
 theorem ContinuousWithinAt.integral_sub_linear_isLittleO_ae [TopologicalSpace X]
-    [OpensMeasurableSpace X] {μ : Measure X}
+    [OpensSigmaAlgebra X] {μ : Measure X}
     [IsLocallyFiniteMeasure μ] {x : X} {t : Set X} {f : X → E} (hx : ContinuousWithinAt f t x)
     (ht : MeasurableSet t) (hfm : StronglyMeasurableAtFilter f (𝓝[t] x) μ) {s : ι → Set X}
     {li : Filter ι} (hs : Tendsto s li (𝓝[t] x).smallSets) (m : ι → ℝ := fun i => μ.real (s i))
@@ -92,7 +92,7 @@ the actual statement.
 Often there is a good formula for `μ.real (s i)`, so the formalization can take an optional
 argument `m` with this formula and a proof of `(fun i => μ.real (s i)) =ᶠ[li] m`. Without these
 arguments, `m i = μ.real (s i)` is used in the output. -/
-theorem ContinuousAt.integral_sub_linear_isLittleO_ae [TopologicalSpace X] [OpensMeasurableSpace X]
+theorem ContinuousAt.integral_sub_linear_isLittleO_ae [TopologicalSpace X] [OpensSigmaAlgebra X]
     {μ : Measure X} [IsLocallyFiniteMeasure μ] {x : X}
     {f : X → E} (hx : ContinuousAt f x) (hfm : StronglyMeasurableAtFilter f (𝓝 x) μ) {s : ι → Set X}
     {li : Filter ι} (hs : Tendsto s li (𝓝 x).smallSets) (m : ι → ℝ := fun i => μ.real (s i))
@@ -108,7 +108,7 @@ Since `μ (s i)` is an `ℝ≥0∞` number, we use `μ.real (s i)` in the actual
 Often there is a good formula for `μ.real (s i)`, so the formalization can take an optional
 argument `m` with this formula and a proof of `(fun i => μ.real (s i)) =ᶠ[li] m`. Without these
 arguments, `m i = μ.real (s i)` is used in the output. -/
-theorem ContinuousOn.integral_sub_linear_isLittleO_ae [TopologicalSpace X] [OpensMeasurableSpace X]
+theorem ContinuousOn.integral_sub_linear_isLittleO_ae [TopologicalSpace X] [OpensSigmaAlgebra X]
     [SecondCountableTopologyEither X E] {μ : Measure X}
     [IsLocallyFiniteMeasure μ] {x : X} {t : Set X} {f : X → E} (hft : ContinuousOn f t) (hx : x ∈ t)
     (ht : MeasurableSet t) {s : ι → Set X} {li : Filter ι} (hs : Tendsto s li (𝓝[t] x).smallSets)

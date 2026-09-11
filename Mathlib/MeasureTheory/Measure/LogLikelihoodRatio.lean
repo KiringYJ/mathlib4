@@ -31,7 +31,7 @@ open scoped ENNReal NNReal Topology
 
 namespace MeasureTheory
 
-variable {α : Type*} {mα : MeasurableSpace α} {μ ν : Measure α} {f : α → ℝ}
+variable {α : Type*} {mα : SigmaAlgebra α} {μ ν : Measure α} {f : α → ℝ}
 
 /-- Log-Likelihood Ratio between two measures. -/
 noncomputable def llr (μ ν : Measure α) (x : α) : ℝ := log (μ.rnDeriv ν x).toReal

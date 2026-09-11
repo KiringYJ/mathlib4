@@ -46,7 +46,7 @@ open scoped ENNReal NNReal
 
 namespace ProbabilityTheory
 
-variable {T Ω E : Type*} [PseudoEMetricSpace T] {mΩ : MeasurableSpace Ω} [PseudoEMetricSpace E]
+variable {T Ω E : Type*} [PseudoEMetricSpace T] {mΩ : SigmaAlgebra Ω} [PseudoEMetricSpace E]
   {p q : ℝ} {M : ℝ≥0} {P : Measure Ω} {X : T → Ω → E}
 
 /-- A stochastic process `X : T → Ω → E` on an index space `T` and a measurable space `Ω`
@@ -120,7 +120,7 @@ lemma IsKolmogorovProcess.measurable_edist (hX : IsKolmogorovProcess X P p q M) 
 lemma IsAEKolmogorovProcess.aemeasurable_edist (hX : IsAEKolmogorovProcess X P p q M) {s t : T} :
     AEMeasurable (fun ω ↦ edist (X s ω) (X t ω)) P := hX.aestronglyMeasurable_edist.aemeasurable
 
-variable [MeasurableSpace E] [BorelSpace E]
+variable [SigmaAlgebra E] [BorelSpace E]
 
 lemma IsKolmogorovProcess.measurable (hX : IsKolmogorovProcess X P p q M) (s : T) :
     Measurable (X s) :=
@@ -138,7 +138,7 @@ lemma IsKolmogorovProcess.mk_of_secondCountableTopology [SecondCountableTopology
     IsKolmogorovProcess X P p q M where
   measurablePair s t := by
     suffices Measurable (fun ω ↦ (X s ω, X t ω)) by
-      rwa [Prod.borelSpace.measurable_eq] at this
+      rwa [Prod.borelSpace.sigmaAlgebra_eq] at this
     fun_prop
   kolmogorovCondition := h_kol
   p_pos := hp

@@ -40,7 +40,7 @@ section FiniteMeasure_product
 
 namespace FiniteMeasure
 
-variable {α : Type*} [MeasurableSpace α] {β : Type*} [MeasurableSpace β]
+variable {α : Type*} [SigmaAlgebra α] {β : Type*} [SigmaAlgebra β]
 
 /-- The binary product of finite measures. -/
 noncomputable def prod (μ : FiniteMeasure α) (ν : FiniteMeasure β) : FiniteMeasure (α × β) :=
@@ -75,7 +75,7 @@ lemma prod_apply_symm (s : Set (α × β)) (s_mble : MeasurableSet s) :
 @[simp] lemma map_fst_prod : (μ.prod ν).map Prod.fst = ν univ • μ := by ext; simp
 @[simp] lemma map_snd_prod : (μ.prod ν).map Prod.snd = μ univ • ν := by ext; simp
 
-lemma map_prod_map {α' : Type*} [MeasurableSpace α'] {β' : Type*} [MeasurableSpace β']
+lemma map_prod_map {α' : Type*} [SigmaAlgebra α'] {β' : Type*} [SigmaAlgebra β']
     {f : α → α'} {g : β → β'} (f_mble : Measurable f) (g_mble : Measurable g) :
     (μ.map f).prod (ν.map g) = (μ.prod ν).map (Prod.map f g) := by
   apply Subtype.ext
@@ -94,7 +94,7 @@ section ProbabilityMeasure_product
 
 namespace ProbabilityMeasure
 
-variable {α : Type*} [MeasurableSpace α] {β : Type*} [MeasurableSpace β]
+variable {α : Type*} [SigmaAlgebra α] {β : Type*} [SigmaAlgebra β]
 
 /-- The binary product of probability measures. -/
 noncomputable def prod (μ : ProbabilityMeasure α) (ν : ProbabilityMeasure β) :
@@ -126,7 +126,7 @@ lemma prod_apply_symm (s : Set (α × β)) (s_mble : MeasurableSet s) :
   apply Subtype.ext
   simp
 
-lemma map_prod_map {α' : Type*} [MeasurableSpace α'] {β' : Type*} [MeasurableSpace β']
+lemma map_prod_map {α' : Type*} [SigmaAlgebra α'] {β' : Type*} [SigmaAlgebra β']
     {f : α → α'} {g : β → β'} (f_mble : Measurable f) (g_mble : Measurable g) :
     (μ.map f).prod (ν.map g) = (μ.prod ν).map (Prod.map f g) := by
   apply Subtype.ext
@@ -143,7 +143,7 @@ open TopologicalSpace
 @[fun_prop]
 theorem continuous_prod [TopologicalSpace α] [TopologicalSpace β] [SecondCountableTopology α]
     [SecondCountableTopology β] [PseudoMetrizableSpace α] [PseudoMetrizableSpace β]
-    [OpensMeasurableSpace α] [OpensMeasurableSpace β] :
+    [OpensSigmaAlgebra α] [OpensSigmaAlgebra β] :
     Continuous (fun (μ : ProbabilityMeasure α × ProbabilityMeasure β) ↦ μ.1.prod μ.2) := by
   refine continuous_iff_continuousAt.2 (fun μ ↦ ?_)
   /- It suffices to check the convergence along elements of a π-system containing arbitrarily

@@ -18,8 +18,9 @@ measurable spaces and measurable functions, called the Giry monad.
 Note that most sources use the term "Giry monad" for the restriction
 to *probability* measures. Here we include all measures on X.
 
-See also `Mathlib/MeasureTheory/Category/MeasCat.lean`, containing an upgrade of the type-level
-monad to an honest monad of the functor `measure : MeasCat ⥤ MeasCat`.
+See also `Mathlib/MeasureTheory/Category/Meas.lean`, containing an upgrade of the type-level monad
+to an honest monad of the functor
+`measure : Meas ⥤ Meas`.
 
 ## References
 
@@ -43,10 +44,10 @@ namespace MeasureTheory
 
 namespace Measure
 
-variable {mα : MeasurableSpace α} {mβ : MeasurableSpace β}
+variable {mα : SigmaAlgebra α} {mβ : SigmaAlgebra β}
 
 /-- Measurability structure on `Measure`: Measures are measurable w.r.t. all projections -/
-instance instMeasurableSpace : MeasurableSpace (Measure α) :=
+instance instSigmaAlgebra : SigmaAlgebra (Measure α) :=
   ⨆ (s : Set α) (_ : MeasurableSet s), (borel ℝ≥0∞).comap fun μ => μ s
 
 theorem measurable_coe {s : Set α} (hs : MeasurableSet s) : Measurable fun μ : Measure α => μ s :=
@@ -56,9 +57,9 @@ theorem measurable_of_measurable_coe (f : β → Measure α)
     (h : ∀ (s : Set α), MeasurableSet s → Measurable fun b => f b s) : Measurable f :=
   Measurable.of_le_map <|
     iSup₂_le fun s hs =>
-      MeasurableSpace.comap_le_iff_le_map.2 <| by rw [MeasurableSpace.map_comp]; exact h s hs
+      SigmaAlgebra.comap_le_iff_le_map.2 <| by rw [SigmaAlgebra.map_comp]; exact h s hs
 
-instance instMeasurableAdd₂ {α : Type*} {m : MeasurableSpace α} : MeasurableAdd₂ (Measure α) := by
+instance instMeasurableAdd₂ {α : Type*} {m : SigmaAlgebra α} : MeasurableAdd₂ (Measure α) := by
   refine ⟨Measure.measurable_of_measurable_coe _ fun s hs => ?_⟩
   simp_rw [Measure.coe_add, Pi.add_apply]
   refine Measurable.add ?_ ?_
@@ -79,12 +80,12 @@ theorem measurable_measure {μ : α → Measure β} :
   ⟨fun hμ _s hs => (measurable_coe hs).comp hμ, measurable_of_measurable_coe μ⟩
 
 theorem _root_.Measurable.measure_of_isPiSystem {μ : α → Measure β} [∀ a, IsFiniteMeasure (μ a)]
-    {S : Set (Set β)} (hgen : ‹MeasurableSpace β› = .generateFrom S) (hpi : IsPiSystem S)
+    {S : Set (Set β)} (hgen : ‹SigmaAlgebra β› = .generateFrom S) (hpi : IsPiSystem S)
     (h_basic : ∀ s ∈ S, Measurable fun a ↦ μ a s) (h_univ : Measurable fun a ↦ μ a univ) :
     Measurable μ := by
   rw [measurable_measure]
   intro s hs
-  induction s, hs using MeasurableSpace.induction_on_inter hgen hpi with
+  induction s, hs using SigmaAlgebra.induction_on_inter hgen hpi with
   | empty => simp
   | basic s hs => exact h_basic s hs
   | compl s hsm ihs =>
@@ -95,7 +96,7 @@ theorem _root_.Measurable.measure_of_isPiSystem {μ : α → Measure β} [∀ a,
 
 theorem _root_.Measurable.measure_of_isPiSystem_of_isProbabilityMeasure {μ : α → Measure β}
     [∀ a, IsProbabilityMeasure (μ a)]
-    {S : Set (Set β)} (hgen : ‹MeasurableSpace β› = .generateFrom S) (hpi : IsPiSystem S)
+    {S : Set (Set β)} (hgen : ‹SigmaAlgebra β› = .generateFrom S) (hpi : IsPiSystem S)
     (h_basic : ∀ s ∈ S, Measurable fun a ↦ μ a s) : Measurable μ :=
   .measure_of_isPiSystem hgen hpi h_basic <| by simp
 
@@ -246,7 +247,7 @@ theorem ae_ae_of_ae_bind {m : Measure α} {f : α → Measure β} {p : β → Pr
     (h : ∀ᵐ b ∂m.bind f, p b) : ∀ᵐ a ∂m, ∀ᵐ b ∂f a, p b :=
   ae_of_ae_map hf <| ae_ae_of_ae_join h
 
-theorem _root_.AEMeasurable.ae_of_bind {γ : Type*} {_ : MeasurableSpace γ} {m : Measure α}
+theorem _root_.AEMeasurable.ae_of_bind {γ : Type*} {_ : SigmaAlgebra γ} {m : Measure α}
     {f : α → Measure β} {g : β → γ} (hf : AEMeasurable f m) (hg : AEMeasurable g (m.bind f)) :
     ∀ᵐ a ∂m, AEMeasurable g (f a) :=
   ae_of_ae_map hf hg.ae_of_join
@@ -292,7 +293,7 @@ theorem lintegral_bind_le (f : β → ℝ≥0∞) (m : Measure α) {μ : α → 
     ∫⁻ x, f x ∂bind m μ ≤ ∫⁻ a, ∫⁻ x, f x ∂μ a ∂m :=
   (lintegral_join_le _ _).trans (lintegral_map_le _ hμ)
 
-theorem bind_bind {γ} [MeasurableSpace γ] {m : Measure α} {f : α → Measure β} {g : β → Measure γ}
+theorem bind_bind {γ} [SigmaAlgebra γ] {m : Measure α} {f : α → Measure β} {g : β → Measure γ}
     (hf : AEMeasurable f m) (hg : AEMeasurable g (m.bind f)) :
     bind (bind m f) g = bind m fun a => bind (f a) g := by
   ext1 s hs

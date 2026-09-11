@@ -18,7 +18,7 @@ measurable function, group, lattice operation
 
 public section
 
-variable {α β : Type*} [Lattice α] [MeasurableSpace α] [MeasurableSpace β] {f : β → α}
+variable {α β : Type*} [Lattice α] [SigmaAlgebra α] [SigmaAlgebra β] {f : β → α}
 
 section DivInvMonoid
 

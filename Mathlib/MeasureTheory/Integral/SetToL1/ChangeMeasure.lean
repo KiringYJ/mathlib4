@@ -28,14 +28,14 @@ namespace MeasureTheory
 
 variable {α E F G : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [NormedAddCommGroup F] [NormedSpace ℝ F] [NormedAddCommGroup G]
-  {m : MeasurableSpace α} {μ μ' μ'' : Measure α}
+  {m : SigmaAlgebra α} {μ μ' μ'' : Measure α}
 
 section Function
 
 variable {T T' T'' : Set α → E →L[ℝ] F} {C C' C'' : ℝ} {f : α → E}
 
 theorem tendsto_setToFun_approxOn_of_measurable (hT : DominatedFinMeasAdditive μ T C)
-    [MeasurableSpace E] [BorelSpace E] {f : α → E} {s : Set E} [SeparableSpace s]
+    [SigmaAlgebra E] [BorelSpace E] {f : α → E} {s : Set E} [SeparableSpace s]
     (hfi : Integrable f μ) (hfm : Measurable f) (hs : ∀ᵐ x ∂μ, f x ∈ closure s) {y₀ : E}
     (h₀ : y₀ ∈ s) (h₀i : Integrable (fun _ => y₀) μ) :
     Tendsto (fun n => setToFun μ T hT (SimpleFunc.approxOn f hfm s y₀ h₀ n)) atTop
@@ -45,7 +45,7 @@ theorem tendsto_setToFun_approxOn_of_measurable (hT : DominatedFinMeasAdditive �
     (SimpleFunc.tendsto_approxOn_L1_enorm hfm _ hs (hfi.sub h₀i).2)
 
 theorem tendsto_setToFun_approxOn_of_measurable_of_range_subset
-    (hT : DominatedFinMeasAdditive μ T C) [MeasurableSpace E] [BorelSpace E] {f : α → E}
+    (hT : DominatedFinMeasAdditive μ T C) [SigmaAlgebra E] [BorelSpace E] {f : α → E}
     (fmeas : Measurable f) (hf : Integrable f μ) (s : Set E) [SeparableSpace s]
     (hs : range f ∪ {0} ⊆ s) :
     Tendsto (fun n => setToFun μ T hT (SimpleFunc.approxOn f fmeas s 0 (hs <| by simp) n)) atTop
@@ -54,7 +54,7 @@ theorem tendsto_setToFun_approxOn_of_measurable_of_range_subset
   exact Eventually.of_forall fun x => subset_closure (hs (Set.mem_union_left _ (mem_range_self _)))
 
 theorem setToFun_of_le_map_of_stronglyMeasurable
-    (hT : DominatedFinMeasAdditive μ T C) {β : Type*} {_ : MeasurableSpace β}
+    (hT : DominatedFinMeasAdditive μ T C) {β : Type*} {_ : SigmaAlgebra β}
     {μ' : Measure β} {φ : α → β} {T' : Set β → E →L[ℝ] F} (hT' : DominatedFinMeasAdditive μ' T' C')
     {f : β → E} (hf : Integrable (f ∘ φ) μ) (hfm : StronglyMeasurable f) (hφ : Measurable φ)
     (hμ' : μ' ≤ μ.map φ)
@@ -80,7 +80,7 @@ theorem setToFun_of_le_map_of_stronglyMeasurable
   simp [hy, hT.1.map_empty_eq_zero]
 
 theorem setToFun_of_le_map
-    (hT : DominatedFinMeasAdditive μ T C) {β : Type*} {_ : MeasurableSpace β}
+    (hT : DominatedFinMeasAdditive μ T C) {β : Type*} {_ : SigmaAlgebra β}
     {μ' : Measure β} {φ : α → β} {T' : Set β → E →L[ℝ] F} (hT' : DominatedFinMeasAdditive μ' T' C')
     {f : β → E} (hf : Integrable (f ∘ φ) μ) (hfm : AEStronglyMeasurable f (μ.map φ))
     (hφ : Measurable φ) (hμ' : μ' ≤ μ.map φ)

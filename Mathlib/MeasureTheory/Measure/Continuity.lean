@@ -28,7 +28,7 @@ open scoped Topology
 
 namespace MeasureTheory
 
-variable {α ι : Type*} {m : MeasurableSpace α} {μ : Measure α} {s : ι → Set α}
+variable {α ι : Type*} {m : SigmaAlgebra α} {μ : Measure α} {s : ι → Set α}
 
 /-- Continuity from below:
 the measure of the union of a directed sequence of (not necessarily measurable) sets

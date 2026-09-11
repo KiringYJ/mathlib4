@@ -32,7 +32,7 @@ namespace Measure
 
 section Basic
 
-variable {X Y : Type*} [TopologicalSpace X] {m : MeasurableSpace X} [TopologicalSpace Y]
+variable {X Y : Type*} [TopologicalSpace X] {m : SigmaAlgebra X} [TopologicalSpace Y]
   [T2Space Y] (μ ν : Measure X)
 
 /-- A measure is said to be `IsOpenPosMeasure` if it is positive on nonempty open sets. -/
@@ -91,12 +91,12 @@ theorem _root_.IsClosed.ae_eq_univ_iff_eq (hF : IsClosed F) :
   refine ⟨fun h ↦ ?_, fun h ↦ by rw [h]⟩
   rwa [ae_eq_univ, hF.isOpen_compl.measure_eq_zero_iff μ, compl_empty_iff] at h
 
-theorem _root_.IsClosed.measure_eq_univ_iff_eq [OpensMeasurableSpace X] [IsFiniteMeasure μ]
+theorem _root_.IsClosed.measure_eq_univ_iff_eq [OpensSigmaAlgebra X] [IsFiniteMeasure μ]
     (hF : IsClosed F) :
     μ F = μ univ ↔ F = univ := by
   rw [← ae_eq_univ_iff_measure_eq hF.measurableSet.nullMeasurableSet, hF.ae_eq_univ_iff_eq]
 
-theorem _root_.IsClosed.measure_eq_one_iff_eq_univ [OpensMeasurableSpace X] [IsProbabilityMeasure μ]
+theorem _root_.IsClosed.measure_eq_one_iff_eq_univ [OpensSigmaAlgebra X] [IsProbabilityMeasure μ]
     (hF : IsClosed F) :
     μ F = 1 ↔ F = univ := by
   rw [← measure_univ (μ := μ), hF.measure_eq_univ_iff_eq]
@@ -142,8 +142,8 @@ theorem _root_.Continuous.ae_eq_iff_eq {f g : X → Y} (hf : Continuous f) (hg :
     f =ᵐ[μ] g ↔ f = g :=
   ⟨fun h => eq_of_ae_eq h hf hg, fun h => h ▸ EventuallyEq.rfl⟩
 
-theorem _root_.Continuous.isOpenPosMeasure_map [OpensMeasurableSpace X]
-    {Z : Type*} [TopologicalSpace Z] [MeasurableSpace Z] [BorelSpace Z]
+theorem _root_.Continuous.isOpenPosMeasure_map [OpensSigmaAlgebra X]
+    {Z : Type*} [TopologicalSpace Z] [SigmaAlgebra Z] [BorelSpace Z]
     {f : X → Z} (hf : Continuous f) (hf_surj : Function.Surjective f) :
     (Measure.map f μ).IsOpenPosMeasure := by
   refine ⟨fun U hUo hUne => ?_⟩
@@ -151,7 +151,7 @@ theorem _root_.Continuous.isOpenPosMeasure_map [OpensMeasurableSpace X]
   exact (hUo.preimage hf).measure_ne_zero μ (hf_surj.nonempty_preimage.mpr hUne)
 
 protected theorem IsOpenPosMeasure.comap [BorelSpace X]
-    {Z : Type*} [TopologicalSpace Z] {mZ : MeasurableSpace Z} [BorelSpace Z]
+    {Z : Type*} [TopologicalSpace Z] {mZ : SigmaAlgebra Z} [BorelSpace Z]
     (μ : Measure Z) [IsOpenPosMeasure μ] {f : X → Z} (hf : IsOpenEmbedding f) :
     (μ.comap f).IsOpenPosMeasure where
   open_pos U hU Une := by
@@ -163,7 +163,7 @@ end Basic
 section LinearOrder
 
 variable {X Y : Type*} [TopologicalSpace X] [LinearOrder X] [OrderTopology X]
-  {m : MeasurableSpace X} [TopologicalSpace Y] [T2Space Y] (μ : Measure X) [IsOpenPosMeasure μ]
+  {m : SigmaAlgebra X} [TopologicalSpace Y] [T2Space Y] (μ : Measure X) [IsOpenPosMeasure μ]
 
 theorem measure_Ioi_pos [NoMaxOrder X] (a : X) : 0 < μ (Ioi a) :=
   isOpen_Ioi.measure_pos μ nonempty_Ioi
@@ -206,7 +206,7 @@ open MeasureTheory MeasureTheory.Measure
 
 namespace Metric
 
-variable {X : Type*} [PseudoMetricSpace X] {m : MeasurableSpace X} (μ : Measure X)
+variable {X : Type*} [PseudoMetricSpace X] {m : SigmaAlgebra X} (μ : Measure X)
   [IsOpenPosMeasure μ]
 
 theorem measure_ball_pos (x : X) {r : ℝ} (hr : 0 < r) : 0 < μ (ball x r) :=
@@ -216,7 +216,7 @@ theorem measure_ball_pos (x : X) {r : ℝ} (hr : 0 < r) : 0 < μ (ball x r) :=
 theorem measure_closedBall_pos (x : X) {r : ℝ} (hr : 0 < r) : 0 < μ (closedBall x r) :=
   (measure_ball_pos μ x hr).trans_le (measure_mono ball_subset_closedBall)
 
-@[simp] lemma measure_closedBall_pos_iff {X : Type*} [MetricSpace X] {m : MeasurableSpace X}
+@[simp] lemma measure_closedBall_pos_iff {X : Type*} [MetricSpace X] {m : SigmaAlgebra X}
     (μ : Measure X) [IsOpenPosMeasure μ] [NullSingletonClass μ] {x : X} {r : ℝ} :
     0 < μ (closedBall x r) ↔ 0 < r := by
   refine ⟨fun h ↦ ?_, measure_closedBall_pos μ x⟩
@@ -227,7 +227,7 @@ end Metric
 
 namespace Metric
 
-variable {X : Type*} [PseudoEMetricSpace X] {m : MeasurableSpace X} (μ : Measure X)
+variable {X : Type*} [PseudoEMetricSpace X] {m : SigmaAlgebra X} (μ : Measure X)
   [IsOpenPosMeasure μ]
 
 theorem measure_eball_pos (x : X) {r : ℝ≥0∞} (hr : r ≠ 0) : 0 < μ (eball x r) :=
@@ -253,7 +253,7 @@ However, with respect to a measure which is positive on non-empty open sets, *cl
 zero sets are nowhere dense and σ-compact measure zero sets in a Hausdorff space are meagre.
 -/
 
-variable {X : Type*} [TopologicalSpace X] [MeasurableSpace X] {s : Set X}
+variable {X : Type*} [TopologicalSpace X] [SigmaAlgebra X] {s : Set X}
   {μ : Measure X} [IsOpenPosMeasure μ]
 
 /-- A *closed* measure zero subset is nowhere dense. (Closedness is required: for instance, the

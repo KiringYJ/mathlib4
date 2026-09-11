@@ -40,9 +40,9 @@ structure SFinKer : Type (u + 1) where
   of ::
   /-- The underlying measurable space. -/
   carrier : Type u
-  [str : MeasurableSpace carrier]
+  [sigmaAlgebra : SigmaAlgebra carrier]
 
-attribute [instance] SFinKer.str
+attribute [instance] SFinKer.sigmaAlgebra
 
 instance : CoeSort SFinKer Type* :=
   ⟨SFinKer.carrier⟩
@@ -138,8 +138,11 @@ instance : MonoidalCategory SFinKer.{u} where
     have := κ.2
     rw [Kernel.map_apply' _ (by fun_prop) _ hs, Kernel.comap_apply' _ (by fun_prop),
       Kernel.parallelComp_apply' <| measurable_fst hs]
-    simp only [Kernel.id_apply, MeasurableSpace.measurableSet_top, Measure.dirac_apply']
+    simp only [Kernel.id_apply]
     rw [← lintegral_indicator_one hs]
+    refine lintegral_congr ?_
+    intro b
+    rw [Measure.dirac_apply' _ Subsingleton.measurableSet]
     rfl
   tensorHom_comp_tensorHom κ₁ κ₂ η₁ η₂ := by
     ext : 1; dsimp

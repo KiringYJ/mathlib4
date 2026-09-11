@@ -40,14 +40,14 @@ namespace MeasureTheory
 
 open Set ENNReal NNReal
 
-variable {mα : MeasurableSpace α} {mβ : MeasurableSpace β}
+variable {mα : SigmaAlgebra α} {mβ : SigmaAlgebra β}
   {μ μ₁ μ₂ μ₃ ν ν' : Measure α} {s t : Set α}
 
 namespace Measure
 
 /-- We say that `μ` is absolutely continuous with respect to `ν`, or that `μ` is dominated by `ν`,
   if `ν(A) = 0` implies that `μ(A) = 0`. -/
-def AbsolutelyContinuous {_m0 : MeasurableSpace α} (μ ν : Measure α) : Prop :=
+def AbsolutelyContinuous {_m0 : SigmaAlgebra α} (μ ν : Measure α) : Prop :=
   ∀ ⦃s : Set α⦄, ν s = 0 → μ s = 0
 
 @[inherit_doc MeasureTheory.Measure.AbsolutelyContinuous]
@@ -71,12 +71,12 @@ theorem mk (h : ∀ ⦃s : Set α⦄, MeasurableSet s → ν s = 0 → μ s = 0)
   exact measure_mono_null h1t (h h2t h3t)
 
 @[refl]
-protected theorem refl {_m0 : MeasurableSpace α} (μ : Measure α) : μ ≪ μ :=
+protected theorem refl {_m0 : SigmaAlgebra α} (μ : Measure α) : μ ≪ μ :=
   rfl.absolutelyContinuous
 
 protected theorem rfl : μ ≪ μ := fun _s hs => hs
 
-instance instRefl {_ : MeasurableSpace α} : @Std.Refl (Measure α) (· ≪ ·) :=
+instance instRefl {_ : SigmaAlgebra α} : @Std.Refl (Measure α) (· ≪ ·) :=
   ⟨fun _ => AbsolutelyContinuous.rfl⟩
 
 @[simp]
@@ -204,7 +204,7 @@ namespace MeasurableEmbedding
 
 open MeasureTheory
 
-variable {m0 : MeasurableSpace α} {m1 : MeasurableSpace β} {f : α → β} {μ ν : Measure α}
+variable {m0 : SigmaAlgebra α} {m1 : SigmaAlgebra β} {f : α → β} {μ ν : Measure α}
 
 lemma absolutelyContinuous_map (hf : MeasurableEmbedding f) (hμν : μ ≪ ν) :
     μ.map f ≪ ν.map f := by

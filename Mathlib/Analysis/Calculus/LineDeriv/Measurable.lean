@@ -26,7 +26,7 @@ public section
 open MeasureTheory
 
 variable {𝕜 : Type*} [NontriviallyNormedField 𝕜] [LocallyCompactSpace 𝕜]
-  {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [MeasurableSpace E] [OpensMeasurableSpace E]
+  {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [SigmaAlgebra E] [OpensSigmaAlgebra E]
   {F : Type*} [NormedAddCommGroup F] [NormedSpace 𝕜 F] [CompleteSpace F]
   {f : E → F} {v : E}
 
@@ -41,7 +41,7 @@ theorem measurableSet_lineDifferentiableAt (hf : Continuous f) :
   have hg : Continuous g.uncurry := by fun_prop
   exact measurable_prodMk_right (measurableSet_of_differentiableAt_with_param 𝕜 hg)
 
-theorem measurable_lineDeriv [MeasurableSpace F] [BorelSpace F]
+theorem measurable_lineDeriv [SigmaAlgebra F] [BorelSpace F]
     (hf : Continuous f) : Measurable (fun x ↦ lineDeriv 𝕜 f x v) := by
   borelize 𝕜
   let g : E → 𝕜 → F := fun x t ↦ f (x + t • v)
@@ -55,7 +55,7 @@ theorem stronglyMeasurable_lineDeriv [SecondCountableTopologyEither E F] (hf : C
   have hg : Continuous g.uncurry := by fun_prop
   exact (stronglyMeasurable_deriv_with_param hg).comp_measurable measurable_prodMk_right
 
-theorem aemeasurable_lineDeriv [MeasurableSpace F] [BorelSpace F]
+theorem aemeasurable_lineDeriv [SigmaAlgebra F] [BorelSpace F]
     (hf : Continuous f) (μ : Measure E) :
     AEMeasurable (fun x ↦ lineDeriv 𝕜 f x v) μ :=
   (measurable_lineDeriv hf).aemeasurable
@@ -84,7 +84,7 @@ theorem measurableSet_lineDifferentiableAt_uncurry (hf : Continuous f) :
     measurableSet_of_differentiableAt_with_param 𝕜 this
   exact measurable_prodMk_right M_meas
 
-theorem measurable_lineDeriv_uncurry [MeasurableSpace F] [BorelSpace F]
+theorem measurable_lineDeriv_uncurry [SigmaAlgebra F] [BorelSpace F]
     (hf : Continuous f) : Measurable (fun (p : E × E) ↦ lineDeriv 𝕜 f p.1 p.2) := by
   borelize 𝕜
   let g : (E × E) → 𝕜 → F := fun p t ↦ f (p.1 + t • p.2)
@@ -102,7 +102,7 @@ theorem stronglyMeasurable_lineDeriv_uncurry (hf : Continuous f) :
     <| continuous_snd.smul (continuous_snd.comp continuous_fst)
   exact (stronglyMeasurable_deriv_with_param this).comp_measurable measurable_prodMk_right
 
-theorem aemeasurable_lineDeriv_uncurry [MeasurableSpace F] [BorelSpace F]
+theorem aemeasurable_lineDeriv_uncurry [SigmaAlgebra F] [BorelSpace F]
     (hf : Continuous f) (μ : Measure (E × E)) :
     AEMeasurable (fun (p : E × E) ↦ lineDeriv 𝕜 f p.1 p.2) μ :=
   (measurable_lineDeriv_uncurry hf).aemeasurable

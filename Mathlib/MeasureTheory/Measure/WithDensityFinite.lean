@@ -44,7 +44,7 @@ open scoped ENNReal ProbabilityTheory
 
 namespace MeasureTheory
 
-variable {α : Type*} {mα : MeasurableSpace α} {μ : Measure α}
+variable {α : Type*} {mα : SigmaAlgebra α} {μ : Measure α}
 
 /-- Auxiliary definition for `MeasureTheory.Measure.toFinite`. -/
 noncomputable def Measure.toFiniteAux (μ : Measure α) [SFinite μ] : Measure α :=

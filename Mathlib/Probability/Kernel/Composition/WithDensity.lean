@@ -23,8 +23,8 @@ public section
 open ProbabilityTheory MeasureTheory
 open scoped ENNReal
 
-variable {𝓧 𝓨 𝓩 : Type*} {m𝓧 : MeasurableSpace 𝓧} {m𝓨 : MeasurableSpace 𝓨}
-  {m𝓩 : MeasurableSpace 𝓩} {μ : Measure 𝓧} {κ : Kernel 𝓧 𝓨} [IsSFiniteKernel κ]
+variable {𝓧 𝓨 𝓩 : Type*} {m𝓧 : SigmaAlgebra 𝓧} {m𝓨 : SigmaAlgebra 𝓨}
+  {m𝓩 : SigmaAlgebra 𝓩} {μ : Measure 𝓧} {κ : Kernel 𝓧 𝓨} [IsSFiniteKernel κ]
   {f : 𝓧 → ℝ≥0∞} {f' : 𝓨 → ℝ≥0∞} {g : 𝓧 → 𝓨 → ℝ≥0∞}
 
 namespace MeasureTheory.Measure

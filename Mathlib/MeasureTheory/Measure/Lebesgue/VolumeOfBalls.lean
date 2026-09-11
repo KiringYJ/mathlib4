@@ -48,7 +48,7 @@ section general_case
 open MeasureTheory MeasureTheory.Measure Module ENNReal
 
 theorem MeasureTheory.measure_unitBall_eq_integral_div_gamma {E : Type*} {p : ℝ}
-    [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E] [MeasurableSpace E]
+    [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E] [SigmaAlgebra E]
     [BorelSpace E] (μ : Measure E) [IsAddHaarMeasure μ] (hp : 0 < p) :
     μ (Metric.ball 0 1) =
       .ofReal ((∫ (x : E), Real.exp (-‖x‖ ^ p) ∂μ) / Real.Gamma (finrank ℝ E / p + 1)) := by
@@ -69,7 +69,7 @@ theorem MeasureTheory.measure_unitBall_eq_integral_div_gamma {E : Type*} {p : �
       mul_div_assoc, mul_div_assoc, mul_comm, mul_assoc, this, mul_one, ofReal_measureReal _]
     exact ne_of_lt measure_ball_lt_top
 
-variable {E : Type*} [AddCommGroup E] [Module ℝ E] [FiniteDimensional ℝ E] [mE : MeasurableSpace E]
+variable {E : Type*} [AddCommGroup E] [Module ℝ E] [FiniteDimensional ℝ E] [mE : SigmaAlgebra E]
   [tE : TopologicalSpace E] [IsTopologicalAddGroup E] [BorelSpace E] [T2Space E]
   [ContinuousSMul ℝ E] (μ : Measure E) [IsAddHaarMeasure μ] {g : E → ℝ} (h1 : g 0 = 0)
   (h2 : ∀ x, g (-x) = g x) (h3 : ∀ x y, g (x + y) ≤ g x + g y) (h4 : ∀ {x}, g x = 0 → x = 0)
@@ -86,8 +86,8 @@ theorem MeasureTheory.measure_lt_one_eq_integral_div_gamma {p : ℝ} (hp : 0 < p
   let : NormedSpace ℝ F := { norm_smul_le := fun _ _ ↦ h5 _ _ }
   -- We put the new topology on F
   let : TopologicalSpace F := UniformSpace.toTopologicalSpace
-  let : MeasurableSpace F := borel F
-  have : BorelSpace F := { measurable_eq := rfl }
+  let : SigmaAlgebra F := borel F
+  have : BorelSpace F := { sigmaAlgebra_eq := rfl }
   -- The map between `E` and `F` as a continuous linear equivalence
   let φ := @LinearEquiv.toContinuousLinearEquiv ℝ _ E _ _ tE _ _ F _ _ _ _ _ _ _ _ _
     (LinearEquiv.refl ℝ E : E ≃ₗ[ℝ] F)
@@ -119,8 +119,8 @@ theorem MeasureTheory.measure_le_eq_lt [Nontrivial E] (r : ℝ) :
   let : NormedSpace ℝ F := { norm_smul_le := fun _ _ ↦ h5 _ _ }
   -- We put the new topology on F
   let : TopologicalSpace F := UniformSpace.toTopologicalSpace
-  let : MeasurableSpace F := borel F
-  have : BorelSpace F := { measurable_eq := rfl }
+  let : SigmaAlgebra F := borel F
+  have : BorelSpace F := { sigmaAlgebra_eq := rfl }
   -- The map between `E` and `F` as a continuous linear equivalence
   let φ := @LinearEquiv.toContinuousLinearEquiv ℝ _ E _ _ tE _ _ F _ _ _ _ _ _ _ _ _
     (LinearEquiv.refl ℝ E : E ≃ₗ[ℝ] F)
@@ -334,7 +334,7 @@ open scoped Nat
 open MeasureTheory MeasureTheory.Measure ENNReal Real Module Metric
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
-  [MeasurableSpace E] [BorelSpace E]
+  [SigmaAlgebra E] [BorelSpace E]
 
 section Nontrivial
 

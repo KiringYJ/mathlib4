@@ -148,7 +148,7 @@ theorem _root_.HasCompactSupport.convolution_integrand_bound_left (hcf : HasComp
 end NoMeasurability
 
 section Measurability
-variable [MeasurableSpace G] {μ ν : Measure G}
+variable [SigmaAlgebra G] {μ ν : Measure G}
 
 /-- The convolution of `f` and `g` exists at `x` when the function `t ↦ L (f t) (g (x - t))` is
 integrable. There are various conditions on `f` and `g` to prove this. -/
@@ -874,7 +874,7 @@ variable [NormedSpace 𝕜 E]
 variable [NormedSpace 𝕜 E']
 variable [NormedSpace 𝕜 E'']
 variable [NormedSpace ℝ F] [NormedSpace 𝕜 F]
-variable [MeasurableSpace G] {μ ν : Measure G}
+variable [SigmaAlgebra G] {μ ν : Measure G}
 variable (L : E →L[𝕜] E' →L[𝕜] F)
 
 section Assoc

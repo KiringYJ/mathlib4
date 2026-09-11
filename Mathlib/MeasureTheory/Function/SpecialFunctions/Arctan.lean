@@ -27,7 +27,7 @@ section RealComposition
 
 open Real
 
-variable {α : Type*} {m : MeasurableSpace α} {f : α → ℝ}
+variable {α : Type*} {m : SigmaAlgebra α} {f : α → ℝ}
 
 @[fun_prop]
 theorem Measurable.arctan (hf : Measurable f) : Measurable fun x => arctan (f x) :=

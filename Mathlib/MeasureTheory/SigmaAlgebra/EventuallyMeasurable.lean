@@ -5,7 +5,7 @@ Authors: Felix Weilacher
 -/
 module
 
-public import Mathlib.MeasureTheory.MeasurableSpace.Defs
+public import Mathlib.MeasureTheory.SigmaAlgebra.Defs
 public import Mathlib.Order.Filter.CountableInter
 
 /-!
@@ -22,38 +22,39 @@ TODO: Implement the latter.
 
 ## Main definitions
 
-* `eventuallyMeasurableSpace`: A `MeasurableSpace` on a type `α` consisting of sets which are
+* `eventuallySigmaAlgebra`: A `SigmaAlgebra` on a type `α` consisting of sets which are
   `Filter.EventuallyEq` to a measurable set with respect to a given `CountableInterFilter` on `α`
-  and `MeasurableSpace` on `α`.
+  and `SigmaAlgebra` on `α`.
 * `EventuallyMeasurableSet`: A `Prop` for sets which are measurable with respect to some
-  `eventuallyMeasurableSpace`.
+  `eventuallySigmaAlgebra`.
 * `EventuallyMeasurable`: A `Prop` for functions which are measurable with respect to some
-  `eventuallyMeasurableSpace` on the domain.
+  `eventuallySigmaAlgebra` on the domain.
 
 -/
 
 @[expose] public section
 
-open Filter Set MeasurableSpace
+open Filter Set SigmaAlgebra
 
-variable {α : Type*} (m : MeasurableSpace α) {s t : Set α}
+variable {α : Type*} (m : SigmaAlgebra α) {s t : Set α}
 
-/-- The `MeasurableSpace` of sets which are measurable with respect to a given σ-algebra `m`
+/-- The `SigmaAlgebra` of sets which are measurable with respect to a given σ-algebra `m`
 on `α`, modulo a given σ-filter `l` on `α`. -/
 @[instance_reducible]
-def eventuallyMeasurableSpace (l : Filter α) [CountableInterFilter l] : MeasurableSpace α where
-  MeasurableSet' s := ∃ t, MeasurableSet t ∧ s =ᶠ[l] t
-  measurableSet_empty := ⟨∅, MeasurableSet.empty, EventuallyEq.refl _ _ ⟩
-  measurableSet_compl := fun _ ⟨t, ht, hts⟩ => ⟨tᶜ, ht.compl, hts.compl⟩
-  measurableSet_iUnion s hs := by
-    choose t ht hts using hs
-    exact ⟨⋃ i, t i, MeasurableSet.iUnion ht, .countable_iUnion hts⟩
+def eventuallySigmaAlgebra (l : Filter α) [CountableInterFilter l] : SigmaAlgebra α where
+  carrier := {s | ∃ t ∈ m, s =ᶠ[l] t}
+  isSigmaAlgebra :=
+    { empty_mem := ⟨∅, m.empty_mem, EventuallyEq.refl _ _⟩
+      compl_mem := fun _ ⟨t, ht, hts⟩ ↦ ⟨tᶜ, m.compl_mem ht, hts.compl⟩
+      iUnion_mem_nat := fun s hs ↦ by
+        choose t ht hts using hs
+        exact ⟨⋃ i, t i, m.iUnion_mem ht, .countable_iUnion hts⟩ }
 
 /-- We say a set `s` is an `EventuallyMeasurableSet` with respect to a given
 σ-algebra `m` and σ-filter `l` if it differs from a set in `m` by a set in
 the dual ideal of `l`. -/
 def EventuallyMeasurableSet (l : Filter α) [CountableInterFilter l] (s : Set α) : Prop :=
-  @MeasurableSet _ (eventuallyMeasurableSpace m l) s
+  @MeasurableSet _ (eventuallySigmaAlgebra m l) s
 
 variable {l : Filter α} [CountableInterFilter l]
 variable {m}
@@ -62,8 +63,10 @@ theorem MeasurableSet.eventuallyMeasurableSet (hs : MeasurableSet s) :
     EventuallyMeasurableSet m l s :=
   ⟨s, hs, EventuallyEq.refl _ _⟩
 
-theorem le_eventuallyMeasurableSpace : m ≤ eventuallyMeasurableSpace m l :=
-  fun _ hs => hs.eventuallyMeasurableSet
+theorem le_eventuallySigmaAlgebra : m ≤ eventuallySigmaAlgebra m l :=
+  fun s hs ↦ by
+    change ∃ t ∈ m, s =ᶠ[l] t
+    exact ⟨s, hs, EventuallyEq.refl _ _⟩
 
 theorem eventuallyMeasurableSet_of_mem_filter (hs : s ∈ l) : EventuallyMeasurableSet m l s :=
   ⟨univ, MeasurableSet.univ, eventuallyEqSet_univ.mpr hs⟩
@@ -78,7 +81,7 @@ theorem EventuallyMeasurableSet.congr
 section instances
 
 instance eventuallyMeasurableSingleton [MeasurableSingletonClass α] :
-    @MeasurableSingletonClass α (eventuallyMeasurableSpace m l) :=
+    @MeasurableSingletonClass α (eventuallySigmaAlgebra m l) :=
   @MeasurableSingletonClass.mk _ (_) <| fun x => (MeasurableSet.singleton x).eventuallyMeasurableSet
 
 end instances
@@ -87,7 +90,7 @@ section EventuallyMeasurable
 
 open Function
 
-variable (m l) {β γ : Type*} [MeasurableSpace β] [MeasurableSpace γ]
+variable (m l) {β γ : Type*} [SigmaAlgebra β] [SigmaAlgebra γ]
 
 /-- We say a function is `EventuallyMeasurable` with respect to a given
 σ-algebra `m` and σ-filter `l` if the preimage of any measurable set is equal to some
@@ -95,12 +98,12 @@ variable (m l) {β γ : Type*} [MeasurableSpace β] [MeasurableSpace γ]
 Warning: This is not always the same as being equal to some `m`-measurable function modulo `l`.
 In general it is weaker. See `Measurable.eventuallyMeasurable_of_eventuallyEq`.
 *TODO*: Add lemmas about when these are equivalent. -/
-def EventuallyMeasurable (f : α → β) : Prop := @Measurable _ _ (eventuallyMeasurableSpace m l) _ f
+def EventuallyMeasurable (f : α → β) : Prop := @Measurable _ _ (eventuallySigmaAlgebra m l) _ f
 
 variable {m l} {f g : α → β} {h : β → γ}
 
 theorem Measurable.eventuallyMeasurable (hf : Measurable f) : EventuallyMeasurable m l f :=
-  hf.le le_eventuallyMeasurableSpace
+  hf.le le_eventuallySigmaAlgebra
 
 theorem Measurable.comp_eventuallyMeasurable (hh : Measurable h) (hf : EventuallyMeasurable m l f) :
     EventuallyMeasurable m l (h ∘ f) :=

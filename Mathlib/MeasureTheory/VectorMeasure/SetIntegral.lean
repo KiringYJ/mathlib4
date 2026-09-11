@@ -24,7 +24,7 @@ assert_not_exists InnerProductSpace
 open Filter Function MeasureTheory RCLike Set TopologicalSpace Topology ContinuousLinearMap
 open scoped ENNReal NNReal Finset
 
-variable {ι X E F G H : Type*} {mX : MeasurableSpace X}
+variable {ι X E F G H : Type*} {mX : SigmaAlgebra X}
   [NormedAddCommGroup E] [NormedAddCommGroup F] [NormedAddCommGroup G] [NormedAddCommGroup H]
   {μ : VectorMeasure X F} {f g : X → E} {s t : Set X}
 
@@ -254,7 +254,7 @@ theorem setIntegral_of_variation_apply_eq_zero (f : X → E) {s : Set X}
   have : μ.restrict s = 0 := variation_eq_zero.1 this
   simp [this]
 
-theorem setIntegral_dirac' {mX : MeasurableSpace X} [CompleteSpace G] {a : X} {v : F}
+theorem setIntegral_dirac' {mX : SigmaAlgebra X} [CompleteSpace G] {a : X} {v : F}
     (hf : StronglyMeasurable f) {s : Set X} (hs : MeasurableSet s) [Decidable (a ∈ s)] :
     ∫ᵛ x in s, f x ∂[B; VectorMeasure.dirac a v] = if a ∈ s then B (f a) v else 0 := by
   rw [restrict_dirac hs]
@@ -262,7 +262,7 @@ theorem setIntegral_dirac' {mX : MeasurableSpace X} [CompleteSpace G] {a : X} {v
   · exact integral_dirac' hf
   · exact integral_zero_vectorMeasure
 
-theorem setIntegral_dirac [MeasurableSpace X] [MeasurableSingletonClass X] [CompleteSpace G]
+theorem setIntegral_dirac [SigmaAlgebra X] [MeasurableSingletonClass X] [CompleteSpace G]
     {a : X} {v : F} {s : Set X} (hs : MeasurableSet s) [Decidable (a ∈ s)] :
     ∫ᵛ x in s, f x ∂[B; VectorMeasure.dirac a v] = if a ∈ s then B (f a) v else 0 := by
   rw [restrict_dirac hs]
@@ -342,26 +342,26 @@ theorem integral_indicator_const [CompleteSpace G]
     ∫ᵛ x, s.indicator (fun _ : X ↦ e) x ∂[B; μ] = B e (μ s) := by
   rw [integral_indicator s_meas, ← setIntegral_const]
 
-theorem setIntegral_map {β : Type*} [MeasurableSpace β]
+theorem setIntegral_map {β : Type*} [SigmaAlgebra β]
     {φ : X → β} (hφ : Measurable φ) {f : β → E} {s : Set β} (hs : MeasurableSet s)
     (hfm : AEStronglyMeasurable f ((μ.restrict (φ ⁻¹' s)).variation.map φ))
     (hfi' : μ.Integrable (f ∘ φ)) :
     ∫ᵛ y in s, f y ∂[B; μ.map φ] = ∫ᵛ x in φ ⁻¹' s, f (φ x) ∂[B; μ] := by
   rw [restrict_map μ hφ hs, integral_map hφ hfm hfi'.integrableOn]
 
-theorem _root_.MeasurableEmbedding.setIntegral_map_vectorMeasure {β : Type*} [MeasurableSpace β]
+theorem _root_.MeasurableEmbedding.setIntegral_map_vectorMeasure {β : Type*} [SigmaAlgebra β]
     {φ : X → β} {f : β → E} (hφ : MeasurableEmbedding φ) {s : Set β} (hs : MeasurableSet s) :
     ∫ᵛ y in s, f y ∂[B; μ.map φ] = ∫ᵛ x in φ ⁻¹' s, f (φ x) ∂[B; μ] := by
   rw [restrict_map μ hφ.measurable hs, hφ.integral_map_vectorMeasure]
 
 theorem _root_.Topology.IsClosedEmbedding.setIntegral_map_vectorMeasure
     [TopologicalSpace X] [BorelSpace X] {β : Type*}
-    [MeasurableSpace β] [TopologicalSpace β] [BorelSpace β] {φ : X → β} {f : β → E} {s : Set β}
+    [SigmaAlgebra β] [TopologicalSpace β] [BorelSpace β] {φ : X → β} {f : β → E} {s : Set β}
     (hs : MeasurableSet s) (hφ : IsClosedEmbedding φ) :
     ∫ᵛ y in s, f y ∂[B; μ.map φ] = ∫ᵛ x in φ ⁻¹' s, f (φ x) ∂[B; μ] :=
   hφ.measurableEmbedding.setIntegral_map_vectorMeasure hs
 
-theorem setIntegral_map_equiv {β : Type*} [MeasurableSpace β] {e : X ≃ᵐ β} {f : β → E} {s : Set β}
+theorem setIntegral_map_equiv {β : Type*} [SigmaAlgebra β] {e : X ≃ᵐ β} {f : β → E} {s : Set β}
     (hs : MeasurableSet s) :
     ∫ᵛ y in s, f y ∂[B; μ.map e] = ∫ᵛ x in e ⁻¹' s, f (e x) ∂[B; μ] :=
   e.measurableEmbedding.setIntegral_map_vectorMeasure hs

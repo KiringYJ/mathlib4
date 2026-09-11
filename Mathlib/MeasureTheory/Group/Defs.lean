@@ -49,7 +49,7 @@ namespace MeasureTheory
 /-- A measure `μ : Measure α` is invariant under an additive action of `M` on `α` if for any
 measurable set `s : Set α` and `c : M`, the measure of its preimage under `fun x => c +ᵥ x` is equal
 to the measure of `s`. -/
-class VAddInvariantMeasure (M α : Type*) [VAdd M α] {_ : MeasurableSpace α} (μ : Measure α) :
+class VAddInvariantMeasure (M α : Type*) [VAdd M α] {_ : SigmaAlgebra α} (μ : Measure α) :
   Prop where
   measure_preimage_vadd : ∀ (c : M) ⦃s : Set α⦄, MeasurableSet s → μ ((fun x => c +ᵥ x) ⁻¹' s) = μ s
 
@@ -57,7 +57,7 @@ class VAddInvariantMeasure (M α : Type*) [VAdd M α] {_ : MeasurableSpace α} (
 measurable set `s : Set α` and `c : M`, the measure of its preimage under `fun x => c • x` is equal
 to the measure of `s`. -/
 @[to_additive, mk_iff smulInvariantMeasure_iff]
-class SMulInvariantMeasure (M α : Type*) [SMul M α] {_ : MeasurableSpace α} (μ : Measure α) :
+class SMulInvariantMeasure (M α : Type*) [SMul M α] {_ : SigmaAlgebra α} (μ : Measure α) :
   Prop where
   measure_preimage_smul : ∀ (c : M) ⦃s : Set α⦄, MeasurableSet s → μ ((fun x => c • x) ⁻¹' s) = μ s
 
@@ -65,7 +65,7 @@ attribute [to_additive] smulInvariantMeasure_iff
 
 namespace Measure
 
-variable {G : Type*} [MeasurableSpace G]
+variable {G : Type*} [SigmaAlgebra G]
 
 /-- A measure `μ` on a measurable additive group is left invariant
   if the measure of left translations of a set are equal to the measure of the set itself. -/

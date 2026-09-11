@@ -38,7 +38,7 @@ open scoped Real Topology
 
 namespace ProbabilityTheory
 
-variable {Ω Ω' : Type*} {mΩ : MeasurableSpace Ω} {mΩ' : MeasurableSpace Ω'}
+variable {Ω Ω' : Type*} {mΩ : SigmaAlgebra Ω} {mΩ' : SigmaAlgebra Ω'}
   {P : Measure Ω} {P' : Measure Ω'} {X : ℕ → Ω → ℝ} {Y : Ω' → ℝ}
 
 lemma charFun_inv_sqrt_mul_sum (hindep : iIndepFun X P)

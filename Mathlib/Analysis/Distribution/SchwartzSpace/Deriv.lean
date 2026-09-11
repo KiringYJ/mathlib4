@@ -261,7 +261,7 @@ end one_dim
 
 variable [NormedAddCommGroup V] [NormedSpace ℝ V]
   [NormedAddCommGroup D] [NormedSpace ℝ D]
-  [MeasurableSpace D] {μ : Measure D} [BorelSpace D] [FiniteDimensional ℝ D] [μ.IsAddHaarMeasure]
+  [SigmaAlgebra D] {μ : Measure D} [BorelSpace D] [FiniteDimensional ℝ D] [μ.IsAddHaarMeasure]
 
 open scoped LineDeriv
 
@@ -314,7 +314,7 @@ variable [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
   [NormedAddCommGroup F₁] [NormedSpace ℝ F₁]
   [NormedAddCommGroup F₂] [NormedSpace ℝ F₂]
   [NormedAddCommGroup F₃] [NormedSpace ℝ F₃]
-  [MeasurableSpace E] {μ : Measure E} [BorelSpace E] [μ.IsAddHaarMeasure]
+  [SigmaAlgebra E] {μ : Measure E} [BorelSpace E] [μ.IsAddHaarMeasure]
 
 /-- Integration by parts of Schwartz functions for the Laplacian.
 

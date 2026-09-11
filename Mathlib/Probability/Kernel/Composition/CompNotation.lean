@@ -32,7 +32,7 @@ open ProbabilityTheory
 
 namespace MeasureTheory.Measure
 
-variable {α β : Type*} {mα : MeasurableSpace α} {mβ : MeasurableSpace β}
+variable {α β : Type*} {mα : SigmaAlgebra α} {mβ : SigmaAlgebra β}
   {μ : Measure α} {κ : Kernel α β}
 
 /-- Composition of a measure and a kernel.

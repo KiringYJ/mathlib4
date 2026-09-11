@@ -37,7 +37,7 @@ open scoped ENNReal NNReal MeasureTheory Topology
 
 namespace MeasureTheory
 
-variable {α : Type*} {m m0 : MeasurableSpace α} {μ : Measure α} {p : ℝ≥0∞}
+variable {α : Type*} {m m0 : SigmaAlgebra α} {μ : Measure α} {p : ℝ≥0∞}
 
 theorem ae_const_le_iff_forall_lt_measure_zero {β} [LinearOrder β] [TopologicalSpace β]
     [OrderTopology β] [FirstCountableTopology β] (f : α → β) (c : β) :
@@ -150,11 +150,11 @@ section PiSystem
 variable {s : Set (Set α)} {f g : α → ℝ≥0∞}
 
 theorem lintegral_eq_lintegral_of_isPiSystem
-    (h_eq : m0 = MeasurableSpace.generateFrom s) (h_inter : IsPiSystem s)
+    (h_eq : m0 = SigmaAlgebra.generateFrom s) (h_inter : IsPiSystem s)
     (basic : ∀ t ∈ s, ∫⁻ x in t, f x ∂μ = ∫⁻ x in t, g x ∂μ)
     (h_univ : ∫⁻ x, f x ∂μ = ∫⁻ x, g x ∂μ) (hf_int : ∫⁻ x, f x ∂μ ≠ ∞) :
     ∀ t (_ : MeasurableSet t), ∫⁻ x in t, f x ∂μ = ∫⁻ x in t, g x ∂μ := by
-  refine MeasurableSpace.induction_on_inter h_eq h_inter ?_ basic ?_ ?_
+  refine SigmaAlgebra.induction_on_inter h_eq h_inter ?_ basic ?_ ?_
   · simp
   · intro t ht h_eq
     rw [setLIntegral_compl ht, setLIntegral_compl ht, h_eq, h_univ]
@@ -170,7 +170,7 @@ theorem lintegral_eq_lintegral_of_isPiSystem
     simp_rw [lintegral_iUnion htm htd, h]
 
 lemma lintegral_eq_lintegral_of_isPiSystem_of_univ_mem
-    (h_eq : m0 = MeasurableSpace.generateFrom s) (h_inter : IsPiSystem s) (h_univ : Set.univ ∈ s)
+    (h_eq : m0 = SigmaAlgebra.generateFrom s) (h_inter : IsPiSystem s) (h_univ : Set.univ ∈ s)
     (basic : ∀ t ∈ s, ∫⁻ x in t, f x ∂μ = ∫⁻ x in t, g x ∂μ)
     (hf_int : ∫⁻ x, f x ∂μ ≠ ∞) {t : Set α} (ht : MeasurableSet t) :
     ∫⁻ x in t, f x ∂μ = ∫⁻ x in t, g x ∂μ := by
@@ -180,19 +180,20 @@ lemma lintegral_eq_lintegral_of_isPiSystem_of_univ_mem
 
 /-- If two a.e.-measurable functions `α × β → ℝ≥0∞` with finite integrals have the same integral
 on every rectangle, then they are almost everywhere equal. -/
-lemma ae_eq_of_setLIntegral_prod_eq {β : Type*} {mβ : MeasurableSpace β}
+lemma ae_eq_of_setLIntegral_prod_eq {β : Type*} {mβ : SigmaAlgebra β}
     {μ : Measure (α × β)} {f g : α × β → ℝ≥0∞}
     (hf : AEMeasurable f μ) (hg : AEMeasurable g μ) (hf_int : ∫⁻ x, f x ∂μ ≠ ∞)
     (h : ∀ ⦃s : Set α⦄ (_ : MeasurableSet s) ⦃t : Set β⦄ (_ : MeasurableSet t),
       ∫⁻ x in s ×ˢ t, f x ∂μ = ∫⁻ x in s ×ˢ t, g x ∂μ) :
     f =ᵐ[μ] g := by
   have hg_int : ∫⁻ x, g x ∂μ ≠ ∞ := by
-    rwa [← setLIntegral_univ, ← Set.univ_prod_univ, ← h .univ .univ, Set.univ_prod_univ,
+    rwa [← setLIntegral_univ, ← Set.univ_prod_univ,
+      ← h MeasurableSet.univ MeasurableSet.univ, Set.univ_prod_univ,
       setLIntegral_univ]
   refine AEMeasurable.ae_eq_of_forall_setLIntegral_eq hf hg hf_int hg_int fun s hs _ ↦ ?_
   refine lintegral_eq_lintegral_of_isPiSystem_of_univ_mem generateFrom_prod.symm isPiSystem_prod
     ?_ ?_ hf_int hs
-  · exact ⟨Set.univ, .univ, Set.univ, .univ, Set.univ_prod_univ⟩
+  · exact ⟨Set.univ, MeasurableSet.univ, Set.univ, MeasurableSet.univ, Set.univ_prod_univ⟩
   · rintro _ ⟨s, hs, t, ht, rfl⟩
     exact h hs ht
 
@@ -200,7 +201,7 @@ end PiSystem
 
 section WithDensity
 
-variable {m : MeasurableSpace α} {μ : Measure α}
+variable {m : SigmaAlgebra α} {μ : Measure α}
 
 theorem withDensity_eq_iff_of_sigmaFinite [SigmaFinite μ] {f g : α → ℝ≥0∞} (hf : AEMeasurable f μ)
     (hg : AEMeasurable g μ) : μ.withDensity f = μ.withDensity g ↔ f =ᵐ[μ] g :=

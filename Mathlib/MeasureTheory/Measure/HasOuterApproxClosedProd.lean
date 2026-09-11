@@ -55,18 +55,18 @@ bounded continuous function, product measure
 
 public section
 
-open BoundedContinuousFunction MeasureTheory Filter Set ENNReal NNReal MeasurableSpace
+open BoundedContinuousFunction MeasureTheory Filter Set ENNReal NNReal SigmaAlgebra
 open scoped Topology ENNReal NNReal
 
 namespace Measure
 
 variable {ι κ Z T : Type*} {X : ι → Type*} {Y : κ → Type*}
-  {mX : ∀ i, MeasurableSpace (X i)} [∀ i, TopologicalSpace (X i)] [∀ i, BorelSpace (X i)]
+  {mX : ∀ i, SigmaAlgebra (X i)} [∀ i, TopologicalSpace (X i)] [∀ i, BorelSpace (X i)]
   [∀ i, HasOuterApproxClosed (X i)]
-  {mY : ∀ j, MeasurableSpace (Y j)} [∀ j, TopologicalSpace (Y j)] [∀ j, BorelSpace (Y j)]
+  {mY : ∀ j, SigmaAlgebra (Y j)} [∀ j, TopologicalSpace (Y j)] [∀ j, BorelSpace (Y j)]
   [∀ j, HasOuterApproxClosed (Y j)]
-  {mZ : MeasurableSpace Z} [TopologicalSpace Z] [BorelSpace Z] [HasOuterApproxClosed Z]
-  {mT : MeasurableSpace T} [TopologicalSpace T] [BorelSpace T] [HasOuterApproxClosed T]
+  {mZ : SigmaAlgebra Z} [TopologicalSpace Z] [BorelSpace Z] [HasOuterApproxClosed Z]
+  {mT : SigmaAlgebra T} [TopologicalSpace T] [BorelSpace T] [HasOuterApproxClosed T]
 
 section fintype
 
@@ -95,14 +95,14 @@ lemma ext_of_lintegral_prod_mul_prod_boundedContinuousFunction
     · simp only [Set.mem_pi, mem_univ, mem_ofPred_eq, forall_const] at ht₁ ht₂ ⊢
       exact fun j ↦ (ht₁ j).inter (ht₂ j)
     simp [Set.pi_inter_distrib, Set.prod_inter_prod]
-  have hπ2 : Prod.instMeasurableSpace = generateFrom π := by
+  have hπ2 : Prod.instSigmaAlgebra = generateFrom π := by
     rw [← generateFrom_eq_prod (C := Set.univ.pi '' (Set.univ.pi fun _ ↦ {s | IsClosed s}))
       (D := Set.univ.pi '' (Set.univ.pi fun _ ↦ {t | IsClosed t}))]
     · rw [← generateFrom_eq_pi (C := fun _ ↦ {s | IsClosed s})]
-      · simp [BorelSpace.measurable_eq, borel_eq_generateFrom_isClosed]
+      · simp [BorelSpace.sigmaAlgebra_eq, borel_eq_generateFrom_isClosed]
       · exact fun _ ↦ ⟨fun _ ↦ Set.univ, fun _ ↦ isClosed_univ, iUnion_const _⟩
     · rw [← generateFrom_eq_pi (C := fun _ ↦ {t | IsClosed t})]
-      · simp [BorelSpace.measurable_eq, borel_eq_generateFrom_isClosed]
+      · simp [BorelSpace.sigmaAlgebra_eq, borel_eq_generateFrom_isClosed]
       · exact fun _ ↦ ⟨fun _ ↦ Set.univ, fun _ ↦ isClosed_univ, iUnion_const _⟩
     · exact ⟨fun _ ↦ Set.univ, fun _ ↦ ⟨fun _ ↦ Set.univ, by simp, by simp⟩, iUnion_const _⟩
     · exact ⟨fun _ ↦ Set.univ, fun _ ↦ ⟨fun _ ↦ Set.univ, by simp, by simp⟩, iUnion_const _⟩

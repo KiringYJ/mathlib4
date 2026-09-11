@@ -42,7 +42,7 @@ open scoped ENNReal
 
 namespace ConvexOn
 
-variable {𝓧 𝓨 : Type*} {m m𝓧 : MeasurableSpace 𝓧} {m𝓨 : MeasurableSpace 𝓨}
+variable {𝓧 𝓨 : Type*} {m m𝓧 : SigmaAlgebra 𝓧} {m𝓨 : SigmaAlgebra 𝓨}
   {μ ν : Measure 𝓧} [IsFiniteMeasure μ] [IsFiniteMeasure ν] {f : ℝ → ℝ} {g : 𝓧 → 𝓨}
 
 lemma map_condExp_rnDeriv_le (hm : m ≤ m𝓧) (hf : StronglyMeasurable f)
@@ -125,7 +125,7 @@ end ConvexOn
 
 namespace InformationTheory
 
-variable {𝓧 𝓨 : Type*} {m m𝓧 : MeasurableSpace 𝓧} {m𝓨 : MeasurableSpace 𝓨} {μ ν : Measure 𝓧}
+variable {𝓧 𝓨 : Type*} {m m𝓧 : SigmaAlgebra 𝓧} {m𝓨 : SigmaAlgebra 𝓨} {μ ν : Measure 𝓧}
   [IsFiniteMeasure μ] [IsFiniteMeasure ν] {g : 𝓧 → 𝓨}
 
 lemma integrable_llr_map (hμν : μ ≪ ν) (hg : Measurable g)

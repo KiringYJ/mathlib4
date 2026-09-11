@@ -5,7 +5,7 @@ Authors: Johannes Hölzl, Mario Carneiro, Yury Kudryashov
 -/
 module
 
-public import Mathlib.MeasureTheory.MeasurableSpace.EventuallyMeasurable
+public import Mathlib.MeasureTheory.SigmaAlgebra.EventuallyMeasurable
 public import Mathlib.MeasureTheory.Measure.AEDisjoint
 
 /-!
@@ -25,28 +25,28 @@ any of the following equivalent conditions:
 * `s` can be represented as a union of a measurable set and a set of measure zero;
 * `s` can be represented as a difference of a measurable set and a set of measure zero.
 
-Null measurable sets form a σ-algebra that is registered as a `MeasurableSpace` instance on
-`MeasureTheory.NullMeasurableSpace α μ`. We also say that `f : α → β` is
+Null measurable sets form a σ-algebra that is registered as a `SigmaAlgebra` instance on
+`MeasureTheory.NullSigmaAlgebra α μ`. We also say that `f : α → β` is
 `MeasureTheory.NullMeasurable` if the preimage of a measurable set is a null measurable set.
 In other words, `f : α → β` is null measurable if it is measurable as a function
-`MeasureTheory.NullMeasurableSpace α μ → β`.
+`MeasureTheory.NullSigmaAlgebra α μ → β`.
 
 ### Complete measures
 
-We say that a measure `μ` is complete w.r.t. the `MeasurableSpace α` σ-algebra (or the σ-algebra is
+We say that a measure `μ` is complete w.r.t. the `SigmaAlgebra α` σ-algebra (or the σ-algebra is
 complete w.r.t. measure `μ`) if every set of measure zero is measurable. In this case all null
 measurable sets and functions are measurable.
 
 For each measure `μ`, we define `MeasureTheory.Measure.completion μ` to be the same measure
-interpreted as a measure on `MeasureTheory.NullMeasurableSpace α μ` and prove that this is a
+interpreted as a measure on `MeasureTheory.NullSigmaAlgebra α μ` and prove that this is a
 complete measure.
 
 ## Implementation notes
 
-We define `MeasureTheory.NullMeasurableSet` as `@MeasurableSet (NullMeasurableSpace α μ) _` so
+We define `MeasureTheory.NullMeasurableSet` as `@MeasurableSet (NullSigmaAlgebra α μ) _` so
 that theorems about `MeasurableSet`s like `MeasurableSet.union` can be applied to
 `NullMeasurableSet`s. However, these lemmas output terms of the same form
-`@MeasurableSet (NullMeasurableSpace α μ) _ _`. While this is definitionally equal to the
+`@MeasurableSet (NullSigmaAlgebra α μ) _ _`. While this is definitionally equal to the
 expected output `NullMeasurableSet s μ`, it looks different and may be misleading. So we copy all
 standard lemmas about measurable sets to the `MeasureTheory.NullMeasurableSet` namespace and fix
 the output type.
@@ -67,30 +67,30 @@ namespace MeasureTheory
 
 /-- A type tag for `α` with `MeasurableSet` given by `NullMeasurableSet`. -/
 @[nolint unusedArguments]
-def NullMeasurableSpace (α : Type*) [MeasurableSpace α]
+def NullSigmaAlgebra (α : Type*) [SigmaAlgebra α]
     (_μ : Measure α := by volume_tac) : Type _ :=
   α
 
 section
 
-variable {m0 : MeasurableSpace α} {μ : Measure α} {s t : Set α}
+variable {m0 : SigmaAlgebra α} {μ : Measure α} {s t : Set α}
 
-instance NullMeasurableSpace.instInhabited [h : Inhabited α] :
-    Inhabited (NullMeasurableSpace α μ) :=
+instance NullSigmaAlgebra.instInhabited [h : Inhabited α] :
+    Inhabited (NullSigmaAlgebra α μ) :=
   h
 
-instance NullMeasurableSpace.instSubsingleton [h : Subsingleton α] :
-    Subsingleton (NullMeasurableSpace α μ) :=
+instance NullSigmaAlgebra.instSubsingleton [h : Subsingleton α] :
+    Subsingleton (NullSigmaAlgebra α μ) :=
   h
 
-instance NullMeasurableSpace.instMeasurableSpace : MeasurableSpace (NullMeasurableSpace α μ) :=
-  fast_instance% @eventuallyMeasurableSpace α inferInstance (ae μ) _
+instance NullSigmaAlgebra.instSigmaAlgebra : SigmaAlgebra (NullSigmaAlgebra α μ) :=
+  fast_instance% @eventuallySigmaAlgebra α inferInstance (ae μ) _
 
 /-- A set is called `NullMeasurableSet` if it can be approximated by a measurable set up to
 a set of null measure. -/
-def NullMeasurableSet [MeasurableSpace α] (s : Set α)
+def NullMeasurableSet [SigmaAlgebra α] (s : Set α)
     (μ : Measure α := by volume_tac) : Prop :=
-  @MeasurableSet (NullMeasurableSpace α μ) _ s
+  @MeasurableSet (NullSigmaAlgebra α μ) _ s
 
 @[simp, aesop unsafe (rule_sets := [Measurable])]
 theorem _root_.MeasurableSet.nullMeasurableSet (h : MeasurableSet s) : NullMeasurableSet s μ :=
@@ -189,17 +189,18 @@ protected theorem const (p : Prop) : NullMeasurableSet { _a : α | p } μ :=
   MeasurableSet.const p
 
 instance instMeasurableSingletonClass [MeasurableSingletonClass α] :
-    MeasurableSingletonClass (NullMeasurableSpace α μ) :=
+    MeasurableSingletonClass (NullSigmaAlgebra α μ) :=
   eventuallyMeasurableSingleton (m := m0)
 
-protected theorem insert [MeasurableSingletonClass (NullMeasurableSpace α μ)]
+protected theorem insert [MeasurableSingletonClass (NullSigmaAlgebra α μ)]
     (hs : NullMeasurableSet s μ) (a : α) : NullMeasurableSet (insert a s) μ :=
   MeasurableSet.insert hs a
 
 theorem exists_measurable_superset_ae_eq (h : NullMeasurableSet s μ) :
     ∃ t ⊇ s, MeasurableSet t ∧ t =ᵐ[μ] s := by
   rcases h with ⟨t, htm, hst⟩
-  refine ⟨t ∪ toMeasurable μ (s \ t), ?_, htm.union (measurableSet_toMeasurable _ _), ?_⟩
+  refine ⟨t ∪ toMeasurable μ (s \ t), ?_,
+    (inferInstance : SigmaAlgebra α).union_mem htm (measurableSet_toMeasurable _ _), ?_⟩
   · exact sdiff_subset_iff.1 (subset_toMeasurable _ _)
   · have : toMeasurable μ (s \ t) =ᵐ[μ] ∅ := by simp [ae_le_set.1 hst.le]
     simpa only [union_empty] using hst.symm.union this
@@ -238,7 +239,7 @@ theorem exists_subordinate_pairwise_disjoint [Countable ι] {s : ι → Set α}
       hud.mono fun i j h =>
         h.mono (sdiff_subset_sdiff_left (ht_sub i)) (sdiff_subset_sdiff_left (ht_sub j))⟩
 
-theorem measure_iUnion {m0 : MeasurableSpace α} {μ : Measure α} [Countable ι] {f : ι → Set α}
+theorem measure_iUnion {m0 : SigmaAlgebra α} {μ : Measure α} [Countable ι] {f : ι → Set α}
     (hn : Pairwise (Disjoint on f)) (h : ∀ i, MeasurableSet (f i)) :
     μ (⋃ i, f i) = ∑' i, μ (f i) := by
   rw [measure_eq_extend (MeasurableSet.iUnion h),
@@ -310,7 +311,7 @@ lemma measure_of_measure_compl_eq_zero (hs : μ sᶜ = 0) : μ s = μ Set.univ :
 
 section MeasurableSingletonClass
 
-variable [MeasurableSingletonClass (NullMeasurableSpace α μ)]
+variable [MeasurableSingletonClass (NullSigmaAlgebra α μ)]
 
 theorem nullMeasurableSet_singleton (x : α) : NullMeasurableSet {x} μ :=
   @measurableSet_singleton _ _ _ _
@@ -358,7 +359,7 @@ theorem _root_.Set.Finite.nullMeasurableSet_sInter {s : Set (Set α)} (hs : s.Fi
 theorem nullMeasurableSet_toMeasurable : NullMeasurableSet (toMeasurable μ s) μ :=
   (measurableSet_toMeasurable _ _).nullMeasurableSet
 
-variable [MeasurableSingletonClass α] {mβ : MeasurableSpace β} [MeasurableSingletonClass β]
+variable [MeasurableSingletonClass α] {mβ : SigmaAlgebra β} [MeasurableSingletonClass β]
 
 lemma measure_preimage_fst_singleton_eq_tsum [Countable β] (μ : Measure (α × β)) (x : α) :
     μ (Prod.fst ⁻¹' {x}) = ∑' y, μ {(x, y)} := by
@@ -382,7 +383,7 @@ end
 
 section NullMeasurable
 
-variable [m : MeasurableSpace α] [MeasurableSpace β] [MeasurableSpace γ] {f : α → β} {μ : Measure α}
+variable [m : SigmaAlgebra α] [SigmaAlgebra β] [SigmaAlgebra γ] {f : α → β} {μ : Measure α}
 
 /-- A function `f : α → β` is null measurable if the preimage of a measurable set is a null
 measurable set.
@@ -399,7 +400,7 @@ protected theorem _root_.Measurable.nullMeasurable (h : Measurable f) : NullMeas
   h.eventuallyMeasurable
 
 protected theorem NullMeasurable.measurable' (h : NullMeasurable f μ) :
-    @Measurable (NullMeasurableSpace α μ) β _ _ f :=
+    @Measurable (NullSigmaAlgebra α μ) β _ _ f :=
   h
 
 theorem Measurable.comp_nullMeasurable {g : β → γ} (hg : Measurable g) (hf : NullMeasurable f μ) :
@@ -416,7 +417,7 @@ end NullMeasurable
 
 section AEMeasurable
 
-variable {m : MeasurableSpace α} [MeasurableSpace β] {μ : Measure α} {f : α → β}
+variable {m : SigmaAlgebra α} [SigmaAlgebra β] {μ : Measure α} {f : α → β}
 
 protected theorem _root_.AEMeasurable.nullMeasurable (h : AEMeasurable f μ) :
     NullMeasurable f μ :=
@@ -434,10 +435,10 @@ section IsComplete
   A null set is a subset of a measurable set with measure `0`.
   Since every measure is defined as a special case of an outer measure, we can more simply state
   that a set `s` is null if `μ s = 0`. -/
-class Measure.IsComplete {_ : MeasurableSpace α} (μ : Measure α) : Prop where
+class Measure.IsComplete {_ : SigmaAlgebra α} (μ : Measure α) : Prop where
   out' : ∀ s, μ s = 0 → MeasurableSet s
 
-variable {m0 : MeasurableSpace α} {μ : Measure α} {s : Set α}
+variable {m0 : SigmaAlgebra α} {μ : Measure α} {s : Set α}
 
 theorem Measure.isComplete_iff : μ.IsComplete ↔ ∀ s, μ s = 0 → MeasurableSet s :=
   ⟨fun h => h.1, fun h => ⟨h⟩⟩
@@ -455,37 +456,38 @@ theorem NullMeasurableSet.measurable_of_complete (hs : NullMeasurableSet s μ) [
       (measurableSet_of_null (ae_le_set.1 <|
         EventuallyEq.le (NullMeasurableSet.toMeasurable_ae_eq hs)))
 
-theorem NullMeasurable.measurable_of_complete [μ.IsComplete] {_m1 : MeasurableSpace β} {f : α → β}
+theorem NullMeasurable.measurable_of_complete [μ.IsComplete] {_m1 : SigmaAlgebra β} {f : α → β}
     (hf : NullMeasurable f μ) : Measurable f := fun _s hs => (hf hs).measurable_of_complete
 
-theorem _root_.Measurable.congr_ae {α β} [MeasurableSpace α] [MeasurableSpace β] {μ : Measure α}
+theorem _root_.Measurable.congr_ae {α β} [SigmaAlgebra α] [SigmaAlgebra β] {μ : Measure α}
     [_hμ : μ.IsComplete] {f g : α → β} (hf : Measurable f) (hfg : f =ᵐ[μ] g) : Measurable g :=
   NullMeasurable.measurable_of_complete (NullMeasurable.congr hf.nullMeasurable hfg)
 
 namespace Measure
 
 /-- Given a measure we can complete it to a (complete) measure on all null measurable sets. -/
-def completion {_ : MeasurableSpace α} (μ : Measure α) :
-    MeasureTheory.Measure (NullMeasurableSpace α μ) where
+def completion {_ : SigmaAlgebra α} (μ : Measure α) :
+    MeasureTheory.Measure (NullSigmaAlgebra α μ) where
   toOuterMeasure := μ.toOuterMeasure
   m_iUnion _ hs hd := measure_iUnion₀ (hd.mono fun _ _ h => h.aedisjoint) hs
   trim_le := by
     nth_rewrite 2 [← μ.trimmed]
-    exact OuterMeasure.trim_anti_measurableSpace _ fun _ ↦ MeasurableSet.nullMeasurableSet
+    exact OuterMeasure.trim_anti_sigmaAlgebra _ fun ⦃s⦄ hs ↦
+      MeasurableSet.nullMeasurableSet hs
 
-instance completion.isComplete {_m : MeasurableSpace α} (μ : Measure α) : μ.completion.IsComplete :=
+instance completion.isComplete {_m : SigmaAlgebra α} (μ : Measure α) : μ.completion.IsComplete :=
   ⟨fun _z hz => NullMeasurableSet.of_null hz⟩
 
 @[simp]
-theorem coe_completion {_ : MeasurableSpace α} (μ : Measure α) : ⇑μ.completion = μ :=
+theorem coe_completion {_ : SigmaAlgebra α} (μ : Measure α) : ⇑μ.completion = μ :=
   rfl
 
-theorem completion_apply {_ : MeasurableSpace α} (μ : Measure α) (s : Set α) :
+theorem completion_apply {_ : SigmaAlgebra α} (μ : Measure α) (s : Set α) :
     μ.completion s = μ s :=
   rfl
 
 @[simp]
-theorem ae_completion {_ : MeasurableSpace α} (μ : Measure α) : ae μ.completion = ae μ := rfl
+theorem ae_completion {_ : SigmaAlgebra α} (μ : Measure α) : ae μ.completion = ae μ := rfl
 
 end Measure
 

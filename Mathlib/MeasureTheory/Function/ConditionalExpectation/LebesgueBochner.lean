@@ -32,7 +32,7 @@ variable {𝓧 : Type*}
 
 /-- The two definitions of the conditional expectation `condExp` and `condLExp` (for Bochner and
 Lebesgue integrals respectively) agree almost everywhere. -/
-lemma toReal_condLExp (m : MeasurableSpace 𝓧) {m𝓧 : MeasurableSpace 𝓧} {μ : Measure 𝓧}
+lemma toReal_condLExp (m : SigmaAlgebra 𝓧) {m𝓧 : SigmaAlgebra 𝓧} {μ : Measure 𝓧}
     {f : 𝓧 → ℝ≥0∞} (hf_meas : AEMeasurable f μ) (hf : ∫⁻ x, f x ∂μ ≠ ∞) :
     (fun x ↦ (μ⁻[f|m] x).toReal) =ᵐ[μ] μ[fun x ↦ (f x).toReal | m] := by
   by_cases hm : m ≤ m𝓧
@@ -53,7 +53,7 @@ lemma toReal_condLExp (m : MeasurableSpace 𝓧) {m𝓧 : MeasurableSpace 𝓧} 
 
 /-- The two definitions of the conditional expectation `condExp` and `condLExp` (for Bochner and
 Lebesgue integrals respectively) agree almost everywhere. -/
-lemma condLExp_ofReal (m : MeasurableSpace 𝓧) {m𝓧 : MeasurableSpace 𝓧} {μ : Measure 𝓧}
+lemma condLExp_ofReal (m : SigmaAlgebra 𝓧) {m𝓧 : SigmaAlgebra 𝓧} {μ : Measure 𝓧}
     {f : 𝓧 → ℝ} (hf : Integrable f μ) (h'f : 0 ≤ᵐ[μ] f) :
     μ⁻[fun x ↦ ENNReal.ofReal (f x) | m] =ᵐ[μ] fun x ↦ ENNReal.ofReal (μ[f | m] x) := by
   by_cases hm : m ≤ m𝓧
@@ -82,7 +82,7 @@ lemma condLExp_ofReal (m : MeasurableSpace 𝓧) {m𝓧 : MeasurableSpace 𝓧} 
 
 /-- The two definitions of the conditional expectation `condExp` and `condLExp` (for Bochner and
 Lebesgue integrals respectively) agree almost everywhere. -/
-lemma condLExp_enorm (m : MeasurableSpace 𝓧) {m𝓧 : MeasurableSpace 𝓧} {μ : Measure 𝓧}
+lemma condLExp_enorm (m : SigmaAlgebra 𝓧) {m𝓧 : SigmaAlgebra 𝓧} {μ : Measure 𝓧}
     {f : 𝓧 → ℝ} (hf : Integrable f μ) (h'f : 0 ≤ᵐ[μ] f) :
     μ⁻[fun x ↦ ‖f x‖ₑ | m] =ᵐ[μ] fun x ↦ ‖μ[f | m] x‖ₑ := by
   have A : μ⁻[fun x ↦ ENNReal.ofReal (f x) | m] =ᵐ[μ] μ⁻[fun x ↦ ‖f x‖ₑ | m] := by
@@ -92,7 +92,7 @@ lemma condLExp_enorm (m : MeasurableSpace 𝓧) {m𝓧 : MeasurableSpace 𝓧} {
   filter_upwards [condExp_nonneg h'f (m := m)] with x hx using by simp [Real.enorm_eq_ofReal hx]
 
 lemma lintegral_enorm_condExp_indicator
-    {m : MeasurableSpace 𝓧} {m𝓧 : MeasurableSpace 𝓧} (hm : m ≤ m𝓧) {μ : Measure 𝓧}
+    {m : SigmaAlgebra 𝓧} {m𝓧 : SigmaAlgebra 𝓧} (hm : m ≤ m𝓧) {μ : Measure 𝓧}
     [SigmaFinite (μ.trim hm)] {s : Set 𝓧} (hs : MeasurableSet s) (h's : μ s ≠ ∞ := by finiteness) :
     ∫⁻ a, ‖μ[s.indicator (1 : 𝓧 → ℝ) | m] a‖ₑ ∂μ = μ s := calc
   _ = ∫⁻ a, μ⁻[fun x ↦ ‖s.indicator (1 : 𝓧 → ℝ) x‖ₑ | m] a ∂μ := by

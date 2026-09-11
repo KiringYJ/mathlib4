@@ -451,7 +451,7 @@ def regionBetween (f g : α → ℝ) (s : Set α) : Set (α × ℝ) :=
 theorem regionBetween_subset (f g : α → ℝ) (s : Set α) : regionBetween f g s ⊆ s ×ˢ univ := by
   simpa only [prod_univ, regionBetween, Set.preimage, ofPred_subset_ofPred] using fun a => And.left
 
-variable [MeasurableSpace α] {μ : Measure α} {f g : α → ℝ} {s : Set α}
+variable [SigmaAlgebra α] {μ : Measure α} {f g : α → ℝ} {s : Set α}
 
 /-- The region between two measurable functions on a measurable set is measurable. -/
 theorem measurableSet_regionBetween (hf : Measurable f) (hg : Measurable g) (hs : MeasurableSet s) :

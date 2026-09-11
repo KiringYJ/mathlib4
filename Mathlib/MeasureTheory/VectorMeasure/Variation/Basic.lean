@@ -14,7 +14,7 @@ public import Mathlib.MeasureTheory.VectorMeasure.Variation.Defs
 # Properties of variation
 
 We prove basic properties of `variation` for `μ : VectorMeasure X V` in `ENormedAddCommMonoid V` on
-`MeasurableSpace X`. It is defined as the supremum over partitions `{Eᵢ}` of `E`, of the quantity
+`SigmaAlgebra X`. It is defined as the supremum over partitions `{Eᵢ}` of `E`, of the quantity
 `∑ᵢ, ‖μ(Eᵢ)‖`. This definition allows one to define the integral against
 such vector-valued measures.
 
@@ -39,7 +39,7 @@ open scoped ENNReal NNReal
 
 namespace MeasureTheory.VectorMeasure
 
-variable {X V : Type*} {mX : MeasurableSpace X}
+variable {X V : Type*} {mX : SigmaAlgebra X}
 
 /-- The sum of a vector measure `μ` on a `Finpartition` of `Subtype MeasurableSet` equals `μ s`. -/
 lemma sum_finpartition [AddCommMonoid V] [TopologicalSpace V] [T2Space V]
@@ -247,7 +247,7 @@ lemma variation_restrict_le : (μ.restrict s).variation ≤ μ.variation.restric
 instance [IsFiniteMeasure μ.variation] : IsFiniteMeasure (μ.restrict s).variation :=
   isFiniteMeasure_of_le _ variation_restrict_le
 
-variable {Y : Type*} [MeasurableSpace Y] {φ : X → Y}
+variable {Y : Type*} [SigmaAlgebra Y] {φ : X → Y}
 
 lemma variation_map_le : (μ.map φ).variation ≤ μ.variation.map φ := by
   by_cases hφ : Measurable φ; swap

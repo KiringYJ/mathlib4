@@ -24,7 +24,7 @@ open scoped NNReal ENNReal
 
 namespace MeasureTheory.Measure
 
-variable {α ι R R' : Type*} {mα : MeasurableSpace α}
+variable {α ι R R' : Type*} {mα : SigmaAlgebra α}
   {μ ν : Measure α} {s t : Set α} {c : ℝ≥0∞}
 
 instance : Zero (Measure α) :=

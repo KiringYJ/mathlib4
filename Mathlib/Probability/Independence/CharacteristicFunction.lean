@@ -24,15 +24,15 @@ namespace ProbabilityTheory
 open MeasureTheory WithLp Finset
 open scoped ENNReal
 
-variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω}
+variable {Ω : Type*} {mΩ : SigmaAlgebra Ω} {P : Measure Ω}
   (p : ℝ≥0∞) [Fact (1 ≤ p)]
 
 section IndepFun
 
 variable [IsFiniteMeasure P] {E F : Type*}
-  {mE : MeasurableSpace E} [NormedAddCommGroup E]
+  {mE : SigmaAlgebra E} [NormedAddCommGroup E]
   [BorelSpace E] [SecondCountableTopology E]
-  {mF : MeasurableSpace F} [NormedAddCommGroup F] [CompleteSpace F]
+  {mF : SigmaAlgebra F} [NormedAddCommGroup F] [CompleteSpace F]
   [BorelSpace F] [SecondCountableTopology F]
   {X : Ω → E} {Y : Ω → F}
 
@@ -128,7 +128,7 @@ variable {ι : Type*} {s : Finset ι}
 
 section Sum
 
-variable {E : Type*} [MeasurableSpace E] [NormedAddCommGroup E]
+variable {E : Type*} [SigmaAlgebra E] [NormedAddCommGroup E]
     [BorelSpace E] [SecondCountableTopology E] {X : ι → Ω → E}
 
 lemma iIndepFun.charFunDual_map_finsetSum_eq_prod [NormedSpace ℝ E]
@@ -225,7 +225,7 @@ lemma charFun_map_sum_pi_eq_prod [Fintype ι] [InnerProductSpace ℝ E]
 end Sum
 
 variable [Fintype ι] [IsProbabilityMeasure P] {E : ι → Type*}
-  {mE : ∀ i, MeasurableSpace (E i)} [∀ i, NormedAddCommGroup (E i)] [∀ i, CompleteSpace (E i)]
+  {mE : ∀ i, SigmaAlgebra (E i)} [∀ i, NormedAddCommGroup (E i)] [∀ i, CompleteSpace (E i)]
   [∀ i, BorelSpace (E i)] [∀ i, SecondCountableTopology (E i)] {X : (i : ι) → Ω → E i}
 
 section InnerProductSpace

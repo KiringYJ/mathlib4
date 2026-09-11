@@ -35,13 +35,13 @@ open MeasureTheory Finset
 
 namespace ProbabilityTheory.IsGaussianProcess
 
-variable {S T Ω E F : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} {X Y : T → Ω → E}
+variable {S T Ω E F : Type*} {mΩ : SigmaAlgebra Ω} {P : Measure Ω} {X Y : T → Ω → E}
 
 section Basic
 
 /-! ### Basic facts -/
 
-variable [MeasurableSpace E] [TopologicalSpace E] [AddCommMonoid E] [Module ℝ E]
+variable [SigmaAlgebra E] [TopologicalSpace E] [AddCommMonoid E] [Module ℝ E]
 
 lemma isProbabilityMeasure (hX : IsGaussianProcess X P) :
     IsProbabilityMeasure P :=
@@ -59,7 +59,7 @@ lemma congr (hX : IsGaussianProcess X P) (hXY : ∀ t, X t =ᵐ[P] Y t) :
 
 end Basic
 
-variable [NormedAddCommGroup E] [MeasurableSpace E] [BorelSpace E]
+variable [NormedAddCommGroup E] [SigmaAlgebra E] [BorelSpace E]
 
 section Maps
 
@@ -117,7 +117,7 @@ section Transformations
 /-! ### Operations that preserve Gaussianity -/
 
 variable [NormedSpace ℝ E] [SecondCountableTopology E]
-  {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F] [MeasurableSpace F]
+  {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F] [SigmaAlgebra F]
   [BorelSpace F] [SecondCountableTopology F] {Y : S → Ω → F}
 
 /-- If a stochastic process `Y` is such that for each `s`, `Y s` can be written as a linear

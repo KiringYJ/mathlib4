@@ -28,7 +28,7 @@ public section
 
 namespace MeasureTheory
 
-variable {M F : Type*} [Monoid M] {mM : MeasurableSpace M} [MeasurableMul₂ M]
+variable {M F : Type*} [Monoid M] {mM : SigmaAlgebra M} [MeasurableMul₂ M]
   [NormedAddCommGroup F] {μ ν : Measure M} {f : M → F}
 
 @[to_additive]

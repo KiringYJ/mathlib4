@@ -41,7 +41,7 @@ that two measures are equal.
 A `MeasureSpace` is a class that is a measurable space with a canonical measure.
 The measure is denoted `volume`.
 
-This file does not import `MeasureTheory.MeasurableSpace.Basic`, but only `MeasurableSpace.Defs`.
+This file does not import `MeasureTheory.SigmaAlgebra.Basic`, but only `SigmaAlgebra.Defs`.
 
 ## References
 
@@ -59,7 +59,7 @@ assert_not_exists Module.Basis
 
 noncomputable section
 
-open Set Function MeasurableSpace Filter ENNReal
+open Set Function SigmaAlgebra Filter ENNReal
 
 open Filter hiding map
 
@@ -74,7 +74,7 @@ extension of the restricted measure.
 The measure of a set `s`, denoted `μ s`, is an extended nonnegative real. The real-valued version
 is written `μ.real s`.
 -/
-structure Measure (α : Type*) [MeasurableSpace α] extends OuterMeasure α where
+structure Measure (α : Type*) [SigmaAlgebra α] extends OuterMeasure α where
   m_iUnion ⦃f : ℕ → Set α⦄ : (∀ i, MeasurableSet (f i)) → Pairwise (Disjoint on f) →
     toOuterMeasure (⋃ i, f i) = ∑' i, toOuterMeasure (f i)
   trim_le : toOuterMeasure.trim ≤ toOuterMeasure
@@ -82,34 +82,34 @@ structure Measure (α : Type*) [MeasurableSpace α] extends OuterMeasure α wher
 /-- Notation for `Measure` with respect to a non-standard σ-algebra in the domain. -/
 scoped notation "Measure[" mα "] " α:arg => @Measure α mα
 
-theorem Measure.toOuterMeasure_injective [MeasurableSpace α] :
+theorem Measure.toOuterMeasure_injective [SigmaAlgebra α] :
     Injective (toOuterMeasure : Measure α → OuterMeasure α)
   | ⟨_, _, _⟩, ⟨_, _, _⟩, rfl => rfl
 
 @[macro_inline]
-instance Measure.instFunLike [MeasurableSpace α] : FunLike (Measure α) (Set α) ℝ≥0∞ where
+instance Measure.instFunLike [SigmaAlgebra α] : FunLike (Measure α) (Set α) ℝ≥0∞ where
   coe μ := μ.toOuterMeasure
   coe_injective | ⟨_, _, _⟩, ⟨_, _, _⟩, h => toOuterMeasure_injective <| DFunLike.coe_injective h
 
 
-instance Measure.instOuterMeasureClass [MeasurableSpace α] : OuterMeasureClass (Measure α) α where
+instance Measure.instOuterMeasureClass [SigmaAlgebra α] : OuterMeasureClass (Measure α) α where
   measure_empty m := measure_empty (μ := m.toOuterMeasure)
   measure_iUnion_nat_le m := m.iUnion_nat
   measure_mono m := m.mono
 
 /-- The real-valued version of a measure. Maps infinite measure sets to zero. Use as `μ.real s`.
 The API is developed in `Mathlib/MeasureTheory/Measure/Real.lean`. -/
-protected def Measure.real {α : Type*} {m : MeasurableSpace α} (μ : Measure α) (s : Set α) : ℝ :=
+protected def Measure.real {α : Type*} {m : SigmaAlgebra α} (μ : Measure α) (s : Set α) : ℝ :=
   (μ s).toReal
 
-theorem measureReal_def {α : Type*} {m : MeasurableSpace α} (μ : Measure α) (s : Set α) :
+theorem measureReal_def {α : Type*} {m : SigmaAlgebra α} (μ : Measure α) (s : Set α) :
     μ.real s = (μ s).toReal := rfl
 
 alias Measure.real_def := measureReal_def
 
 section
 
-variable [MeasurableSpace α] {μ μ₁ μ₂ : Measure α} {s s₁ s₂ t : Set α}
+variable [SigmaAlgebra α] {μ μ₁ μ₂ : Measure α} {s s₁ s₂ t : Set α}
 
 namespace Measure
 
@@ -299,19 +299,19 @@ predicate holds for almost every `x : β` and
 Moreover, if for almost every `x : β`, the predicate is closed under complements and countable
 disjoint unions, then the predicate holds for almost every `x : β` and all measurable sets of `α`.
 
-This is an AE version of `MeasurableSpace.induction_on_inter` where the condition is dependent
+This is an AE version of `SigmaAlgebra.induction_on_inter` where the condition is dependent
 on a measurable space `β`. -/
-theorem _root_.MeasurableSpace.ae_induction_on_inter
-    {α β : Type*} [MeasurableSpace β] {μ : Measure β}
-    {C : β → Set α → Prop} {s : Set (Set α)} [m : MeasurableSpace α]
-    (h_eq : m = MeasurableSpace.generateFrom s)
+theorem _root_.SigmaAlgebra.ae_induction_on_inter
+    {α β : Type*} [SigmaAlgebra β] {μ : Measure β}
+    {C : β → Set α → Prop} {s : Set (Set α)} [m : SigmaAlgebra α]
+    (h_eq : m = SigmaAlgebra.generateFrom s)
     (h_inter : IsPiSystem s) (h_empty : ∀ᵐ x ∂μ, C x ∅) (h_basic : ∀ᵐ x ∂μ, ∀ t ∈ s, C x t)
-    (h_compl : ∀ᵐ x ∂μ, ∀ t, MeasurableSet t → C x t → C x tᶜ)
+    (h_compl : ∀ᵐ x ∂μ, ∀ t, t ∈ m → C x t → C x tᶜ)
     (h_union : ∀ᵐ x ∂μ, ∀ f : ℕ → Set α,
-        Pairwise (Disjoint on f) → (∀ i, MeasurableSet (f i)) → (∀ i, C x (f i)) → C x (⋃ i, f i)) :
-    ∀ᵐ x ∂μ, ∀ ⦃t⦄, MeasurableSet t → C x t := by
+        Pairwise (Disjoint on f) → (∀ i, f i ∈ m) → (∀ i, C x (f i)) → C x (⋃ i, f i)) :
+    ∀ᵐ x ∂μ, ∀ ⦃t⦄, t ∈ m → C x t := by
   filter_upwards [h_empty, h_basic, h_compl, h_union] with x hx_empty hx_basic hx_compl hx_union
-    using MeasurableSpace.induction_on_inter (C := fun t _ ↦ C x t)
+    using SigmaAlgebra.induction_on_inter (C := fun t _ ↦ C x t)
       h_eq h_inter hx_empty hx_basic hx_compl hx_union
 
 end ae
@@ -353,7 +353,7 @@ theorem measure_toMeasurable (s : Set α) : μ (toMeasurable μ s) = μ s := by
 
 /-- A measure space is a measurable space equipped with a
   measure, referred to as `volume`. -/
-class MeasureSpace (α : Type*) extends MeasurableSpace α where
+class MeasureSpace (α : Type*) extends SigmaAlgebra α where
   volume : Measure α
 
 export MeasureSpace (volume)
@@ -399,7 +399,7 @@ function. We define this property, called `AEMeasurable f μ`. It's properties a
 -/
 
 
-variable {m : MeasurableSpace α} [MeasurableSpace β] {f g : α → β} {μ : Measure α}
+variable {m : SigmaAlgebra α} [SigmaAlgebra β] {f g : α → β} {μ : Measure α}
 
 /-- A function is almost everywhere measurable if it coincides almost everywhere with a measurable
 function.
@@ -407,7 +407,7 @@ function.
 A similar notion is `MeasureTheory.NullMeasurable`. That notion is equivalent to `AEMeasurable` if
 the σ-algebra on the codomain is countably generated, but weaker in general. -/
 @[fun_prop]
-def AEMeasurable {_m : MeasurableSpace α} (f : α → β) (μ : Measure α := by volume_tac) : Prop :=
+def AEMeasurable {_m : SigmaAlgebra α} (f : α → β) (μ : Measure α := by volume_tac) : Prop :=
   ∃ g : α → β, Measurable g ∧ f =ᵐ[μ] g
 
 /-- A function is `m`-`AEMeasurable` with respect to a measure `μ` if it coincides almost everywhere
@@ -426,7 +426,7 @@ theorem Measurable.aemeasurable (h : Measurable f) : AEMeasurable f μ :=
 namespace AEMeasurable
 
 @[fun_prop]
-lemma of_discrete [DiscreteMeasurableSpace α] : AEMeasurable f μ :=
+lemma of_discrete [DiscreteSigmaAlgebra α] : AEMeasurable f μ :=
   Measurable.of_discrete.aemeasurable
 
 /-- Given an almost everywhere measurable function `f`, associate to it a measurable function
@@ -462,16 +462,16 @@ theorem aemeasurable_id : AEMeasurable id μ :=
 theorem aemeasurable_id' : AEMeasurable (fun x => x) μ :=
   measurable_id.aemeasurable
 
-theorem Measurable.comp_aemeasurable [MeasurableSpace δ] {f : α → δ} {g : δ → β} (hg : Measurable g)
+theorem Measurable.comp_aemeasurable [SigmaAlgebra δ] {f : α → δ} {g : δ → β} (hg : Measurable g)
     (hf : AEMeasurable f μ) : AEMeasurable (g ∘ f) μ :=
   ⟨g ∘ hf.mk f, hg.comp hf.measurable_mk, EventuallyEq.fun_comp hf.ae_eq_mk _⟩
 
 @[fun_prop]
-theorem Measurable.comp_aemeasurable' [MeasurableSpace δ] {f : α → δ} {g : δ → β}
+theorem Measurable.comp_aemeasurable' [SigmaAlgebra δ] {f : α → δ} {g : δ → β}
     (hg : Measurable g) (hf : AEMeasurable f μ) : AEMeasurable (fun x ↦ g (f x)) μ :=
   Measurable.comp_aemeasurable hg hf
 
-variable {δ : Type*} {X : δ → Type*} {mX : ∀ a, MeasurableSpace (X a)}
+variable {δ : Type*} {X : δ → Type*} {mX : ∀ a, SigmaAlgebra (X a)}
 
 protected theorem AEMeasurable.eval {g : α → Π a, X a} (hg : AEMeasurable g μ) (a : δ) :
     AEMeasurable (fun x ↦ g x a) μ := by

@@ -51,7 +51,7 @@ noncomputable section
 
 open scoped MeasureTheory NNReal ENNReal
 
-variable {α β : Type*} {m : MeasurableSpace α}
+variable {α β : Type*} {m : SigmaAlgebra α}
 
 namespace MeasureTheory
 
@@ -499,7 +499,7 @@ end Ratio
 
 section MeasurableEmbedding
 
-variable {mβ : MeasurableSpace β} {f : α → β}
+variable {mβ : SigmaAlgebra β} {f : α → β}
 
 lemma _root_.MeasurableEmbedding.rnDeriv_map_aux (hf : MeasurableEmbedding f)
     (hμν : μ ≪ ν) [SigmaFinite μ] [SigmaFinite ν] :
@@ -561,7 +561,7 @@ section IntegralRNDerivMul
 
 open Measure
 
-variable {α : Type*} {m : MeasurableSpace α} {μ ν : Measure α}
+variable {α : Type*} {m : SigmaAlgebra α} {μ ν : Measure α}
 
 theorem lintegral_rnDeriv_mul [HaveLebesgueDecomposition μ ν] (hμν : μ ≪ ν) {f : α → ℝ≥0∞}
     (hf : AEMeasurable f ν) : ∫⁻ x, μ.rnDeriv ν x * f x ∂ν = ∫⁻ x, f x ∂μ := by
@@ -631,7 +631,7 @@ section Conv
 
 open Measure
 
-variable {G : Type*} [Group G] {mG : MeasurableSpace G} [MeasurableMul₂ G] [MeasurableInv G]
+variable {G : Type*} [Group G] {mG : SigmaAlgebra G} [MeasurableMul₂ G] [MeasurableInv G]
   {μ : Measure G} [IsMulLeftInvariant μ]
 
 @[to_additive]

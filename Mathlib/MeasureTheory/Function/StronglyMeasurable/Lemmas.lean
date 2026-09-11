@@ -27,7 +27,7 @@ public section
 
 open MeasureTheory Filter Set ENNReal NNReal
 
-variable {α β γ : Type*} {m : MeasurableSpace α} {μ : Measure α} [TopologicalSpace β]
+variable {α β γ : Type*} {m : SigmaAlgebra α} {μ : Measure α} [TopologicalSpace β]
   [TopologicalSpace γ] {f g : α → β}
 
 @[fun_prop]
@@ -36,13 +36,13 @@ lemma aestronglyMeasurable_dirac [MeasurableSingletonClass α] {a : α} {f : α 
   ⟨fun _ ↦ f a, stronglyMeasurable_const, ae_eq_dirac f⟩
 
 theorem MeasureTheory.AEStronglyMeasurable.comp_measurePreserving
-    {γ : Type*} {_ : MeasurableSpace γ} {_ : MeasurableSpace α} {f : γ → α} {μ : Measure γ}
+    {γ : Type*} {_ : SigmaAlgebra γ} {_ : SigmaAlgebra α} {f : γ → α} {μ : Measure γ}
     {ν : Measure α} (hg : AEStronglyMeasurable g ν) (hf : MeasurePreserving f μ ν) :
     AEStronglyMeasurable (g ∘ f) μ :=
   hg.comp_quasiMeasurePreserving hf.quasiMeasurePreserving
 
 theorem MeasureTheory.MeasurePreserving.aestronglyMeasurable_comp_iff {β : Type*}
-    {f : α → β} {mα : MeasurableSpace α} {μa : Measure α} {mβ : MeasurableSpace β} {μb : Measure β}
+    {f : α → β} {mα : SigmaAlgebra α} {μa : Measure α} {mβ : SigmaAlgebra β} {μb : Measure β}
     (hf : MeasurePreserving f μa μb) (h₂ : MeasurableEmbedding f) {g : β → γ} :
     AEStronglyMeasurable (g ∘ f) μa ↔ AEStronglyMeasurable g μb := by
   rw [← hf.map_eq, h₂.aestronglyMeasurable_map_iff]
@@ -66,7 +66,7 @@ variable {F : Type*} [NormedAddCommGroup F] [NormedSpace 𝕜 F]
 variable {G : Type*} [NormedAddCommGroup G] [NormedSpace 𝕜 G]
 
 theorem StronglyMeasurable.apply_continuousLinearMap
-    {_m : MeasurableSpace α} {φ : α → F →L[𝕜] E} (hφ : StronglyMeasurable φ) (v : F) :
+    {_m : SigmaAlgebra α} {φ : α → F →L[𝕜] E} (hφ : StronglyMeasurable φ) (v : F) :
     StronglyMeasurable fun a => φ a v :=
   (ContinuousLinearMap.apply 𝕜 E v).continuous.comp_stronglyMeasurable hφ
 
@@ -89,7 +89,8 @@ theorem aestronglyMeasurable_withDensity_iff {E : Type*} [NormedAddCommGroup E]
       AEStronglyMeasurable (fun x => (f x : ℝ) • g x) μ := by
   constructor
   · rintro ⟨g', g'meas, hg'⟩
-    have A : MeasurableSet { x : α | f x ≠ 0 } := (hf (measurableSet_singleton 0)).compl
+    have A : MeasurableSet { x : α | f x ≠ 0 } :=
+      MeasurableSet.compl (hf (measurableSet_singleton 0))
     refine ⟨fun x => (f x : ℝ) • g' x, hf.coe_nnreal_real.stronglyMeasurable.smul g'meas, ?_⟩
     apply @ae_of_ae_restrict_of_ae_restrict_compl _ _ _ { x | f x ≠ 0 }
     · rw [EventuallyEq, ae_withDensity_iff hf.coe_nnreal_ennreal] at hg'

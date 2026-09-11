@@ -56,7 +56,7 @@ namespace MeasureTheory
 /-- A measurable set `s` is a *fundamental domain* for an additive action of an additive group `G`
 on a measurable space `α` with respect to a measure `μ` if the sets `g +ᵥ s`, `g : G`, are pairwise
 a.e. disjoint and cover the whole space. -/
-structure IsAddFundamentalDomain (G : Type*) {α : Type*} [Zero G] [VAdd G α] [MeasurableSpace α]
+structure IsAddFundamentalDomain (G : Type*) {α : Type*} [Zero G] [VAdd G α] [SigmaAlgebra α]
     (s : Set α) (μ : Measure α := by volume_tac) : Prop where
   protected nullMeasurableSet : NullMeasurableSet s μ
   protected ae_covers : ∀ᵐ x ∂μ, ∃ g : G, g +ᵥ x ∈ s
@@ -66,7 +66,7 @@ structure IsAddFundamentalDomain (G : Type*) {α : Type*} [Zero G] [VAdd G α] [
 space `α` with respect to a measure `μ` if the sets `g • s`, `g : G`, are pairwise a.e. disjoint and
 cover the whole space. -/
 @[to_additive IsAddFundamentalDomain]
-structure IsFundamentalDomain (G : Type*) {α : Type*} [One G] [SMul G α] [MeasurableSpace α]
+structure IsFundamentalDomain (G : Type*) {α : Type*} [One G] [SMul G α] [SigmaAlgebra α]
     (s : Set α) (μ : Measure α := by volume_tac) : Prop where
   protected nullMeasurableSet : NullMeasurableSet s μ
   protected ae_covers : ∀ᵐ x ∂μ, ∃ g : G, g • x ∈ s
@@ -76,7 +76,7 @@ variable {G H α β E : Type*}
 
 namespace IsFundamentalDomain
 
-variable [Group G] [Group H] [MulAction G α] [MeasurableSpace α] [MulAction H β] [MeasurableSpace β]
+variable [Group G] [Group H] [MulAction G α] [SigmaAlgebra α] [MulAction H β] [SigmaAlgebra β]
   [NormedAddCommGroup E] {s t : Set α} {μ : Measure α}
 
 /-- If for each `x : α`, exactly one of `g • x`, `g : G`, belongs to a measurable set `s`, then `s`
@@ -470,7 +470,7 @@ end IsFundamentalDomain
 
 /-! ### Interior/frontier of a fundamental domain -/
 
-section MeasurableSpace
+section SigmaAlgebra
 
 variable (G) [Group G] [MulAction G α] (s : Set α) {x : α}
 
@@ -552,7 +552,7 @@ theorem pairwise_disjoint_fundamentalInterior :
   · rwa [Ne, inv_mul_eq_iff_eq_mul, mul_one, eq_comm]
   · simpa [mul_smul, ← hxy, mem_inv_smul_set_iff] using hy.1
 
-variable [Countable G] [MeasurableSpace α] [MeasurableConstSMul G α]
+variable [Countable G] [SigmaAlgebra α] [MeasurableConstSMul G α]
   {μ : Measure α} [SMulInvariantMeasure G α μ]
 
 @[to_additive MeasureTheory.NullMeasurableSet.addFundamentalFrontier]
@@ -565,11 +565,11 @@ protected theorem NullMeasurableSet.fundamentalInterior (hs : NullMeasurableSet 
     NullMeasurableSet (fundamentalInterior G s) μ :=
   hs.diff <| .iUnion fun _ => .iUnion fun _ => hs.smul _
 
-end MeasurableSpace
+end SigmaAlgebra
 
 namespace IsFundamentalDomain
 
-variable [Countable G] [Group G] [MulAction G α] [MeasurableSpace α] {μ : Measure α} {s : Set α}
+variable [Countable G] [Group G] [MulAction G α] [SigmaAlgebra α] {μ : Measure α} {s : Set α}
   (hs : IsFundamentalDomain G s μ)
 include hs
 
@@ -610,7 +610,7 @@ end IsFundamentalDomain
 
 section FundamentalDomainMeasure
 
-variable (G) [Group G] [MulAction G α] [MeasurableSpace α]
+variable (G) [Group G] [MulAction G α] [SigmaAlgebra α]
   (μ : Measure α)
 
 local notation "α_mod_G" => MulAction.orbitRel G α
@@ -659,13 +659,13 @@ section HasFundamentalDomain
 
 /-- We say a quotient of `α` by `G` `HasAddFundamentalDomain` if there is a measurable set
   `s` for which `IsAddFundamentalDomain G s` holds. -/
-class HasAddFundamentalDomain (G α : Type*) [Zero G] [VAdd G α] [MeasurableSpace α]
+class HasAddFundamentalDomain (G α : Type*) [Zero G] [VAdd G α] [SigmaAlgebra α]
     (ν : Measure α := by volume_tac) : Prop where
   ExistsIsAddFundamentalDomain : ∃ s : Set α, IsAddFundamentalDomain G s ν
 
 /-- We say a quotient of `α` by `G` `HasFundamentalDomain` if there is a measurable set `s` for
   which `IsFundamentalDomain G s` holds. -/
-class HasFundamentalDomain (G : Type*) (α : Type*) [One G] [SMul G α] [MeasurableSpace α]
+class HasFundamentalDomain (G : Type*) (α : Type*) [One G] [SMul G α] [SigmaAlgebra α]
     (ν : Measure α := by volume_tac) : Prop where
   ExistsIsFundamentalDomain : ∃ (s : Set α), IsFundamentalDomain G s ν
 
@@ -676,11 +676,11 @@ open scoped Classical in
 none exists. -/
 @[to_additive addCovolume /-- The `addCovolume` of an action of `G` on `α` is the volume of some
 fundamental domain, or `0` if none exists. -/]
-noncomputable def covolume (G α : Type*) [One G] [SMul G α] [MeasurableSpace α]
+noncomputable def covolume (G α : Type*) [One G] [SMul G α] [SigmaAlgebra α]
     (ν : Measure α := by volume_tac) : ℝ≥0∞ :=
   if funDom : HasFundamentalDomain G α ν then ν funDom.ExistsIsFundamentalDomain.choose else 0
 
-variable [Group G] [MulAction G α] [MeasurableSpace α]
+variable [Group G] [MulAction G α] [SigmaAlgebra α]
 
 /-- If there is a fundamental domain `s`, then `HasFundamentalDomain` holds. -/
 @[to_additive /-- If there is an additive fundamental domain `s`, then `HasAddFundamentalDomain`
@@ -719,7 +719,7 @@ section QuotientMeasureEqMeasurePreimage
 
 section additive
 
-variable [AddGroup G] [AddAction G α] [MeasurableSpace α]
+variable [AddGroup G] [AddAction G α] [SigmaAlgebra α]
 
 local notation "α_mod_G" => AddAction.orbitRel G α
 
@@ -735,7 +735,7 @@ class AddQuotientMeasureEqMeasurePreimage (ν : Measure α := by volume_tac)
 
 end additive
 
-variable [Group G] [MulAction G α] [MeasurableSpace α]
+variable [Group G] [MulAction G α] [SigmaAlgebra α]
 
 local notation "α_mod_G" => MulAction.orbitRel G α
 
@@ -895,7 +895,7 @@ local notation "π" => @Quotient.mk _ α_mod_G
 
 /-- If a measure `μ` on a quotient satisfies `QuotientMeasureEqMeasurePreimage` with respect to a
 sigma-finite measure, then it is itself `SigmaFinite`. -/
-@[to_additive MeasureTheory.instSigmaFiniteAddQuotientOrbitRelInstMeasurableSpaceToMeasurableSpace
+@[to_additive MeasureTheory.instSigmaFiniteAddQuotientOrbitRelInstSigmaAlgebraToSigmaAlgebra
 /-- If a measure `μ` on a quotient satisfies `AddQuotientMeasureEqMeasurePreimage` with respect to a
 sigma-finite measure, then it is itself `SigmaFinite`. -/]
 instance [SigmaFinite (volume : Measure α)] [HasFundamentalDomain G α]

@@ -29,7 +29,7 @@ measure.
 
 @[expose] public section
 
-variable {X : Type*} [MeasurableSpace X]
+variable {X : Type*} [SigmaAlgebra X]
 
 open NNReal ENNReal Function
 

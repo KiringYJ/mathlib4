@@ -471,7 +471,7 @@ end RCLike
 
 namespace MeasureTheory.Measure
 
-variable [NormedAddCommGroup E] [MeasurableSpace E]
+variable [NormedAddCommGroup E] [SigmaAlgebra E]
 
 open Module
 open scoped ENNReal

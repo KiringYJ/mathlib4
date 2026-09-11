@@ -20,11 +20,11 @@ open Filter MeasureTheory TopologicalSpace NNReal ENNReal MeasureTheory
 
 open scoped Topology
 
-variable {α β : Type*} [MeasurableSpace α]
+variable {α β : Type*} [SigmaAlgebra α]
 
 section Limits
 
-variable [TopologicalSpace β] [PseudoMetrizableSpace β] [MeasurableSpace β] [BorelSpace β]
+variable [TopologicalSpace β] [PseudoMetrizableSpace β] [SigmaAlgebra β] [BorelSpace β]
 
 open Metric
 
@@ -83,7 +83,7 @@ theorem aemeasurable_of_tendsto_metrizable_ae' {μ : Measure α} {f : ℕ → α
     (h_ae_tendsto : ∀ᵐ x ∂μ, Tendsto (fun n => f n x) atTop (𝓝 (g x))) : AEMeasurable g μ :=
   aemeasurable_of_tendsto_metrizable_ae atTop hf h_ae_tendsto
 
-theorem aemeasurable_of_unif_approx {β} [MeasurableSpace β] [PseudoMetricSpace β] [BorelSpace β]
+theorem aemeasurable_of_unif_approx {β} [SigmaAlgebra β] [PseudoMetricSpace β] [BorelSpace β]
     {μ : Measure α} {g : α → β}
     (hf : ∀ ε > (0 : ℝ), ∃ f : α → β, AEMeasurable f μ ∧ ∀ᵐ x ∂μ, dist (f x) (g x) ≤ ε) :
     AEMeasurable g μ := by
@@ -129,7 +129,7 @@ end Limits
 
 section TendstoIndicator
 
-variable {α : Type*} [MeasurableSpace α] {A : Set α}
+variable {α : Type*} [SigmaAlgebra α] {A : Set α}
 variable {ι : Type*} (L : Filter ι) [IsCountablyGenerated L] {As : ι → Set α}
 
 /-- If the indicator functions of measurable sets `Aᵢ` converge to the indicator function of

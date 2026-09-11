@@ -36,7 +36,7 @@ namespace Asymptotics
 
 section Basic
 
-variable [MeasurableSpace α] [NormedAddCommGroup F] {μ : Measure α}
+variable [SigmaAlgebra α] [NormedAddCommGroup F] {μ : Measure α}
 
 /-- If `f = O[l] g` on measurably generated `l`, `f` is strongly measurable at `l`,
 and `g` is integrable at `l`, then `f` is integrable at `l`. -/
@@ -58,7 +58,7 @@ theorem IsBigO.integrable (hfm : AEStronglyMeasurable f μ)
 
 end Basic
 
-variable {ι : Type*} [MeasurableSpace ι] {f : ι × α → E} {s : Set ι} {μ : Measure ι}
+variable {ι : Type*} [SigmaAlgebra ι] {f : ι × α → E} {s : Set ι} {μ : Measure ι}
 
 /-- Let `f : X x Y → Z`. If as `y` tends to `l`, `f(x, y) = O(g(y))` uniformly on `s : Set X`
 of finite measure, then f is eventually (as `y` tends to `l`) integrable along `s`. -/
@@ -95,7 +95,7 @@ theorem IsBigO.set_integral_isBigO (hf : f =O[𝓟 s ×ˢ l] (g ∘ Prod.snd)) (
 
 end Asymptotics
 
-variable [TopologicalSpace α] [SecondCountableTopology α] [MeasurableSpace α] {μ : Measure α}
+variable [TopologicalSpace α] [SecondCountableTopology α] [SigmaAlgebra α] {μ : Measure α}
   [NormedAddCommGroup F]
 
 namespace MeasureTheory

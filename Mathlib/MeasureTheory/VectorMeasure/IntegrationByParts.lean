@@ -46,7 +46,7 @@ open scoped Topology ENNReal
 namespace BoundedVariationOn
 
 variable {α E F G M : Type*} [LinearOrder α] [TopologicalSpace α] [OrderTopology α]
-  [SecondCountableTopology α] [MeasurableSpace α] [BorelSpace α]
+  [SecondCountableTopology α] [SigmaAlgebra α] [BorelSpace α]
   [NormedAddCommGroup E] [NormedAddCommGroup F] [NormedAddCommGroup G]
   [PseudoEMetricSpace M]
   {μ : Measure α} {f : α → E}
@@ -59,7 +59,7 @@ theorem _root_.MeasureTheory.VectorMeasure.ext_of_Icc
     have : s = ∅ := Subsingleton.elim _ _
     simp [this]
   apply VectorMeasure.ext_of_generateFrom _ _
-    (BorelSpace.measurable_eq.trans (borel_eq_generateFrom_Icc α)) (isPiSystem_Icc id id); swap
+    (BorelSpace.sigmaAlgebra_eq.trans (borel_eq_generateFrom_Icc α)) (isPiSystem_Icc id id); swap
   · rintro s ⟨l, u, hlu, rfl⟩
     exact hμ hlu
   obtain ⟨u, u_mono, hu⟩ : ∃ u : ℕ → α, Monotone u ∧ Tendsto u atTop atTop :=

@@ -37,7 +37,7 @@ open Set Function Filter MeasureTheory MeasureTheory.Measure
 
 open ENNReal
 
-variable {α : Type*} {m : MeasurableSpace α} {s : Set α}
+variable {α : Type*} {m : SigmaAlgebra α} {s : Set α}
 
 /-- A map `f : α → α` is said to be pre-ergodic with respect to a measure `μ` if any measurable
 strictly invariant set is either almost empty or full. -/
@@ -89,7 +89,7 @@ end PreErgodic
 
 namespace MeasureTheory.MeasurePreserving
 
-variable {β : Type*} {m' : MeasurableSpace β} {μ' : Measure β} {g : α → β}
+variable {β : Type*} {m' : SigmaAlgebra β} {μ' : Measure β} {g : α → β}
 
 theorem preErgodic_of_preErgodic_semiconj (hg : MeasurePreserving g μ μ') (hf : PreErgodic f μ)
     {f' : β → β} (h_comm : Semiconj g f f') : PreErgodic f' μ' where

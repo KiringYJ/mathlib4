@@ -44,11 +44,11 @@ noncomputable section
 
 open ProbabilityTheory
 
-open MeasureTheory MeasurableSpace Finset
+open MeasureTheory SigmaAlgebra Finset
 
 namespace ProbabilityTheory
 
-variable {Ω : Type*} [MeasurableSpace Ω] {s : Set Ω}
+variable {Ω : Type*} [SigmaAlgebra Ω] {s : Set Ω}
 
 /-- Given a set `s`, `uniformOn s` is the uniform measure on `s`, defined as the counting measure
 conditioned by `s`. One should think of `uniformOn s t` as the proportion of `s` that is contained
@@ -94,7 +94,7 @@ instance instIsProbabilityMeasure_uniformOn_univ [Finite Ω] [Nonempty Ω] :
     IsProbabilityMeasure (uniformOn (.univ : Set Ω)) :=
   isProbabilityMeasure_uniformOn' Set.finite_univ Set.univ_nonempty .univ
 
-lemma uniformOn_apply_finset' {Ω : Type*} [DecidableEq Ω] {_ : MeasurableSpace Ω} {s t : Finset Ω}
+lemma uniformOn_apply_finset' {Ω : Type*} [DecidableEq Ω] {_ : SigmaAlgebra Ω} {s t : Finset Ω}
     (hs : MeasurableSet (s : Set Ω)) (ht : MeasurableSet (t : Set Ω)) :
     uniformOn (s : Set Ω) (t : Set Ω) = #(s ∩ t) / #s := by
   rw [uniformOn, cond_apply hs, Measure.count_apply_finset' hs, ← coe_inter,

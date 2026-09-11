@@ -23,7 +23,7 @@ open Filter Set MeasureTheory Measure
 /-- In a locally compact regular space with an inner regular measure, the measure of a compact
 set `k` is the infimum of the integrals of compactly supported functions equal to `1` on `k`. -/
 lemma IsCompact.measure_eq_biInf_integral_hasCompactSupport
-    {X : Type*} [TopologicalSpace X] [MeasurableSpace X] [BorelSpace X]
+    {X : Type*} [TopologicalSpace X] [SigmaAlgebra X] [BorelSpace X]
     {k : Set X} (hk : IsCompact k)
     (μ : Measure X) [IsFiniteMeasureOnCompacts μ] [InnerRegularCompactLTTop μ]
     [LocallyCompactSpace X] [RegularSpace X] :
@@ -48,7 +48,7 @@ lemma IsCompact.measure_eq_biInf_integral_hasCompactSupport
 /-- Given an inner regular finite measure, the measure of an open set is the supremum of the
 integrals of nonnegative continuous functions supported in this set and bounded by `1`. -/
 lemma IsOpen.measure_eq_biSup_integral_continuous
-    {X : Type*} [TopologicalSpace X] [MeasurableSpace X] [BorelSpace X] [T2Space X]
+    {X : Type*} [TopologicalSpace X] [SigmaAlgebra X] [BorelSpace X] [T2Space X]
     {U : Set X} (hU : IsOpen U)
     (μ : Measure X) [IsFiniteMeasure μ] [InnerRegularCompactLTTop μ] [NormalSpace X] :
     μ U = ⨆ (f : X → ℝ) (_ : Continuous f) (_ : EqOn f 0 Uᶜ) (_ : 0 ≤ f) (_ : f ≤ 1),

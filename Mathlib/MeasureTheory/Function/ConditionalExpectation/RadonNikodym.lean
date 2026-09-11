@@ -41,7 +41,7 @@ open scoped ENNReal
 
 namespace MeasureTheory
 
-variable {𝓧 𝓨 : Type*} {m m𝓧 : MeasurableSpace 𝓧} {m𝓨 : MeasurableSpace 𝓨} {μ ν : Measure 𝓧}
+variable {𝓧 𝓨 : Type*} {m m𝓧 : SigmaAlgebra 𝓧} {m𝓨 : SigmaAlgebra 𝓨} {μ ν : Measure 𝓧}
 
 /-- The Radon-Nikodym derivative `∂(μ.map g)/∂(ν.map g)` of the pushforward of measures by
 a function `g : 𝓧 → 𝓨` evaluated at `g x` is a.e.-equal to the conditional expectation of `∂μ/∂ν`
@@ -86,7 +86,7 @@ lemma rnDeriv_map [IsFiniteMeasure μ] (hμν : μ ≪ ν)
   have : SigmaFinite ν := SigmaFinite.of_map _ hg.aemeasurable hσ
   have h_ne_top1 : ∀ᵐ x ∂ν, (μ.map g).rnDeriv (ν.map g) (g x) ≠ ∞ :=
     ae_of_ae_map hg.aemeasurable (Measure.rnDeriv_ne_top (μ.map g) (ν.map g))
-  have h_ne_top2 : ∀ᵐ x ∂ν, ν⁻[μ.rnDeriv ν|MeasurableSpace.comap g m𝓨] x ≠ ∞ := by
+  have h_ne_top2 : ∀ᵐ x ∂ν, ν⁻[μ.rnDeriv ν|SigmaAlgebra.comap g m𝓨] x ≠ ∞ := by
     refine condLExp_ne_top ?_
     simp [Measure.lintegral_rnDeriv hμν]
   have h_condExp := toReal_condLExp (m𝓨.comap g) (f := μ.rnDeriv ν) (μ := ν) (by fun_prop) ?_
@@ -107,7 +107,8 @@ lemma rnDeriv_map_ae_eq_trim [IsFiniteMeasure μ] (hμν : μ ≪ ν)
   rw [StronglyMeasurable.ae_eq_trim_iff]
   · exact rnDeriv_map hμν hg
   · refine Measurable.stronglyMeasurable fun s hs ↦ ?_
-    exact ⟨((μ.map g).rnDeriv (ν.map g)) ⁻¹' s, hs.preimage (by fun_prop), by grind⟩
+    exact ⟨((μ.map g).rnDeriv (ν.map g)) ⁻¹' s,
+      MeasurableSet.preimage hs (by fun_prop), by grind⟩
   · fun_prop
 
 /-- The Radon-Nikodym derivative `∂(μ.map g)/∂(ν.map g)` of the pushforward of measures by
@@ -123,7 +124,8 @@ lemma toReal_rnDeriv_map_ae_eq_trim [IsFiniteMeasure μ] (hμν : μ ≪ ν)
   rw [StronglyMeasurable.ae_eq_trim_iff]
   · exact toReal_rnDeriv_map hμν hg
   · refine Measurable.stronglyMeasurable fun s hs ↦ ?_
-    refine ⟨(fun a ↦ ((μ.map g).rnDeriv (ν.map g) a).toReal) ⁻¹' s, hs.preimage (by fun_prop), ?_⟩
+    refine ⟨(fun a ↦ ((μ.map g).rnDeriv (ν.map g) a).toReal) ⁻¹' s,
+      MeasurableSet.preimage hs (by fun_prop), ?_⟩
     rw [← Set.preimage_comp]
     rfl
   · fun_prop
@@ -138,8 +140,8 @@ lemma toReal_rnDeriv_trim (hm : m ≤ m𝓧) [IsFiniteMeasure μ] [hsf : SigmaFi
   simp_rw [trim_eq_map hm]
   have : SigmaFinite (@Measure.map _ _ m𝓧 m id ν) := by rwa [← trim_eq_map hm]
   have h := toReal_rnDeriv_map_ae_eq_trim hμν (measurable_id'' hm)
-  simp_rw [MeasurableSpace.comap_id, id_def, trim_eq_map] at h
-  convert! h <;> rw [MeasurableSpace.comap_id]
+  simp_rw [SigmaAlgebra.comap_id, id_def, trim_eq_map] at h
+  convert! h <;> rw [SigmaAlgebra.comap_id]
 
 /-- The Radon-Nikodym derivative `∂(μ.trim hm)/∂(ν.trim hm)` of the trimmed measures
 (for `hm : m ≤ m0` stating that `m` is a sub-sigma-algebra of `m0`) is a.e.-equal to the

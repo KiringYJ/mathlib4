@@ -31,7 +31,7 @@ public noncomputable section
 variable {E F : Type*}
 
 variable [NormedAddCommGroup E] [NormedAddCommGroup F]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [MeasurableSpace E] [BorelSpace E]
+  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [SigmaAlgebra E] [BorelSpace E]
   [CompleteSpace F]
 
 open FourierTransform TemperedDistribution ENNReal MeasureTheory

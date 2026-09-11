@@ -12,7 +12,7 @@ import Mathlib.MeasureTheory.Function.Holder
 /-!
 # Pull-out property of the conditional expectation
 
-Let `Ω` be endowed with a measurable space structure `mΩ`, and let `m : MeasurableSpace Ω` such that
+Let `Ω` be endowed with a measurable space structure `mΩ`, and let `m : SigmaAlgebra Ω` such that
 `m ≤ mΩ`. Let `μ` be a measure over `Ω`. Let `B : F →L[ℝ] E →L[ℝ] G` a continuous bilinear map,
 `f : Ω → F` and `g : Ω → E` such that `fun ω ↦ B (f ω) (g ω)` is integrable, `g` is integrable
 and `f` is `AEStronglyMeasurable` with respect to `m`. The **pull-out** property of the conditional
@@ -43,7 +43,7 @@ open scoped NNReal ENNReal Topology MeasureTheory
 
 namespace MeasureTheory
 
-variable {Ω : Type*} {m mΩ : MeasurableSpace Ω} {μ : Measure Ω}
+variable {Ω : Type*} {m mΩ : SigmaAlgebra Ω} {μ : Measure Ω}
   {E F G : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [NormedAddCommGroup F] [NormedSpace ℝ F] [NormedAddCommGroup G] [NormedSpace ℝ G]
   [CompleteSpace G] (B : F →L[ℝ] E →L[ℝ] G)
@@ -174,9 +174,9 @@ theorem condExp_bilin_of_stronglyMeasurable_left [CompleteSpace E] {f : Ω → F
   suffices (μ.restrict (sets n))[fun ω ↦ B ((sets n).indicator f ω) (g ω) | m]
       =ᵐ[μ.restrict (sets n)] fun ω ↦ B ((sets n).indicator f ω) ((μ.restrict (sets n))[g | m] ω) by
     refine EventuallyEq.trans (condExp_congr_ae ?_) (this.trans ?_)
-    · filter_upwards [indicator_ae_eq_restrict (f := f) <| hm _ <| h_meas n] with ω hω
+    · filter_upwards [indicator_ae_eq_restrict (f := f) <| hm (h_meas n)] with ω hω
       rw [hω]
-    · filter_upwards [indicator_ae_eq_restrict (f := f) <| hm _ <| h_meas n] with ω hω
+    · filter_upwards [indicator_ae_eq_restrict (f := f) <| hm (h_meas n)] with ω hω
       rw [hω]
   have : IsFiniteMeasure (μ.restrict (sets n)) := by
     constructor

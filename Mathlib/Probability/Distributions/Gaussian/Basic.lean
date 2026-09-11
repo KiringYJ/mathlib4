@@ -43,12 +43,12 @@ namespace ProbabilityTheory
 
 /-- A measure is Gaussian if its map by every continuous linear form is a real Gaussian measure. -/
 class IsGaussian {E : Type*} [TopologicalSpace E] [AddCommMonoid E] [Module ℝ E]
-    {mE : MeasurableSpace E} (μ : Measure E) : Prop where
+    {mE : SigmaAlgebra E} (μ : Measure E) : Prop where
   map_eq_gaussianReal (L : StrongDual ℝ E) : μ.map L = gaussianReal (μ[L]) (Var[L; μ]).toNNReal
 
 /-- A Gaussian measure is a probability measure. -/
 instance IsGaussian.toIsProbabilityMeasure {E : Type*} [TopologicalSpace E] [AddCommMonoid E]
-    [Module ℝ E] {mE : MeasurableSpace E} (μ : Measure E) [IsGaussian μ] :
+    [Module ℝ E] {mE : SigmaAlgebra E} (μ : Measure E) [IsGaussian μ] :
     IsProbabilityMeasure μ where
   measure_univ := by
     have : μ.map (0 : StrongDual ℝ E) Set.univ = 1 := by
@@ -75,7 +75,7 @@ lemma IsGaussian.eq_gaussianReal (μ : Measure ℝ) (h : IsGaussian μ) :
   _ = gaussianReal μ[id] Var[id; μ].toNNReal := by rw [h.map_eq_gaussianReal]; simp
 
 lemma isGaussian_of_isGaussian_map {E : Type*} [TopologicalSpace E] [AddCommMonoid E]
-    [Module ℝ E] {mE : MeasurableSpace E} [OpensMeasurableSpace E] {μ : Measure E}
+    [Module ℝ E] {mE : SigmaAlgebra E} [OpensSigmaAlgebra E] {μ : Measure E}
     (h : ∀ L : E →L[ℝ] ℝ, IsGaussian (μ.map L)) : IsGaussian μ := by
   refine ⟨fun L ↦ ?_⟩
   rw [(h L).eq_gaussianReal, integral_map, variance_map]
@@ -83,7 +83,7 @@ lemma isGaussian_of_isGaussian_map {E : Type*} [TopologicalSpace E] [AddCommMono
   all_goals fun_prop
 
 lemma isGaussian_of_map_eq_gaussianReal {E : Type*} [TopologicalSpace E] [AddCommMonoid E]
-    [Module ℝ E] {mE : MeasurableSpace E} [OpensMeasurableSpace E] {μ : Measure E}
+    [Module ℝ E] {mE : SigmaAlgebra E} [OpensSigmaAlgebra E] {μ : Measure E}
     (h : ∀ L : E →L[ℝ] ℝ, ∃ (m : ℝ) (v : ℝ≥0), μ.map L = gaussianReal m v) :
     IsGaussian μ := by
   refine isGaussian_of_isGaussian_map fun L ↦ ?_
@@ -97,15 +97,15 @@ on `E`. In particular, it requires `E` to be a Borel space, which requires some 
 hypotheses if `E` is a product space. This version does not, which can be useful for instance
 if `L := Prod.fst`, which is always measurable. -/
 lemma isGaussian_map_of_measurable {E F : Type*} [TopologicalSpace E] [AddCommMonoid E]
-    [Module ℝ E] {mE : MeasurableSpace E} [TopologicalSpace F] [AddCommMonoid F]
-    [Module ℝ F] {mF : MeasurableSpace F} [OpensMeasurableSpace F] {μ : Measure E}
+    [Module ℝ E] {mE : SigmaAlgebra E} [TopologicalSpace F] [AddCommMonoid F]
+    [Module ℝ F] {mF : SigmaAlgebra F} [OpensSigmaAlgebra F] {μ : Measure E}
     {L : E →L[ℝ] F} [IsGaussian μ] (hL : Measurable L) : IsGaussian (μ.map L) := by
   refine isGaussian_of_map_eq_gaussianReal fun L' ↦ ⟨μ[L' ∘L L], Var[L' ∘L L; μ].toNNReal, ?_⟩
   rw [Measure.map_map (by fun_prop) hL, ← ContinuousLinearMap.coe_comp,
     IsGaussian.map_eq_gaussianReal]
 
-variable {E F : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [MeasurableSpace E] [BorelSpace E]
-  [NormedAddCommGroup F] [NormedSpace ℝ F] [MeasurableSpace F] [BorelSpace F]
+variable {E F : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [SigmaAlgebra E] [BorelSpace E]
+  [NormedAddCommGroup F] [NormedSpace ℝ F] [SigmaAlgebra F] [BorelSpace F]
   {μ : Measure E} [IsGaussian μ]
 
 /-- Dirac measures are Gaussian. -/
@@ -189,7 +189,7 @@ section charFun
 open InnerProductSpace
 open scoped RealInnerProductSpace
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [MeasurableSpace E]
+variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [SigmaAlgebra E]
     [BorelSpace E] {μ : Measure E}
 
 lemma IsGaussian.charFun_eq [IsGaussian μ] (t : E) :

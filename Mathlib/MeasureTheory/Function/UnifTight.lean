@@ -45,7 +45,7 @@ open Set Filter ENNReal
 
 open scoped Topology
 
-variable {α β ι : Type*} {m : MeasurableSpace α} {μ : Measure α} [NormedAddCommGroup β]
+variable {α β ι : Type*} {m : SigmaAlgebra α} {μ : Measure α} [NormedAddCommGroup β]
 
 section UnifTight
 
@@ -57,16 +57,16 @@ variable {f g : ι → α → β} {p : ℝ≥0∞}
 /-- A sequence of functions `f` is uniformly tight in `L^p` if for all `ε > 0`, there
 exists some measurable set `s` with finite measure such that the Lp-norm of
 `f i` restricted to `sᶜ` is smaller than `ε` for all `i`. -/
-def UnifTight {_ : MeasurableSpace α} (f : ι → α → β) (p : ℝ≥0∞) (μ : Measure α) : Prop :=
+def UnifTight {_ : SigmaAlgebra α} (f : ι → α → β) (p : ℝ≥0∞) (μ : Measure α) : Prop :=
   ∀ ε > 0, ∃ s : Set α, μ s ≠ ∞ ∧ ∀ i, eLpNorm (sᶜ.indicator (f i)) p μ ≤ ε
 
 @[deprecated "This is a duplicate of the new definition of UnifTight." (since := "2026-07-24")]
-theorem unifTight_iff_ennreal {_ : MeasurableSpace α} (f : ι → α → β) (p : ℝ≥0∞) (μ : Measure α) :
+theorem unifTight_iff_ennreal {_ : SigmaAlgebra α} (f : ι → α → β) (p : ℝ≥0∞) (μ : Measure α) :
     UnifTight f p μ ↔ ∀ ⦃ε : ℝ≥0∞⦄, 0 < ε → ∃ s : Set α,
       μ s ≠ ∞ ∧ ∀ i, eLpNorm (sᶜ.indicator (f i)) p μ ≤ ε := by
   rfl
 
-theorem unifTight_iff_real {_ : MeasurableSpace α} (f : ι → α → β) (p : ℝ≥0∞) (μ : Measure α) :
+theorem unifTight_iff_real {_ : SigmaAlgebra α} (f : ι → α → β) (p : ℝ≥0∞) (μ : Measure α) :
     UnifTight f p μ ↔ ∀ (ε : ℝ), 0 < ε → ∃ s : Set α,
       μ s ≠ ∞ ∧ ∀ i, eLpNorm (sᶜ.indicator (f i)) p μ ≤ .ofReal ε := by
   refine ⟨fun hut ε hε ↦ hut (ENNReal.ofReal ε) (ofReal_pos.2 hε), fun hut ε hε ↦ ?_⟩
@@ -75,7 +75,7 @@ theorem unifTight_iff_real {_ : MeasurableSpace α} (f : ι → α → β) (p : 
   obtain ⟨s, hμs, hfε⟩ := hut ε.toReal (ε.toReal_pos hε.ne' hε_top.ne)
   exact ⟨s, hμs, fun i ↦ (hfε i).trans ofReal_toReal_le⟩
 
-theorem unifTight_iff_nnreal {_ : MeasurableSpace α} (f : ι → α → β) (p : ℝ≥0∞) (μ : Measure α) :
+theorem unifTight_iff_nnreal {_ : SigmaAlgebra α} (f : ι → α → β) (p : ℝ≥0∞) (μ : Measure α) :
     UnifTight f p μ ↔ ∀ ⦃ε : NNReal⦄, 0 < ε → ∃ s : Set α,
       μ s ≠ ∞ ∧ ∀ i, eLpNorm (sᶜ.indicator (f i)) p μ ≤ ε := by
   refine ⟨fun hut ε hε ↦ hut ε (coe_pos.2 hε), fun hut ε hε ↦ ?_⟩

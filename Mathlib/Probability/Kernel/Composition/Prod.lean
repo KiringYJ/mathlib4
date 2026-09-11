@@ -42,9 +42,9 @@ namespace ProbabilityTheory
 
 namespace Kernel
 
-variable {α β γ : Type*} {mα : MeasurableSpace α} {mβ : MeasurableSpace β} {mγ : MeasurableSpace γ}
+variable {α β γ : Type*} {mα : SigmaAlgebra α} {mβ : SigmaAlgebra β} {mγ : SigmaAlgebra γ}
 
-variable {γ δ : Type*} {mγ : MeasurableSpace γ} {mδ : MeasurableSpace δ}
+variable {γ δ : Type*} {mγ : SigmaAlgebra γ} {mδ : SigmaAlgebra δ}
 
 /-- Product of two kernels. This is meaningful only when the kernels are s-finite. -/
 noncomputable def prod (κ : Kernel α β) (η : Kernel α γ) : Kernel α (β × γ) :=
@@ -171,7 +171,7 @@ lemma comap_prod (κ : Kernel β γ) [IsSFiniteKernel κ] (η : Kernel β δ) [I
   ext1 x
   rw [comap_apply, prod_apply, prod_apply, comap_apply, comap_apply]
 
-lemma map_prod_map {ε} {mε : MeasurableSpace ε} (κ : Kernel α β) [IsSFiniteKernel κ]
+lemma map_prod_map {ε} {mε : SigmaAlgebra ε} (κ : Kernel α β) [IsSFiniteKernel κ]
     (η : Kernel α δ) [IsSFiniteKernel η] {f : β → γ} (hf : Measurable f) {g : δ → ε}
     (hg : Measurable g) : (κ.map f) ×ₖ (η.map g) = (κ ×ₖ η).map (Prod.map f g) := by
   ext1 x
@@ -237,14 +237,14 @@ lemma prodAssoc_symm_prod (κ : Kernel α β) [IsSFiniteKernel κ] (η : Kernel 
   rw [← prodAssoc_prod, ← Kernel.map_comp_right _ (by fun_prop) (by fun_prop)]
   simp
 
-lemma prod_const_comp {δ} {mδ : MeasurableSpace δ} (κ : Kernel α β) [IsSFiniteKernel κ]
+lemma prod_const_comp {δ} {mδ : SigmaAlgebra δ} (κ : Kernel α β) [IsSFiniteKernel κ]
     (η : Kernel β γ) [IsSFiniteKernel η] (μ : Measure δ) [SFinite μ] :
     (η ×ₖ (const β μ)) ∘ₖ κ = (η ∘ₖ κ) ×ₖ (const α μ) := by
   ext x s ms
   simp_rw [comp_apply' _ _ _ ms, prod_apply' _ _ _ ms, const_apply,
   lintegral_comp _ _ _ (measurable_measure_prodMk_left ms)]
 
-lemma const_prod_comp {δ} {mδ : MeasurableSpace δ} (κ : Kernel α β) [IsSFiniteKernel κ]
+lemma const_prod_comp {δ} {mδ : SigmaAlgebra δ} (κ : Kernel α β) [IsSFiniteKernel κ]
     (μ : Measure γ) [SFinite μ] (η : Kernel β δ) [IsSFiniteKernel η] :
     ((const β μ) ×ₖ η) ∘ₖ κ = (const α μ) ×ₖ (η ∘ₖ κ) := by
   ext x s ms

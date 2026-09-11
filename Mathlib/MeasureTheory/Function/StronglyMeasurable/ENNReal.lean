@@ -21,7 +21,7 @@ public section
 open MeasureTheory
 open scoped ENNReal
 
-variable {α : Type*} {m : MeasurableSpace α} {μ : Measure α} {f : α → ℝ≥0∞}
+variable {α : Type*} {m : SigmaAlgebra α} {μ : Measure α} {f : α → ℝ≥0∞}
 
 lemma ENNReal.finStronglyMeasurable_of_measurable (hf : ∫⁻ x, f x ∂μ ≠ ∞)
     (hf_meas : Measurable f) :

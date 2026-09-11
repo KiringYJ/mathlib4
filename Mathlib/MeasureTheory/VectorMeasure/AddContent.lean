@@ -23,12 +23,12 @@ measure, see `exists_extension_of_isSetSemiring_of_le_measure`.
 
 @[expose] public section
 
-open MeasurableSpace
+open SigmaAlgebra
 open scoped symmDiff
 
 namespace MeasureTheory.VectorMeasure
 
-variable {α : Type*} {hα : MeasurableSpace α} {E : Type*} [NormedAddCommGroup E]
+variable {α : Type*} {hα : SigmaAlgebra α} {E : Type*} [NormedAddCommGroup E]
   [CompleteSpace E] {μ : Measure α}
 
 /-- A finitely additive vector measure which is dominated by a finite positive measure is in
@@ -287,7 +287,7 @@ private lemma exists_extension_of_isSetSemiring_of_le_measure_of_generateFrom_of
   apply VectorMeasure.exists_extension_of_isSetSemiring_of_le_measure_of_dense hC ?_ hm ?_
   · intro s hs
     rw [h'C]
-    exact measurableSet_generateFrom hs
+    exact SigmaAlgebra.mem_generateFrom hs
   · intro t ε ht εpos
     exact exists_measure_symmDiff_lt_of_generateFrom_isSetSemiring hC h''C h'C ht εpos
 
@@ -299,7 +299,7 @@ theorem exists_extension_of_isSetSemiring_of_le_measure_of_generateFrom
     (hm : ∀ s ∈ C, ‖m s‖ₑ ≤ μ s) (h'C : hα = generateFrom C) :
     ∃ m' : VectorMeasure α E, (∀ s ∈ C, m' s = m s) ∧ ∀ s, ‖m' s‖ₑ ≤ μ s := by
   have M (s) (hs : s ∈ C) : MeasurableSet s := by
-    rw [h'C]; exact measurableSet_generateFrom hs
+    rw [h'C]; exact SigmaAlgebra.mem_generateFrom hs
   rcases Measure.exists_ae_subset_biUnion_countable μ M with ⟨D, DC, D_count, hD⟩
   have MD : MeasurableSet (⋃₀ D) := MeasurableSet.sUnion D_count (fun t ht ↦ M _ (DC ht))
   let μ' := μ.restrict (⋃₀ D)
@@ -326,18 +326,18 @@ theorem exists_extension_of_isSetSemiring_of_le_measure [NormedSpace ℝ E]
   sigma-algebra of measurable sets by integrating the conditional expectation with respect to `M`.
   This extension satisfies all the desired properties. -/
   classical
-  let M : MeasurableSpace α := generateFrom C
+  let M : SigmaAlgebra α := generateFrom C
   have Mle : M ≤ hα := generateFrom_le h'C
   set μ' := μ.trim Mle with hμ'
   obtain ⟨m', m'C, hm'⟩ :
       ∃ m' : @VectorMeasure α M E _ _, (∀ s ∈ C, m' s = m s) ∧ ∀ s, ‖m' s‖ₑ ≤ μ' s := by
     apply exists_extension_of_isSetSemiring_of_le_measure_of_generateFrom hC (fun s hs ↦ ?_) rfl
     apply (hm s hs).trans_eq
-    exact (MeasureTheory.trim_measurableSet_eq Mle (measurableSet_generateFrom hs)).symm
+    exact (MeasureTheory.trim_measurableSet_eq Mle (SigmaAlgebra.mem_generateFrom hs)).symm
   have m'_le : m'.variation ≤ μ' := by
     exact variation_le_of_forall_enorm_le (fun s hs ↦ hm' _)
   -- next line is to make sure that the default instance is picked below when defininig `m''`.
-  let : MeasurableSpace α := hα
+  let : SigmaAlgebra α := hα
   let m'' : VectorMeasure α E :=
   { measureOf' s := if MeasurableSet s then ∫ᵛ x, μ[s.indicator 1 | M] x ∂• m' else 0
     empty' := by simp
@@ -379,9 +379,9 @@ theorem exists_extension_of_isSetSemiring_of_le_measure [NormedSpace ℝ E]
       filter_upwards with x
       rw [condExp_of_stronglyMeasurable Mle]
       · exact StronglyMeasurable.indicator stronglyMeasurable_const
-          (measurableSet_generateFrom hs)
+          (SigmaAlgebra.mem_generateFrom hs)
       · exact (integrable_const 1).indicator (h'C s hs)
-    rw [this, integral_indicator (measurableSet_generateFrom hs)]
+    rw [this, integral_indicator (SigmaAlgebra.mem_generateFrom hs)]
     have : IsFiniteMeasure m'.variation :=
       isFiniteMeasure_of_le _ m'_le
     simp only [Pi.one_apply, setIntegral_const]

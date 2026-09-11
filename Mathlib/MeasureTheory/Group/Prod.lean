@@ -52,7 +52,7 @@ open Filter hiding map
 
 open scoped ENNReal Pointwise MeasureTheory
 
-variable (G : Type*) [MeasurableSpace G]
+variable (G : Type*) [SigmaAlgebra G]
 variable [Group G] [MeasurableMul₂ G]
 variable (μ ν : Measure G) [SFinite ν] [SFinite μ] {s : Set G}
 

@@ -27,7 +27,7 @@ open Filter MeasureTheory Set TopologicalSpace
 
 open scoped Topology
 
-variable {ι X E : Type*} [MeasurableSpace X] [TopologicalSpace E] [Countable ι] {l : Filter ι}
+variable {ι X E : Type*} [SigmaAlgebra X] [TopologicalSpace E] [Countable ι] {l : Filter ι}
   [l.IsCountablyGenerated] {f : ι → X → E}
 
 namespace MeasureTheory.StronglyMeasurable
@@ -78,7 +78,7 @@ end MeasureTheory.StronglyMeasurable
 
 namespace MeasureTheory
 
-variable {X E ι : Type*} [MeasurableSpace X] [CommMonoid E] [TopologicalSpace E]
+variable {X E ι : Type*} [SigmaAlgebra X] [CommMonoid E] [TopologicalSpace E]
 
 section
 

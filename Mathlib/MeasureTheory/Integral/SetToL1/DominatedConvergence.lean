@@ -28,7 +28,7 @@ open Set Filter TopologicalSpace ENNReal
 namespace MeasureTheory
 
 variable {α E F : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [NormedAddCommGroup F] [NormedSpace ℝ F] {m : MeasurableSpace α} {μ : Measure α}
+  [NormedAddCommGroup F] [NormedSpace ℝ F] {m : SigmaAlgebra α} {μ : Measure α}
 
 section Function
 
@@ -242,7 +242,7 @@ theorem tendsto_setToFun_filter_of_norm_le_const (hT : DominatedFinMeasAdditive 
     C h_meas h_boundc (integrable_const c) h_lim
 
 omit [NormedSpace ℝ E] in
-theorem _root_.measurableSet_integrable {β : Type*} {mβ : MeasurableSpace β} [SFinite μ]
+theorem _root_.measurableSet_integrable {β : Type*} {mβ : SigmaAlgebra β} [SFinite μ]
     ⦃f : β → α → E⦄ (hf : StronglyMeasurable (Function.uncurry f)) :
     MeasurableSet {x | Integrable (f x) μ} := by
   simp_rw [Integrable, hf.of_uncurry_left.aestronglyMeasurable, true_and]
@@ -250,7 +250,7 @@ theorem _root_.measurableSet_integrable {β : Type*} {mβ : MeasurableSpace β} 
 
 /-- The `setToFun` operation is measurable. This shows that the integrand of (the right-hand-side
 of) Fubini's theorem is measurable. This version has `f` in curried form. -/
-theorem StronglyMeasurable.setToFun_prod_right {β : Type*} {mβ : MeasurableSpace β} [SFinite μ]
+theorem StronglyMeasurable.setToFun_prod_right {β : Type*} {mβ : SigmaAlgebra β} [SFinite μ]
     (hT : DominatedFinMeasAdditive μ T C)
     (h'T : ∀ (s : Set (β × α)), MeasurableSet s → StronglyMeasurable fun x => T (Prod.mk x ⁻¹' s))
     ⦃f : β → α → E⦄ (hf : StronglyMeasurable (Function.uncurry f)) :

@@ -6,7 +6,7 @@ Authors: Yaël Dillies
 module
 
 public import Mathlib.Algebra.Group.AddChar
-public import Mathlib.MeasureTheory.MeasurableSpace.Defs
+public import Mathlib.MeasureTheory.SigmaAlgebra.Defs
 
 /-!
 # Measurable space instance for additive characters
@@ -22,15 +22,15 @@ Give the definition in the correct generality.
 public section
 
 namespace AddChar
-variable {A M : Type*} [AddMonoid A] [Monoid M] [MeasurableSpace A] [MeasurableSpace M]
+variable {A M : Type*} [AddMonoid A] [Monoid M] [SigmaAlgebra A] [SigmaAlgebra M]
 
 @[nolint unusedArguments]
-instance instMeasurableSpace [DiscreteMeasurableSpace A] [Finite A] :
-    MeasurableSpace (AddChar A M) :=
+instance instSigmaAlgebra [DiscreteSigmaAlgebra A] [Finite A] :
+    SigmaAlgebra (AddChar A M) :=
   ⊤
 
-instance instDiscreteMeasurableSpace [DiscreteMeasurableSpace A] [Finite A] :
-    DiscreteMeasurableSpace (AddChar A M) :=
+instance instDiscreteSigmaAlgebra [DiscreteSigmaAlgebra A] [Finite A] :
+    DiscreteSigmaAlgebra (AddChar A M) :=
   ⟨fun _ ↦ trivial⟩
 
 end AddChar

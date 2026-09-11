@@ -49,7 +49,7 @@ section unital
 open ContinuousMap
 
 variable {X : Type*} {𝕜 : Type*} {A : Type*} {p : A → Prop} [RCLike 𝕜]
-  [MeasurableSpace X] {μ : Measure X}
+  [SigmaAlgebra X] {μ : Measure X}
   [NormedRing A] [StarRing A] [NormedAlgebra 𝕜 A]
   [ContinuousFunctionalCalculus 𝕜 A p]
   [CompleteSpace A]
@@ -94,7 +94,7 @@ open Set Function in
 /-- An integrability criterion for the continuous functional calculus.
 This version assumes joint continuity of `f`, see `integrable_cfc'` for a statement
 with weaker assumptions. -/
-lemma integrable_cfc [TopologicalSpace X] [OpensMeasurableSpace X] (f : X → 𝕜 → 𝕜)
+lemma integrable_cfc [TopologicalSpace X] [OpensSigmaAlgebra X] (f : X → 𝕜 → 𝕜)
     (bound : X → ℝ) (a : A) [SecondCountableTopologyEither X C(spectrum 𝕜 a, 𝕜)]
     (hf : ContinuousOn (uncurry f) (univ ×ˢ spectrum 𝕜 a))
     (bound_ge : ∀ᵐ x ∂μ, ∀ z ∈ spectrum 𝕜 a, ‖f x z‖ ≤ bound x)
@@ -110,7 +110,7 @@ open Set Function in
 /-- An integrability criterion for the continuous functional calculus.
 This version assumes joint continuity of `f`, see `integrableOn_cfc'` for a statement
 with weaker assumptions. -/
-lemma integrableOn_cfc [TopologicalSpace X] [OpensMeasurableSpace X] {s : Set X}
+lemma integrableOn_cfc [TopologicalSpace X] [OpensSigmaAlgebra X] {s : Set X}
     (hs : MeasurableSet s) (f : X → 𝕜 → 𝕜) (bound : X → ℝ) (a : A)
     [SecondCountableTopologyEither X C(spectrum 𝕜 a, 𝕜)]
     (hf : ContinuousOn (uncurry f) (s ×ˢ spectrum 𝕜 a))
@@ -166,7 +166,7 @@ open Function Set in
 /-- The continuous functional calculus commutes with integration.
 This version assumes joint continuity of `f`, see `cfc_integral'` for a statement
 with weaker assumptions. -/
-lemma cfc_integral [NormedSpace ℝ A] [TopologicalSpace X] [OpensMeasurableSpace X]
+lemma cfc_integral [NormedSpace ℝ A] [TopologicalSpace X] [OpensSigmaAlgebra X]
     (f : X → 𝕜 → 𝕜) (bound : X → ℝ) (a : A) [SecondCountableTopologyEither X C(spectrum 𝕜 a, 𝕜)]
     (hf : ContinuousOn (uncurry f) (univ ×ˢ spectrum 𝕜 a))
     (bound_ge : ∀ᵐ x ∂μ, ∀ z ∈ spectrum 𝕜 a, ‖f x z‖ ≤ bound x)
@@ -182,7 +182,7 @@ open Function Set in
 /-- The continuous functional calculus commutes with integration.
 This version assumes joint continuity of `f`, see `cfc_setIntegral'` for a statement
 with weaker assumptions. -/
-lemma cfc_setIntegral [NormedSpace ℝ A] [TopologicalSpace X] [OpensMeasurableSpace X] {s : Set X}
+lemma cfc_setIntegral [NormedSpace ℝ A] [TopologicalSpace X] [OpensSigmaAlgebra X] {s : Set X}
     (hs : MeasurableSet s) (f : X → 𝕜 → 𝕜) (bound : X → ℝ) (a : A)
     [SecondCountableTopologyEither X C(spectrum 𝕜 a, 𝕜)]
     (hf : ContinuousOn (uncurry f) (s ×ˢ spectrum 𝕜 a))
@@ -203,7 +203,7 @@ section nonunital
 open ContinuousMapZero
 
 variable {X : Type*} {𝕜 : Type*} {A : Type*} {p : A → Prop} [RCLike 𝕜]
-  [MeasurableSpace X] {μ : Measure X} [NonUnitalNormedRing A] [StarRing A]
+  [SigmaAlgebra X] {μ : Measure X} [NonUnitalNormedRing A] [StarRing A]
   [NormedSpace 𝕜 A] [IsScalarTower 𝕜 A A] [SMulCommClass 𝕜 A A]
   [NonUnitalContinuousFunctionalCalculus 𝕜 A p]
   [CompleteSpace A]
@@ -248,7 +248,7 @@ open Set Function in
 /-- An integrability criterion for the continuous functional calculus.
 This version assumes joint continuity of `f`, see `integrable_cfcₙ'` for a statement
 with weaker assumptions. -/
-lemma integrable_cfcₙ [TopologicalSpace X] [OpensMeasurableSpace X] (f : X → 𝕜 → 𝕜)
+lemma integrable_cfcₙ [TopologicalSpace X] [OpensSigmaAlgebra X] (f : X → 𝕜 → 𝕜)
     (bound : X → ℝ) (a : A)
     [SecondCountableTopologyEither X C(quasispectrum 𝕜 a, 𝕜)]
     (hf : ContinuousOn (uncurry f) (univ ×ˢ quasispectrum 𝕜 a))
@@ -266,7 +266,7 @@ open Set Function in
 /-- An integrability criterion for the continuous functional calculus.
 This version assumes joint continuity of `f`, see `integrableOn_cfcₙ'` for a statement
 with weaker assumptions. -/
-lemma integrableOn_cfcₙ [TopologicalSpace X] [OpensMeasurableSpace X] {s : Set X}
+lemma integrableOn_cfcₙ [TopologicalSpace X] [OpensSigmaAlgebra X] {s : Set X}
     (hs : MeasurableSet s) (f : X → 𝕜 → 𝕜) (bound : X → ℝ) (a : A)
     [SecondCountableTopologyEither X C(quasispectrum 𝕜 a, 𝕜)]
     (hf : ContinuousOn (uncurry f) (s ×ˢ quasispectrum 𝕜 a))
@@ -326,7 +326,7 @@ open Function Set in
 /-- The continuous functional calculus commutes with integration.
 This version assumes joint continuity of `f`, see `cfcₙ_integral'` for a statement
 with weaker assumptions. -/
-lemma cfcₙ_integral [NormedSpace ℝ A] [TopologicalSpace X] [OpensMeasurableSpace X]
+lemma cfcₙ_integral [NormedSpace ℝ A] [TopologicalSpace X] [OpensSigmaAlgebra X]
     (f : X → 𝕜 → 𝕜) (bound : X → ℝ) (a : A)
     [SecondCountableTopologyEither X C(quasispectrum 𝕜 a, 𝕜)]
     (hf : ContinuousOn (uncurry f) (univ ×ˢ quasispectrum 𝕜 a))
@@ -344,7 +344,7 @@ open Function Set in
 /-- The continuous functional calculus commutes with integration.
 This version assumes joint continuity of `f`, see `cfcₙ_setIntegral'` for a statement
 with weaker assumptions. -/
-lemma cfcₙ_setIntegral [NormedSpace ℝ A] [TopologicalSpace X] [OpensMeasurableSpace X] {s : Set X}
+lemma cfcₙ_setIntegral [NormedSpace ℝ A] [TopologicalSpace X] [OpensSigmaAlgebra X] {s : Set X}
     (hs : MeasurableSet s) (f : X → 𝕜 → 𝕜) (bound : X → ℝ) (a : A)
     [SecondCountableTopologyEither X C(quasispectrum 𝕜 a, 𝕜)]
     (hf : ContinuousOn (uncurry f) (s ×ˢ quasispectrum 𝕜 a))

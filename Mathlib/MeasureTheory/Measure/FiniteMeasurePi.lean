@@ -36,7 +36,7 @@ open scoped Topology ENNReal NNReal BoundedContinuousFunction
 
 namespace MeasureTheory
 
-variable {ι : Type*} {α : ι → Type*} [Fintype ι] [∀ i, MeasurableSpace (α i)]
+variable {ι : Type*} {α : ι → Type*} [Fintype ι] [∀ i, SigmaAlgebra (α i)]
 
 namespace FiniteMeasure
 
@@ -56,7 +56,7 @@ variable (μ : Π i, FiniteMeasure (α i))
   simp only [mass]
   rw [← pi_univ (univ : Set ι), pi_pi]
 
-lemma pi_map_pi {β : ι → Type*} [∀ i, MeasurableSpace (β i)] {f : Π i, α i → β i}
+lemma pi_map_pi {β : ι → Type*} [∀ i, SigmaAlgebra (β i)] {f : Π i, α i → β i}
     (f_mble : ∀ i, AEMeasurable (f i) (μ i)) :
     (FiniteMeasure.pi μ).map (fun x i ↦ (f i (x i))) =
       FiniteMeasure.pi (fun i ↦ (μ i).map (f i)) := by
@@ -86,7 +86,7 @@ open TopologicalSpace
 /-- The map associating to finitely many probability measures their product is a continuous map. -/
 @[fun_prop]
 theorem continuous_pi [∀ i, TopologicalSpace (α i)] [∀ i, SecondCountableTopology (α i)]
-    [∀ i, PseudoMetrizableSpace (α i)] [∀ i, OpensMeasurableSpace (α i)] :
+    [∀ i, PseudoMetrizableSpace (α i)] [∀ i, OpensSigmaAlgebra (α i)] :
     Continuous (fun (μ : Π i, ProbabilityMeasure (α i)) ↦ ProbabilityMeasure.pi μ) := by
   refine continuous_iff_continuousAt.2 (fun μ ↦ ?_)
   /- It suffices to check the convergence along elements of a π-system containing arbitrarily

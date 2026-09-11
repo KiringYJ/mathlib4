@@ -49,7 +49,7 @@ open scoped ENNReal Topology
 
 namespace ProbabilityTheory
 
-variable {ι Ω E : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω}
+variable {ι Ω E : Type*} {mΩ : SigmaAlgebra Ω} {P : Measure Ω}
 
 /-- A pre-localizing sequence is a sequence of stopping times that tends almost surely to
 infinity. -/

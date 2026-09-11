@@ -58,7 +58,7 @@ public section
 open MeasureTheory ProbabilityTheory.BrownianReal
 open scoped ENNReal NNReal Topology
 
-variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {B X : ℝ≥0 → Ω → ℝ} {P : Measure Ω}
+variable {Ω : Type*} {mΩ : SigmaAlgebra Ω} {B X : ℝ≥0 → Ω → ℝ} {P : Measure Ω}
 
 namespace ProbabilityTheory
 

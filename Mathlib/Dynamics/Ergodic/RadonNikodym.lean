@@ -29,7 +29,7 @@ public section
 
 open MeasureTheory Measure Set
 
-variable {X : Type*} {m : MeasurableSpace X} {μ ν : Measure X} [IsFiniteMeasure μ]
+variable {X : Type*} {m : SigmaAlgebra X} {μ ν : Measure X} [IsFiniteMeasure μ]
 
 namespace MeasureTheory.MeasurePreserving
 
@@ -42,7 +42,7 @@ protected theorem singularPart [SigmaFinite ν] {f : X → X}
   convert! hfμ.restrict_preimage hsm using 1
   · refine singularPart_eq_restrict ?_ (hfν.preimage_null hνs)
     rw [← mem_ae_iff, ← Filter.eventuallyEqSet_univ,
-      ae_eq_univ_iff_measure_eq (hfμ.measurable hsm).nullMeasurableSet]
+      ae_eq_univ_iff_measure_eq (MeasurableSet.nullMeasurableSet (hfμ.measurable hsm))]
     calc
       μ.singularPart ν (f ⁻¹' s) = (ν.withDensity (μ.rnDeriv ν) + μ.singularPart ν) (f ⁻¹' s) := by
         rw [← hfν.measure_preimage hsm.nullMeasurableSet] at hνs
@@ -81,10 +81,10 @@ theorem rnDeriv_comp_aeEq [IsFiniteMeasure ν] {f : X → X}
   set s := {a | μ.rnDeriv ν a < c}
   have hsm : MeasurableSet s := measurable_rnDeriv _ _ measurableSet_Iio
   have hμ_sdiff : μ (f ⁻¹' s \ s) = μ (s \ f ⁻¹' s) :=
-    measure_sdiff_symm (hfμ.measurable hsm).nullMeasurableSet hsm.nullMeasurableSet
+    measure_sdiff_symm (MeasurableSet.nullMeasurableSet (hfμ.measurable hsm)) hsm.nullMeasurableSet
       (hfμ.measure_preimage hsm.nullMeasurableSet) (by finiteness)
   have hν_sdiff : ν (f ⁻¹' s \ s) = ν (s \ f ⁻¹' s) :=
-    measure_sdiff_symm (hfν.measurable hsm).nullMeasurableSet hsm.nullMeasurableSet
+    measure_sdiff_symm (MeasurableSet.nullMeasurableSet (hfν.measurable hsm)) hsm.nullMeasurableSet
       (hfν.measure_preimage hsm.nullMeasurableSet) (by finiteness)
   suffices f ⁻¹' s =ᵐ[ν] s from this.mem_iff
   suffices ν (f ⁻¹' s \ s) = 0 from (ae_le_set.mpr this).antisymm (ae_le_set.mpr <| hν_sdiff ▸ this)

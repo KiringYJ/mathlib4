@@ -21,7 +21,7 @@ open scoped ENNReal
 
 namespace MeasureTheory
 
-variable {X : Type*} {mX : MeasurableSpace X} {μ : Measure X} {p q : ℝ≥0∞} [Fact (1 ≤ q)]
+variable {X : Type*} {mX : SigmaAlgebra X} {μ : Measure X} {p q : ℝ≥0∞} [Fact (1 ≤ q)]
 
 section Pi
 

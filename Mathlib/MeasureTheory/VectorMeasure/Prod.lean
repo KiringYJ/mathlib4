@@ -28,7 +28,7 @@ public section
 open Filter Function MeasureTheory Set TopologicalSpace
 open scoped ENNReal NNReal Finset Topology
 
-variable {ι X Y E F G H I J : Type*} {mX : MeasurableSpace X} {mY : MeasurableSpace Y}
+variable {ι X Y E F G H I J : Type*} {mX : SigmaAlgebra X} {mY : SigmaAlgebra Y}
   [NormedAddCommGroup E] [NormedSpace ℝ E]
   [NormedAddCommGroup F] [NormedSpace ℝ F]
   [NormedAddCommGroup G] [NormedSpace ℝ G]
@@ -88,7 +88,7 @@ a strongly measurable function. -/
 theorem stronglyMeasurable_vectorMeasure_prodMk_left {s : Set (X × Y)}
     (hs : MeasurableSet s) : StronglyMeasurable fun x ↦ ν (Prod.mk x ⁻¹' s) := by
   induction s, hs
-    using MeasurableSpace.induction_on_inter generateFrom_prod.symm isPiSystem_prod with
+    using SigmaAlgebra.induction_on_inter generateFrom_prod.symm isPiSystem_prod with
   | empty => simp [stronglyMeasurable_const]
   | basic s hs =>
     obtain ⟨s, hs, t, -, rfl⟩ := hs

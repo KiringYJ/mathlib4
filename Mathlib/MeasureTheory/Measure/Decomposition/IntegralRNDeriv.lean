@@ -34,7 +34,7 @@ open scoped ENNReal
 
 namespace MeasureTheory
 
-variable {𝓧 : Type*} {m𝓧 : MeasurableSpace 𝓧} {μ ν : Measure 𝓧} {f : ℝ → ℝ}
+variable {𝓧 : Type*} {m𝓧 : SigmaAlgebra 𝓧} {μ ν : Measure 𝓧} {f : ℝ → ℝ}
 
 @[fun_prop]
 lemma Measure.integrable_toReal_rnDeriv [IsFiniteMeasure μ] :
@@ -108,7 +108,7 @@ lemma mul_le_integral_rnDeriv_of_ac [IsFiniteMeasure μ] [IsFiniteMeasure ν]
 
 section Integrable
 
-variable {𝓨 : Type*} {m𝓨 : MeasurableSpace 𝓨} {κ η : Kernel 𝓧 𝓨} {f : ℝ → ℝ}
+variable {𝓨 : Type*} {m𝓨 : SigmaAlgebra 𝓨} {κ η : Kernel 𝓧 𝓨} {f : ℝ → ℝ}
   [IsFiniteMeasure μ] [IsFiniteMeasure ν]
 
 lemma lintegral_rnDeriv_compProd [IsSFiniteKernel κ] [IsFiniteKernel η]

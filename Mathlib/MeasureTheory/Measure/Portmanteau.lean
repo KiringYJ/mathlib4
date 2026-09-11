@@ -111,7 +111,7 @@ Either of these will later be shown to be equivalent to the weak convergence of 
 of measures.
 -/
 
-variable {Ω : Type*} [MeasurableSpace Ω]
+variable {Ω : Type*} [SigmaAlgebra Ω]
 
 theorem le_measure_compl_liminf_of_limsup_measure_le {ι : Type*} {L : Filter ι} {μ : Measure Ω}
     {μs : ι → Measure Ω} [IsProbabilityMeasure μ] [∀ i, IsProbabilityMeasure (μs i)] {E : Set Ω}
@@ -161,7 +161,7 @@ theorem limsup_measure_le_of_le_liminf_measure_compl {ι : Type*} {L : Filter ι
     (L.limsup fun i ↦ μs i E) ≤ μ E :=
   compl_compl E ▸ limsup_measure_compl_le_of_le_liminf_measure (MeasurableSet.compl E_mble) h
 
-variable [TopologicalSpace Ω] [OpensMeasurableSpace Ω]
+variable [TopologicalSpace Ω] [OpensSigmaAlgebra Ω]
 
 /-- One pair of implications of the portmanteau theorem:
 For a sequence of Borel probability measures, the following two are equivalent:
@@ -206,7 +206,7 @@ implies that
 -/
 
 
-variable {Ω : Type*} [MeasurableSpace Ω]
+variable {Ω : Type*} [SigmaAlgebra Ω]
 
 theorem tendsto_measure_of_le_liminf_measure_of_limsup_measure_le {ι : Type*} {L : Filter ι}
     {μ : Measure Ω} {μs : ι → Measure Ω} {E₀ E E₁ : Set Ω} (E₀_subset : E₀ ⊆ E) (subset_E₁ : E ⊆ E₁)
@@ -232,7 +232,7 @@ theorem tendsto_measure_of_le_liminf_measure_of_limsup_measure_le {ι : Type*} {
   · infer_param
   · infer_param
 
-variable [TopologicalSpace Ω] [OpensMeasurableSpace Ω]
+variable [TopologicalSpace Ω] [OpensSigmaAlgebra Ω]
 
 /-- One implication of the portmanteau theorem:
 For a sequence of Borel probability measures, if the liminf of the measures of any open set is at
@@ -279,8 +279,8 @@ Weak convergence of finite measures implies that the limsup of the measures of a
 at most the measure of the closed set under the limit measure.
 -/
 theorem FiniteMeasure.limsup_measure_closed_le_of_tendsto {Ω ι : Type*} {L : Filter ι}
-    [MeasurableSpace Ω] [TopologicalSpace Ω] [HasOuterApproxClosed Ω]
-    [OpensMeasurableSpace Ω] {μ : FiniteMeasure Ω}
+    [SigmaAlgebra Ω] [TopologicalSpace Ω] [HasOuterApproxClosed Ω]
+    [OpensSigmaAlgebra Ω] {μ : FiniteMeasure Ω}
     {μs : ι → FiniteMeasure Ω} (μs_lim : Tendsto μs L (𝓝 μ)) {F : Set Ω} (F_closed : IsClosed F) :
     (L.limsup fun i ↦ (μs i : Measure Ω) F) ≤ (μ : Measure Ω) F := by
   rcases L.eq_or_neBot with rfl | hne
@@ -312,7 +312,7 @@ Weak convergence of probability measures implies that the limsup of the measures
 set is at most the measure of the closed set under the limit probability measure.
 -/
 theorem ProbabilityMeasure.limsup_measure_closed_le_of_tendsto {Ω ι : Type*} {L : Filter ι}
-    [MeasurableSpace Ω] [TopologicalSpace Ω] [OpensMeasurableSpace Ω] [HasOuterApproxClosed Ω]
+    [SigmaAlgebra Ω] [TopologicalSpace Ω] [OpensSigmaAlgebra Ω] [HasOuterApproxClosed Ω]
     {μ : ProbabilityMeasure Ω} {μs : ι → ProbabilityMeasure Ω} (μs_lim : Tendsto μs L (𝓝 μ))
     {F : Set Ω} (F_closed : IsClosed F) :
     (L.limsup fun i ↦ (μs i : Measure Ω) F) ≤ (μ : Measure Ω) F := by
@@ -324,7 +324,7 @@ Weak convergence of probability measures implies that the liminf of the measures
 is at least the measure of the open set under the limit probability measure.
 -/
 theorem ProbabilityMeasure.le_liminf_measure_open_of_tendsto {Ω ι : Type*} {L : Filter ι}
-    [MeasurableSpace Ω] [TopologicalSpace Ω] [OpensMeasurableSpace Ω] [HasOuterApproxClosed Ω]
+    [SigmaAlgebra Ω] [TopologicalSpace Ω] [OpensSigmaAlgebra Ω] [HasOuterApproxClosed Ω]
     {μ : ProbabilityMeasure Ω} {μs : ι → ProbabilityMeasure Ω} (μs_lim : Tendsto μs L (𝓝 μ))
     {G : Set Ω} (G_open : IsOpen G) :
     (μ : Measure Ω) G ≤ L.liminf fun i ↦ (μs i : Measure Ω) G :=
@@ -334,7 +334,7 @@ theorem ProbabilityMeasure.le_liminf_measure_open_of_tendsto {Ω ι : Type*} {L 
     (h_closeds _ (isClosed_compl_iff.mpr G_open))
 
 theorem ProbabilityMeasure.tendsto_measure_of_null_frontier_of_tendsto' {Ω ι : Type*}
-    {L : Filter ι} [MeasurableSpace Ω] [TopologicalSpace Ω] [OpensMeasurableSpace Ω]
+    {L : Filter ι} [SigmaAlgebra Ω] [TopologicalSpace Ω] [OpensSigmaAlgebra Ω]
     [HasOuterApproxClosed Ω] {μ : ProbabilityMeasure Ω} {μs : ι → ProbabilityMeasure Ω}
     (μs_lim : Tendsto μs L (𝓝 μ)) {E : Set Ω} (E_nullbdry : (μ : Measure Ω) (frontier E) = 0) :
     Tendsto (fun i ↦ (μs i : Measure Ω) E) L (𝓝 ((μ : Measure Ω) E)) :=
@@ -351,7 +351,7 @@ A version with coercions to ordinary `ℝ≥0∞`-valued measures is
 `MeasureTheory.ProbabilityMeasure.tendsto_measure_of_null_frontier_of_tendsto'`.
 -/
 theorem ProbabilityMeasure.tendsto_measure_of_null_frontier_of_tendsto {Ω ι : Type*} {L : Filter ι}
-    [MeasurableSpace Ω] [TopologicalSpace Ω] [OpensMeasurableSpace Ω] [HasOuterApproxClosed Ω]
+    [SigmaAlgebra Ω] [TopologicalSpace Ω] [OpensSigmaAlgebra Ω] [HasOuterApproxClosed Ω]
     {μ : ProbabilityMeasure Ω} {μs : ι → ProbabilityMeasure Ω} (μs_lim : Tendsto μs L (𝓝 μ))
     {E : Set Ω} (E_nullbdry : μ (frontier E) = 0) : Tendsto (fun i ↦ μs i E) L (𝓝 (μ E)) := by
   have key := tendsto_measure_of_null_frontier_of_tendsto' μs_lim (by simpa using E_nullbdry)
@@ -362,7 +362,7 @@ Weak convergence of probability measures implies that if a set is clopen, then t
 measures of the set equals the measure of the set under the limit probability measure.
 -/
 theorem ProbabilityMeasure.tendsto_measure_of_isClopen_of_tendsto {Ω ι : Type*} {L : Filter ι}
-    [MeasurableSpace Ω] [TopologicalSpace Ω] [OpensMeasurableSpace Ω] [HasOuterApproxClosed Ω]
+    [SigmaAlgebra Ω] [TopologicalSpace Ω] [OpensSigmaAlgebra Ω] [HasOuterApproxClosed Ω]
     {μ : ProbabilityMeasure Ω} {μs : ι → ProbabilityMeasure Ω} (μs_lim : Tendsto μs L (𝓝 μ))
     {E : Set Ω} (hE : IsClopen E) : Tendsto (fun i ↦ μs i E) L (𝓝 (μ E)) :=
   ProbabilityMeasure.tendsto_measure_of_null_frontier_of_tendsto μs_lim (by simp [hE])
@@ -396,7 +396,7 @@ open ENNReal
 
 section PseudoMetricSpace
 
-variable {Ω : Type*} [PseudoMetricSpace Ω] [MeasurableSpace Ω] [OpensMeasurableSpace Ω]
+variable {Ω : Type*} [PseudoMetricSpace Ω] [SigmaAlgebra Ω] [OpensSigmaAlgebra Ω]
 
 theorem exists_null_frontier_thickening (μ : Measure Ω) [SFinite μ] (s : Set Ω) {a b : ℝ}
     (hab : a < b) : ∃ r ∈ Ioo a b, μ (frontier (Metric.thickening r s)) = 0 := by
@@ -428,8 +428,8 @@ Assuming that for all Borel sets E whose boundary ∂E carries no probability ma
 candidate limit probability measure μ we have convergence of the measures μsᵢ(E) to μ(E),
 then for all closed sets F we have the limsup condition limsup μsᵢ(F) ≤ μ(F). -/
 lemma limsup_measure_closed_le_of_forall_tendsto_measure
-    {Ω ι : Type*} {L : Filter ι} [MeasurableSpace Ω] [TopologicalSpace Ω]
-    [PseudoMetrizableSpace Ω] [OpensMeasurableSpace Ω]
+    {Ω ι : Type*} {L : Filter ι} [SigmaAlgebra Ω] [TopologicalSpace Ω]
+    [PseudoMetrizableSpace Ω] [OpensSigmaAlgebra Ω]
     {μ : Measure Ω} [IsFiniteMeasure μ] {μs : ι → Measure Ω}
     (h : ∀ {E : Set Ω}, MeasurableSet E → μ (frontier E) = 0 →
             Tendsto (fun i ↦ μs i E) L (𝓝 (μ E)))
@@ -467,8 +467,8 @@ Assuming that for all Borel sets E whose boundary ∂E carries no probability ma
 candidate limit probability measure μ we have convergence of the measures μsᵢ(E) to μ(E),
 then for all open sets G we have the limsup condition μ(G) ≤ liminf μsᵢ(G). -/
 lemma le_liminf_measure_open_of_forall_tendsto_measure
-    {Ω ι : Type*} {L : Filter ι} [MeasurableSpace Ω] [TopologicalSpace Ω]
-    [PseudoMetrizableSpace Ω] [OpensMeasurableSpace Ω]
+    {Ω ι : Type*} {L : Filter ι} [SigmaAlgebra Ω] [TopologicalSpace Ω]
+    [PseudoMetrizableSpace Ω] [OpensSigmaAlgebra Ω]
     {μ : Measure Ω} [IsProbabilityMeasure μ] {μs : ι → Measure Ω} [∀ i, IsProbabilityMeasure (μs i)]
     (h : ∀ {E}, MeasurableSet E → μ (frontier E) = 0 → Tendsto (fun i ↦ μs i E) L (𝓝 (μ E)))
     (G : Set Ω) (G_open : IsOpen G) :
@@ -494,7 +494,7 @@ implies
 
 -/
 
-variable {Ω : Type*} [MeasurableSpace Ω] [TopologicalSpace Ω] [OpensMeasurableSpace Ω]
+variable {Ω : Type*} [SigmaAlgebra Ω] [TopologicalSpace Ω] [OpensSigmaAlgebra Ω]
 
 lemma lintegral_le_liminf_lintegral_of_forall_isOpen_measure_le_liminf_measure
     {μ : Measure Ω} {μs : ℕ → Measure Ω} {f : Ω → ℝ} (f_cont : Continuous f) (f_nn : 0 ≤ f)
@@ -604,7 +604,7 @@ end le_liminf_open_implies_convergence
 
 section Closed
 
-variable {Ω ι : Type*} {mΩ : MeasurableSpace Ω} [TopologicalSpace Ω] [OpensMeasurableSpace Ω]
+variable {Ω ι : Type*} {mΩ : SigmaAlgebra Ω} [TopologicalSpace Ω] [OpensSigmaAlgebra Ω]
     {μ : ProbabilityMeasure Ω} {μs : ι → ProbabilityMeasure Ω}
     {L : Filter ι} [L.IsCountablyGenerated]
 
@@ -685,8 +685,8 @@ section Lipschitz
 /-- Weak convergence of probability measures is equivalent to the property that the integrals of
 every bounded Lipschitz function converge to the integral of the function against
 the limit measure. -/
-theorem tendsto_iff_forall_lipschitz_integral_tendsto {γ Ω : Type*} {mΩ : MeasurableSpace Ω}
-    [PseudoEMetricSpace Ω] [OpensMeasurableSpace Ω] {F : Filter γ} [F.IsCountablyGenerated]
+theorem tendsto_iff_forall_lipschitz_integral_tendsto {γ Ω : Type*} {mΩ : SigmaAlgebra Ω}
+    [PseudoEMetricSpace Ω] [OpensSigmaAlgebra Ω] {F : Filter γ} [F.IsCountablyGenerated]
     {μs : γ → ProbabilityMeasure Ω} {μ : ProbabilityMeasure Ω} :
     Tendsto μs F (𝓝 μ) ↔
       ∀ f : Ω → ℝ, (∃ (C : ℝ), ∀ x y, dist (f x) (f y) ≤ C) → (∃ L, LipschitzWith L f) →
@@ -741,7 +741,7 @@ section convergenceCriterion
 
 open scoped Finset
 
-variable {Ω ι : Type*} [MeasurableSpace Ω]
+variable {Ω ι : Type*} [SigmaAlgebra Ω]
 
 /-- Given a π-system, if a sequence of measures converges along all elements of the π-system, then
 it also converges along finite unions of elements of the π-system. -/
@@ -829,7 +829,7 @@ converges to a limiting probability measure. Assume also that the π-system cont
 small neighborhoods of any point. Then the sequence of probability measures converges for the
 weak topology. -/
 lemma _root_.IsPiSystem.tendsto_probabilityMeasure_of_tendsto_of_mem
-    [TopologicalSpace Ω] [SecondCountableTopology Ω] [OpensMeasurableSpace Ω]
+    [TopologicalSpace Ω] [SecondCountableTopology Ω] [OpensSigmaAlgebra Ω]
     {S : Set (Set Ω)} (hS : IsPiSystem S) {μ : ι → ProbabilityMeasure Ω} {ν : ProbabilityMeasure Ω}
     {l : Filter ι} [l.IsCountablyGenerated]
     (hmeas : ∀ s ∈ S, MeasurableSet s)

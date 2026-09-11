@@ -27,14 +27,14 @@ provided.
 
 public section
 
-open MeasureTheory ProbabilityTheory MeasurableSpace
+open MeasureTheory ProbabilityTheory SigmaAlgebra
 
 open scoped ENNReal
 
 namespace ProbabilityTheory
 
-variable {α β Ω : Type*} {mα : MeasurableSpace α} {mβ : MeasurableSpace β}
-  [MeasurableSpace Ω] [StandardBorelSpace Ω] [Nonempty Ω]
+variable {α β Ω : Type*} {mα : SigmaAlgebra α} {mβ : SigmaAlgebra β}
+  [SigmaAlgebra Ω] [StandardBorelSpace Ω] [Nonempty Ω]
 
 section Lintegral
 
@@ -123,8 +123,8 @@ end ProbabilityTheory
 
 namespace MeasureTheory.Measure
 
-variable {β Ω : Type*} {mβ : MeasurableSpace β}
-  [MeasurableSpace Ω] [StandardBorelSpace Ω] [Nonempty Ω]
+variable {β Ω : Type*} {mβ : SigmaAlgebra β}
+  [SigmaAlgebra Ω] [StandardBorelSpace Ω] [Nonempty Ω]
 
 section Lintegral
 
@@ -216,7 +216,7 @@ We place these lemmas in the `MeasureTheory` namespace to enable dot notation. -
 
 open ProbabilityTheory
 
-variable {α Ω E F : Type*} {mα : MeasurableSpace α} [MeasurableSpace Ω]
+variable {α Ω E F : Type*} {mα : SigmaAlgebra α} [SigmaAlgebra Ω]
   [StandardBorelSpace Ω] [Nonempty Ω] [NormedAddCommGroup E] [NormedSpace ℝ E]
   [NormedAddCommGroup F] {ρ : Measure (α × Ω)} [IsFiniteMeasure ρ]
 

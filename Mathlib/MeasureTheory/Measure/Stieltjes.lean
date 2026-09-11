@@ -95,7 +95,7 @@ lemma notMem_botSet_of_lt {x y : R} (h : x < y) : y ∉ botSet := by
 lemma subsingleton_botSet : (botSet (R := R)).Subsingleton :=
   subsingleton_isBot _
 
-lemma measurableSet_botSet [MeasurableSpace R] [MeasurableSingletonClass R] :
+lemma measurableSet_botSet [SigmaAlgebra R] [MeasurableSingletonClass R] :
     MeasurableSet (botSet (R := R)) :=
   subsingleton_botSet.measurableSet
 
@@ -467,7 +467,7 @@ theorem measurableSet_Ioi {c : R} : MeasurableSet[f.outer.caratheodory] (Ioi c) 
   · simp only [hac, hbc, Ioc_inter_Ioi, Ioc_sdiff_Ioi, f.length_Ioc, min_eq_right,
       le_refl, Ioc_eq_empty, add_zero, max_eq_left, f.length_empty, not_lt]
 
-theorem outer_trim [MeasurableSpace R] [BorelSpace R] [DenselyOrdered R] :
+theorem outer_trim [SigmaAlgebra R] [BorelSpace R] [DenselyOrdered R] :
     f.outer.trim = f.outer := by
   refine le_antisymm (fun s => ?_) (OuterMeasure.le_trim _)
   rw [OuterMeasure.trim_eq_iInf]
@@ -508,19 +508,20 @@ omit [CompactIccSpace R] in
 theorem borel_le_measurable [SecondCountableTopology R] :
     borel R ≤ f.outer.caratheodory := by
   rw [borel_eq_generateFrom_Ioi]
-  refine MeasurableSpace.generateFrom_le ?_
-  simp +contextual [f.measurableSet_Ioi]
+  refine SigmaAlgebra.generateFrom_le fun s ⟨c, hc⟩ ↦ ?_
+  subst s
+  exact measurableSet_iff_mem.mp f.measurableSet_Ioi
 
 /-! ### The measure associated to a Stieltjes function -/
 
-variable [MeasurableSpace R] [BorelSpace R] [SecondCountableTopology R] [DenselyOrdered R]
+variable [SigmaAlgebra R] [BorelSpace R] [SecondCountableTopology R] [DenselyOrdered R]
 
 /-- The measure associated to a Stieltjes function, giving mass `f b - f a` to the
 interval `(a, b]`. If there is a bot element, it gives zero mass to it. -/
 protected irreducible_def measure : Measure R where
   toOuterMeasure := f.outer
-  m_iUnion _s hs := f.outer.iUnion_eq_of_caratheodory fun i => f.borel_le_measurable _ <| by
-    borelize R
+  m_iUnion _s hs := f.outer.iUnion_eq_of_caratheodory fun i => f.borel_le_measurable <| by
+    rw [← BorelSpace.sigmaAlgebra_eq (α := R)]
     exact hs i
   trim_le := f.outer_trim.le
 

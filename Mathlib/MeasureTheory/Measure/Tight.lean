@@ -41,7 +41,7 @@ open scoped Topology
 
 namespace MeasureTheory
 
-variable {𝓧 𝓨 : Type*} {m𝓧 : MeasurableSpace 𝓧}
+variable {𝓧 𝓨 : Type*} {m𝓧 : SigmaAlgebra 𝓧}
   {μ : Measure 𝓧} {S T : Set (Measure 𝓧)}
 
 section Basic
@@ -69,7 +69,7 @@ lemma isTightMeasureSet_iff_exists_isCompact_measure_compl_le :
     exact ⟨Kᶜ, ⟨K, h1, subset_rfl⟩, fun A hA μ hμS ↦ (μ.mono hA).trans (h2 μ hμS)⟩
 
 /-- Finite measures that are inner regular with respect to closed compact sets are tight. -/
-theorem isTightMeasureSet_singleton_of_innerRegularWRT [OpensMeasurableSpace 𝓧] [IsFiniteMeasure μ]
+theorem isTightMeasureSet_singleton_of_innerRegularWRT [OpensSigmaAlgebra 𝓧] [IsFiniteMeasure μ]
     (h : μ.InnerRegularWRT (fun s ↦ IsCompact s ∧ IsClosed s) MeasurableSet) :
     IsTightMeasureSet {μ} := by
   rw [isTightMeasureSet_iff_exists_isCompact_measure_compl_le]
@@ -87,7 +87,7 @@ theorem isTightMeasureSet_singleton_of_innerRegularWRT [OpensMeasurableSpace �
   | inr hεr => exact ⟨∅, isCompact_empty, by simpa⟩
 
 /-- Inner regular finite measures on T2 spaces are tight. -/
-lemma isTightMeasureSet_singleton_of_innerRegular [T2Space 𝓧] [OpensMeasurableSpace 𝓧]
+lemma isTightMeasureSet_singleton_of_innerRegular [T2Space 𝓧] [OpensSigmaAlgebra 𝓧]
     [IsFiniteMeasure μ] [h : μ.InnerRegular] :
     IsTightMeasureSet {μ} := by
   refine isTightMeasureSet_singleton_of_innerRegularWRT ?_
@@ -96,7 +96,7 @@ lemma isTightMeasureSet_singleton_of_innerRegular [T2Space 𝓧] [OpensMeasurabl
   exact ⟨K, hKs, ⟨hK_compact, hK_compact.isClosed⟩, hμK⟩
 
 /-- In a complete second-countable pseudo-metric space, finite measures are tight. -/
-theorem isTightMeasureSet_singleton {α : Type*} [MeasurableSpace α] [TopologicalSpace α]
+theorem isTightMeasureSet_singleton {α : Type*} [SigmaAlgebra α] [TopologicalSpace α]
     [IsCompletelyPseudoMetrizableSpace α] [SecondCountableTopology α] [BorelSpace α]
     {μ : Measure α} [IsFiniteMeasure μ] :
     IsTightMeasureSet {μ} :=
@@ -126,7 +126,7 @@ protected lemma inter (hS : IsTightMeasureSet S) (T : Set (Measure 𝓧)) :
     IsTightMeasureSet (S ∩ T) :=
   hS.subset inter_subset_left
 
-lemma map [OpensMeasurableSpace 𝓧] [TopologicalSpace 𝓨] [MeasurableSpace 𝓨]
+lemma map [OpensSigmaAlgebra 𝓧] [TopologicalSpace 𝓨] [SigmaAlgebra 𝓨]
     [BorelSpace 𝓨] [T2Space 𝓨] (hS : IsTightMeasureSet S) {f : 𝓧 → 𝓨} (hf : Continuous f) :
     IsTightMeasureSet (Measure.map f '' S) := by
   rw [isTightMeasureSet_iff_exists_isCompact_measure_compl_le] at hS ⊢
@@ -140,7 +140,7 @@ lemma map [OpensMeasurableSpace 𝓧] [TopologicalSpace 𝓨] [MeasurableSpace �
   exact subset_preimage_image f K
 
 /-- A set of measures on a product space is tight if both marginals are tight. -/
-lemma prodMk {m𝓨 : MeasurableSpace 𝓨} [TopologicalSpace 𝓨] {μ : Set (Measure (𝓧 × 𝓨))}
+lemma prodMk {m𝓨 : SigmaAlgebra 𝓨} [TopologicalSpace 𝓨] {μ : Set (Measure (𝓧 × 𝓨))}
     (hμ₁ : IsTightMeasureSet (Measure.fst '' μ)) (hμ₂ : IsTightMeasureSet (Measure.snd '' μ)) :
     IsTightMeasureSet μ := by
   rw [isTightMeasureSet_iff_exists_isCompact_measure_compl_le] at hμ₁ hμ₂ ⊢

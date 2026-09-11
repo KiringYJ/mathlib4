@@ -71,7 +71,7 @@ instance (r : ℝ≥0) : IsProbabilityMeasure Po(r) :=
 section Integral
 
 variable {E : Type*} [NormedAddCommGroup E]
-variable {R : Type*} [NatCast R] [MeasurableSpace R]
+variable {R : Type*} [NatCast R] [SigmaAlgebra R]
 
 lemma integrable_poissonMeasure_iff {r : ℝ≥0} {f : ℕ → E} :
     Integrable f Po(r) ↔ Summable (fun n ↦ exp (-r) * r ^ n / (n)! * ‖f n‖) := by
@@ -162,7 +162,7 @@ end CharFun
 
 section Convolution
 
-variable {R : Type*} [AddMonoidWithOne R] {mR : MeasurableSpace R}
+variable {R : Type*} [AddMonoidWithOne R] {mR : SigmaAlgebra R}
 
 private theorem map_cast_poissonMeasure_conv_real (r₁ r₂ : ℝ≥0) :
     Po(ℝ, r₁) ∗ Po(ℝ, r₂) = Po(ℝ, r₁ + r₂) := by
@@ -184,7 +184,7 @@ theorem map_cast_poissonMeasure_conv [MeasurableAdd₂ R] (r₁ r₂ : ℝ≥0) 
 
 /-- The sum of two independent Poisson random variables with rates `r₁, r₂` is a Poisson
 random variable with rate `r₁ + r₂`. -/
-theorem IndepFun.hasLaw_add_poissonMeasure {Ω : Type*} {mΩ : MeasurableSpace Ω}
+theorem IndepFun.hasLaw_add_poissonMeasure {Ω : Type*} {mΩ : SigmaAlgebra Ω}
     {P : Measure Ω} {r₁ r₂ : ℝ≥0} {X Y : Ω → ℕ}
     (hXY : IndepFun X Y P) (hX : HasLaw X Po(r₁) P) (hY : HasLaw Y Po(r₂) P) :
     HasLaw (X + Y) Po(r₁ + r₂) P := by
@@ -193,7 +193,7 @@ theorem IndepFun.hasLaw_add_poissonMeasure {Ω : Type*} {mΩ : MeasurableSpace �
 
 /-- The sum of two independent Poisson random variables with rates `r₁, r₂` taking values in `R`
 is a Poisson random variable with rate `r₁ + r₂`. -/
-theorem IndepFun.hasLaw_add_map_cast_poissonMeasure {Ω : Type*} {mΩ : MeasurableSpace Ω}
+theorem IndepFun.hasLaw_add_map_cast_poissonMeasure {Ω : Type*} {mΩ : SigmaAlgebra Ω}
     {P : Measure Ω} [MeasurableAdd₂ R] {r₁ r₂ : ℝ≥0} {X Y : Ω → R}
     (hXY : IndepFun X Y P) (hX : HasLaw X Po(R, r₁) P) (hY : HasLaw Y Po(R, r₂) P) :
     HasLaw (X + Y) Po(R, r₁ + r₂) P := by

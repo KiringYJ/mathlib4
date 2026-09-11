@@ -22,14 +22,14 @@ public section
 
 open Function Set Filter MeasureTheory TopologicalSpace
 
-variable {α X : Type*} [MeasurableSpace α] {μ : MeasureTheory.Measure α}
+variable {α X : Type*} [SigmaAlgebra α] {μ : MeasureTheory.Measure α}
 
 /-- Let `f : α → α` be a (quasi)ergodic map. Let `g : α → X` be a null-measurable function
 from `α` to a nonempty space with a countable family of measurable sets
 separating points of a set `s` such that `g x ∈ s` for a.e. `x`.
 If `g` is a.e.-invariant under `f`, then `g` is a.e. constant. -/
-theorem QuasiErgodic.ae_eq_const_of_ae_eq_comp_of_ae_range₀ [Nonempty X] [MeasurableSpace X]
-    {s : Set X} [MeasurableSpace.CountablySeparated s] {f : α → α} {g : α → X}
+theorem QuasiErgodic.ae_eq_const_of_ae_eq_comp_of_ae_range₀ [Nonempty X] [SigmaAlgebra X]
+    {s : Set X} [SigmaAlgebra.CountablySeparated s] {f : α → α} {g : α → X}
     (h : QuasiErgodic f μ) (hs : ∀ᵐ x ∂μ, g x ∈ s) (hgm : NullMeasurable g μ)
     (hg_eq : g ∘ f =ᵐ[μ] g) :
     ∃ c, g =ᵐ[μ] const α c := by
@@ -40,7 +40,7 @@ theorem QuasiErgodic.ae_eq_const_of_ae_eq_comp_of_ae_range₀ [Nonempty X] [Meas
 
 section CountableSeparatingOnUniv
 
-variable [Nonempty X] [MeasurableSpace X] [MeasurableSpace.CountablySeparated X]
+variable [Nonempty X] [SigmaAlgebra X] [SigmaAlgebra.CountablySeparated X]
   {f : α → α} {g : α → X}
 
 /-- Let `f : α → α` be a (pre)ergodic map.

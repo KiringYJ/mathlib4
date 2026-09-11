@@ -41,7 +41,7 @@ Gaussian random variable
 open MeasureTheory WithLp Complex Finset ContinuousLinearMap InnerProductSpace
 open scoped ENNReal NNReal RealInnerProductSpace
 
-variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω}
+variable {Ω : Type*} {mΩ : SigmaAlgebra Ω} {P : Measure Ω}
 
 
 section Diagonal
@@ -160,7 +160,7 @@ namespace ProbabilityTheory
 section iIndepFun
 
 variable {ι : Type*} [Finite ι] {E : ι → Type*}
-  [∀ i, NormedAddCommGroup (E i)] [∀ i, MeasurableSpace (E i)]
+  [∀ i, NormedAddCommGroup (E i)] [∀ i, SigmaAlgebra (E i)]
   [∀ i, CompleteSpace (E i)] [∀ i, BorelSpace (E i)] [∀ i, SecondCountableTopology (E i)]
 
 section NormedSpace
@@ -272,9 +272,9 @@ end iIndepFun
 section IndepFun
 
 variable {E F : Type*}
-    [NormedAddCommGroup E] [MeasurableSpace E]
+    [NormedAddCommGroup E] [SigmaAlgebra E]
     [CompleteSpace E] [BorelSpace E] [SecondCountableTopology E]
-    [NormedAddCommGroup F] [MeasurableSpace F]
+    [NormedAddCommGroup F] [SigmaAlgebra F]
     [CompleteSpace F] [BorelSpace F] [SecondCountableTopology F]
 
 /-- Independent Gaussian random variables are jointly Gaussian. -/
@@ -377,7 +377,7 @@ end IndepFun
 
 section AddSub
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [MeasurableSpace E] [BorelSpace E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [SigmaAlgebra E] [BorelSpace E]
   [SecondCountableTopology E]
 
 lemma iIndepFun.hasGaussianLaw_sum [CompleteSpace E] {ι : Type*} [Fintype ι] {X : ι → Ω → E}

@@ -83,7 +83,7 @@ Ionescu-Tulcea theorem
 
 @[expose] public section
 
-open Filter Finset Function MeasurableEquiv MeasurableSpace MeasureTheory Preorder ProbabilityTheory
+open Filter Finset Function MeasurableEquiv SigmaAlgebra MeasureTheory Preorder ProbabilityTheory
 
 open scoped ENNReal Topology
 
@@ -98,16 +98,16 @@ private lemma cast_pi {s t : Set ℕ} (h : s = t) (x : (i : s) → X i) (i : t) 
     cast (congrArg (fun u : Set ℕ ↦ (Π i : u, X i)) h) x i = x ⟨i.1, h.symm ▸ i.2⟩ := by
   cases h; rfl
 
-variable [∀ n, MeasurableSpace (X n)]
+variable [∀ n, SigmaAlgebra (X n)]
 
 private lemma measure_cast {a b : ℕ} (h : a = b) (μ : (n : ℕ) → Measure (Π i : Iic n, X i)) :
     (μ a).map (cast (Iic_pi_eq h)) = μ b := by
   cases h
   exact Measure.map_id
 
-private lemma heq_measurableSpace_Iic_pi {a b : ℕ} (h : a = b) :
-    (inferInstance : MeasurableSpace (Π i : Iic a, X i)) ≍
-      (inferInstance : MeasurableSpace (Π i : Iic b, X i)) := by cases h; rfl
+private lemma heq_sigmaAlgebra_Iic_pi {a b : ℕ} (h : a = b) :
+    (inferInstance : SigmaAlgebra (Π i : Iic a, X i)) ≍
+      (inferInstance : SigmaAlgebra (Π i : Iic b, X i)) := by cases h; rfl
 
 end castLemmas
 
@@ -134,7 +134,7 @@ lemma frestrictLe_iterateInduction {a : ℕ} (x : Π i : Iic a, X i)
 
 end iterateInduction
 
-variable [∀ n, MeasurableSpace (X n)]
+variable [∀ n, SigmaAlgebra (X n)]
 
 section ProjectiveFamily
 
@@ -492,7 +492,7 @@ theorem isProjectiveLimit_trajFun (a : ℕ) (x₀ : Π i : Iic a, X i) :
 variable {κ} in
 theorem measurable_trajFun (a : ℕ) : Measurable (trajFun κ a) := by
   apply Measure.measurable_of_measurable_coe
-  refine MeasurableSpace.induction_on_inter
+  refine SigmaAlgebra.induction_on_inter
     (C := fun t ht ↦ Measurable (fun x₀ ↦ trajFun κ a x₀ t))
     (s := measurableCylinders X) generateFrom_measurableCylinders.symm
     isPiSystem_measurableCylinders (by simp) (fun t ht ↦ ?cylinder) (fun t mt ht ↦ ?compl)

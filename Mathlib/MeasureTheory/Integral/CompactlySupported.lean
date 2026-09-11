@@ -25,7 +25,7 @@ open scoped ENNReal NNReal CompactlySupported
 variable {X : Type*}
 
 namespace CompactlySupportedContinuousMap
-variable [TopologicalSpace X] [MeasurableSpace X] [OpensMeasurableSpace X]
+variable [TopologicalSpace X] [SigmaAlgebra X] [OpensSigmaAlgebra X]
 
 lemma integrable {E : Type*} [NormedAddCommGroup E] (f : C_c(X, E))
     {μ : Measure X} [IsFiniteMeasureOnCompacts μ] :

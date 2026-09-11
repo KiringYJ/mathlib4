@@ -6,7 +6,7 @@ Authors: Yury Kudryashov
 module
 
 public import Mathlib.Data.Set.Card
-public import Mathlib.MeasureTheory.MeasurableSpace.Constructions
+public import Mathlib.MeasureTheory.SigmaAlgebra.Constructions
 
 /-!
 # Measurability of `Set.encard` and `Set.ncard`

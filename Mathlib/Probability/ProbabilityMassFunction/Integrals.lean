@@ -26,7 +26,7 @@ open MeasureTheory NNReal ENNReal TopologicalSpace
 
 section General
 
-variable {α : Type*} [MeasurableSpace α] [MeasurableSingletonClass α]
+variable {α : Type*} [SigmaAlgebra α] [MeasurableSingletonClass α]
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]
 
 theorem integral_eq_tsum (p : PMF α) (f : α → E) (hf : Integrable f p.toMeasure) :

@@ -155,7 +155,7 @@ variable [NormedAddCommGroup E] [NormedDivisionRing 𝕜]
 
 open scoped Classical in
 /-- The Bochner integral -/
-irreducible_def integral {_ : MeasurableSpace α} (μ : Measure α) (f : α → G) : G :=
+irreducible_def integral {_ : SigmaAlgebra α} (μ : Measure α) (f : α → G) : G :=
   if _ : CompleteSpace G then
     if hf : Integrable f μ then L1.integral (hf.toL1 f) else 0
   else 0
@@ -181,7 +181,7 @@ section Properties
 open ContinuousLinearMap MeasureTheory.SimpleFunc
 
 variable [NormedSpace ℝ E]
-variable {f : α → E} {m : MeasurableSpace α} {μ : Measure α}
+variable {f : α → E} {m : SigmaAlgebra α} {μ : Measure α}
 
 section Basic
 
@@ -302,7 +302,7 @@ theorem integral_congr_ae {f g : α → G} (h : f =ᵐ[μ] g) : ∫ a, f a ∂μ
   simp only [integral_eq_setToFun]
   exact setToFun_congr_ae (dominatedFinMeasAdditive_weightedSMul μ) h
 
-lemma integral_congr_ae₂ {β : Type*} {_ : MeasurableSpace β} {ν : Measure β} {f g : α → β → G}
+lemma integral_congr_ae₂ {β : Type*} {_ : SigmaAlgebra β} {ν : Measure β} {f g : α → β → G}
     (h : ∀ᵐ a ∂μ, f a =ᵐ[ν] g a) :
     ∫ a, ∫ b, f a b ∂ν ∂μ = ∫ a, ∫ b, g a b ∂ν ∂μ := by
   apply integral_congr_ae
@@ -525,7 +525,7 @@ theorem SimpleFunc.integral_eq_sum [CompleteSpace E] (f : α →ₛ E) (hfi : In
     ∫ x, f x ∂μ = ∑ x ∈ f.range, μ.real (f ⁻¹' {x}) • x := by
   rw [← f.integral_eq_integral hfi, SimpleFunc.integral, ← SimpleFunc.integral_eq]; rfl
 
-theorem tendsto_integral_approxOn_of_measurable [CompleteSpace E] [MeasurableSpace E] [BorelSpace E]
+theorem tendsto_integral_approxOn_of_measurable [CompleteSpace E] [SigmaAlgebra E] [BorelSpace E]
     {f : α → E} {s : Set E} [SeparableSpace s] (hfi : Integrable f μ) (hfm : Measurable f)
     (hs : ∀ᵐ x ∂μ, f x ∈ closure s) {y₀ : E} (h₀ : y₀ ∈ s) (h₀i : Integrable (fun _ => y₀) μ) :
     Tendsto (fun n => (SimpleFunc.approxOn f hfm s y₀ h₀ n).integral μ)
@@ -536,7 +536,7 @@ theorem tendsto_integral_approxOn_of_measurable [CompleteSpace E] [MeasurableSpa
     hfi hfm hs h₀ h₀i
 
 theorem tendsto_integral_approxOn_of_measurable_of_range_subset
-    [CompleteSpace E] [MeasurableSpace E] [BorelSpace E]
+    [CompleteSpace E] [SigmaAlgebra E] [BorelSpace E]
     {f : α → E} (fmeas : Measurable f) (hf : Integrable f μ) (s : Set E) [SeparableSpace s]
     (hs : range f ∪ {0} ⊆ s) :
     Tendsto (fun n => (SimpleFunc.approxOn f fmeas s 0 (hs <| by simp) n).integral μ) atTop
@@ -547,7 +547,7 @@ theorem tendsto_integral_approxOn_of_measurable_of_range_subset
 -- We redeclare `E` here to temporarily avoid
 -- the `[NormedSpace ℝ E]` instance.
 theorem tendsto_integral_norm_approxOn_sub
-    {E : Type*} [NormedAddCommGroup E] [MeasurableSpace E] [BorelSpace E] {f : α → E}
+    {E : Type*} [NormedAddCommGroup E] [SigmaAlgebra E] [BorelSpace E] {f : α → E}
     (fmeas : Measurable f) (hf : Integrable f μ) [SeparableSpace (range f ∪ {0} : Set E)] :
     Tendsto (fun n ↦ ∫ x, ‖SimpleFunc.approxOn f fmeas (range f ∪ {0}) 0 (by simp) n x - f x‖ ∂μ)
       atTop (𝓝 0) := by
@@ -981,7 +981,7 @@ theorem integral_add_measure {f : α → G} (hμ : Integrable f μ) (hν : Integ
   simp [weightedSMul, Measure.real, toReal_add, h's.1.ne, h's.2.ne, add_smul]
 
 @[simp]
-theorem integral_zero_measure {m : MeasurableSpace α} (f : α → G) :
+theorem integral_zero_measure {m : SigmaAlgebra α} (f : α → G) :
     (∫ x, f x ∂(0 : Measure α)) = 0 := by
   simp only [integral_eq_setToFun]
   exact setToFun_measure_zero (dominatedFinMeasAdditive_weightedSMul _) rfl
@@ -993,7 +993,7 @@ theorem setIntegral_measure_zero (f : α → G) {μ : Measure α} {s : Set α} (
 lemma integral_of_isEmpty [IsEmpty α] {f : α → G} : ∫ x, f x ∂μ = 0 :=
   μ.eq_zero_of_isEmpty ▸ integral_zero_measure _
 
-theorem integral_finsetSum_measure {ι} {m : MeasurableSpace α} {f : α → G} {μ : ι → Measure α}
+theorem integral_finsetSum_measure {ι} {m : SigmaAlgebra α} {f : α → G} {μ : ι → Measure α}
     {s : Finset ι} (hf : ∀ i ∈ s, Integrable f (μ i)) :
     ∫ a, f a ∂(∑ i ∈ s, μ i) = ∑ i ∈ s, ∫ a, f a ∂μ i := by
   induction s using Finset.cons_induction_on with
@@ -1031,7 +1031,7 @@ theorem integral_smul_nnreal_measure (f : α → G) (c : ℝ≥0) :
     ∫ x, f x ∂(c • μ) = c • ∫ x, f x ∂μ :=
   integral_smul_measure f (c : ℝ≥0∞)
 
-theorem integral_map_of_stronglyMeasurable {β} [MeasurableSpace β] {φ : α → β} (hφ : Measurable φ)
+theorem integral_map_of_stronglyMeasurable {β} [SigmaAlgebra β] {φ : α → β} (hφ : Measurable φ)
     {f : β → G} (hfm : StronglyMeasurable f) : ∫ y, f y ∂Measure.map φ μ = ∫ x, f (φ x) ∂μ := by
   by_cases hfi : Integrable f (Measure.map φ μ); swap
   · rw [integral_undef hfi, integral_undef]
@@ -1042,7 +1042,7 @@ theorem integral_map_of_stronglyMeasurable {β} [MeasurableSpace β] {φ : α �
   intro s x hs
   simp [weightedSMul_apply, map_measureReal_apply, hs, hφ]
 
-theorem integral_map {β} [MeasurableSpace β] {φ : α → β} (hφ : AEMeasurable φ μ) {f : β → G}
+theorem integral_map {β} [SigmaAlgebra β] {φ : α → β} (hφ : AEMeasurable φ μ) {f : β → G}
     (hfm : AEStronglyMeasurable f (Measure.map φ μ)) :
     ∫ y, f y ∂Measure.map φ μ = ∫ x, f (φ x) ∂μ :=
   let g := hfm.mk f
@@ -1054,7 +1054,7 @@ theorem integral_map {β} [MeasurableSpace β] {φ : α → β} (hφ : AEMeasura
     _ = ∫ x, g (φ x) ∂μ := integral_congr_ae (hφ.ae_eq_mk.symm.fun_comp _)
     _ = ∫ x, f (φ x) ∂μ := integral_congr_ae <| ae_eq_comp hφ hfm.ae_eq_mk.symm
 
-theorem _root_.MeasurableEmbedding.integral_map {β} {_ : MeasurableSpace β} {f : α → β}
+theorem _root_.MeasurableEmbedding.integral_map {β} {_ : SigmaAlgebra β} {f : α → β}
     (hf : MeasurableEmbedding f) (g : β → G) : ∫ y, g y ∂Measure.map f μ = ∫ x, g (f x) ∂μ := by
   by_cases hgm : AEStronglyMeasurable g (Measure.map f μ)
   · exact MeasureTheory.integral_map hf.measurable.aemeasurable hgm
@@ -1062,30 +1062,30 @@ theorem _root_.MeasurableEmbedding.integral_map {β} {_ : MeasurableSpace β} {f
     exact fun hgf => hgm (hf.aestronglyMeasurable_map_iff.2 hgf)
 
 theorem _root_.Topology.IsClosedEmbedding.integral_map {β} [TopologicalSpace α] [BorelSpace α]
-    [TopologicalSpace β] [MeasurableSpace β] [BorelSpace β] {φ : α → β} (hφ : IsClosedEmbedding φ)
+    [TopologicalSpace β] [SigmaAlgebra β] [BorelSpace β] {φ : α → β} (hφ : IsClosedEmbedding φ)
     (f : β → G) : ∫ y, f y ∂Measure.map φ μ = ∫ x, f (φ x) ∂μ :=
   hφ.measurableEmbedding.integral_map _
 
-theorem integral_map_equiv {β} [MeasurableSpace β] (e : α ≃ᵐ β) (f : β → G) :
+theorem integral_map_equiv {β} [SigmaAlgebra β] (e : α ≃ᵐ β) (f : β → G) :
     ∫ y, f y ∂Measure.map e μ = ∫ x, f (e x) ∂μ :=
   e.measurableEmbedding.integral_map f
 
 omit hE in
 lemma integral_domSMul {G A : Type*} [Group G] [AddCommGroup A] [DistribMulAction G A]
-    [MeasurableSpace A] [MeasurableConstSMul G A] {μ : Measure A} (g : Gᵈᵐᵃ) (f : A → E) :
+    [SigmaAlgebra A] [MeasurableConstSMul G A] {μ : Measure A} (g : Gᵈᵐᵃ) (f : A → E) :
     ∫ x, f x ∂g • μ = ∫ x, f ((DomMulAct.mk.symm g)⁻¹ • x) ∂μ :=
   integral_map_equiv (MeasurableEquiv.smul ((DomMulAct.mk.symm g : G)⁻¹)) f
 
-theorem MeasurePreserving.integral_comp {β} {_ : MeasurableSpace β} {f : α → β} {ν}
+theorem MeasurePreserving.integral_comp {β} {_ : SigmaAlgebra β} {f : α → β} {ν}
     (h₁ : MeasurePreserving f μ ν) (h₂ : MeasurableEmbedding f) (g : β → G) :
     ∫ x, g (f x) ∂μ = ∫ y, g y ∂ν :=
   h₁.map_eq ▸ (h₂.integral_map g).symm
 
-theorem MeasurePreserving.integral_comp' {β} [MeasurableSpace β] {ν} {f : α ≃ᵐ β}
+theorem MeasurePreserving.integral_comp' {β} [SigmaAlgebra β] {ν} {f : α ≃ᵐ β}
     (h : MeasurePreserving f μ ν) (g : β → G) :
     ∫ x, g (f x) ∂μ = ∫ y, g y ∂ν := MeasurePreserving.integral_comp h f.measurableEmbedding _
 
-theorem integral_subtype_comap {α} [MeasurableSpace α] {μ : Measure α} {s : Set α}
+theorem integral_subtype_comap {α} [SigmaAlgebra α] {μ : Measure α} {s : Set α}
     (hs : MeasurableSet s) (f : α → G) :
     ∫ x : s, f (x : α) ∂(Measure.comap Subtype.val μ) = ∫ x in s, f x ∂μ := by
   rw [← map_comap_subtype_coe hs]
@@ -1096,7 +1096,7 @@ theorem integral_subtype {α} [MeasureSpace α] {s : Set α} (hs : MeasurableSet
     ∫ x : s, f x = ∫ x in s, f x := integral_subtype_comap hs f
 
 @[simp]
-theorem integral_dirac' [MeasurableSpace α] (f : α → E) (a : α) (hfm : StronglyMeasurable f) :
+theorem integral_dirac' [SigmaAlgebra α] (f : α → E) (a : α) (hfm : StronglyMeasurable f) :
     ∫ x, f x ∂Measure.dirac a = f a := by
   borelize E
   calc
@@ -1105,13 +1105,13 @@ theorem integral_dirac' [MeasurableSpace α] (f : α → E) (a : α) (hfm : Stro
     _ = f a := by simp
 
 @[simp]
-theorem integral_dirac [MeasurableSpace α] [MeasurableSingletonClass α] (f : α → E) (a : α) :
+theorem integral_dirac [SigmaAlgebra α] [MeasurableSingletonClass α] (f : α → E) (a : α) :
     ∫ x, f x ∂Measure.dirac a = f a :=
   calc
     ∫ x, f x ∂Measure.dirac a = ∫ _, f a ∂Measure.dirac a := integral_congr_ae <| ae_eq_dirac f
     _ = f a := by simp
 
-theorem setIntegral_dirac' {mα : MeasurableSpace α} {f : α → E} (hf : StronglyMeasurable f) (a : α)
+theorem setIntegral_dirac' {mα : SigmaAlgebra α} {f : α → E} (hf : StronglyMeasurable f) (a : α)
     {s : Set α} (hs : MeasurableSet s) [Decidable (a ∈ s)] :
     ∫ x in s, f x ∂Measure.dirac a = if a ∈ s then f a else 0 := by
   rw [restrict_dirac' hs]
@@ -1119,7 +1119,7 @@ theorem setIntegral_dirac' {mα : MeasurableSpace α} {f : α → E} (hf : Stron
   · exact integral_dirac' _ _ hf
   · exact integral_zero_measure _
 
-theorem setIntegral_dirac [MeasurableSpace α] [MeasurableSingletonClass α] (f : α → E) (a : α)
+theorem setIntegral_dirac [SigmaAlgebra α] [MeasurableSingletonClass α] (f : α → E) (a : α)
     (s : Set α) [Decidable (a ∈ s)] :
     ∫ x in s, f x ∂Measure.dirac a = if a ∈ s then f a else 0 := by
   rw [restrict_dirac]
@@ -1233,11 +1233,11 @@ end Properties
 
 section IntegralTrim
 
-variable {β γ : Type*} {m m0 : MeasurableSpace β} {μ : Measure β}
+variable {β γ : Type*} {m m0 : SigmaAlgebra β} {μ : Measure β}
 
-/-- Simple function seen as simple function of a larger `MeasurableSpace`. -/
+/-- Simple function seen as simple function of a larger `SigmaAlgebra`. -/
 def SimpleFunc.toLargerSpace (hm : m ≤ m0) (f : @SimpleFunc β m γ) : SimpleFunc β γ :=
-  ⟨@SimpleFunc.toFun β m γ f, fun x => hm _ (@SimpleFunc.measurableSet_fiber β γ m f x),
+  ⟨@SimpleFunc.toFun β m γ f, fun x => hm (@SimpleFunc.measurableSet_fiber β γ m f x),
     @SimpleFunc.finite_range β γ m f⟩
 
 theorem SimpleFunc.coe_toLargerSpace_eq (hm : m ≤ m0) (f : @SimpleFunc β m γ) :
@@ -1301,7 +1301,7 @@ end IntegralTrim
 
 section SnormBound
 
-variable {m0 : MeasurableSpace α} {μ : Measure α} {f : α → ℝ}
+variable {m0 : SigmaAlgebra α} {μ : Measure α} {f : α → ℝ}
 
 theorem eLpNorm_one_le_of_le {r : ℝ≥0} (hfint : Integrable f μ) (hfint' : 0 ≤ ∫ x, f x ∂μ)
     (hf : ∀ᵐ ω ∂μ, f ω ≤ r) : eLpNorm f 1 μ ≤ 2 * μ Set.univ * r := by

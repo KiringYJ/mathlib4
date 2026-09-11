@@ -20,7 +20,7 @@ Definition and properties of stopping times.
 * `MeasureTheory.IsStoppingTime`: a stopping time with respect to some filtration `f` on a
   measurable space `Ω` is a function `τ : Ω → WithTop ι` such that for all `i : ι`,
   the preimage of `{j | j ≤ i}` along `τ` is `f i`-measurable
-* `MeasureTheory.IsStoppingTime.measurableSpace`: the σ-algebra associated with a stopping time
+* `MeasureTheory.IsStoppingTime.sigmaAlgebra`: the σ-algebra associated with a stopping time
 
 ## Main results
 
@@ -62,7 +62,7 @@ open scoped MeasureTheory NNReal ENNReal Topology
 
 namespace MeasureTheory
 
-variable {Ω β ι : Type*} {m : MeasurableSpace Ω}
+variable {Ω β ι : Type*} {m : SigmaAlgebra Ω}
 
 /-! ### Stopping times -/
 
@@ -108,7 +108,7 @@ theorem IsStoppingTime.measurableSet_lt_of_pred [PredOrder ι] (hτ : IsStopping
       simp only [coe_lt_coe, coe_le_coe]
       rw [le_pred_iff_of_not_isMin hi_min]
   rw [this]
-  exact f.mono (pred_le i) _ (hτ.measurableSet_le <| pred i)
+  exact f.mono (pred_le i) (hτ.measurableSet_le <| pred i)
 
 end Preorder
 
@@ -134,7 +134,7 @@ protected theorem measurableSet_eq_of_countable_range (hτ : IsStoppingTime f τ
   rw [Set.iUnion_eq_if]
   split_ifs with hji
   · lift j to ι using (ne_top_of_lt hji)
-    exact f.mono (mod_cast hji.le) _ (hτ.measurableSet_le j)
+    exact f.mono (mod_cast hji.le) (hτ.measurableSet_le j)
   · exact @MeasurableSet.empty _ (f i)
 
 protected theorem measurableSet_eq_of_countable [Countable ι] (hτ : IsStoppingTime f τ) (i : ι) :
@@ -215,7 +215,7 @@ theorem IsStoppingTime.measurableSet_lt_of_isLUB (hτ : IsStoppingTime f τ) (i 
     ext1 ω; push _ ∈ _; rfl
   rw [h_lt_eq_preimage, h_Iio_eq_Union]
   simp only [Set.preimage_iUnion, Set.preimage_ofPred_eq]
-  exact MeasurableSet.iUnion fun n => f.mono (h_bound n).le _ (hτ.measurableSet_le (seq n))
+  exact MeasurableSet.iUnion fun n => f.mono (h_bound n).le (hτ.measurableSet_le (seq n))
 
 theorem IsStoppingTime.measurableSet_lt (hτ : IsStoppingTime f τ) (i : ι) :
     MeasurableSet[f i] {ω | τ ω < i} := by
@@ -227,7 +227,7 @@ theorem IsStoppingTime.measurableSet_lt (hτ : IsStoppingTime f τ) (i : ι) :
     have h_Iio_eq_Iic' : Set.Iio (i : WithTop ι) = Set.Iic (i' : WithTop ι) := by
       rw [← image_coe_Iio, ← image_coe_Iic, h_Iio_eq_Iic]
     rw [h_lt_eq_preimage, h_Iio_eq_Iic']
-    exact f.mono (le_of_isLUB_Iio i hi'_lub) _ (hτ.measurableSet_le i')
+    exact f.mono (le_of_isLUB_Iio i hi'_lub) (hτ.measurableSet_le i')
 
 theorem IsStoppingTime.measurableSet_ge (hτ : IsStoppingTime f τ) (i : ι) :
     MeasurableSet[f i] {ω | i ≤ τ ω} := by
@@ -245,11 +245,11 @@ theorem IsStoppingTime.measurableSet_eq (hτ : IsStoppingTime f τ) (i : ι) :
 
 theorem IsStoppingTime.measurableSet_eq_le (hτ : IsStoppingTime f τ) {i j : ι} (hle : i ≤ j) :
     MeasurableSet[f j] {ω | τ ω = i} :=
-  f.mono hle _ <| hτ.measurableSet_eq i
+  f.mono hle <| hτ.measurableSet_eq i
 
 theorem IsStoppingTime.measurableSet_lt_le (hτ : IsStoppingTime f τ) {i j : ι} (hle : i ≤ j) :
     MeasurableSet[f j] {ω | τ ω < i} :=
-  f.mono hle _ <| hτ.measurableSet_lt i
+  f.mono hle <| hτ.measurableSet_lt i
 
 end TopologicalSpace
 
@@ -268,7 +268,7 @@ theorem isStoppingTime_of_measurableSet_eq [Preorder ι] [Countable ι] {f : Fil
     | coe a => norm_cast; simp
   rw [h_eq_iUnion]
   refine MeasurableSet.biUnion (Set.to_countable _) fun k hk => ?_
-  exact f.mono hk _ (hτ k)
+  exact f.mono hk (hτ k)
 
 end Countable
 
@@ -320,7 +320,8 @@ lemma isStoppingTime_of_measurableSet_lt_of_isRightContinuous' [hf : f.IsRightCo
       intro i hti
       obtain ⟨m, hm⟩ := h_exists_lt i hti
       exact (iInf_le _ m).trans (f.mono hm.le)
-  rw [h𝓕_eq_iInf, MeasurableSpace.measurableSet_iInf]
+  change (⋂ m, {ω | τ ω < s m}) ∈ f t
+  rw [h𝓕_eq_iInf, SigmaAlgebra.mem_iInf]
   intro k
   have h_eq_k : ⋂ m, {ω | τ ω < s m} = ⋂ (m) (hm : s m ≤ s k), {ω | τ ω < s m} := by
     ext x
@@ -330,7 +331,7 @@ lemma isStoppingTime_of_measurableSet_lt_of_isRightContinuous' [hf : f.IsRightCo
     · exact h m hmk
     · exact (h k le_rfl).trans_le (mod_cast hkm)
   rw [h_eq_k]
-  exact MeasurableSet.iInter fun m ↦ MeasurableSet.iInter fun hm ↦ f.mono hm _ (hτ1 (s m))
+  exact MeasurableSet.iInter fun m ↦ MeasurableSet.iInter fun hm ↦ f.mono hm (hτ1 (s m))
 
 lemma isStoppingTime_of_measurableSet_lt_of_isRightContinuous [DenselyOrdered ι] [NoMaxOrder ι]
     {τ : Ω → WithTop ι} [f.IsRightContinuous] (hτ : ∀ i, MeasurableSet[f i] {ω | τ ω < i}) :
@@ -398,7 +399,7 @@ theorem add_const [AddGroup ι] [Preorder ι] [AddRightMono ι]
     | top => simp
     | coe a => norm_cast; simp_rw [← le_sub_iff_add_le]
   rw [h_eq]
-  exact f.mono (sub_le_self j hi) _ (hτ (j - i))
+  exact f.mono (sub_le_self j hi) (hτ (j - i))
 
 theorem add_const' [Add ι] [LinearOrder ι] [CanonicallyOrderedAdd ι] [Countable ι]
     [TopologicalSpace ι] [OrderTopology ι]
@@ -437,32 +438,36 @@ variable [Preorder ι] {f : Filtration ι m} {τ π : Ω → WithTop ι}
 
 /-- The associated σ-algebra with a stopping time. -/
 @[instance_reducible]
-protected def measurableSpace (hτ : IsStoppingTime f τ) : MeasurableSpace Ω where
-  MeasurableSet' s := MeasurableSet[⨆ t, f t] s ∧ ∀ i : ι, MeasurableSet[f i] (s ∩ {ω | τ ω ≤ i})
-  measurableSet_empty := by simp
-  measurableSet_compl s hs := by
-    refine ⟨hs.1.compl, fun i ↦ ?_⟩
-    rw [(_ : sᶜ ∩ {ω | τ ω ≤ i} = (sᶜ ∪ {ω | τ ω ≤ i}ᶜ) ∩ {ω | τ ω ≤ i})]
-    · refine MeasurableSet.inter ?_ ?_
-      · rw [← Set.compl_inter]
-        exact (hs.2 i).compl
-      · exact hτ i
-    · rw [Set.union_inter_distrib_right]
-      simp only [Set.compl_inter_self, Set.union_empty]
-  measurableSet_iUnion s hs := by
-    refine ⟨MeasurableSet.iUnion fun i ↦ (hs i).1, fun i ↦ ?_⟩
-    replace hs := fun i ↦ (hs i).2
-    rw [forall_comm] at hs
-    rw [Set.iUnion_inter]
-    exact MeasurableSet.iUnion (hs i)
+protected def sigmaAlgebra (hτ : IsStoppingTime f τ) : SigmaAlgebra Ω where
+  carrier := {s | MeasurableSet[⨆ t, f t] s ∧
+    ∀ i : ι, MeasurableSet[f i] (s ∩ {ω | τ ω ≤ i})}
+  isSigmaAlgebra := {
+    empty_mem := by simp
+    compl_mem := by
+      rintro s hs
+      refine ⟨hs.1.compl, fun i ↦ ?_⟩
+      rw [(_ : sᶜ ∩ {ω | τ ω ≤ i} = (sᶜ ∪ {ω | τ ω ≤ i}ᶜ) ∩ {ω | τ ω ≤ i})]
+      · refine MeasurableSet.inter ?_ ?_
+        · rw [← Set.compl_inter]
+          exact (hs.2 i).compl
+        · exact hτ i
+      · rw [Set.union_inter_distrib_right]
+        simp only [Set.compl_inter_self, Set.union_empty]
+    iUnion_mem_nat := by
+      intro s hs
+      refine ⟨MeasurableSet.iUnion fun i ↦ (hs i).1, fun i ↦ ?_⟩
+      replace hs := fun i ↦ (hs i).2
+      rw [forall_comm] at hs
+      rw [Set.iUnion_inter]
+      exact MeasurableSet.iUnion (hs i) }
 
 protected theorem measurableSet (hτ : IsStoppingTime f τ) (s : Set Ω) :
-    MeasurableSet[hτ.measurableSpace] s
+    MeasurableSet[hτ.sigmaAlgebra] s
       ↔ MeasurableSet[⨆ t, f t] s ∧ ∀ i : ι, MeasurableSet[f i] (s ∩ {ω | τ ω ≤ i}) :=
   Iff.rfl
 
-theorem measurableSpace_mono (hτ : IsStoppingTime f τ) (hπ : IsStoppingTime f π) (hle : τ ≤ π) :
-    hτ.measurableSpace ≤ hπ.measurableSpace := by
+theorem sigmaAlgebra_mono (hτ : IsStoppingTime f τ) (hπ : IsStoppingTime f π) (hle : τ ≤ π) :
+    hτ.sigmaAlgebra ≤ hπ.sigmaAlgebra := by
   refine fun s hs ↦ ⟨hs.1, fun i ↦ ?_⟩
   rw [(_ : s ∩ {ω | π ω ≤ i} = s ∩ {ω | τ ω ≤ i} ∩ {ω | π ω ≤ i})]
   · exact (hs.2 i).inter (hπ i)
@@ -471,30 +476,31 @@ theorem measurableSpace_mono (hτ : IsStoppingTime f τ) (hπ : IsStoppingTime f
     intro hle' _
     exact le_trans (hle _) hle'
 
-theorem measurableSpace_le' (hτ : IsStoppingTime f τ) :
-    hτ.measurableSpace ≤ ⨆ t, f t := fun _ hs ↦ hs.1
+theorem sigmaAlgebra_le' (hτ : IsStoppingTime f τ) :
+    hτ.sigmaAlgebra ≤ ⨆ t, f t := fun _ hs ↦ hs.1
 
-theorem measurableSpace_le (hτ : IsStoppingTime f τ) : hτ.measurableSpace ≤ m :=
-  hτ.measurableSpace_le'.trans (iSup_le f.le)
+theorem sigmaAlgebra_le (hτ : IsStoppingTime f τ) : hτ.sigmaAlgebra ≤ m :=
+  hτ.sigmaAlgebra_le'.trans (iSup_le f.le)
 
 @[simp]
-theorem measurableSpace_const (f : Filtration ι m) (i : ι) :
-    (isStoppingTime_const f i).measurableSpace = f i := by
+theorem sigmaAlgebra_const (f : Filtration ι m) (i : ι) :
+    (isStoppingTime_const f i).sigmaAlgebra = f i := by
   ext1 s
+  change MeasurableSet[(isStoppingTime_const f i).sigmaAlgebra] s ↔ MeasurableSet[f i] s
   rw [IsStoppingTime.measurableSet]
   constructor <;> intro h
   · have h' := h.2 i
     simpa only [le_refl, Set.ofPred_true, Set.inter_univ] using h'
-  · refine ⟨le_iSup f i s h, fun j ↦ ?_⟩
+  · refine ⟨le_iSup f i h, fun j ↦ ?_⟩
     by_cases hij : i ≤ j
     · norm_cast
       simp only [hij, Set.ofPred_true, Set.inter_univ]
-      exact f.mono hij _ h
+      exact f.mono hij h
     · norm_cast
       simp only [hij, Set.ofPred_false, Set.inter_empty, @MeasurableSet.empty _ (f.1 j)]
 
 theorem measurableSet_inter_eq_iff (hτ : IsStoppingTime f τ) (s : Set Ω) (i : ι) :
-    MeasurableSet[hτ.measurableSpace] (s ∩ {ω | τ ω = i}) ↔
+    MeasurableSet[hτ.sigmaAlgebra] (s ∩ {ω | τ ω = i}) ↔
       MeasurableSet[f i] (s ∩ {ω | τ ω = i}) := by
   have : ∀ j, {ω : Ω | τ ω = i} ∩ {ω : Ω | τ ω ≤ j} = {ω : Ω | τ ω = i} ∩ {_ω | i ≤ j} := by
     intro j
@@ -504,44 +510,44 @@ theorem measurableSet_inter_eq_iff (hτ : IsStoppingTime f τ) (s : Set Ω) (i :
     rw [hxi]
   constructor <;> intro h
   · simpa [Set.inter_assoc, this] using h.2 i
-  · refine ⟨le_iSup f i _ h, fun j ↦ ?_⟩
+  · refine ⟨le_iSup f i h, fun j ↦ ?_⟩
     rw [Set.inter_assoc, this]
     by_cases hij : i ≤ j
     · norm_cast
       simp only [hij, Set.ofPred_true, Set.inter_univ]
-      exact f.mono hij _ h
+      exact f.mono hij h
     · simp [hij]
 
-theorem measurableSpace_le_of_le_const (hτ : IsStoppingTime f τ) {i : ι} (hτ_le : ∀ ω, τ ω ≤ i) :
-    hτ.measurableSpace ≤ f i :=
-  (measurableSpace_mono hτ _ hτ_le).trans (measurableSpace_const _ _).le
+theorem sigmaAlgebra_le_of_le_const (hτ : IsStoppingTime f τ) {i : ι} (hτ_le : ∀ ω, τ ω ≤ i) :
+    hτ.sigmaAlgebra ≤ f i :=
+  (sigmaAlgebra_mono hτ _ hτ_le).trans (sigmaAlgebra_const _ _).le
 
-theorem measurableSpace_le_of_le (hτ : IsStoppingTime f τ) {n : ι} (hτ_le : ∀ ω, τ ω ≤ n) :
-    hτ.measurableSpace ≤ m :=
-  (hτ.measurableSpace_le_of_le_const hτ_le).trans (f.le n)
+theorem sigmaAlgebra_le_of_le (hτ : IsStoppingTime f τ) {n : ι} (hτ_le : ∀ ω, τ ω ≤ n) :
+    hτ.sigmaAlgebra ≤ m :=
+  (hτ.sigmaAlgebra_le_of_le_const hτ_le).trans (f.le n)
 
-theorem le_measurableSpace_of_const_le (hτ : IsStoppingTime f τ) {i : ι} (hτ_le : ∀ ω, i ≤ τ ω) :
-    f i ≤ hτ.measurableSpace :=
-  (measurableSpace_const _ _).symm.le.trans (measurableSpace_mono _ hτ hτ_le)
+theorem le_sigmaAlgebra_of_const_le (hτ : IsStoppingTime f τ) {i : ι} (hτ_le : ∀ ω, i ≤ τ ω) :
+    f i ≤ hτ.sigmaAlgebra :=
+  (sigmaAlgebra_const _ _).symm.le.trans (sigmaAlgebra_mono _ hτ hτ_le)
 
 end Preorder
 
 instance sigmaFinite_stopping_time {ι} [SemilatticeSup ι] [OrderBot ι]
     {μ : Measure Ω} {f : Filtration ι m}
     {τ : Ω → WithTop ι} [SigmaFiniteFiltration μ f] (hτ : IsStoppingTime f τ) :
-    SigmaFinite (μ.trim hτ.measurableSpace_le) := by
+    SigmaFinite (μ.trim hτ.sigmaAlgebra_le) := by
   refine @sigmaFiniteTrim_mono _ _ ?_ _ _ _ ?_ ?_
   · exact f ⊥
-  · exact hτ.le_measurableSpace_of_const_le fun _ => bot_le
+  · exact hτ.le_sigmaAlgebra_of_const_le fun _ => bot_le
   · infer_instance
 
 instance sigmaFinite_stopping_time_of_le {ι} [SemilatticeSup ι] [OrderBot ι] {μ : Measure Ω}
     {f : Filtration ι m} {τ : Ω → WithTop ι} [SigmaFiniteFiltration μ f]
     (hτ : IsStoppingTime f τ) {n : ι}
-    (hτ_le : ∀ ω, τ ω ≤ n) : SigmaFinite (μ.trim (hτ.measurableSpace_le_of_le hτ_le)) := by
+    (hτ_le : ∀ ω, τ ω ≤ n) : SigmaFinite (μ.trim (hτ.sigmaAlgebra_le_of_le hτ_le)) := by
   refine @sigmaFiniteTrim_mono _ _ ?_ _ _ _ ?_ ?_
   · exact f ⊥
-  · exact hτ.le_measurableSpace_of_const_le fun _ => bot_le
+  · exact hτ.le_sigmaAlgebra_of_const_le fun _ => bot_le
   · infer_instance
 
 section LinearOrder
@@ -549,29 +555,29 @@ section LinearOrder
 variable [LinearOrder ι] {f : Filtration ι m} {τ π : Ω → WithTop ι}
 
 protected theorem measurableSet_le' (hτ : IsStoppingTime f τ) (i : ι) :
-    MeasurableSet[hτ.measurableSpace] {ω | τ ω ≤ i} := by
-  refine ⟨le_iSup f i _ (hτ i), fun j ↦ ?_⟩
+    MeasurableSet[hτ.sigmaAlgebra] {ω | τ ω ≤ i} := by
+  refine ⟨le_iSup f i (hτ i), fun j ↦ ?_⟩
   have : {ω : Ω | τ ω ≤ i} ∩ {ω : Ω | τ ω ≤ j} = {ω : Ω | τ ω ≤ min i j} := by
     ext1 ω
     simp [Set.mem_inter_iff, Set.mem_ofPred_eq]
   rw [this]
-  exact f.mono (min_le_right i j) _ (hτ _)
+  exact f.mono (min_le_right i j) (hτ _)
 
 protected theorem measurableSet_gt' (hτ : IsStoppingTime f τ) (i : ι) :
-    MeasurableSet[hτ.measurableSpace] {ω | i < τ ω} := by
+    MeasurableSet[hτ.sigmaAlgebra] {ω | i < τ ω} := by
   have : {ω : Ω | i < τ ω} = {ω : Ω | τ ω ≤ i}ᶜ := by ext1 ω; simp
   rw [this]
   exact (hτ.measurableSet_le' i).compl
 
 protected theorem measurableSet_eq' [TopologicalSpace ι] [OrderTopology ι]
     [FirstCountableTopology ι] (hτ : IsStoppingTime f τ) (i : ι) :
-    MeasurableSet[hτ.measurableSpace] {ω | τ ω = i} := by
+    MeasurableSet[hτ.sigmaAlgebra] {ω | τ ω = i} := by
   rw [← Set.univ_inter {ω | τ ω = i}, measurableSet_inter_eq_iff, Set.univ_inter]
   exact hτ.measurableSet_eq i
 
 protected theorem measurableSet_ge' [TopologicalSpace ι] [OrderTopology ι]
     [FirstCountableTopology ι] (hτ : IsStoppingTime f τ) (i : ι) :
-    MeasurableSet[hτ.measurableSpace] {ω | i ≤ τ ω} := by
+    MeasurableSet[hτ.sigmaAlgebra] {ω | i ≤ τ ω} := by
   have : {ω | i ≤ τ ω} = {ω | τ ω = i} ∪ {ω | i < τ ω} := by
     ext1 ω
     simp only [le_iff_lt_or_eq, Set.mem_ofPred_eq, Set.mem_union]
@@ -585,7 +591,7 @@ protected theorem measurableSet_ge' [TopologicalSpace ι] [OrderTopology ι]
 
 protected theorem measurableSet_lt' [TopologicalSpace ι] [OrderTopology ι]
     [FirstCountableTopology ι] (hτ : IsStoppingTime f τ) (i : ι) :
-    MeasurableSet[hτ.measurableSpace] {ω | τ ω < i} := by
+    MeasurableSet[hτ.sigmaAlgebra] {ω | τ ω < i} := by
   have : {ω | τ ω < i} = {ω | τ ω ≤ i} \ {ω | τ ω = i} := by
     ext1 ω
     simp only [lt_iff_le_and_ne, Set.mem_ofPred_eq, Set.mem_sdiff]
@@ -596,17 +602,17 @@ section Countable
 
 protected theorem measurableSet_eq_of_countable_range' (hτ : IsStoppingTime f τ)
     (h_countable : (Set.range τ).Countable) (i : ι) :
-    MeasurableSet[hτ.measurableSpace] {ω | τ ω = i} := by
+    MeasurableSet[hτ.sigmaAlgebra] {ω | τ ω = i} := by
   rw [← Set.univ_inter {ω | τ ω = i}, measurableSet_inter_eq_iff, Set.univ_inter]
   exact hτ.measurableSet_eq_of_countable_range h_countable i
 
 protected theorem measurableSet_eq_of_countable' [Countable ι] (hτ : IsStoppingTime f τ) (i : ι) :
-    MeasurableSet[hτ.measurableSpace] {ω | τ ω = i} :=
+    MeasurableSet[hτ.sigmaAlgebra] {ω | τ ω = i} :=
   hτ.measurableSet_eq_of_countable_range' (Set.to_countable _) i
 
 protected theorem measurableSet_ge_of_countable_range' (hτ : IsStoppingTime f τ)
     (h_countable : (Set.range τ).Countable) (i : ι) :
-    MeasurableSet[hτ.measurableSpace] {ω | i ≤ τ ω} := by
+    MeasurableSet[hτ.sigmaAlgebra] {ω | i ≤ τ ω} := by
   have : {ω | i ≤ τ ω} = {ω | τ ω = i} ∪ {ω | i < τ ω} := by
     ext1 ω
     simp only [le_iff_lt_or_eq, Set.mem_ofPred_eq, Set.mem_union]
@@ -619,12 +625,12 @@ protected theorem measurableSet_ge_of_countable_range' (hτ : IsStoppingTime f �
   exact (hτ.measurableSet_eq_of_countable_range' h_countable i).union (hτ.measurableSet_gt' i)
 
 protected theorem measurableSet_ge_of_countable' [Countable ι] (hτ : IsStoppingTime f τ) (i : ι) :
-    MeasurableSet[hτ.measurableSpace] {ω | i ≤ τ ω} :=
+    MeasurableSet[hτ.sigmaAlgebra] {ω | i ≤ τ ω} :=
   hτ.measurableSet_ge_of_countable_range' (Set.to_countable _) i
 
 protected theorem measurableSet_lt_of_countable_range' (hτ : IsStoppingTime f τ)
     (h_countable : (Set.range τ).Countable) (i : ι) :
-    MeasurableSet[hτ.measurableSpace] {ω | τ ω < i} := by
+    MeasurableSet[hτ.sigmaAlgebra] {ω | τ ω < i} := by
   have : {ω | τ ω < i} = {ω | τ ω ≤ i} \ {ω | τ ω = i} := by
     ext1 ω
     simp only [lt_iff_le_and_ne, Set.mem_ofPred_eq, Set.mem_sdiff]
@@ -632,14 +638,14 @@ protected theorem measurableSet_lt_of_countable_range' (hτ : IsStoppingTime f �
   exact (hτ.measurableSet_le' i).diff (hτ.measurableSet_eq_of_countable_range' h_countable i)
 
 protected theorem measurableSet_lt_of_countable' [Countable ι] (hτ : IsStoppingTime f τ) (i : ι) :
-    MeasurableSet[hτ.measurableSpace] {ω | τ ω < i} :=
+    MeasurableSet[hτ.sigmaAlgebra] {ω | τ ω < i} :=
   hτ.measurableSet_lt_of_countable_range' (Set.to_countable _) i
 
 end Countable
 
 protected theorem measurable [TopologicalSpace ι]
     [OrderTopology ι] [SecondCountableTopology ι] (hτ : IsStoppingTime f τ) :
-    Measurable[hτ.measurableSpace] τ := by
+    Measurable[hτ.sigmaAlgebra] τ := by
   refine measurable_of_Iic fun i ↦ ?_
   cases i with
   | top => simp
@@ -647,11 +653,11 @@ protected theorem measurable [TopologicalSpace ι]
 
 protected theorem measurable' [TopologicalSpace ι]
     [OrderTopology ι] [SecondCountableTopology ι] (hτ : IsStoppingTime f τ) :
-    Measurable τ := hτ.measurable.mono (measurableSpace_le hτ) le_rfl
+    Measurable τ := hτ.measurable.mono (sigmaAlgebra_le hτ) le_rfl
 
 protected theorem measurable_iSup [TopologicalSpace ι]
     [OrderTopology ι] [SecondCountableTopology ι] (hτ : IsStoppingTime f τ) :
-    Measurable[⨆ t, f t] τ := hτ.measurable.mono (measurableSpace_le' hτ) le_rfl
+    Measurable[⨆ t, f t] τ := hτ.measurable.mono (sigmaAlgebra_le' hτ) le_rfl
 
 protected lemma measurableSet_eq_top [TopologicalSpace ι]
     [OrderTopology ι] [SecondCountableTopology ι] (hτ : IsStoppingTime f τ) :
@@ -666,16 +672,16 @@ protected lemma measurableSet_eq_top' [TopologicalSpace ι]
 protected theorem measurable_of_le [TopologicalSpace ι]
     [OrderTopology ι] [SecondCountableTopology ι] (hτ : IsStoppingTime f τ) {i : ι}
     (hτ_le : ∀ ω, τ ω ≤ i) : Measurable[f i] τ :=
-  hτ.measurable.mono (measurableSpace_le_of_le_const _ hτ_le) le_rfl
+  hτ.measurable.mono (sigmaAlgebra_le_of_le_const _ hτ_le) le_rfl
 
-theorem measurableSpace_min (hτ : IsStoppingTime f τ) (hπ : IsStoppingTime f π) :
-    (hτ.min hπ).measurableSpace = hτ.measurableSpace ⊓ hπ.measurableSpace := by
+theorem sigmaAlgebra_min (hτ : IsStoppingTime f τ) (hπ : IsStoppingTime f π) :
+    (hτ.min hπ).sigmaAlgebra = hτ.sigmaAlgebra ⊓ hπ.sigmaAlgebra := by
   refine le_antisymm ?_ ?_
-  · exact le_inf (measurableSpace_mono _ hτ fun _ => min_le_left _ _)
-      (measurableSpace_mono _ hπ fun _ => min_le_right _ _)
+  · exact le_inf (sigmaAlgebra_mono _ hτ fun _ => min_le_left _ _)
+      (sigmaAlgebra_mono _ hπ fun _ => min_le_right _ _)
   · intro s
-    change MeasurableSet[hτ.measurableSpace] s ∧ MeasurableSet[hπ.measurableSpace] s →
-      MeasurableSet[(hτ.min hπ).measurableSpace] s
+    change MeasurableSet[hτ.sigmaAlgebra] s ∧ MeasurableSet[hπ.sigmaAlgebra] s →
+      MeasurableSet[(hτ.min hπ).sigmaAlgebra] s
     simp_rw [IsStoppingTime.measurableSet]
     have : ∀ i, {ω | min (τ ω) (π ω) ≤ i} = {ω | τ ω ≤ i} ∪ {ω | π ω ≤ i} := by
       intro i; ext1 ω; simp
@@ -683,23 +689,23 @@ theorem measurableSpace_min (hτ : IsStoppingTime f τ) (hπ : IsStoppingTime f 
     exact fun h ↦ ⟨h.1.1, fun i ↦ (h.left.2 i).union (h.right.2 i)⟩
 
 theorem measurableSet_min_iff (hτ : IsStoppingTime f τ) (hπ : IsStoppingTime f π) (s : Set Ω) :
-    MeasurableSet[(hτ.min hπ).measurableSpace] s ↔
-      MeasurableSet[hτ.measurableSpace] s ∧ MeasurableSet[hπ.measurableSpace] s := by
-  rw [measurableSpace_min hτ hπ]; rfl
+    MeasurableSet[(hτ.min hπ).sigmaAlgebra] s ↔
+      MeasurableSet[hτ.sigmaAlgebra] s ∧ MeasurableSet[hπ.sigmaAlgebra] s := by
+  rw [sigmaAlgebra_min hτ hπ]; rfl
 
-theorem measurableSpace_min_const (hτ : IsStoppingTime f τ) {i : ι} :
-    (hτ.min_const i).measurableSpace = hτ.measurableSpace ⊓ f i := by
-  rw [hτ.measurableSpace_min (isStoppingTime_const _ i), measurableSpace_const]
+theorem sigmaAlgebra_min_const (hτ : IsStoppingTime f τ) {i : ι} :
+    (hτ.min_const i).sigmaAlgebra = hτ.sigmaAlgebra ⊓ f i := by
+  rw [hτ.sigmaAlgebra_min (isStoppingTime_const _ i), sigmaAlgebra_const]
 
 theorem measurableSet_min_const_iff (hτ : IsStoppingTime f τ) (s : Set Ω) {i : ι} :
-    MeasurableSet[(hτ.min_const i).measurableSpace] s ↔
-      MeasurableSet[hτ.measurableSpace] s ∧ MeasurableSet[f i] s := by
-  rw [measurableSpace_min_const hτ]; apply MeasurableSpace.measurableSet_inf
+    MeasurableSet[(hτ.min_const i).sigmaAlgebra] s ↔
+      MeasurableSet[hτ.sigmaAlgebra] s ∧ MeasurableSet[f i] s := by
+  rw [sigmaAlgebra_min_const hτ]; apply SigmaAlgebra.mem_inf
 
 theorem measurableSet_inter_le [TopologicalSpace ι] [SecondCountableTopology ι] [OrderTopology ι]
     (hτ : IsStoppingTime f τ) (hπ : IsStoppingTime f π)
-    (s : Set Ω) (hs : MeasurableSet[hτ.measurableSpace] s) :
-    MeasurableSet[(hτ.min hπ).measurableSpace] (s ∩ {ω | τ ω ≤ π ω}) := by
+    (s : Set Ω) (hs : MeasurableSet[hτ.sigmaAlgebra] s) :
+    MeasurableSet[(hτ.min hπ).sigmaAlgebra] (s ∩ {ω | τ ω ≤ π ω}) := by
   simp_rw [IsStoppingTime.measurableSet] at hs ⊢
   have h_eq i : s ∩ {ω | τ ω ≤ π ω} ∩ {ω | min (τ ω) (π ω) ≤ i} =
       s ∩ {ω | τ ω ≤ i} ∩ {ω | min (τ ω) (π ω) ≤ i} ∩
@@ -716,8 +722,8 @@ theorem measurableSet_inter_le [TopologicalSpace ι] [SecondCountableTopology ι
 theorem measurableSet_inter_le_iff [TopologicalSpace ι] [SecondCountableTopology ι]
     [OrderTopology ι] (hτ : IsStoppingTime f τ)
     (hπ : IsStoppingTime f π) (s : Set Ω) :
-    MeasurableSet[hτ.measurableSpace] (s ∩ {ω | τ ω ≤ π ω}) ↔
-      MeasurableSet[(hτ.min hπ).measurableSpace] (s ∩ {ω | τ ω ≤ π ω}) := by
+    MeasurableSet[hτ.sigmaAlgebra] (s ∩ {ω | τ ω ≤ π ω}) ↔
+      MeasurableSet[(hτ.min hπ).sigmaAlgebra] (s ∩ {ω | τ ω ≤ π ω}) := by
   constructor <;> intro h
   · have : s ∩ {ω | τ ω ≤ π ω} = s ∩ {ω | τ ω ≤ π ω} ∩ {ω | τ ω ≤ π ω} := by
       rw [Set.inter_assoc, Set.inter_self]
@@ -727,17 +733,17 @@ theorem measurableSet_inter_le_iff [TopologicalSpace ι] [SecondCountableTopolog
     exact h.1
 
 theorem measurableSet_inter_le_const_iff (hτ : IsStoppingTime f τ) (s : Set Ω) (i : ι) :
-    MeasurableSet[hτ.measurableSpace] (s ∩ {ω | τ ω ≤ i}) ↔
-      MeasurableSet[(hτ.min_const i).measurableSpace] (s ∩ {ω | τ ω ≤ i}) := by
+    MeasurableSet[hτ.sigmaAlgebra] (s ∩ {ω | τ ω ≤ i}) ↔
+      MeasurableSet[(hτ.min_const i).sigmaAlgebra] (s ∩ {ω | τ ω ≤ i}) := by
   rw [IsStoppingTime.measurableSet_min_iff hτ (isStoppingTime_const _ i),
-    IsStoppingTime.measurableSpace_const, IsStoppingTime.measurableSet]
+    IsStoppingTime.sigmaAlgebra_const, IsStoppingTime.measurableSet]
   refine ⟨fun h => ⟨h, ?_⟩, fun h ↦ h.1⟩
   have h' := h.2 i
   rwa [Set.inter_assoc, Set.inter_self] at h'
 
 theorem measurableSet_le_stopping_time [TopologicalSpace ι] [SecondCountableTopology ι]
     [OrderTopology ι] (hτ : IsStoppingTime f τ)
-    (hπ : IsStoppingTime f π) : MeasurableSet[hτ.measurableSpace] {ω | τ ω ≤ π ω} := by
+    (hπ : IsStoppingTime f π) : MeasurableSet[hτ.sigmaAlgebra] {ω | τ ω ≤ π ω} := by
   rw [hτ.measurableSet]
   refine ⟨measurableSet_le hτ.measurable_iSup hπ.measurable_iSup, fun j ↦ ?_⟩
   have : {ω | τ ω ≤ π ω} ∩ {ω | τ ω ≤ j} = {ω | min (τ ω) j ≤ min (π ω) j} ∩ {ω | τ ω ≤ j} := by
@@ -751,21 +757,21 @@ theorem measurableSet_le_stopping_time [TopologicalSpace ι] [SecondCountableTop
 
 theorem measurableSet_stopping_time_le_min [TopologicalSpace ι] [SecondCountableTopology ι]
     [OrderTopology ι] (hτ : IsStoppingTime f τ) (hπ : IsStoppingTime f π) :
-    MeasurableSet[(hτ.min hπ).measurableSpace] {ω | τ ω ≤ π ω} := by
+    MeasurableSet[(hτ.min hπ).sigmaAlgebra] {ω | τ ω ≤ π ω} := by
   rw [← Set.univ_inter {ω : Ω | τ ω ≤ π ω}, ← hτ.measurableSet_inter_le_iff hπ, Set.univ_inter]
   exact measurableSet_le_stopping_time hτ hπ
 
 theorem measurableSet_stopping_time_le [TopologicalSpace ι] [SecondCountableTopology ι]
     [OrderTopology ι] (hτ : IsStoppingTime f τ) (hπ : IsStoppingTime f π) :
-    MeasurableSet[hπ.measurableSpace] {ω | τ ω ≤ π ω} := by
-  have : MeasurableSet[(hτ.min hπ).measurableSpace] {ω | τ ω ≤ π ω} :=
+    MeasurableSet[hπ.sigmaAlgebra] {ω | τ ω ≤ π ω} := by
+  have : MeasurableSet[(hτ.min hπ).sigmaAlgebra] {ω | τ ω ≤ π ω} :=
     measurableSet_stopping_time_le_min hτ hπ
   rw [measurableSet_min_iff hτ hπ] at this; exact this.2
 
 theorem measurableSet_eq_stopping_time_min [TopologicalSpace ι]
     [OrderTopology ι] [SecondCountableTopology ι]
     (hτ : IsStoppingTime f τ) (hπ : IsStoppingTime f π) :
-    MeasurableSet[(hτ.min hπ).measurableSpace] {ω | τ ω = π ω} := by
+    MeasurableSet[(hτ.min hπ).sigmaAlgebra] {ω | τ ω = π ω} := by
   have : {ω | τ ω = π ω} = {ω | τ ω ≤ π ω} ∩ {ω | π ω ≤ τ ω} := by
     ext; simp only [Set.mem_ofPred_eq, le_antisymm_iff, Set.mem_inter_iff]
   rw [this]
@@ -776,7 +782,7 @@ theorem measurableSet_eq_stopping_time_min [TopologicalSpace ι]
 theorem measurableSet_eq_stopping_time [TopologicalSpace ι] [OrderTopology ι]
     [SecondCountableTopology ι]
     (hτ : IsStoppingTime f τ) (hπ : IsStoppingTime f π) :
-    MeasurableSet[hτ.measurableSpace] {ω | τ ω = π ω} := by
+    MeasurableSet[hτ.sigmaAlgebra] {ω | τ ω = π ω} := by
   have h := measurableSet_eq_stopping_time_min hτ hπ
   rw [measurableSet_min_iff hτ hπ] at h
   exact h.1
@@ -932,16 +938,16 @@ theorem stoppedProcess_stoppedProcess_of_le_left (h : τ ≤ σ) :
 
 section Progressive
 
-variable [MeasurableSpace ι] [TopologicalSpace ι] [OrderTopology ι] [SecondCountableTopology ι]
+variable [SigmaAlgebra ι] [TopologicalSpace ι] [OrderTopology ι] [SecondCountableTopology ι]
   [BorelSpace ι] [TopologicalSpace β] {f : Filtration ι m}
 
 theorem isStronglyProgressive_min_stopping_time [PseudoMetrizableSpace ι]
     (hτ : IsStoppingTime f τ) :
     IsStronglyProgressive f fun i ω ↦ (min (i : WithTop ι) (τ ω)).untopA := by
   refine fun i ↦ (Measurable.untopA ?_).stronglyMeasurable
-  let m_prod : MeasurableSpace (Set.Iic i × Ω) := Subtype.instMeasurableSpace.prod (f i)
-  let m_set : ∀ t : Set (Set.Iic i × Ω), MeasurableSpace t := fun _ =>
-    @Subtype.instMeasurableSpace (Set.Iic i × Ω) _ m_prod
+  let m_prod : SigmaAlgebra (Set.Iic i × Ω) := Subtype.instSigmaAlgebra.prod (f i)
+  let m_set : ∀ t : Set (Set.Iic i × Ω), SigmaAlgebra t := fun _ =>
+    @Subtype.instSigmaAlgebra (Set.Iic i × Ω) _ m_prod
   let s := {p : Set.Iic i × Ω | τ p.2 ≤ i}
   have hs : MeasurableSet[m_prod] s := @measurable_snd (Set.Iic i) Ω _ (f i) _ (hτ i)
   have h_meas_fst : ∀ t : Set (Set.Iic i × Ω),
@@ -961,7 +967,7 @@ theorem isStronglyProgressive_min_stopping_time [PseudoMetrizableSpace ι]
         exact fun _ => ω.prop
       rw [h_set_eq]
       suffices h_meas : @Measurable _ _ (m_set s) (f i) fun x : s ↦ (x : Set.Iic i × Ω).snd from
-        h_meas (f.mono (min_le_left _ _) _ (hτ.measurableSet_le (min i j)))
+        h_meas (f.mono (min_le_left _ _) (hτ.measurableSet_le (min i j)))
       exact measurable_snd.comp (@measurable_subtype_coe _ m_prod _)
   · let sc := sᶜ
     suffices h_min_eq_left :
@@ -1025,7 +1031,7 @@ theorem stronglyMeasurable_stoppedValue_of_le (h : IsStronglyProgressive f u)
   refine (Measurable.subtype_mk ?_).prodMk measurable_id
   exact (hτ.measurable_of_le hτ_le).untopA
 
-lemma measurableSet_preimage_stoppedValue_inter [PseudoMetrizableSpace β] [MeasurableSpace β]
+lemma measurableSet_preimage_stoppedValue_inter [PseudoMetrizableSpace β] [SigmaAlgebra β]
     [BorelSpace β]
     (hf_prog : IsStronglyProgressive f u) (hτ : IsStoppingTime f τ)
     {t : Set β} (ht : MeasurableSet t) (i : ι) :
@@ -1034,16 +1040,17 @@ lemma measurableSet_preimage_stoppedValue_inter [PseudoMetrizableSpace β] [Meas
     stronglyMeasurable_stoppedValue_of_le hf_prog (hτ.min_const i) fun _ => min_le_right _ _
   suffices stoppedValue u τ ⁻¹' t ∩ {ω : Ω | τ ω ≤ i} =
       (stoppedValue u fun ω => min (τ ω) i) ⁻¹' t ∩ {ω : Ω | τ ω ≤ i} by
-    rw [this]; exact ((h_str_meas i).measurable ht).inter (hτ.measurableSet_le i)
+    rw [this]
+    exact MeasurableSet.inter ((h_str_meas i).measurable ht) (hτ.measurableSet_le i)
   ext1 ω
   simp only [stoppedValue, Set.mem_inter_iff, Set.mem_preimage, Set.mem_ofPred_eq,
     and_congr_left_iff]
   intro h
   rw [min_eq_left h]
 
-theorem measurable_stoppedValue [PseudoMetrizableSpace β] [MeasurableSpace β] [BorelSpace β]
+theorem measurable_stoppedValue [PseudoMetrizableSpace β] [SigmaAlgebra β] [BorelSpace β]
     (hf_prog : IsStronglyProgressive f u) (hτ : IsStoppingTime f τ) :
-    Measurable[hτ.measurableSpace] (stoppedValue u τ) := by
+    Measurable[hτ.sigmaAlgebra] (stoppedValue u τ) := by
   have h_str_meas : ∀ i, StronglyMeasurable[f i] (stoppedValue u fun ω => min (τ ω) i) := fun i =>
     stronglyMeasurable_stoppedValue_of_le hf_prog (hτ.min_const i) fun _ => min_le_right _ _
   intro t ht
@@ -1065,7 +1072,7 @@ theorem measurable_stoppedValue [PseudoMetrizableSpace β] [MeasurableSpace β] 
       exact (h_seq_tendsto t).exists
   rw [this]
   refine MeasurableSet.union ?_ ?_
-  · exact MeasurableSet.iUnion fun i ↦ le_iSup f (seq i) _
+  · exact MeasurableSet.iUnion fun i ↦ le_iSup f (seq i)
       (measurableSet_preimage_stoppedValue_inter hf_prog hτ ht (seq i))
   · have : stoppedValue u τ ⁻¹' t ∩ {ω | τ ω = ⊤}
        = (fun ω ↦ u (Classical.arbitrary ι) ω) ⁻¹' t ∩ {ω | τ ω = ⊤} := by
@@ -1075,7 +1082,7 @@ theorem measurable_stoppedValue [PseudoMetrizableSpace β] [MeasurableSpace β] 
       intro h
       simp [h]
     rw [this]
-    refine MeasurableSet.inter (ht.preimage ?_) hτ.measurableSet_eq_top'
+    refine MeasurableSet.inter (MeasurableSet.preimage ht ?_) hτ.measurableSet_eq_top'
     exact (hf_prog.stronglyAdapted (Classical.arbitrary ι)).measurable.mono
       (le_iSup f (Classical.arbitrary ι)) le_rfl
 
@@ -1170,7 +1177,7 @@ theorem memLp_stoppedValue_of_mem_finset (hτ : IsStoppingTime ℱ τ) (hu : ∀
     MemLp (stoppedValue u τ) p μ := by
   rw [stoppedValue_eq_of_mem_finset hbdd]
   refine memLp_finsetSum' _ fun i _ => MemLp.indicator ?_ (hu i)
-  refine ℱ.le i {a : Ω | τ a = i} (hτ.measurableSet_eq_of_countable_range ?_ i)
+  refine ℱ.le i (hτ.measurableSet_eq_of_countable_range ?_ i)
   have : Set.range τ ⊆ WithTop.some '' s := by
     rintro x ⟨y, rfl⟩
     exact hbdd y
@@ -1216,11 +1223,11 @@ theorem memLp_stoppedProcess_of_mem_finset (hτ : IsStoppingTime ℱ τ) (hu : �
     MemLp (stoppedProcess u τ n) p μ := by
   rw [stoppedProcess_eq_of_mem_finset n hbdd]
   refine MemLp.add ?_ ?_
-  · exact MemLp.indicator (ℱ.le n {a : Ω | n ≤ τ a} (hτ.measurableSet_ge n)) (hu n)
+  · exact MemLp.indicator (ℱ.le n (hτ.measurableSet_ge n)) (hu n)
   · suffices MemLp (fun ω => ∑ i ∈ s with i < n, {a : Ω | τ a = i}.indicator (u i) ω) p μ by
       convert! this using 1; ext1 ω; simp only [Finset.sum_apply]
     refine memLp_finsetSum _ fun i _ => MemLp.indicator ?_ (hu i)
-    exact ℱ.le i {a : Ω | τ a = i} (hτ.measurableSet_eq i)
+    exact ℱ.le i (hτ.measurableSet_eq i)
 
 theorem memLp_stoppedProcess [LocallyFiniteOrderBot ι] (hτ : IsStoppingTime ℱ τ)
     (hu : ∀ n, MemLp (u n) p μ) (n : ι) :
@@ -1254,7 +1261,7 @@ section StronglyAdaptedStoppedProcess
 
 variable [TopologicalSpace β] [PseudoMetrizableSpace β] [Nonempty ι] [LinearOrder ι]
   [TopologicalSpace ι] [SecondCountableTopology ι] [OrderTopology ι]
-  [MeasurableSpace ι] [BorelSpace ι]
+  [SigmaAlgebra ι] [BorelSpace ι]
   {f : Filtration ι m} {u : ι → Ω → β} {τ : Ω → WithTop ι}
 
 /-- The stopped process of a strongly adapted process with continuous paths is strongly adapted. -/
@@ -1376,7 +1383,7 @@ theorem IsStoppingTime.piecewise_of_le (hτ_st : IsStoppingTime 𝒢 τ) (hη_st
     by_cases hx : ω ∈ s <;> simp [hx]
   rw [this]
   by_cases hin : i ≤ n
-  · have hs_n : MeasurableSet[𝒢 n] s := 𝒢.mono hin _ hs
+  · have hs_n : MeasurableSet[𝒢 n] s := 𝒢.mono hin hs
     exact (hs_n.inter (hτ_st n)).union (hs_n.compl.inter (hη_st n))
   · have hτn : ∀ ω, ¬τ ω ≤ n := fun ω hτn => hin (mod_cast (hτ ω).trans hτn)
     have hηn : ∀ ω, ¬η ω ≤ n := fun ω hηn => hin (mod_cast (hη ω).trans hηn)
@@ -1409,51 +1416,51 @@ variable [LinearOrder ι] {μ : Measure Ω} {ℱ : Filtration ι m} {τ σ : Ω 
 
 theorem condExp_stopping_time_ae_eq_restrict_eq_of_countable_range [SigmaFiniteFiltration μ ℱ]
     (hτ : IsStoppingTime ℱ τ) (h_countable : (Set.range τ).Countable)
-    [SigmaFinite (μ.trim (hτ.measurableSpace_le))] (i : ι) :
-    μ[f | hτ.measurableSpace] =ᵐ[μ.restrict {x | τ x = i}] μ[f | ℱ i] := by
-  refine condExp_ae_eq_restrict_of_measurableSpace_eq_on
-    (hτ.measurableSpace_le) (ℱ.le i)
+    [SigmaFinite (μ.trim (hτ.sigmaAlgebra_le))] (i : ι) :
+    μ[f | hτ.sigmaAlgebra] =ᵐ[μ.restrict {x | τ x = i}] μ[f | ℱ i] := by
+  refine condExp_ae_eq_restrict_of_sigmaAlgebra_eq_on
+    (hτ.sigmaAlgebra_le) (ℱ.le i)
     (hτ.measurableSet_eq_of_countable_range' h_countable i) fun t => ?_
   rw [Set.inter_comm _ t, IsStoppingTime.measurableSet_inter_eq_iff]
 
 theorem condExp_stopping_time_ae_eq_restrict_eq_of_countable [Countable ι]
     [SigmaFiniteFiltration μ ℱ] (hτ : IsStoppingTime ℱ τ)
-    [SigmaFinite (μ.trim hτ.measurableSpace_le)] (i : ι) :
-    μ[f | hτ.measurableSpace] =ᵐ[μ.restrict {x | τ x = i}] μ[f | ℱ i] :=
+    [SigmaFinite (μ.trim hτ.sigmaAlgebra_le)] (i : ι) :
+    μ[f | hτ.sigmaAlgebra] =ᵐ[μ.restrict {x | τ x = i}] μ[f | ℱ i] :=
   condExp_stopping_time_ae_eq_restrict_eq_of_countable_range hτ (Set.to_countable _) i
 
 theorem condExp_min_stopping_time_ae_eq_restrict_le_const (hτ : IsStoppingTime ℱ τ) (i : ι)
-    [SigmaFinite (μ.trim (hτ.min_const i).measurableSpace_le)] :
-    μ[f | (hτ.min_const i).measurableSpace] =ᵐ[μ.restrict {x | τ x ≤ i}]
-      μ[f | hτ.measurableSpace] := by
-  have : SigmaFinite (μ.trim hτ.measurableSpace_le) :=
-    haveI h_le : (hτ.min_const i).measurableSpace ≤ hτ.measurableSpace := by
-      rw [IsStoppingTime.measurableSpace_min_const]
+    [SigmaFinite (μ.trim (hτ.min_const i).sigmaAlgebra_le)] :
+    μ[f | (hτ.min_const i).sigmaAlgebra] =ᵐ[μ.restrict {x | τ x ≤ i}]
+      μ[f | hτ.sigmaAlgebra] := by
+  have : SigmaFinite (μ.trim hτ.sigmaAlgebra_le) :=
+    haveI h_le : (hτ.min_const i).sigmaAlgebra ≤ hτ.sigmaAlgebra := by
+      rw [IsStoppingTime.sigmaAlgebra_min_const]
       exact inf_le_left
     sigmaFiniteTrim_mono _ h_le
-  refine (condExp_ae_eq_restrict_of_measurableSpace_eq_on hτ.measurableSpace_le
-    (hτ.min_const i).measurableSpace_le (hτ.measurableSet_le' i) fun t => ?_).symm
+  refine (condExp_ae_eq_restrict_of_sigmaAlgebra_eq_on hτ.sigmaAlgebra_le
+    (hτ.min_const i).sigmaAlgebra_le (hτ.measurableSet_le' i) fun t => ?_).symm
   rw [Set.inter_comm _ t, hτ.measurableSet_inter_le_const_iff]
 
 variable [TopologicalSpace ι] [OrderTopology ι]
 
 theorem condExp_stopping_time_ae_eq_restrict_eq [FirstCountableTopology ι]
     [SigmaFiniteFiltration μ ℱ] (hτ : IsStoppingTime ℱ τ)
-    [SigmaFinite (μ.trim hτ.measurableSpace_le)] (i : ι) :
-    μ[f | hτ.measurableSpace] =ᵐ[μ.restrict {x | τ x = i}] μ[f | ℱ i] := by
-  refine condExp_ae_eq_restrict_of_measurableSpace_eq_on hτ.measurableSpace_le (ℱ.le i)
+    [SigmaFinite (μ.trim hτ.sigmaAlgebra_le)] (i : ι) :
+    μ[f | hτ.sigmaAlgebra] =ᵐ[μ.restrict {x | τ x = i}] μ[f | ℱ i] := by
+  refine condExp_ae_eq_restrict_of_sigmaAlgebra_eq_on hτ.sigmaAlgebra_le (ℱ.le i)
     (hτ.measurableSet_eq' i) fun t => ?_
   rw [Set.inter_comm _ t, IsStoppingTime.measurableSet_inter_eq_iff]
 
 theorem condExp_min_stopping_time_ae_eq_restrict_le [SecondCountableTopology ι]
     (hτ : IsStoppingTime ℱ τ) (hσ : IsStoppingTime ℱ σ)
-    [SigmaFinite (μ.trim (hτ.min hσ).measurableSpace_le)] :
-    μ[f | (hτ.min hσ).measurableSpace] =ᵐ[μ.restrict {x | τ x ≤ σ x}]
-      μ[f | hτ.measurableSpace] := by
-  have : SigmaFinite (μ.trim hτ.measurableSpace_le) :=
-    sigmaFiniteTrim_mono _ (hτ.measurableSpace_min hσ ▸ inf_le_left)
-  refine (condExp_ae_eq_restrict_of_measurableSpace_eq_on hτ.measurableSpace_le
-    (hτ.min hσ).measurableSpace_le (hτ.measurableSet_le_stopping_time hσ) fun t => ?_).symm
+    [SigmaFinite (μ.trim (hτ.min hσ).sigmaAlgebra_le)] :
+    μ[f | (hτ.min hσ).sigmaAlgebra] =ᵐ[μ.restrict {x | τ x ≤ σ x}]
+      μ[f | hτ.sigmaAlgebra] := by
+  have : SigmaFinite (μ.trim hτ.sigmaAlgebra_le) :=
+    sigmaFiniteTrim_mono _ (hτ.sigmaAlgebra_min hσ ▸ inf_le_left)
+  refine (condExp_ae_eq_restrict_of_sigmaAlgebra_eq_on hτ.sigmaAlgebra_le
+    (hτ.min hσ).sigmaAlgebra_le (hτ.measurableSet_le_stopping_time hσ) fun t => ?_).symm
   rw [Set.inter_comm _ t, hτ.measurableSet_inter_le_iff hσ]
 
 end Condexp

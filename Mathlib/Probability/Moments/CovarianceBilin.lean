@@ -6,7 +6,7 @@ Authors: Rémy Degenne, Etienne Marion
 module
 
 public import Mathlib.Analysis.InnerProductSpace.Positive
-public import Mathlib.Analysis.Normed.Lp.MeasurableSpace
+public import Mathlib.Analysis.Normed.Lp.SigmaAlgebra
 public import Mathlib.MeasureTheory.SpecificCodomains.WithLp
 public import Mathlib.Probability.Moments.Basic
 public import Mathlib.Probability.Moments.CovarianceBilinDual
@@ -43,7 +43,7 @@ open scoped RealInnerProductSpace
 namespace ProbabilityTheory
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
-  [MeasurableSpace E] [BorelSpace E] {μ : Measure E}
+  [SigmaAlgebra E] [BorelSpace E] {μ : Measure E}
 
 /-- Covariance of a measure on an inner product space, as a continuous bilinear form. -/
 noncomputable
@@ -108,7 +108,7 @@ lemma isPosSemidef_covarianceBilin :
   nonneg := covarianceBilin_self_nonneg
 
 lemma covarianceBilin_map {F : Type*} [NormedAddCommGroup F] [InnerProductSpace ℝ F]
-    [MeasurableSpace F] [BorelSpace F] [SecondCountableTopology F] [CompleteSpace F]
+    [SigmaAlgebra F] [BorelSpace F] [SecondCountableTopology F] [CompleteSpace F]
     [CompleteSpace E] [IsFiniteMeasure μ] (h : MemLp id 2 μ) (L : E →L[ℝ] F) (u v : F) :
     covarianceBilin (μ.map L) u v = covarianceBilin μ (L.adjoint u) (L.adjoint v) := by
   rw [covarianceBilin_apply, covarianceBilin_apply h]
@@ -139,7 +139,7 @@ lemma covarianceBilin_map_const_add [CompleteSpace E] [IsProbabilityMeasure μ] 
     convert! (memLp_const (-c)).add h
     ext; simp
 
-lemma covarianceBilin_apply_basisFun {ι Ω : Type*} [Fintype ι] {mΩ : MeasurableSpace Ω}
+lemma covarianceBilin_apply_basisFun {ι Ω : Type*} [Fintype ι] {mΩ : SigmaAlgebra Ω}
     {μ : Measure Ω} [IsFiniteMeasure μ] {X : ι → Ω → ℝ} (hX : ∀ i, MemLp (X i) 2 μ) (i j : ι) :
     covarianceBilin (μ.map (fun ω ↦ toLp 2 (X · ω)))
       (basisFun ι ℝ i) (basisFun ι ℝ j) = cov[X i, X j; μ] := by
@@ -151,7 +151,7 @@ lemma covarianceBilin_apply_basisFun {ι Ω : Type*} [Fintype ι] {mΩ : Measura
   · fun_prop
   · exact (memLp_map_measure_iff aestronglyMeasurable_id (by fun_prop)).2 (MemLp.of_eval_piLp hX)
 
-lemma covarianceBilin_apply_basisFun_self {ι Ω : Type*} [Fintype ι] {mΩ : MeasurableSpace Ω}
+lemma covarianceBilin_apply_basisFun_self {ι Ω : Type*} [Fintype ι] {mΩ : SigmaAlgebra Ω}
     {μ : Measure Ω} [IsFiniteMeasure μ] {X : ι → Ω → ℝ} (hX : ∀ i, MemLp (X i) 2 μ) (i : ι) :
     covarianceBilin (μ.map (fun ω ↦ toLp 2 (X · ω)))
       (basisFun ι ℝ i) (basisFun ι ℝ i) = Var[X i; μ] := by
@@ -159,7 +159,7 @@ lemma covarianceBilin_apply_basisFun_self {ι Ω : Type*} [Fintype ι] {mΩ : Me
   have (i : ι) := (hX i).aemeasurable
   fun_prop
 
-lemma covarianceBilin_apply_pi {ι Ω : Type*} [Fintype ι] {mΩ : MeasurableSpace Ω}
+lemma covarianceBilin_apply_pi {ι Ω : Type*} [Fintype ι] {mΩ : SigmaAlgebra Ω}
     {μ : Measure Ω} [IsFiniteMeasure μ] {X : ι → Ω → ℝ}
     (hX : ∀ i, MemLp (X i) 2 μ) (x y : EuclideanSpace ℝ ι) :
     covarianceBilin (μ.map (fun ω ↦ toLp 2 (X · ω))) x y =

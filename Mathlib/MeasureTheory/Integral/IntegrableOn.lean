@@ -29,7 +29,7 @@ open Set Filter TopologicalSpace MeasureTheory Function
 
 open scoped Topology Interval Filter ENNReal MeasureTheory
 
-variable {α β ε ε' E : Type*} {mα : MeasurableSpace α}
+variable {α β ε ε' E : Type*} {mα : SigmaAlgebra α}
 
 section
 
@@ -292,18 +292,18 @@ theorem integrableOn_add_measure [PseudoMetrizableSpace ε] :
     ⟨h.mono_measure (Measure.le_add_right le_rfl), h.mono_measure (Measure.le_add_left le_rfl)⟩,
     fun h => h.1.add_measure h.2⟩
 
-theorem _root_.MeasurableEmbedding.integrableOn_map_iff [MeasurableSpace β] {e : α → β}
+theorem _root_.MeasurableEmbedding.integrableOn_map_iff [SigmaAlgebra β] {e : α → β}
     (he : MeasurableEmbedding e) {f : β → ε} {μ : Measure α} {s : Set β} :
     IntegrableOn f s (μ.map e) ↔ IntegrableOn (f ∘ e) (e ⁻¹' s) μ := by
   simp_rw [IntegrableOn, he.restrict_map, he.integrable_map_iff]
 
-theorem _root_.MeasurableEmbedding.integrableOn_iff_comap [MeasurableSpace β] {e : α → β}
+theorem _root_.MeasurableEmbedding.integrableOn_iff_comap [SigmaAlgebra β] {e : α → β}
     (he : MeasurableEmbedding e) {f : β → ε} {μ : Measure β} {s : Set β} (hs : s ⊆ range e) :
     IntegrableOn f s μ ↔ IntegrableOn (f ∘ e) (e ⁻¹' s) (μ.comap e) := by
   simp_rw [← he.integrableOn_map_iff, he.map_comap, IntegrableOn,
     Measure.restrict_restrict_of_subset hs]
 
-theorem _root_.MeasurableEmbedding.integrableOn_range_iff_comap [MeasurableSpace β] {e : α → β}
+theorem _root_.MeasurableEmbedding.integrableOn_range_iff_comap [SigmaAlgebra β] {e : α → β}
     (he : MeasurableEmbedding e) {f : β → ε} {μ : Measure β} :
     IntegrableOn f (range e) μ ↔ Integrable (f ∘ e) (μ.comap e) := by
   rw [he.integrableOn_iff_comap .rfl, preimage_range, integrableOn_univ]
@@ -312,16 +312,16 @@ theorem integrableOn_iff_comap_subtypeVal (hs : MeasurableSet s) :
     IntegrableOn f s μ ↔ Integrable (f ∘ (↑) : s → ε) (μ.comap (↑)) := by
   rw [← (MeasurableEmbedding.subtype_coe hs).integrableOn_range_iff_comap, Subtype.range_val]
 
-theorem integrableOn_map_equiv [MeasurableSpace β] (e : α ≃ᵐ β) {f : β → ε} {μ : Measure α}
+theorem integrableOn_map_equiv [SigmaAlgebra β] (e : α ≃ᵐ β) {f : β → ε} {μ : Measure α}
     {s : Set β} : IntegrableOn f s (μ.map e) ↔ IntegrableOn (f ∘ e) (e ⁻¹' s) μ := by
   simp only [IntegrableOn, e.restrict_map, integrable_map_equiv e]
 
-theorem MeasurePreserving.integrableOn_comp_preimage [MeasurableSpace β] {e : α → β} {ν}
+theorem MeasurePreserving.integrableOn_comp_preimage [SigmaAlgebra β] {e : α → β} {ν}
     (h₁ : MeasurePreserving e μ ν) (h₂ : MeasurableEmbedding e) {f : β → ε} {s : Set β} :
     IntegrableOn (f ∘ e) (e ⁻¹' s) μ ↔ IntegrableOn f s ν :=
   (h₁.restrict_preimage_emb h₂ s).integrable_comp_emb h₂
 
-theorem MeasurePreserving.integrableOn_image [MeasurableSpace β] {e : α → β} {ν}
+theorem MeasurePreserving.integrableOn_image [SigmaAlgebra β] {e : α → β} {ν}
     (h₁ : MeasurePreserving e μ ν) (h₂ : MeasurableEmbedding e) {f : β → ε} {s : Set α} :
     IntegrableOn f (e '' s) ν ↔ IntegrableOn (f ∘ e) s μ :=
   ((h₁.restrict_image_emb h₂ s).integrable_comp_emb h₂).symm
@@ -524,7 +524,7 @@ def IntegrableAtFilter (f : α → ε) (l : Filter α) (μ : Measure α := by vo
 
 variable {l l' : Filter α}
 
-theorem _root_.MeasurableEmbedding.integrableAtFilter_map_iff [MeasurableSpace β] {e : α → β}
+theorem _root_.MeasurableEmbedding.integrableAtFilter_map_iff [SigmaAlgebra β] {e : α → β}
     (he : MeasurableEmbedding e) {f : β → ε} :
     IntegrableAtFilter f (l.map e) (μ.map e) ↔ IntegrableAtFilter (f ∘ e) l μ := by
   simp_rw [IntegrableAtFilter, he.integrableOn_map_iff]
@@ -532,7 +532,7 @@ theorem _root_.MeasurableEmbedding.integrableAtFilter_map_iff [MeasurableSpace �
   · exact ⟨_, hs⟩
   · exact ⟨e '' s, by rwa [mem_map, he.injective.preimage_image]⟩
 
-theorem _root_.MeasurableEmbedding.integrableAtFilter_iff_comap [MeasurableSpace β] {e : α → β}
+theorem _root_.MeasurableEmbedding.integrableAtFilter_iff_comap [SigmaAlgebra β] {e : α → β}
     (he : MeasurableEmbedding e) {f : β → ε} {μ : Measure β} :
     IntegrableAtFilter f (l.map e) μ ↔ IntegrableAtFilter (f ∘ e) l (μ.comap e) := by
   simp_rw [← he.integrableAtFilter_map_iff, IntegrableAtFilter, he.map_comap]
@@ -748,7 +748,7 @@ variable [NormedAddCommGroup E]
 
 /-- A function which is continuous on a set `s` is almost everywhere measurable with respect to
 `μ.restrict s`. -/
-theorem ContinuousOn.aemeasurable [TopologicalSpace α] [OpensMeasurableSpace α] [MeasurableSpace β]
+theorem ContinuousOn.aemeasurable [TopologicalSpace α] [OpensSigmaAlgebra α] [SigmaAlgebra β]
     [TopologicalSpace β] [BorelSpace β] {f : α → β} {s : Set α} {μ : Measure α}
     (hf : ContinuousOn f s) (hs : MeasurableSet s) : AEMeasurable f (μ.restrict s) := by
   classical
@@ -760,9 +760,10 @@ theorem ContinuousOn.aemeasurable [TopologicalSpace α] [OpensMeasurableSpace α
   obtain ⟨u, u_open, hu⟩ : ∃ u : Set α, IsOpen u ∧ f ⁻¹' t ∩ s = u ∩ s :=
     _root_.continuousOn_iff'.1 hf t ht
   rw [piecewise_preimage, Set.ite, hu]
-  exact (u_open.measurableSet.inter hs).union ((measurable_const ht.measurableSet).diff hs)
+  exact MeasurableSet.union (MeasurableSet.inter u_open.measurableSet hs)
+    (MeasurableSet.diff (measurable_const ht.measurableSet) hs)
 
-theorem ContinuousOn.aemeasurable₀ [TopologicalSpace α] [OpensMeasurableSpace α] [MeasurableSpace β]
+theorem ContinuousOn.aemeasurable₀ [TopologicalSpace α] [OpensSigmaAlgebra α] [SigmaAlgebra β]
     [TopologicalSpace β] [BorelSpace β] {f : α → β} {s : Set α} {μ : Measure α}
     (hf : ContinuousOn f s) (hs : NullMeasurableSet s μ) : AEMeasurable f (μ.restrict s) := by
   rcases hs.exists_measurable_subset_ae_eq with ⟨t, ts, ht, t_eq_s⟩
@@ -772,7 +773,7 @@ theorem ContinuousOn.aemeasurable₀ [TopologicalSpace α] [OpensMeasurableSpace
 /-- A function which is continuous on a separable set `s` is almost everywhere strongly measurable
 with respect to `μ.restrict s`. -/
 theorem ContinuousOn.aestronglyMeasurable_of_isSeparable [TopologicalSpace α]
-    [PseudoMetrizableSpace α] [OpensMeasurableSpace α] [TopologicalSpace β]
+    [PseudoMetrizableSpace α] [OpensSigmaAlgebra α] [TopologicalSpace β]
     [PseudoMetrizableSpace β] {f : α → β} {s : Set α} {μ : Measure α} (hf : ContinuousOn f s)
     (hs : MeasurableSet s) (h's : TopologicalSpace.IsSeparable s) :
     AEStronglyMeasurable f (μ.restrict s) := by
@@ -785,7 +786,7 @@ theorem ContinuousOn.aestronglyMeasurable_of_isSeparable [TopologicalSpace α]
 /-- A function which is continuous on a set `s` is almost everywhere strongly measurable with
 respect to `μ.restrict s` when either the source space or the target space is second-countable. -/
 theorem ContinuousOn.aestronglyMeasurable [TopologicalSpace α] [TopologicalSpace β]
-    [h : SecondCountableTopologyEither α β] [OpensMeasurableSpace α] [PseudoMetrizableSpace β]
+    [h : SecondCountableTopologyEither α β] [OpensSigmaAlgebra α] [PseudoMetrizableSpace β]
     {f : α → β} {s : Set α} {μ : Measure α} (hf : ContinuousOn f s) (hs : MeasurableSet s) :
     AEStronglyMeasurable f (μ.restrict s) := by
   borelize β
@@ -801,7 +802,7 @@ theorem ContinuousOn.aestronglyMeasurable [TopologicalSpace α] [TopologicalSpac
 /-- A function which is continuous on a compact set `s` is almost everywhere strongly measurable
 with respect to `μ.restrict t` for any measurable subset `t` of `s`. -/
 theorem ContinuousOn.aestronglyMeasurable_of_subset_isCompact
-    [TopologicalSpace α] [OpensMeasurableSpace α]
+    [TopologicalSpace α] [OpensSigmaAlgebra α]
     [TopologicalSpace β] [PseudoMetrizableSpace β] {f : α → β} {s t : Set α} {μ : Measure α}
     (hf : ContinuousOn f s) (hs : IsCompact s) (ht : MeasurableSet t) (hts : t ⊆ s) :
     AEStronglyMeasurable f (μ.restrict t) := by
@@ -813,19 +814,19 @@ theorem ContinuousOn.aestronglyMeasurable_of_subset_isCompact
 
 /-- A function which is continuous on a compact set `s` is almost everywhere strongly measurable
 with respect to `μ.restrict s`. -/
-theorem ContinuousOn.aestronglyMeasurable_of_isCompact [TopologicalSpace α] [OpensMeasurableSpace α]
+theorem ContinuousOn.aestronglyMeasurable_of_isCompact [TopologicalSpace α] [OpensSigmaAlgebra α]
     [TopologicalSpace β] [PseudoMetrizableSpace β] {f : α → β} {s : Set α} {μ : Measure α}
     (hf : ContinuousOn f s) (hs : IsCompact s) (h's : MeasurableSet s) :
     AEStronglyMeasurable f (μ.restrict s) :=
   hf.aestronglyMeasurable_of_subset_isCompact hs h's Subset.rfl
 
-lemma Continuous.aestronglyMeasurable_of_compactSpace [TopologicalSpace α] [OpensMeasurableSpace α]
+lemma Continuous.aestronglyMeasurable_of_compactSpace [TopologicalSpace α] [OpensSigmaAlgebra α]
     [CompactSpace α] [TopologicalSpace β] [PseudoMetrizableSpace β] {μ : Measure α} {f : α → β}
     (hf : Continuous f) : AEStronglyMeasurable f μ := by
   simpa using hf.continuousOn.aestronglyMeasurable_of_isCompact isCompact_univ .univ
 
 theorem ContinuousOn.integrableAt_nhdsWithin_of_isSeparable [TopologicalSpace α]
-    [PseudoMetrizableSpace α] [OpensMeasurableSpace α] {μ : Measure α} [IsLocallyFiniteMeasure μ]
+    [PseudoMetrizableSpace α] [OpensSigmaAlgebra α] {μ : Measure α} [IsLocallyFiniteMeasure μ]
     {a : α} {t : Set α} {f : α → E} (hft : ContinuousOn f t) (ht : MeasurableSet t)
     (h't : TopologicalSpace.IsSeparable t) (ha : a ∈ t) : IntegrableAtFilter f (𝓝[t] a) μ :=
   haveI : (𝓝[t] a).IsMeasurablyGenerated := ht.nhdsWithin_isMeasurablyGenerated _
@@ -834,7 +835,7 @@ theorem ContinuousOn.integrableAt_nhdsWithin_of_isSeparable [TopologicalSpace α
     (μ.finiteAt_nhdsWithin _ _)
 
 theorem ContinuousOn.integrableAt_nhdsWithin [TopologicalSpace α]
-    [SecondCountableTopologyEither α E] [OpensMeasurableSpace α] {μ : Measure α}
+    [SecondCountableTopologyEither α E] [OpensSigmaAlgebra α] {μ : Measure α}
     [IsLocallyFiniteMeasure μ] {a : α} {t : Set α} {f : α → E} (hft : ContinuousOn f t)
     (ht : MeasurableSet t) (ha : a ∈ t) : IntegrableAtFilter f (𝓝[t] a) μ :=
   haveI : (𝓝[t] a).IsMeasurablyGenerated := ht.nhdsWithin_isMeasurablyGenerated _
@@ -842,33 +843,33 @@ theorem ContinuousOn.integrableAt_nhdsWithin [TopologicalSpace α]
     (μ.finiteAt_nhdsWithin _ _)
 
 theorem Continuous.integrableAt_nhds [TopologicalSpace α] [SecondCountableTopologyEither α E]
-    [OpensMeasurableSpace α] {μ : Measure α} [IsLocallyFiniteMeasure μ] {f : α → E}
+    [OpensSigmaAlgebra α] {μ : Measure α} [IsLocallyFiniteMeasure μ] {f : α → E}
     (hf : Continuous f) (a : α) : IntegrableAtFilter f (𝓝 a) μ := by
   rw [← nhdsWithin_univ]
   exact hf.continuousOn.integrableAt_nhdsWithin MeasurableSet.univ (mem_univ a)
 
 /-- If a function is continuous on an open set `s`, then it is strongly measurable at the filter
 `𝓝 x` for all `x ∈ s` if either the source space or the target space is second-countable. -/
-theorem ContinuousOn.stronglyMeasurableAtFilter [TopologicalSpace α] [OpensMeasurableSpace α]
+theorem ContinuousOn.stronglyMeasurableAtFilter [TopologicalSpace α] [OpensSigmaAlgebra α]
     [TopologicalSpace β] [PseudoMetrizableSpace β] [SecondCountableTopologyEither α β] {f : α → β}
     {s : Set α} {μ : Measure α} (hs : IsOpen s) (hf : ContinuousOn f s) :
     ∀ x ∈ s, StronglyMeasurableAtFilter f (𝓝 x) μ := fun _x hx =>
   ⟨s, IsOpen.mem_nhds hs hx, hf.aestronglyMeasurable hs.measurableSet⟩
 
-theorem ContinuousAt.stronglyMeasurableAtFilter [TopologicalSpace α] [OpensMeasurableSpace α]
+theorem ContinuousAt.stronglyMeasurableAtFilter [TopologicalSpace α] [OpensSigmaAlgebra α]
     [SecondCountableTopologyEither α E] {f : α → E} {s : Set α} {μ : Measure α} (hs : IsOpen s)
     (hf : ∀ x ∈ s, ContinuousAt f x) : ∀ x ∈ s, StronglyMeasurableAtFilter f (𝓝 x) μ :=
   ContinuousOn.stronglyMeasurableAtFilter hs <| continuousOn_of_forall_continuousAt hf
 
-theorem Continuous.stronglyMeasurableAtFilter [TopologicalSpace α] [OpensMeasurableSpace α]
+theorem Continuous.stronglyMeasurableAtFilter [TopologicalSpace α] [OpensSigmaAlgebra α]
     [TopologicalSpace β] [PseudoMetrizableSpace β] [SecondCountableTopologyEither α β] {f : α → β}
     (hf : Continuous f) (μ : Measure α) (l : Filter α) : StronglyMeasurableAtFilter f l μ :=
   hf.stronglyMeasurable.stronglyMeasurableAtFilter
 
 /-- If a function is continuous on a measurable set `s`, then it is measurable at the filter
   `𝓝[s] x` for all `x`. -/
-theorem ContinuousOn.stronglyMeasurableAtFilter_nhdsWithin {α β : Type*} [MeasurableSpace α]
-    [TopologicalSpace α] [OpensMeasurableSpace α] [TopologicalSpace β] [PseudoMetrizableSpace β]
+theorem ContinuousOn.stronglyMeasurableAtFilter_nhdsWithin {α β : Type*} [SigmaAlgebra α]
+    [TopologicalSpace α] [OpensSigmaAlgebra α] [TopologicalSpace β] [PseudoMetrizableSpace β]
     [SecondCountableTopologyEither α β] {f : α → β} {s : Set α} {μ : Measure α}
     (hf : ContinuousOn f s) (hs : MeasurableSet s) (x : α) :
     StronglyMeasurableAtFilter f (𝓝[s] x) μ :=

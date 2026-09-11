@@ -48,7 +48,7 @@ noncomputable section
 open scoped MeasureTheory ProbabilityTheory ENNReal NNReal
 
 namespace ProbabilityTheory
-variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {X Y : Ω → ℝ} {μ : Measure Ω}
+variable {Ω : Type*} {mΩ : SigmaAlgebra Ω} {X Y : Ω → ℝ} {μ : Measure Ω}
 
 variable (X μ) in
 -- TODO: Consider if `evariance` or `eVariance` is better. Also,
@@ -312,7 +312,7 @@ lemma variance_dirac [MeasurableSingletonClass Ω] (x : Ω) : Var[X; Measure.dir
   · simp
   · exact aemeasurable_dirac
 
-lemma variance_map {Ω' : Type*} {mΩ' : MeasurableSpace Ω'} {μ : Measure Ω'}
+lemma variance_map {Ω' : Type*} {mΩ' : SigmaAlgebra Ω'} {μ : Measure Ω'}
     {Y : Ω' → Ω} (hX : AEMeasurable X (μ.map Y)) (hY : AEMeasurable Y μ) :
     Var[X; μ.map Y] = Var[X ∘ Y; μ] := by
   rw [variance_eq_integral hX, integral_map hY, variance_eq_integral (hX.comp_aemeasurable hY),
@@ -323,12 +323,12 @@ lemma variance_map {Ω' : Type*} {mΩ' : MeasurableSpace Ω'} {μ : Measure Ω'}
     exact AEMeasurable.aestronglyMeasurable (by fun_prop)
 
 lemma _root_.MeasureTheory.MeasurePreserving.variance_fun_comp {Ω' : Type*}
-    {mΩ' : MeasurableSpace Ω'} {ν : Measure Ω'} {X : Ω → Ω'}
+    {mΩ' : SigmaAlgebra Ω'} {ν : Measure Ω'} {X : Ω → Ω'}
     (hX : MeasurePreserving X μ ν) {f : Ω' → ℝ} (hf : AEMeasurable f ν) :
     Var[fun ω ↦ f (X ω); μ] = Var[f; ν] := by
   rw [← hX.map_eq, variance_map (hX.map_eq ▸ hf) hX.aemeasurable, Function.comp_def]
 
-lemma variance_map_equiv {Ω' : Type*} {mΩ' : MeasurableSpace Ω'} {μ : Measure Ω'}
+lemma variance_map_equiv {Ω' : Type*} {mΩ' : SigmaAlgebra Ω'} {μ : Measure Ω'}
     (X : Ω → ℝ) (Y : Ω' ≃ᵐ Ω) :
     Var[X; μ.map Y] = Var[X ∘ Y; μ] := by
   simp_rw [variance, evariance, lintegral_map_equiv, integral_map_equiv, Function.comp_apply]
@@ -444,7 +444,7 @@ nonrec theorem IndepFun.variance_sum {ι : Type*} {X : ι → Ω → ℝ} {s : F
   refine Finset.sum_eq_single_of_mem i hi fun j hj1 hj2 ↦ ?_
   exact (h hi hj1 hj2.symm).covariance_eq_zero (hs i hi) (hs j hj1)
 
-lemma variance_sum_pi [Fintype ι] {Ω : ι → Type*} {mΩ : ∀ i, MeasurableSpace (Ω i)}
+lemma variance_sum_pi [Fintype ι] {Ω : ι → Type*} {mΩ : ∀ i, SigmaAlgebra (Ω i)}
     {μ : (i : ι) → Measure (Ω i)} [∀ i, IsProbabilityMeasure (μ i)]
     {X : Π i, Ω i → ℝ} (h : ∀ i, MemLp (X i) 2 (μ i)) :
     Var[∑ i, fun ω ↦ X i (ω i); Measure.pi μ] = ∑ i, Var[X i; μ i] := by
@@ -506,7 +506,7 @@ lemma variance_le_sq_of_bounded [IsProbabilityMeasure μ] {a b : ℝ} {X : Ω �
 
 section Prod
 
-variable {Ω' : Type*} {mΩ' : MeasurableSpace Ω'} {ν : Measure Ω'}
+variable {Ω' : Type*} {mΩ' : SigmaAlgebra Ω'} {ν : Measure Ω'}
   [IsProbabilityMeasure μ] [IsProbabilityMeasure ν]
   {X : Ω → ℝ} {Y : Ω' → ℝ}
 
@@ -521,8 +521,8 @@ end Prod
 
 section NormedSpace
 
-variable {E F : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] {mE : MeasurableSpace E}
-  [NormedAddCommGroup F] [NormedSpace ℝ F] {mF : MeasurableSpace F}
+variable {E F : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] {mE : SigmaAlgebra E}
+  [NormedAddCommGroup F] [NormedSpace ℝ F] {mF : SigmaAlgebra F}
   {μ : Measure E} [IsProbabilityMeasure μ] {ν : Measure F} [IsProbabilityMeasure ν]
 
 lemma variance_dual_prod' {L : StrongDual ℝ (E × F)}

@@ -30,7 +30,7 @@ open scoped NNReal Pointwise ENNReal
 
 namespace MeasureTheory
 
-variable {G : Type*} [Group G] [TopologicalSpace G] [MeasurableSpace G]
+variable {G : Type*} [Group G] [TopologicalSpace G] [SigmaAlgebra G]
     [BorelSpace G] [IsTopologicalGroup G] [LocallyCompactSpace G]
 
 /-- If `φ : G ≃ₜ* G` then `mulEquivHaarChar φ` is the positive real factor by which

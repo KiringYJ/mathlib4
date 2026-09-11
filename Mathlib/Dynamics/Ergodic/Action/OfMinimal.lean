@@ -38,7 +38,7 @@ open scoped Pointwise Topology
 section SMul
 
 variable {M : Type*} [TopologicalSpace M]
-  {X : Type*} [TopologicalSpace X] [R1Space X] [MeasurableSpace X] [BorelSpace X]
+  {X : Type*} [TopologicalSpace X] [R1Space X] [SigmaAlgebra X] [BorelSpace X]
   [SMul M X] [ContinuousSMul M X]
   {μ : Measure X} [IsFiniteMeasure μ] [μ.InnerRegular] [ErgodicSMul M X μ] {s : Set X}
 
@@ -101,7 +101,7 @@ end SMul
 section IsScalarTower
 
 variable {M X : Type*} [Monoid M] [SMul M X]
-  [TopologicalSpace X] [R1Space X] [MeasurableSpace X] [BorelSpace X]
+  [TopologicalSpace X] [R1Space X] [SigmaAlgebra X] [BorelSpace X]
   (μ : Measure X) [IsFiniteMeasure μ] [μ.InnerRegular]
 
 /-- If `N` acts continuously and ergodically on `X` and `M` acts minimally on `N`,
@@ -126,7 +126,7 @@ end IsScalarTower
 section MulActionGroup
 
 variable {G : Type*} [Group G] [TopologicalSpace G] [ContinuousInv G]
-  {X : Type*} [TopologicalSpace X] [R1Space X] [MeasurableSpace X] [BorelSpace X]
+  {X : Type*} [TopologicalSpace X] [R1Space X] [SigmaAlgebra X] [BorelSpace X]
   [MulAction G X] [ContinuousSMul G X]
   {μ : Measure X} [IsFiniteMeasure μ] [μ.InnerRegular] [ErgodicSMul G X μ] {s : Set X}
 
@@ -159,7 +159,7 @@ end MulActionGroup
 
 section IsTopologicalGroup
 
-variable {G : Type*} [Group G] [TopologicalSpace G] [IsTopologicalGroup G] [MeasurableSpace G]
+variable {G : Type*} [Group G] [TopologicalSpace G] [IsTopologicalGroup G] [SigmaAlgebra G]
 
 /-- If the left multiplication by `g` is ergodic
 with respect to a measure which is positive on nonempty open sets,
@@ -167,7 +167,7 @@ then the integer powers of `g` are dense in `G`. -/
 @[to_additive /-- If the left addition of `g` is ergodic
 with respect to a measure which is positive on nonempty open sets,
 then the integer multiples of `g` are dense in `G`. -/]
-theorem DenseRange.zpow_of_ergodic_mul_left [OpensMeasurableSpace G]
+theorem DenseRange.zpow_of_ergodic_mul_left [OpensSigmaAlgebra G]
     {μ : Measure G} [μ.IsOpenPosMeasure] {g : G} (hg : Ergodic (g * ·) μ) :
     DenseRange (g ^ · : ℤ → G) := by
   intro a
@@ -222,7 +222,7 @@ end IsTopologicalGroup
 namespace MonoidHom
 
 variable {G : Type*} [Group G] [TopologicalSpace G]
-  [IsTopologicalGroup G] [SecondCountableTopology G] [MeasurableSpace G] [BorelSpace G]
+  [IsTopologicalGroup G] [SecondCountableTopology G] [SigmaAlgebra G] [BorelSpace G]
 
 /-- Let `f : G →* G` be a group endomorphism of a topological group with second countable topology.
 If the preimages of `1` under the iterations of `f` are dense,

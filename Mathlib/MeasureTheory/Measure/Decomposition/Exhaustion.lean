@@ -57,7 +57,7 @@ open Filter
 
 namespace MeasureTheory
 
-variable {α : Type*} {mα : MeasurableSpace α} {μ ν : Measure α} {s t : Set α}
+variable {α : Type*} {mα : SigmaAlgebra α} {μ ν : Measure α} {s t : Set α}
 
 open scoped Classical in
 /-- A measurable set such that `μ.restrict (μ.sigmaFiniteSetWRT ν)` is sigma-finite and for all

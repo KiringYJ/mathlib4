@@ -79,8 +79,8 @@ theorem cylinder_mem_closedCompactCylinders (s : Finset ι) (S : Set (Π i : s, 
   rw [mem_closedCompactCylinders]
   exact ⟨s, S, hS_closed, hS_compact, rfl⟩
 
-theorem mem_measurableCylinders_of_mem_closedCompactCylinders [∀ i, MeasurableSpace (X i)]
-    [∀ i, SecondCountableTopology (X i)] [∀ i, OpensMeasurableSpace (X i)]
+theorem mem_measurableCylinders_of_mem_closedCompactCylinders [∀ i, SigmaAlgebra (X i)]
+    [∀ i, SecondCountableTopology (X i)] [∀ i, OpensSigmaAlgebra (X i)]
     (ht : t ∈ closedCompactCylinders X) :
     t ∈ measurableCylinders X := by
   rw [mem_measurableCylinders]

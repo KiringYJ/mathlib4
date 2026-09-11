@@ -32,7 +32,7 @@ not less than this function. It turns out that this function is a measure.
 
 @[expose] public section
 
-variable {X : Type*} {mX : MeasurableSpace X}
+variable {X : Type*} {mX : SigmaAlgebra X}
 
 open scoped ENNReal
 

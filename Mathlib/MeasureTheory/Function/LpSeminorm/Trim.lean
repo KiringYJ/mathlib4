@@ -21,7 +21,7 @@ namespace MeasureTheory
 open Filter
 open scoped ENNReal
 
-variable {α ε : Type*} {m m0 : MeasurableSpace α} {p : ℝ≥0∞} {q : ℝ} {μ : Measure α}
+variable {α ε : Type*} {m m0 : SigmaAlgebra α} {p : ℝ≥0∞} {q : ℝ} {μ : Measure α}
   [TopologicalSpace ε] [ContinuousENorm ε]
 
 theorem eLpNorm'_trim (hm : m ≤ m0) {f : α → ε} (hf : StronglyMeasurable[m] f) :

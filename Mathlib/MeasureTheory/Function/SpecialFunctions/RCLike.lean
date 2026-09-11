@@ -32,7 +32,7 @@ end RCLike
 
 section RCLikeComposition
 
-variable {α 𝕜 : Type*} [RCLike 𝕜] {m : MeasurableSpace α} {f : α → 𝕜}
+variable {α 𝕜 : Type*} [RCLike 𝕜] {m : SigmaAlgebra α} {f : α → 𝕜}
   {μ : MeasureTheory.Measure α}
 
 @[fun_prop]
@@ -55,7 +55,7 @@ end RCLikeComposition
 
 section
 
-variable {α 𝕜 : Type*} [RCLike 𝕜] [MeasurableSpace α] {f : α → 𝕜} {μ : MeasureTheory.Measure α}
+variable {α 𝕜 : Type*} [RCLike 𝕜] [SigmaAlgebra α] {f : α → 𝕜} {μ : MeasureTheory.Measure α}
 
 @[fun_prop]
 theorem RCLike.measurable_ofReal : Measurable ((↑) : ℝ → 𝕜) :=

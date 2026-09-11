@@ -27,7 +27,7 @@ public import Mathlib.Topology.MetricSpace.Thickening
 
 public section
 
-open Set Filter MeasureTheory MeasurableSpace TopologicalSpace
+open Set Filter MeasureTheory SigmaAlgebra TopologicalSpace
 
 open scoped Topology NNReal ENNReal MeasureTheory
 
@@ -37,8 +37,8 @@ variable {α β : Type*} {s : Set α}
 
 section PseudoMetricSpace
 
-variable [PseudoMetricSpace α] [MeasurableSpace α] [OpensMeasurableSpace α]
-variable [MeasurableSpace β] {x : α} {ε : ℝ}
+variable [PseudoMetricSpace α] [SigmaAlgebra α] [OpensSigmaAlgebra α]
+variable [SigmaAlgebra β] {x : α} {ε : ℝ}
 
 open Metric
 
@@ -98,8 +98,8 @@ end PseudoMetricSpace
 
 section PseudoEMetricSpace
 
-variable [PseudoEMetricSpace α] [MeasurableSpace α] [OpensMeasurableSpace α]
-variable [MeasurableSpace β] {x : α} {ε : ℝ≥0∞}
+variable [PseudoEMetricSpace α] [SigmaAlgebra α] [OpensSigmaAlgebra α]
+variable [SigmaAlgebra β] {x : α} {ε : ℝ≥0∞}
 
 open Metric
 
@@ -182,8 +182,8 @@ end PseudoEMetricSpace
 
 /-- Given a compact set in a proper space, the measure of its `r`-closed thickenings converges to
 its measure as `r` tends to `0`. -/
-theorem tendsto_measure_cthickening_of_isCompact [MetricSpace α] [MeasurableSpace α]
-    [OpensMeasurableSpace α] [ProperSpace α] {μ : Measure α} [IsFiniteMeasureOnCompacts μ]
+theorem tendsto_measure_cthickening_of_isCompact [MetricSpace α] [SigmaAlgebra α]
+    [OpensSigmaAlgebra α] [ProperSpace α] {μ : Measure α} [IsFiniteMeasureOnCompacts μ]
     {s : Set α} (hs : IsCompact s) :
     Tendsto (fun r => μ (Metric.cthickening r s)) (𝓝 0) (𝓝 (μ s)) :=
   tendsto_measure_cthickening_of_isClosed
@@ -192,7 +192,7 @@ theorem tendsto_measure_cthickening_of_isCompact [MetricSpace α] [MeasurableSpa
 /-- If a measurable space is countably generated and separates points, it arises as
 the Borel sets of some second countable t4 topology (i.e. a separable metrizable one). -/
 theorem exists_borelSpace_of_countablyGenerated_of_separatesPoints (α : Type*)
-    [m : MeasurableSpace α] [CountablyGenerated α] [SeparatesPoints α] :
+    [m : SigmaAlgebra α] [CountablyGenerated α] [SeparatesPoints α] :
     ∃ _ : TopologicalSpace α, SecondCountableTopology α ∧ T4Space α ∧ BorelSpace α := by
   rcases measurableEquiv_nat_bool_of_countablyGenerated α with ⟨s, ⟨f⟩⟩
   let := induced f inferInstance
@@ -203,18 +203,18 @@ theorem exists_borelSpace_of_countablyGenerated_of_separatesPoints (α : Type*)
 /-- If a measurable space on `α` is countably generated and separates points, there is some
 second countable t4 topology on `α` (i.e. a separable metrizable one) for which every
 open set is measurable. -/
-theorem exists_opensMeasurableSpace_of_countablySeparated (α : Type*)
-    [m : MeasurableSpace α] [CountablySeparated α] :
-    ∃ _ : TopologicalSpace α, SecondCountableTopology α ∧ T4Space α ∧ OpensMeasurableSpace α := by
+theorem exists_opensSigmaAlgebra_of_countablySeparated (α : Type*)
+    [m : SigmaAlgebra α] [CountablySeparated α] :
+    ∃ _ : TopologicalSpace α, SecondCountableTopology α ∧ T4Space α ∧ OpensSigmaAlgebra α := by
   rcases exists_countablyGenerated_le_of_countablySeparated α with ⟨m', _, _, m'le⟩
   rcases exists_borelSpace_of_countablyGenerated_of_separatesPoints (m := m') with ⟨τ, _, _, τm'⟩
-  exact ⟨τ, ‹_›, ‹_›, @OpensMeasurableSpace.mk _ _ m (τm'.measurable_eq.symm.le.trans m'le)⟩
+  exact ⟨τ, ‹_›, ‹_›, @OpensSigmaAlgebra.mk _ _ m (τm'.sigmaAlgebra_eq.symm.le.trans m'le)⟩
 
 
 section ContinuousENorm
 
-variable {ε : Type*} [MeasurableSpace ε] [TopologicalSpace ε] [ContinuousENorm ε]
-  [OpensMeasurableSpace ε] [MeasurableSpace β]
+variable {ε : Type*} [SigmaAlgebra ε] [TopologicalSpace ε] [ContinuousENorm ε]
+  [OpensSigmaAlgebra ε] [SigmaAlgebra β]
 
 @[fun_prop]
 lemma measurable_enorm : Measurable (enorm : ε → ℝ≥0∞) := continuous_enorm.measurable
@@ -232,7 +232,7 @@ end ContinuousENorm
 
 section NormedAddCommGroup
 
-variable [MeasurableSpace α] [NormedAddCommGroup α] [OpensMeasurableSpace α] [MeasurableSpace β]
+variable [SigmaAlgebra α] [NormedAddCommGroup α] [OpensSigmaAlgebra α] [SigmaAlgebra β]
 
 @[fun_prop]
 theorem measurable_norm : Measurable (norm : α → ℝ) :=

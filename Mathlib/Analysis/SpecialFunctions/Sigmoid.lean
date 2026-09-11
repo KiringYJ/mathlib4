@@ -288,7 +288,7 @@ lemma Topology.isEmbedding_sigmoid : IsEmbedding unitInterval.sigmoid :=
 lemma measurableEmbedding_sigmoid : MeasurableEmbedding unitInterval.sigmoid :=
   Topology.isEmbedding_sigmoid.measurableEmbedding <| unitInterval.range_sigmoid ▸ measurableSet_Ioo
 
-variable (α : Type*) [MeasurableSpace α] [StandardBorelSpace α]
+variable (α : Type*) [SigmaAlgebra α] [StandardBorelSpace α]
 
 lemma measurableEmbedding_sigmoid_comp_embeddingReal :
     MeasurableEmbedding (unitInterval.sigmoid ∘ MeasureTheory.embeddingReal α) :=

@@ -30,7 +30,7 @@ public noncomputable section
 
 namespace UpperHalfPlane
 
-instance : MeasurableSpace ℍ := .comap UpperHalfPlane.coe inferInstance
+instance : SigmaAlgebra ℍ := .comap UpperHalfPlane.coe inferInstance
 
 instance : BorelSpace ℍ := ⟨borel_comap.symm⟩
 

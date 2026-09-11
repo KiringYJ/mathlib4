@@ -38,7 +38,7 @@ open MeasureTheory ProbabilityTheory Set ENNReal unitInterval Filter Function
 
 open scoped Topology
 
-variable {X Y : Type*} {mX : MeasurableSpace X} [Nonempty Y] {mY : MeasurableSpace Y}
+variable {X Y : Type*} {mX : SigmaAlgebra X} [Nonempty Y] {mY : SigmaAlgebra Y}
     [StandardBorelSpace Y]
 
 namespace ProbabilityTheory.Kernel

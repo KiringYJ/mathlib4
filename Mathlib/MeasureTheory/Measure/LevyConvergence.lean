@@ -39,7 +39,7 @@ open scoped Topology RealInnerProductSpace ENNReal
 namespace MeasureTheory
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
-  [MeasurableSpace E] [BorelSpace E]
+  [SigmaAlgebra E] [BorelSpace E]
 
 /-- If the characteristic functions of a sequence of measures `μ : ℕ → Measure E` converge pointwise
 to a function which is continuous at 0, then `{μ n | n}` is tight. -/
@@ -152,7 +152,7 @@ If `A` is a star sub-algebra of bounded continuous scalar functions that separat
 and the integrals of elements of `A` with respect to `μ` converge to the integrals
 with respect to `μ₀`, then `μ` converges weakly to `μ₀`. -/
 lemma ProbabilityMeasure.tendsto_of_tight_of_separatesPoints (𝕜 : Type*) [RCLike 𝕜]
-    {E : Type*} [MeasurableSpace E] [TopologicalSpace E] [PolishSpace E] [BorelSpace E]
+    {E : Type*} [SigmaAlgebra E] [TopologicalSpace E] [PolishSpace E] [BorelSpace E]
     {ι : Type*} {𝓕 : Filter ι}
     {μ : ι → ProbabilityMeasure E} (h_tight : IsTightMeasureSet {(μ n : Measure E) | n})
     {μ₀ : ProbabilityMeasure E}
@@ -221,9 +221,9 @@ theorem ProbabilityMeasure.tendsto_iff_tendsto_charFun :
   simp_rw [charFun_eq_integral_innerProbChar]
   exact h (innerProbChar t)
 
-variable {Ω' : Type*} {Ω : ℕ → Type*} {m : ∀ n, MeasurableSpace (Ω n)}
+variable {Ω' : Type*} {Ω : ℕ → Type*} {m : ∀ n, SigmaAlgebra (Ω n)}
   {P : (n : ℕ) → Measure (Ω n)} [∀ n, IsProbabilityMeasure (P n)]
-  {m' : MeasurableSpace Ω'} {P' : Measure Ω'} [IsProbabilityMeasure P']
+  {m' : SigmaAlgebra Ω'} {P' : Measure Ω'} [IsProbabilityMeasure P']
   {X : (n : ℕ) → Ω n → E} {X' : Ω' → E}
 
 /-- If the characteristic functions of a sequence of pushforward measures converge pointwise to the

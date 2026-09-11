@@ -12,7 +12,7 @@ public import Mathlib.MeasureTheory.Function.StronglyMeasurable.Lp
 
 A function `f` verifies `AEStronglyMeasurable[m] f μ` if it is `μ`-a.e. equal to
 an `m`-strongly measurable function. This is similar to `AEStronglyMeasurable`, but the
-`MeasurableSpace` structures used for the measurability statement and for the measure are
+`SigmaAlgebra` structures used for the measurability statement and for the measure are
 different.
 
 We define `lpMeas F 𝕜 m p μ`, the subspace of `Lp F p μ` containing functions `f` verifying
@@ -44,7 +44,7 @@ open scoped ENNReal MeasureTheory
 namespace MeasureTheory
 
 theorem ae_eq_trim_iff_of_aestronglyMeasurable {α β} [TopologicalSpace β] [MetrizableSpace β]
-    {m m0 : MeasurableSpace α} {μ : Measure α} {f g : α → β} (hm : m ≤ m0)
+    {m m0 : SigmaAlgebra α} {μ : Measure α} {f g : α → β} (hm : m ≤ m0)
     (hfm : AEStronglyMeasurable[m] f μ) (hgm : AEStronglyMeasurable[m] g μ) :
     hfm.mk f =ᵐ[μ.trim hm] hgm.mk g ↔ f =ᵐ[μ] g :=
   (hfm.stronglyMeasurable_mk.ae_eq_trim_iff hm hgm.stronglyMeasurable_mk).trans
@@ -52,7 +52,7 @@ theorem ae_eq_trim_iff_of_aestronglyMeasurable {α β} [TopologicalSpace β] [Me
       hfm.ae_eq_mk.symm.trans (h.trans hgm.ae_eq_mk)⟩
 
 theorem AEStronglyMeasurable.comp_ae_measurable' {α β γ : Type*} [TopologicalSpace β]
-    {mα : MeasurableSpace α} {_ : MeasurableSpace γ} {f : α → β} {μ : Measure γ} {g : γ → α}
+    {mα : SigmaAlgebra α} {_ : SigmaAlgebra γ} {f : α → β} {μ : Measure γ} {g : γ → α}
     (hf : AEStronglyMeasurable f (μ.map g)) (hg : AEMeasurable g μ) :
     AEStronglyMeasurable[mα.comap g] (f ∘ g) μ :=
   ⟨hf.mk f ∘ g, hf.stronglyMeasurable_mk.comp_measurable (measurable_iff_comap_le.mpr le_rfl),
@@ -73,7 +73,7 @@ variable (F)
 /-- `lpMeasSubgroup F m p μ` is the subspace of `Lp F p μ` containing functions `f` verifying
 `AEStronglyMeasurable[m] f μ`, i.e. functions which are `μ`-a.e. equal to
 an `m`-strongly measurable function. -/
-def lpMeasSubgroup (m : MeasurableSpace α) [MeasurableSpace α] (p : ℝ≥0∞) (μ : Measure α) :
+def lpMeasSubgroup (m : SigmaAlgebra α) [SigmaAlgebra α] (p : ℝ≥0∞) (μ : Measure α) :
     AddSubgroup (Lp F p μ) where
   carrier := {f : Lp F p μ | AEStronglyMeasurable[m] f μ}
   zero_mem' := ⟨(0 : α → F), @stronglyMeasurable_zero _ _ m _ _, Lp.coeFn_zero _ _ _⟩
@@ -85,7 +85,7 @@ variable (𝕜)
 /-- `lpMeas F 𝕜 m p μ` is the subspace of `Lp F p μ` containing functions `f` verifying
 `AEStronglyMeasurable[m] f μ`, i.e. functions which are `μ`-a.e. equal to
 an `m`-strongly measurable function. -/
-def lpMeas (m : MeasurableSpace α) [MeasurableSpace α] (p : ℝ≥0∞) (μ : Measure α) :
+def lpMeas (m : SigmaAlgebra α) [SigmaAlgebra α] (p : ℝ≥0∞) (μ : Measure α) :
     Submodule 𝕜 (Lp F p μ) where
   carrier := {f : Lp F p μ | AEStronglyMeasurable[m] f μ}
   zero_mem' := ⟨(0 : α → F), @stronglyMeasurable_zero _ _ m _ _, Lp.coeFn_zero _ _ _⟩
@@ -94,25 +94,26 @@ def lpMeas (m : MeasurableSpace α) [MeasurableSpace α] (p : ℝ≥0∞) (μ : 
 
 variable {F 𝕜}
 
-theorem mem_lpMeasSubgroup_iff_aestronglyMeasurable {m m0 : MeasurableSpace α} {μ : Measure α}
+theorem mem_lpMeasSubgroup_iff_aestronglyMeasurable {m m0 : SigmaAlgebra α} {μ : Measure α}
     {f : Lp F p μ} : f ∈ lpMeasSubgroup F m p μ ↔ AEStronglyMeasurable[m] f μ := by
   rw [← AddSubgroup.mem_carrier, lpMeasSubgroup, Set.mem_ofPred_eq]
 
-theorem mem_lpMeas_iff_aestronglyMeasurable {m m0 : MeasurableSpace α} {μ : Measure α}
+theorem mem_lpMeas_iff_aestronglyMeasurable {m m0 : SigmaAlgebra α} {μ : Measure α}
     {f : Lp F p μ} : f ∈ lpMeas F 𝕜 m p μ ↔ AEStronglyMeasurable[m] f μ := by
   rw [← SetLike.mem_coe, ← Submodule.mem_carrier, lpMeas, Set.mem_ofPred_eq]
 
-theorem lpMeas.aestronglyMeasurable {m _ : MeasurableSpace α} {μ : Measure α}
+theorem lpMeas.aestronglyMeasurable {m _ : SigmaAlgebra α} {μ : Measure α}
     (f : lpMeas F 𝕜 m p μ) : AEStronglyMeasurable[m] (f : α → F) μ :=
   mem_lpMeas_iff_aestronglyMeasurable.mp f.mem
 
-theorem mem_lpMeas_self {m0 : MeasurableSpace α} (μ : Measure α) (f : Lp F p μ) :
+theorem mem_lpMeas_self {m0 : SigmaAlgebra α} (μ : Measure α) (f : Lp F p μ) :
     f ∈ lpMeas F 𝕜 m0 p μ :=
   mem_lpMeas_iff_aestronglyMeasurable.mpr (Lp.aestronglyMeasurable f)
 
-theorem mem_lpMeas_indicatorConstLp {m m0 : MeasurableSpace α} (hm : m ≤ m0) {μ : Measure α}
+theorem mem_lpMeas_indicatorConstLp {m m0 : SigmaAlgebra α} (hm : m ≤ m0) {μ : Measure α}
     {s : Set α} (hs : MeasurableSet[m] s) (hμs : μ s ≠ ∞) {c : F} :
-    indicatorConstLp p (hm s hs) hμs c ∈ lpMeas F 𝕜 m p μ :=
+    indicatorConstLp p (measurableSet_iff_mem.mpr (hm (measurableSet_iff_mem.mp hs))) hμs c ∈
+      lpMeas F 𝕜 m p μ :=
   ⟨s.indicator fun _ : α => c, (@stronglyMeasurable_const _ _ m _ _).indicator hs,
     indicatorConstLp_coeFn⟩
 
@@ -125,7 +126,7 @@ measure `μ.trim hm`. As a consequence, the completeness of `Lp` implies complet
 `lpMeasSubgroup` (and `lpMeas`). -/
 
 
-variable {m m0 : MeasurableSpace α} {μ : Measure α}
+variable {m m0 : SigmaAlgebra α} {μ : Measure α}
 
 /-- If `f` belongs to `lpMeasSubgroup F m p μ`, then the measurable function it is almost
 everywhere equal to (given by `AEMeasurable.mk`) belongs to `ℒp` for the measure `μ.trim hm`. -/
@@ -313,7 +314,7 @@ end CompleteSubspace
 
 section StronglyMeasurable
 
-variable {m m0 : MeasurableSpace α} {μ : Measure α}
+variable {m m0 : SigmaAlgebra α} {μ : Measure α}
 
 /-- We do not get `ae_fin_strongly_measurable f (μ.trim hm)`, since we don't have
 `f =ᵐ[μ.trim hm] Lp_meas_to_Lp_trim F 𝕜 p μ hm f` but only the weaker
@@ -330,7 +331,8 @@ sub-sigma-algebra, we obtain an indicator in the Lp space of the larger sigma-al
 theorem lpMeasToLpTrimLie_symm_indicator [one_le_p : Fact (1 ≤ p)] [NormedSpace ℝ F] {hm : m ≤ m0}
     {s : Set α} {μ : Measure α} (hs : MeasurableSet[m] s) (hμs : μ.trim hm s ≠ ∞) (c : F) :
     ((lpMeasToLpTrimLie F ℝ p μ hm).symm (indicatorConstLp p hs hμs c) : Lp F p μ) =
-      indicatorConstLp p (hm s hs) ((le_trim hm).trans_lt hμs.lt_top).ne c := by
+      indicatorConstLp p (measurableSet_iff_mem.mpr (hm (measurableSet_iff_mem.mp hs)))
+        ((le_trim hm).trans_lt hμs.lt_top).ne c := by
   ext1
   change
     lpTrimToLpMeas F ℝ p μ hm (indicatorConstLp p hs hμs c) =ᵐ[μ]
@@ -351,13 +353,14 @@ end LpMeas
 
 section Induction
 
-variable {m m0 : MeasurableSpace α} {μ : Measure α} [Fact (1 ≤ p)] [NormedSpace ℝ F]
+variable {m m0 : SigmaAlgebra α} {μ : Measure α} [Fact (1 ≤ p)] [NormedSpace ℝ F]
 
 /-- Auxiliary lemma for `Lp.induction_stronglyMeasurable`. -/
 @[elab_as_elim]
 theorem Lp.induction_stronglyMeasurable_aux (hm : m ≤ m0) (hp_ne_top : p ≠ ∞) (P : Lp F p μ → Prop)
     (h_ind : ∀ (c : F) {s : Set α} (hs : MeasurableSet[m] s) (hμs : μ s < ∞),
-      P (Lp.simpleFunc.indicatorConst p (hm s hs) hμs.ne c))
+      P (Lp.simpleFunc.indicatorConst p
+        (measurableSet_iff_mem.mpr (hm (measurableSet_iff_mem.mp hs))) hμs.ne c))
     (h_add : ∀ ⦃f g⦄, ∀ hf : MemLp f p μ, ∀ hg : MemLp g p μ, AEStronglyMeasurable[m] f μ →
       AEStronglyMeasurable[m] g μ → Disjoint (Function.support f) (Function.support g) →
         P (hf.toLp f) → P (hg.toLp g) → P (hf.toLp f + hg.toLp g))
@@ -403,7 +406,8 @@ sub-σ-algebra `m` in a normed space, it suffices to show that
 @[elab_as_elim]
 theorem Lp.induction_stronglyMeasurable (hm : m ≤ m0) (hp_ne_top : p ≠ ∞) (P : Lp F p μ → Prop)
     (h_ind : ∀ (c : F) {s : Set α} (hs : MeasurableSet[m] s) (hμs : μ s < ∞),
-      P (Lp.simpleFunc.indicatorConst p (hm s hs) hμs.ne c))
+      P (Lp.simpleFunc.indicatorConst p
+        (measurableSet_iff_mem.mpr (hm (measurableSet_iff_mem.mp hs))) hμs.ne c))
     (h_add : ∀ ⦃f g⦄, ∀ hf : MemLp f p μ, ∀ hg : MemLp g p μ, StronglyMeasurable[m] f →
       StronglyMeasurable[m] g → Disjoint (Function.support f) (Function.support g) →
         P (hf.toLp f) → P (hg.toLp g) → P (hf.toLp f + hg.toLp g))
@@ -481,7 +485,8 @@ theorem MemLp.induction_stronglyMeasurable (hm : m ≤ m0) (hp_ne_top : p ≠ �
   · intro c s hs hμs
     rw [Lp.simpleFunc.coe_indicatorConst]
     refine h_ae indicatorConstLp_coeFn.symm ?_ (h_ind c hs hμs)
-    exact memLp_indicator_const p (hm s hs) c (Or.inr hμs.ne)
+    exact memLp_indicator_const p
+      (measurableSet_iff_mem.mpr (hm (measurableSet_iff_mem.mp hs))) c (Or.inr hμs.ne)
   · intro f g hf_mem hg_mem hfm hgm h_disj hfP hgP
     have hfP' : P f := h_ae hf_mem.coeFn_toLp (Lp.memLp _) hfP
     have hgP' : P g := h_ae hg_mem.coeFn_toLp (Lp.memLp _) hgP

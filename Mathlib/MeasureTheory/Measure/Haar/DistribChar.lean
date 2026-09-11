@@ -58,7 +58,7 @@ noncomputable def distribHaarChar : G →* ℝ≥0 :=
 lemma distribHaarChar_pos : 0 < distribHaarChar A g :=
   pos_iff_ne_zero.mpr ((Group.isUnit g).map (distribHaarChar A)).ne_zero
 
-variable [MeasurableSpace A] [BorelSpace A] {μ : Measure A} [μ.IsAddHaarMeasure]
+variable [SigmaAlgebra A] [BorelSpace A] {μ : Measure A} [μ.IsAddHaarMeasure]
 
 variable (μ) in
 lemma addHaarScalarFactor_smul_eq_distribHaarChar (g : G) :

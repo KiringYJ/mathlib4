@@ -66,15 +66,15 @@ The conditional kernel is unique (almost everywhere w.r.t. `fst κ`): this is pr
 
 @[expose] public section
 
-open MeasureTheory Set Filter MeasurableSpace
+open MeasureTheory Set Filter SigmaAlgebra
 
 open scoped ENNReal MeasureTheory Topology ProbabilityTheory
 
 namespace ProbabilityTheory.Kernel
 
-variable {α β γ Ω : Type*} {mα : MeasurableSpace α} {mβ : MeasurableSpace β}
-  {mγ : MeasurableSpace γ} [MeasurableSpace.CountablyGenerated γ]
-  {mΩ : MeasurableSpace Ω} [StandardBorelSpace Ω] [Nonempty Ω]
+variable {α β γ Ω : Type*} {mα : SigmaAlgebra α} {mβ : SigmaAlgebra β}
+  {mγ : SigmaAlgebra γ} [SigmaAlgebra.CountablyGenerated γ]
+  {mΩ : SigmaAlgebra Ω} [StandardBorelSpace Ω] [Nonempty Ω]
 
 section Real
 
@@ -175,6 +175,16 @@ Since every standard Borel space embeds measurably into `ℝ`, we can generalize
 property on `ℝ` to all these spaces. -/
 
 open scoped Classical in
+/-- The measurable selector used in `borelMarkovFromReal`, stated in the legacy
+`MeasurableSet` facade expected by `Kernel.piecewise`. -/
+lemma measurableSet_borelMarkovFromRealSelector
+    (Ω : Type*) [SigmaAlgebra Ω] [StandardBorelSpace Ω] (η : Kernel α ℝ) :
+    MeasurableSet {a | η a (range (embeddingReal Ω))ᶜ = 0} :=
+  measurableSet_iff_mem.mpr <|
+    (Kernel.measurable_coe η (measurableEmbedding_embeddingReal Ω).measurableSet_range.compl)
+      (measurableSet_singleton 0)
+
+open scoped Classical in
 /-- Auxiliary definition for `ProbabilityTheory.Kernel.condKernel`.
 A Borel space `Ω` embeds measurably into `ℝ` (with embedding `e`), hence we can get a `Kernel α Ω`
 from a `Kernel α ℝ` by taking the comap by `e`.
@@ -184,31 +194,32 @@ ensure that the comap is a Markov kernel.
 We thus take the comap by `e` of a kernel defined piecewise: `η` when
 `η a (range (embeddingReal Ω))ᶜ = 0`, and an arbitrary deterministic kernel otherwise. -/
 noncomputable
-def borelMarkovFromReal (Ω : Type*) [Nonempty Ω] [MeasurableSpace Ω] [StandardBorelSpace Ω]
+def borelMarkovFromReal (Ω : Type*) [Nonempty Ω] [SigmaAlgebra Ω] [StandardBorelSpace Ω]
     (η : Kernel α ℝ) :
     Kernel α Ω :=
   have he := measurableEmbedding_embeddingReal Ω
-  let x₀ := (range_nonempty (embeddingReal Ω)).choose
+  let x₀ := embeddingReal Ω (Classical.ofNonempty : Ω)
   comapRight
-    (piecewise ((Kernel.measurable_coe η he.measurableSet_range.compl) (measurableSet_singleton 0) :
-        MeasurableSet {a | η a (range (embeddingReal Ω))ᶜ = 0})
+    (piecewise (measurableSet_borelMarkovFromRealSelector Ω η)
       η (deterministic (fun _ ↦ x₀) measurable_const)) he
 
-lemma borelMarkovFromReal_apply (Ω : Type*) [Nonempty Ω] [MeasurableSpace Ω] [StandardBorelSpace Ω]
+lemma borelMarkovFromReal_apply (Ω : Type*) [Nonempty Ω] [SigmaAlgebra Ω] [StandardBorelSpace Ω]
     (η : Kernel α ℝ) (a : α) :
     borelMarkovFromReal Ω η a
       = if η a (range (embeddingReal Ω))ᶜ = 0 then (η a).comap (embeddingReal Ω)
-        else (Measure.dirac (range_nonempty (embeddingReal Ω)).choose).comap (embeddingReal Ω) := by
+        else (Measure.dirac (embeddingReal Ω (Classical.ofNonempty : Ω))).comap
+          (embeddingReal Ω) := by
   classical
   rw [borelMarkovFromReal, comapRight_apply, piecewise_apply, deterministic_apply]
-  simp only [mem_preimage, mem_singleton_iff]
+  simp only [Set.mem_ofPred_eq]
   split_ifs <;> rfl
 
-lemma borelMarkovFromReal_apply' (Ω : Type*) [Nonempty Ω] [MeasurableSpace Ω] [StandardBorelSpace Ω]
+lemma borelMarkovFromReal_apply' (Ω : Type*) [Nonempty Ω] [SigmaAlgebra Ω] [StandardBorelSpace Ω]
     (η : Kernel α ℝ) (a : α) {s : Set Ω} (hs : MeasurableSet s) :
     borelMarkovFromReal Ω η a s
       = if η a (range (embeddingReal Ω))ᶜ = 0 then η a (embeddingReal Ω '' s)
-        else (embeddingReal Ω '' s).indicator 1 (range_nonempty (embeddingReal Ω)).choose := by
+        else (embeddingReal Ω '' s).indicator 1
+          (embeddingReal Ω (Classical.ofNonempty : Ω)) := by
   have he := measurableEmbedding_embeddingReal Ω
   rw [borelMarkovFromReal_apply]
   split_ifs with h
@@ -234,7 +245,7 @@ instance instIsMarkovKernelBorelMarkovFromReal (η : Kernel α ℝ) [IsMarkovKer
   split_ifs with h
   · rwa [← prob_compl_eq_zero_iff (measurableEmbedding_embeddingReal Ω).measurableSet_range]
   · rw [deterministic_apply]
-    simp [(range_nonempty (embeddingReal Ω)).choose_spec]
+    simp
 
 /-- For `κ' := map κ (Prod.map (id : β → β) e)`, the hypothesis `hη` is `fst κ' ⊗ₖ η = κ'`.
 The conclusion of the lemma is `fst κ ⊗ₖ borelMarkovFromReal Ω η = comapRight (fst κ' ⊗ₖ η) _`. -/
@@ -406,7 +417,7 @@ noncomputable
 irreducible_def condKernel : Kernel (α × β) Ω :=
   if hα : Countable α then
     condKernelCountable (fun a ↦ (κ a).condKernel)
-      fun x y h ↦ by simp [apply_congr_of_mem_measurableAtom _ h]
+      fun x y h ↦ by simp [apply_congr_of_indistinguishable _ h]
   else letI := h.countableOrCountablyGenerated.resolve_left hα; condKernelBorel κ
 
 /-- `condKernel κ` is a Markov kernel. -/

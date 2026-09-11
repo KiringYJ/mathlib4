@@ -15,7 +15,7 @@ import Mathlib.Tactic.Module
 import Mathlib.Tactic.Positivity
 import Mathlib.Tactic.Ring
 
-import Mathlib.MeasureTheory.MeasurableSpace.Instances
+import Mathlib.MeasureTheory.SigmaAlgebra.Instances
 import Mathlib.Topology.Continuous
 import Mathlib.Topology.Instances.Nat
 
@@ -137,7 +137,7 @@ example {X : Type*} [TopologicalSpace X] {f : X → ℕ} {g : ℕ → X}
   fun_prop
 
 -- A similar example for the `measurability` tactic.
-example {α : Type*} [MeasurableSpace α] {f : α → ℚ} (hf : Measurable f) :
+example {α : Type*} [SigmaAlgebra α] {f : α → ℚ} (hf : Measurable f) :
     Measurable (fun x ↦ f x + 0) := by
   simp
   measurability

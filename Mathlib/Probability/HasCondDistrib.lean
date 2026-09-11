@@ -32,8 +32,8 @@ open MeasureTheory
 
 namespace ProbabilityTheory
 
-variable {Ω 𝓧 𝓨 𝓩 : Type*} {mΩ : MeasurableSpace Ω}
-  {m𝓧 : MeasurableSpace 𝓧} {m𝓨 : MeasurableSpace 𝓨} {m𝓩 : MeasurableSpace 𝓩}
+variable {Ω 𝓧 𝓨 𝓩 : Type*} {mΩ : SigmaAlgebra Ω}
+  {m𝓧 : SigmaAlgebra 𝓧} {m𝓨 : SigmaAlgebra 𝓨} {m𝓩 : SigmaAlgebra 𝓩}
   {P : Measure Ω} {X : Ω → 𝓧} {Y : Ω → 𝓨} {κ : Kernel 𝓧 𝓨}
 
 /-- Predicate stating that the conditional distribution of `Y` given `X` under the measure `P`

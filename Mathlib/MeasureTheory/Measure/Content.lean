@@ -295,7 +295,7 @@ theorem is_mul_left_invariant_outerMeasure [Group G] [SeparatelyContinuousMul G]
   convert! μ.outerMeasure_preimage (Homeomorph.mulLeft g) (fun K => h g) A
 
 theorem outerMeasure_caratheodory (A : Set G) :
-    MeasurableSet[μ.outerMeasure.caratheodory] A ↔
+    A ∈ μ.outerMeasure.caratheodory ↔
       ∀ U : Opens G, μ.outerMeasure (U ∩ A) + μ.outerMeasure (U \ A) ≤ μ.outerMeasure U := by
   rw [Opens.forall]
   apply inducedOuterMeasure_caratheodory
@@ -309,13 +309,14 @@ theorem outerMeasure_pos_of_is_mul_left_invariant [Group G] [IsTopologicalGroup 
   convert! μ.innerContent_pos_of_is_mul_left_invariant h3 K hK ⟨U, h1U⟩ h2U
   exact μ.outerMeasure_opens ⟨U, h1U⟩
 
-variable [S : MeasurableSpace G] [BorelSpace G]
+variable [S : SigmaAlgebra G] [BorelSpace G]
 
 /-- For the outer measure coming from a content, all Borel sets are measurable. -/
 theorem borel_le_caratheodory : S ≤ μ.outerMeasure.caratheodory := by
-  rw [BorelSpace.measurable_eq (α := G)]
-  refine MeasurableSpace.generateFrom_le ?_
+  rw [BorelSpace.sigmaAlgebra_eq (α := G)]
+  refine SigmaAlgebra.generateFrom_le ?_
   intro U hU
+  change U ∈ μ.outerMeasure.caratheodory
   rw [μ.outerMeasure_caratheodory]
   intro U'
   rw [μ.outerMeasure_of_isOpen ((U' : Set G) ∩ U) (U'.isOpen.inter hU)]
@@ -403,7 +404,7 @@ theorem contentRegular_exists_compact (H : ContentRegular μ) (K : TopologicalSp
   exact (lt_self_iff_false (μ K)).mp (lt_of_le_of_lt' lower_bound_iInf
     (ENNReal.lt_add_right (ne_top_of_lt (μ.lt_top K)) (ENNReal.coe_ne_zero.mpr hε)))
 
-variable [MeasurableSpace G] [R1Space G] [BorelSpace G]
+variable [SigmaAlgebra G] [R1Space G] [BorelSpace G]
 
 /-- If `μ` is a regular content, then the measure induced by `μ` will agree with `μ`
   on compact sets. -/

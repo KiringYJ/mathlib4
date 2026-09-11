@@ -70,7 +70,7 @@ namespace MeasureTheory
 
 section
 
-variable {α R : Type*} [MeasurableSpace α] (μ : Measure α) [LinearOrder R]
+variable {α R : Type*} [SigmaAlgebra α] (μ : Measure α) [LinearOrder R]
 
 theorem countable_meas_le_ne_meas_lt (g : α → R) :
     {t : R | μ {a : α | t ≤ g a} ≠ μ {a : α | t < g a}}.Countable := by
@@ -83,7 +83,7 @@ theorem countable_meas_le_ne_meas_lt (g : α → R) :
     lt_of_le_of_ne (measure_mono (fun a ha ↦ le_of_lt ha)) (Ne.symm ht)
   exact ⟨μ {a | t < g a}, this, fun s hs ↦ measure_mono (fun a ha ↦ hs.trans_le ha)⟩
 
-theorem meas_le_ae_eq_meas_lt {R : Type*} [LinearOrder R] [MeasurableSpace R]
+theorem meas_le_ae_eq_meas_lt {R : Type*} [LinearOrder R] [SigmaAlgebra R]
     (ν : Measure R) [NullSingletonClass ν] (g : α → R) :
     (fun t => μ {a : α | t ≤ g a}) =ᵐ[ν] fun t => μ {a : α | t < g a} :=
   Set.Countable.measure_zero (countable_meas_le_ne_meas_lt μ g) _
@@ -95,7 +95,7 @@ end
 
 section Layercake
 
-variable {α : Type*} [MeasurableSpace α] {f : α → ℝ} {g : ℝ → ℝ}
+variable {α : Type*} [SigmaAlgebra α] {f : α → ℝ} {g : ℝ → ℝ}
 
 /-- An auxiliary version of the layer cake formula (Cavalieri's principle, tail probability
 formula), with a measurability assumption that would also essentially follow from the
@@ -460,7 +460,7 @@ end Layercake
 
 section LayercakeLT
 
-variable {α : Type*} [MeasurableSpace α]
+variable {α : Type*} [SigmaAlgebra α]
 variable {f : α → ℝ} {g : ℝ → ℝ}
 
 /-- The layer cake formula / Cavalieri's principle / tail probability formula:
@@ -506,7 +506,7 @@ end LayercakeLT
 
 section LayercakeIntegral
 
-variable {α : Type*} [MeasurableSpace α] {μ : Measure α} {f : α → ℝ}
+variable {α : Type*} [SigmaAlgebra α] {μ : Measure α} {f : α → ℝ}
 
 /-- The standard case of the layer cake formula / Cavalieri's principle / tail probability formula:
 

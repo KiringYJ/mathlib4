@@ -35,7 +35,7 @@ sense). We do not define that quantity here, which is simply the supremum of a m
 open Filter MeasureTheory ProbabilityTheory Set TopologicalSpace
 open scoped ENNReal NNReal
 
-variable {α β : Type*} {m : MeasurableSpace α} {μ ν : Measure α}
+variable {α β : Type*} {m : SigmaAlgebra α} {μ ν : Measure α}
 
 section ConditionallyCompleteLattice
 
@@ -43,12 +43,12 @@ variable [ConditionallyCompleteLattice β] {f : α → β}
 
 /-- Essential supremum of `f` with respect to measure `μ`: the smallest `c : β` such that
 `f x ≤ c` a.e. -/
-def essSup {_ : MeasurableSpace α} (f : α → β) (μ : Measure α) :=
+def essSup {_ : SigmaAlgebra α} (f : α → β) (μ : Measure α) :=
   (ae μ).limsup f
 
 /-- Essential infimum of `f` with respect to measure `μ`: the greatest `c : β` such that
 `c ≤ f x` a.e. -/
-def essInf {_ : MeasurableSpace α} (f : α → β) (μ : Measure α) :=
+def essInf {_ : SigmaAlgebra α} (f : α → β) (μ : Measure α) :=
   (ae μ).liminf f
 
 theorem essSup_congr_ae {f g : α → β} (hfg : f =ᵐ[μ] g) : essSup f μ = essSup g μ :=
@@ -108,7 +108,7 @@ theorem le_essInf_of_ae_le {f : α → β} (c : β) (hf : (fun _ => c) ≤ᵐ[μ
     c ≤ essInf f μ :=
   le_liminf_of_le hfbdd hf
 
-theorem OrderIso.essSup_apply {_ : MeasurableSpace α} {γ} [ConditionallyCompleteLattice γ]
+theorem OrderIso.essSup_apply {_ : SigmaAlgebra α} {γ} [ConditionallyCompleteLattice γ]
     (f : α → β) (μ : Measure α) (g : β ≃o γ)
     (hf : IsBoundedUnder (· ≤ ·) (ae μ) f := by isBoundedDefault)
     (hf_co : IsCoboundedUnder (· ≤ ·) (ae μ) f := by isBoundedDefault)
@@ -118,7 +118,7 @@ theorem OrderIso.essSup_apply {_ : MeasurableSpace α} {γ} [ConditionallyComple
     g (essSup f μ) = essSup (fun x => g (f x)) μ :=
   OrderIso.limsup_apply g hf hf_co hgf hgf_co
 
-theorem OrderIso.essInf_apply {_ : MeasurableSpace α} {γ} [ConditionallyCompleteLattice γ]
+theorem OrderIso.essInf_apply {_ : SigmaAlgebra α} {γ} [ConditionallyCompleteLattice γ]
     (f : α → β) (μ : Measure α) (g : β ≃o γ)
     (hf : IsBoundedUnder (· ≥ ·) (ae μ) f := by isBoundedDefault)
     (hf_co : IsCoboundedUnder (· ≥ ·) (ae μ) f := by isBoundedDefault)
@@ -148,7 +148,7 @@ theorem essInf_antitone_measure {f : α → β} (hμν : μ ≪ ν)
 
 section TopologicalSpace
 
-variable {γ : Type*} {mγ : MeasurableSpace γ} {f : α → γ} {g : γ → β}
+variable {γ : Type*} {mγ : SigmaAlgebra γ} {f : α → γ} {g : γ → β}
 
 theorem essSup_comp_le_essSup_map_measure (hf : AEMeasurable f μ)
     (hgf : IsCoboundedUnder (· ≤ ·) (ae μ) (g ∘ f) := by isBoundedDefault)
@@ -169,8 +169,8 @@ theorem MeasurableEmbedding.essSup_map_measure (hf : MeasurableEmbedding f)
   rw [eventually_map] at h_le ⊢
   exact hf.ae_map_iff.mpr h_le
 
-variable [MeasurableSpace β] [TopologicalSpace β] [SecondCountableTopology β]
-  [OrderClosedTopology β] [OpensMeasurableSpace β]
+variable [SigmaAlgebra β] [TopologicalSpace β] [SecondCountableTopology β]
+  [OrderClosedTopology β] [OpensSigmaAlgebra β]
 
 theorem essSup_map_measure_of_measurable (hg : Measurable g) (hf : AEMeasurable f μ)
     (hg_co : IsCoboundedUnder (· ≤ ·) (ae (Measure.map f μ)) g := by isBoundedDefault)
@@ -235,12 +235,12 @@ section ConditionallyCompleteLinearOrder
 
 variable [ConditionallyCompleteLinearOrder β] {x : β} {f : α → β}
 
-theorem essSup_eq_sInf {m : MeasurableSpace α} (μ : Measure α) (f : α → β) :
+theorem essSup_eq_sInf {m : SigmaAlgebra α} (μ : Measure α) (f : α → β) :
     essSup f μ = sInf { a | μ { x | a < f x } = 0 } := by
   dsimp [essSup, limsup, limsSup]
   simp only [eventually_map, ae_iff, not_le]
 
-theorem essInf_eq_sSup {m : MeasurableSpace α} (μ : Measure α) (f : α → β) :
+theorem essInf_eq_sSup {m : SigmaAlgebra α} (μ : Measure α) (f : α → β) :
     essInf f μ = sSup { a | μ { x | f x < a } = 0 } := by
   dsimp [essInf, liminf, limsInf]
   simp only [eventually_map, ae_iff, not_le]
@@ -286,11 +286,11 @@ section CompleteLattice
 variable [CompleteLattice β]
 
 @[simp]
-theorem essSup_measure_zero {m : MeasurableSpace α} {f : α → β} : essSup f (0 : Measure α) = ⊥ :=
+theorem essSup_measure_zero {m : SigmaAlgebra α} {f : α → β} : essSup f (0 : Measure α) = ⊥ :=
   le_bot_iff.mp (sInf_le (by simp))
 
 @[simp]
-theorem essInf_measure_zero {_ : MeasurableSpace α} {f : α → β} : essInf f (0 : Measure α) = ⊤ :=
+theorem essInf_measure_zero {_ : SigmaAlgebra α} {f : α → β} : essInf f (0 : Measure α) = ⊤ :=
   @essSup_measure_zero α βᵒᵈ _ _ _
 
 theorem essSup_const_bot : essSup (fun _ : α => (⊥ : β)) μ = (⊥ : β) :=

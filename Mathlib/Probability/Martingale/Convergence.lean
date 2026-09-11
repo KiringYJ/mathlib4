@@ -52,7 +52,7 @@ open scoped NNReal ENNReal MeasureTheory ProbabilityTheory Topology
 
 namespace MeasureTheory
 
-variable {Ω : Type*} {m0 : MeasurableSpace Ω} {μ : Measure Ω} {ℱ : Filtration ℕ m0}
+variable {Ω : Type*} {m0 : SigmaAlgebra Ω} {μ : Measure Ω} {ℱ : Filtration ℕ m0}
 variable {a b : ℝ} {f : ℕ → Ω → ℝ} {ω : Ω} {R : ℝ≥0}
 
 section AeConvergence
@@ -370,25 +370,24 @@ theorem Integrable.tendsto_ae_condExp (hg : Integrable g μ)
     filter_upwards [this, (martingale_condExp g ℱ μ).submartingale.ae_tendsto_limitProcess hR] with
       x heq ht
     rwa [heq]
-  have : ∀ n s, MeasurableSet[ℱ n] s →
+  have : ∀ n s, s ∈ ℱ n →
       ∫ x in s, g x ∂μ = ∫ x in s, ℱ.limitProcess (fun n x => (μ[g | ℱ n]) x) μ x ∂μ := by
     intro n s hs
     rw [← setIntegral_condExp (ℱ.le n) hg hs, ← setIntegral_condExp (ℱ.le n) hlimint hs]
-    refine setIntegral_congr_ae (ℱ.le _ _ hs) ?_
+    refine setIntegral_congr_ae (ℱ.le _ hs) ?_
     filter_upwards [(martingale_condExp g ℱ μ).ae_eq_condExp_limitProcess hunif n] with x hx _
     rw [hx]
   refine ae_eq_of_forall_setIntegral_eq_of_sigmaFinite' hle (fun s _ _ => hg.integrableOn)
     (fun s _ _ => hlimint.integrableOn) (fun s hs _ => ?_) hgmeas.aestronglyMeasurable
     stronglyMeasurable_limitProcess.aestronglyMeasurable
-  have hpi : IsPiSystem {s | ∃ n, MeasurableSet[ℱ n] s} := by
-    rw [Set.ofPred_exists]
-    exact isPiSystem_iUnion_of_monotone _ (fun n ↦ (ℱ n).isPiSystem_measurableSet) fun _ _ ↦ ℱ.mono
+  have hpi : IsPiSystem (⋃ n, ((ℱ n : SigmaAlgebra Ω) : Set (Set Ω))) :=
+    isPiSystem_iUnion_of_monotone _ (fun n ↦ (ℱ n).isPiSystem) fun _ _ ↦ ℱ.mono
   induction s, hs
-    using MeasurableSpace.induction_on_inter (MeasurableSpace.measurableSpace_iSup_eq ℱ) hpi with
+    using SigmaAlgebra.induction_on_inter (SigmaAlgebra.iSup_eq_generateFrom ℱ) hpi with
   | empty =>
     simp only [Measure.restrict_empty, integral_zero_measure]
   | basic s hs =>
-    rcases hs with ⟨n, hn⟩
+    rcases Set.mem_iUnion.mp hs with ⟨n, hn⟩
     exact this n _ hn
   | compl t htmeas ht =>
     have hgeq := @setIntegral_compl _ _ (⨆ n, ℱ n) _ _ _ _ _ htmeas (hg.trim hle hgmeas)
@@ -401,8 +400,8 @@ theorem Integrable.tendsto_ae_condExp (hg : Integrable g μ)
       integral_trim hle stronglyMeasurable_limitProcess, ← setIntegral_univ,
       this 0 _ MeasurableSet.univ, setIntegral_univ, ht (measure_lt_top _ _)]
   | iUnion f hf hfmeas heq =>
-    rw [integral_iUnion (fun n => hle _ (hfmeas n)) hf hg.integrableOn,
-      integral_iUnion (fun n => hle _ (hfmeas n)) hf hlimint.integrableOn]
+    rw [integral_iUnion (fun n => hle (hfmeas n)) hf hg.integrableOn,
+      integral_iUnion (fun n => hle (hfmeas n)) hf hlimint.integrableOn]
     exact tsum_congr fun n => heq _ (measure_lt_top _ _)
 
 /-- Part c of the **L¹ martingale convergence theorem**: Given an integrable function `g` which

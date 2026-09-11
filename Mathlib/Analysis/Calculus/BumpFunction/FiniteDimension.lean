@@ -268,7 +268,7 @@ theorem u_le_one (x : E) : u x ≤ 1 :=
 theorem u_neg (x : E) : u (-x) = u x :=
   (Classical.choose_spec (u_exists E)).2.2.2 x
 
-variable [MeasurableSpace E] [BorelSpace E]
+variable [SigmaAlgebra E] [BorelSpace E]
 
 local notation "μ" => MeasureTheory.Measure.addHaar
 

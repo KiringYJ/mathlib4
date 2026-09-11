@@ -27,14 +27,14 @@ local notation "⟪" x ", " y "⟫" => inner 𝕜 x y
 namespace StronglyMeasurable
 
 @[fun_prop]
-protected theorem inner {_ : MeasurableSpace α} {f g : α → E} (hf : StronglyMeasurable f)
+protected theorem inner {_ : SigmaAlgebra α} {f g : α → E} (hf : StronglyMeasurable f)
     (hg : StronglyMeasurable g) : StronglyMeasurable fun t => ⟪f t, g t⟫ :=
   Continuous.comp_stronglyMeasurable continuous_inner (hf.prodMk hg)
 
 end StronglyMeasurable
 
 namespace AEStronglyMeasurable
-variable {m m₀ : MeasurableSpace α} {μ : Measure[m₀] α} {f g : α → E} {c : E}
+variable {m m₀ : SigmaAlgebra α} {μ : Measure[m₀] α} {f g : α → E} {c : E}
 
 @[fun_prop]
 protected theorem re {f : α → 𝕜} (hf : AEStronglyMeasurable[m] f μ) :
@@ -47,7 +47,7 @@ protected theorem im {f : α → 𝕜} (hf : AEStronglyMeasurable[m] f μ) :
   RCLike.continuous_im.comp_aestronglyMeasurable hf
 
 @[fun_prop]
-protected theorem inner {_ : MeasurableSpace α} {μ : Measure α} {f g : α → E}
+protected theorem inner {_ : SigmaAlgebra α} {μ : Measure α} {f g : α → E}
     (hf : AEStronglyMeasurable[m] f μ) (hg : AEStronglyMeasurable[m] g μ) :
     AEStronglyMeasurable[m] (fun x => ⟪f x, g x⟫) μ :=
   continuous_inner.comp_aestronglyMeasurable (hf.prodMk hg)

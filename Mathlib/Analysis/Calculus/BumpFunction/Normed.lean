@@ -26,7 +26,7 @@ open scoped Topology
 namespace ContDiffBump
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [HasContDiffBump E]
-  [MeasurableSpace E] {c : E} (f : ContDiffBump c) {x : E} {n : ℕ∞} {μ : Measure E}
+  [SigmaAlgebra E] {c : E} (f : ContDiffBump c) {x : E} {n : ℕ∞} {μ : Measure E}
 
 /-- A bump function normed so that `∫ x, f.normed μ x ∂μ = 1`. -/
 protected def normed (μ : Measure E) : E → ℝ := fun x => f x / ∫ x, f x ∂μ

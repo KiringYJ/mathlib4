@@ -63,7 +63,7 @@ equal to the limit of a sequence of simple functions.
 One can specify the sigma-algebra according to which simple functions are taken using the
 `AEStronglyMeasurable[m]` notation in the `MeasureTheory` scope. -/
 @[fun_prop]
-def AEStronglyMeasurable [m : MeasurableSpace α] {m₀ : MeasurableSpace α} (f : α → β)
+def AEStronglyMeasurable [m : SigmaAlgebra α] {m₀ : SigmaAlgebra α} (f : α → β)
     (μ : Measure[m₀] α := by volume_tac) : Prop :=
   ∃ g : α → β, StronglyMeasurable[m] g ∧ f =ᵐ[μ] g
 
@@ -79,14 +79,14 @@ scoped notation "AEStronglyMeasurable[" m "]" => @MeasureTheory.AEStronglyMeasur
 /-- A function is `AEFinStronglyMeasurable` with respect to a measure if it is almost everywhere
 equal to the limit of a sequence of simple functions with support with finite measure. -/
 def AEFinStronglyMeasurable
-    [Zero β] {_ : MeasurableSpace α} (f : α → β) (μ : Measure α := by volume_tac) : Prop :=
+    [Zero β] {_ : SigmaAlgebra α} (f : α → β) (μ : Measure α := by volume_tac) : Prop :=
   ∃ g, FinStronglyMeasurable g μ ∧ f =ᵐ[μ] g
 
 end Definitions
 
 namespace FinStronglyMeasurable
 
-variable {m0 : MeasurableSpace α} {μ : Measure α} {f : α → β}
+variable {m0 : SigmaAlgebra α} {μ : Measure α} {f : α → β}
 
 theorem aefinStronglyMeasurable [Zero β] [TopologicalSpace β] (hf : FinStronglyMeasurable f μ) :
     AEFinStronglyMeasurable f μ :=
@@ -94,14 +94,14 @@ theorem aefinStronglyMeasurable [Zero β] [TopologicalSpace β] (hf : FinStrongl
 
 end FinStronglyMeasurable
 
-theorem aefinStronglyMeasurable_zero {α β} {_ : MeasurableSpace α} (μ : Measure α) [Zero β]
+theorem aefinStronglyMeasurable_zero {α β} {_ : SigmaAlgebra α} (μ : Measure α) [Zero β]
     [TopologicalSpace β] : AEFinStronglyMeasurable (0 : α → β) μ :=
   ⟨0, finStronglyMeasurable_zero, EventuallyEq.rfl⟩
 
 /-! ## Almost everywhere strongly measurable functions -/
 
 section AEStronglyMeasurable
-variable [TopologicalSpace β] [TopologicalSpace γ] {m m₀ : MeasurableSpace α} {μ ν : Measure[m₀] α}
+variable [TopologicalSpace β] [TopologicalSpace γ] {m m₀ : SigmaAlgebra α} {μ ν : Measure[m₀] α}
   {f g : α → β}
 
 @[fun_prop]
@@ -138,7 +138,7 @@ theorem SimpleFunc.aestronglyMeasurable (f : α →ₛ β) : AEStronglyMeasurabl
 /-- In a pseudometrizable space, if a measure `μ` is supported on
 a separable set then the identity function is `AEStronglyMeasurable` with respect to `μ`. -/
 lemma aestronglyMeasurable_id_of_isSeparable [TopologicalSpace α]
-    [TopologicalSpace.PseudoMetrizableSpace α] [OpensMeasurableSpace α]
+    [TopologicalSpace.PseudoMetrizableSpace α] [OpensSigmaAlgebra α]
     {s : Set α} (h1 : TopologicalSpace.IsSeparable s) (h2 : μ sᶜ = 0) :
     AEStronglyMeasurable id μ := by
   nontriviality α
@@ -177,7 +177,7 @@ lemma stronglyMeasurable_mk (hf : AEStronglyMeasurable[m] f μ) : StronglyMeasur
   hf.choose_spec.1
 
 @[fun_prop]
-theorem measurable_mk [PseudoMetrizableSpace β] [MeasurableSpace β] [BorelSpace β]
+theorem measurable_mk [PseudoMetrizableSpace β] [SigmaAlgebra β] [BorelSpace β]
     (hf : AEStronglyMeasurable[m] f μ) : Measurable[m] (hf.mk f) :=
   hf.stronglyMeasurable_mk.measurable
 
@@ -185,7 +185,7 @@ theorem ae_eq_mk (hf : AEStronglyMeasurable[m] f μ) : f =ᵐ[μ] hf.mk f :=
   hf.choose_spec.2
 
 @[fun_prop]
-protected theorem aemeasurable {β} [MeasurableSpace β] [TopologicalSpace β]
+protected theorem aemeasurable {β} [SigmaAlgebra β] [TopologicalSpace β]
     [PseudoMetrizableSpace β] [BorelSpace β] {f : α → β} (hf : AEStronglyMeasurable f μ) :
     AEMeasurable f μ :=
   ⟨hf.mk f, hf.stronglyMeasurable_mk.measurable, hf.ae_eq_mk⟩
@@ -213,7 +213,7 @@ theorem mono_set {s t} (h : s ⊆ t) (ht : AEStronglyMeasurable[m] f (μ.restric
 lemma mono {m'} (hm : m ≤ m') (hf : AEStronglyMeasurable[m] f μ) : AEStronglyMeasurable[m'] f μ :=
   let ⟨f', hf'_meas, hff'⟩ := hf; ⟨f', hf'_meas.mono hm, hff'⟩
 
-lemma of_trim {m₀' : MeasurableSpace α} (hm₀ : m₀' ≤ m₀)
+lemma of_trim {m₀' : SigmaAlgebra α} (hm₀ : m₀' ≤ m₀)
     (hf : AEStronglyMeasurable[m] f (μ.trim hm₀)) : AEStronglyMeasurable[m] f μ := by
   obtain ⟨g, hg_meas, hfg⟩ := hf; exact ⟨g, hg_meas, ae_eq_of_ae_eq_trim hfg⟩
 
@@ -236,7 +236,7 @@ theorem _root_.Continuous.comp_aestronglyMeasurable {g : β → γ} {f : α → 
 /-- A continuous function from `α` to `β` is ae strongly measurable when one of the two spaces is
 second countable. -/
 @[fun_prop]
-theorem _root_.Continuous.aestronglyMeasurable [TopologicalSpace α] [OpensMeasurableSpace α]
+theorem _root_.Continuous.aestronglyMeasurable [TopologicalSpace α] [OpensSigmaAlgebra α]
     [PseudoMetrizableSpace β] [SecondCountableTopologyEither α β] (hf : Continuous f) :
     AEStronglyMeasurable f μ :=
   hf.stronglyMeasurable.aestronglyMeasurable
@@ -269,30 +269,30 @@ theorem _root_.Continuous.comp_aestronglyMeasurable₂
 /-- In a space with second countable topology, measurable implies ae strongly measurable. -/
 @[fun_prop]
 theorem _root_.Measurable.aestronglyMeasurable
-    [MeasurableSpace β] [PseudoMetrizableSpace β] [SecondCountableTopology β]
-    [OpensMeasurableSpace β] (hf : Measurable[m] f) : AEStronglyMeasurable[m] f μ :=
+    [SigmaAlgebra β] [PseudoMetrizableSpace β] [SecondCountableTopology β]
+    [OpensSigmaAlgebra β] (hf : Measurable[m] f) : AEStronglyMeasurable[m] f μ :=
   hf.stronglyMeasurable.aestronglyMeasurable
 
 /-- If the restriction to a set `s` of a σ-algebra `m` is included in the restriction to `s` of
 another σ-algebra `m₂` (hypothesis `hs`), the set `s` is `m` measurable and a function `f` almost
 everywhere supported on `s` is `m`-ae-strongly-measurable, then `f` is also
 `m₂`-ae-strongly-measurable. -/
-lemma of_measurableSpace_le_on {m' m₀ : MeasurableSpace α} {μ : Measure[m₀] α} [Zero β]
+lemma of_sigmaAlgebra_le_on {m' m₀ : SigmaAlgebra α} {μ : Measure[m₀] α} [Zero β]
     (hm : m ≤ m₀) {s : Set α} (hs_m : MeasurableSet[m] s)
     (hs : ∀ t, MeasurableSet[m] (s ∩ t) → MeasurableSet[m'] (s ∩ t))
     (hf : AEStronglyMeasurable[m] f μ) (hf_zero : f =ᵐ[μ.restrict sᶜ] 0) :
     AEStronglyMeasurable[m'] f μ := by
   have h_ind_eq : s.indicator (hf.mk f) =ᵐ[μ] f := by
     refine Filter.EventuallyEq.trans ?_ <|
-      indicator_ae_eq_of_restrict_compl_ae_eq_zero (hm _ hs_m) hf_zero
+      indicator_ae_eq_of_restrict_compl_ae_eq_zero (hm hs_m) hf_zero
     filter_upwards [hf.ae_eq_mk] with x hx
     by_cases hxs : x ∈ s
     · simp [hxs, hx]
     · simp [hxs]
   suffices StronglyMeasurable[m'] (s.indicator (hf.mk f)) from
     this.aestronglyMeasurable.congr h_ind_eq
-  exact (hf.stronglyMeasurable_mk.indicator hs_m).stronglyMeasurable_of_measurableSpace_le_on hs_m
-    hs fun x hxs => Set.indicator_of_notMem hxs _
+  exact StronglyMeasurable.stronglyMeasurable_of_sigmaAlgebra_le_on hs_m hs
+    (hf.stronglyMeasurable_mk.indicator hs_m) fun x hxs => Set.indicator_of_notMem hxs _
 
 section Arithmetic
 
@@ -472,17 +472,17 @@ end CommMonoid
 
 section SecondCountableAEStronglyMeasurable
 
-variable [MeasurableSpace β]
+variable [SigmaAlgebra β]
 
 /-- In a space with second countable topology, measurable implies strongly measurable. -/
 @[fun_prop]
-theorem _root_.AEMeasurable.aestronglyMeasurable [PseudoMetrizableSpace β] [OpensMeasurableSpace β]
+theorem _root_.AEMeasurable.aestronglyMeasurable [PseudoMetrizableSpace β] [OpensSigmaAlgebra β]
     [SecondCountableTopology β] (hf : AEMeasurable f μ) : AEStronglyMeasurable f μ :=
   ⟨hf.mk f, hf.measurable_mk.stronglyMeasurable, hf.ae_eq_mk⟩
 
 @[fun_prop]
 theorem _root_.aestronglyMeasurable_id {α : Type*} [TopologicalSpace α] [PseudoMetrizableSpace α]
-    {_ : MeasurableSpace α} [OpensMeasurableSpace α] [SecondCountableTopology α] {μ : Measure α} :
+    {_ : SigmaAlgebra α} [OpensSigmaAlgebra α] [SecondCountableTopology α] {μ : Measure α} :
     AEStronglyMeasurable (id : α → α) μ :=
   aemeasurable_id.aestronglyMeasurable
 
@@ -596,23 +596,23 @@ theorem nullMeasurableSet_le [Preorder β] [OrderClosedTopology β] [PseudoMetri
   filter_upwards [hf.ae_eq_mk, hg.ae_eq_mk] with x hfx hgx
   simp only [hfx, hgx]
 
-theorem _root_.aestronglyMeasurable_of_aestronglyMeasurable_trim {α} {m m0 : MeasurableSpace α}
+theorem _root_.aestronglyMeasurable_of_aestronglyMeasurable_trim {α} {m m0 : SigmaAlgebra α}
     {μ : Measure α} (hm : m ≤ m0) {f : α → β} (hf : AEStronglyMeasurable[m] f (μ.trim hm)) :
     AEStronglyMeasurable f μ :=
   ⟨hf.mk f, StronglyMeasurable.mono hf.stronglyMeasurable_mk hm, ae_eq_of_ae_eq_trim hf.ae_eq_mk⟩
 
-theorem comp_aemeasurable {γ : Type*} {_ : MeasurableSpace γ} {_ : MeasurableSpace α} {f : γ → α}
+theorem comp_aemeasurable {γ : Type*} {_ : SigmaAlgebra γ} {_ : SigmaAlgebra α} {f : γ → α}
     {μ : Measure γ} (hg : AEStronglyMeasurable g (Measure.map f μ)) (hf : AEMeasurable f μ) :
     AEStronglyMeasurable (g ∘ f) μ :=
   ⟨hg.mk g ∘ hf.mk f, hg.stronglyMeasurable_mk.comp_measurable hf.measurable_mk,
     (ae_eq_comp hf hg.ae_eq_mk).trans (hf.ae_eq_mk.fun_comp (hg.mk g))⟩
 
-theorem comp_measurable {γ : Type*} {_ : MeasurableSpace γ} {_ : MeasurableSpace α} {f : γ → α}
+theorem comp_measurable {γ : Type*} {_ : SigmaAlgebra γ} {_ : SigmaAlgebra α} {f : γ → α}
     {μ : Measure γ} (hg : AEStronglyMeasurable g (Measure.map f μ)) (hf : Measurable f) :
     AEStronglyMeasurable (g ∘ f) μ :=
   hg.comp_aemeasurable hf.aemeasurable
 
-theorem comp_quasiMeasurePreserving {γ : Type*} {_ : MeasurableSpace γ} {_ : MeasurableSpace α}
+theorem comp_quasiMeasurePreserving {γ : Type*} {_ : SigmaAlgebra γ} {_ : SigmaAlgebra α}
     {f : γ → α} {μ : Measure γ} {ν : Measure α} (hg : AEStronglyMeasurable g ν)
     (hf : QuasiMeasurePreserving f μ ν) : AEStronglyMeasurable (g ∘ f) μ :=
   (hg.mono_ac hf.absolutelyContinuous).comp_measurable hf.measurable
@@ -625,7 +625,7 @@ theorem isSeparable_ae_range (hf : AEStronglyMeasurable f μ) :
 
 /-- If `μ : Measure α` and `f : α → β` is `AEStronglyMeasurable` where `β` is a pseudometrizable
 space and a Borel space, then the identity is a.e.-strongly measurable w.r.t. `μ.map f`. -/
-lemma aestronglyMeasurable_id_map {mβ : MeasurableSpace β}
+lemma aestronglyMeasurable_id_map {mβ : SigmaAlgebra β}
     [TopologicalSpace.PseudoMetrizableSpace β] [BorelSpace β]
     {f : α → β} (hf : AEStronglyMeasurable f μ) :
     AEStronglyMeasurable id (μ.map f) := by
@@ -637,7 +637,7 @@ lemma aestronglyMeasurable_id_map {mβ : MeasurableSpace β}
 /-- A function is almost everywhere strongly measurable if and only if it is almost everywhere
 measurable, and up to a zero measure set its range is contained in a separable set. -/
 theorem _root_.aestronglyMeasurable_iff_aemeasurable_separable [PseudoMetrizableSpace β]
-    [MeasurableSpace β] [BorelSpace β] :
+    [SigmaAlgebra β] [BorelSpace β] :
     AEStronglyMeasurable f μ ↔
       AEMeasurable f μ ∧ ∃ t : Set β, IsSeparable t ∧ ∀ᵐ x ∂μ, f x ∈ t := by
   refine ⟨fun H => ⟨H.aemeasurable, H.isSeparable_ae_range⟩, ?_⟩
@@ -652,7 +652,7 @@ theorem _root_.aestronglyMeasurable_iff_aemeasurable_separable [PseudoMetrizable
     exact stronglyMeasurable_iff_measurable_separable.2 ⟨g_meas, t_sep.mono gt⟩
 
 theorem _root_.aestronglyMeasurable_iff_nullMeasurable_separable [PseudoMetrizableSpace β]
-    [MeasurableSpace β] [BorelSpace β] :
+    [SigmaAlgebra β] [BorelSpace β] :
     AEStronglyMeasurable f μ ↔
       NullMeasurable f μ ∧ ∃ t : Set β, IsSeparable t ∧ ∀ᵐ x ∂μ, f x ∈ t :=
   aestronglyMeasurable_iff_aemeasurable_separable.trans <| and_congr_left fun ⟨_, hsep, h⟩ ↦
@@ -660,7 +660,7 @@ theorem _root_.aestronglyMeasurable_iff_nullMeasurable_separable [PseudoMetrizab
     ⟨AEMeasurable.nullMeasurable, fun hf ↦ hf.aemeasurable_of_aerange h⟩
 
 theorem _root_.MeasurableEmbedding.aestronglyMeasurable_map_iff {γ : Type*}
-    {mγ : MeasurableSpace γ} {mα : MeasurableSpace α} {f : γ → α} {μ : Measure γ}
+    {mγ : SigmaAlgebra γ} {mα : SigmaAlgebra α} {f : γ → α} {μ : Measure γ}
     (hf : MeasurableEmbedding f) {g : α → β} :
     AEStronglyMeasurable g (Measure.map f μ) ↔ AEStronglyMeasurable (g ∘ f) μ := by
   refine ⟨fun H => H.comp_measurable hf.measurable, ?_⟩
@@ -723,8 +723,8 @@ theorem _root_.exists_stronglyMeasurable_limit_of_tendsto_ae [PseudoMetrizableSp
 in a nonempty measurable set `s`, then there is a strongly measurable representative `g` of `f`
 whose range is contained in `s`. -/
 lemma exists_stronglyMeasurable_range_subset {α β : Type*}
-    [TopologicalSpace β] [PseudoMetrizableSpace β] [mb : MeasurableSpace β] [BorelSpace β]
-    [m : MeasurableSpace α] {μ : Measure α} {f : α → β} (hf : AEStronglyMeasurable f μ)
+    [TopologicalSpace β] [PseudoMetrizableSpace β] [mb : SigmaAlgebra β] [BorelSpace β]
+    [m : SigmaAlgebra α] {μ : Measure α} {f : α → β} (hf : AEStronglyMeasurable f μ)
     {s : Set β} (hs : MeasurableSet s) (h_nonempty : s.Nonempty) (h_mem : ∀ᵐ x ∂μ, f x ∈ s) :
     ∃ g : α → β, StronglyMeasurable g ∧ (∀ x, g x ∈ s) ∧ f =ᵐ[μ] g := by
   obtain ⟨f', hf', hff'⟩ := hf
@@ -761,7 +761,7 @@ theorem piecewise {s : Set α} [DecidablePred (· ∈ s)]
     simp only [hx_mem, not_false_eq_true, Set.piecewise_eq_of_notMem, hx hx_mem]
 
 @[fun_prop]
-theorem sum_measure [PseudoMetrizableSpace β] {m : MeasurableSpace α} {μ : ι → Measure α}
+theorem sum_measure [PseudoMetrizableSpace β] {m : SigmaAlgebra α} {μ : ι → Measure α}
     (h : ∀ i, AEStronglyMeasurable f (μ i)) : AEStronglyMeasurable f (Measure.sum μ) := by
   borelize β
   refine
@@ -778,7 +778,7 @@ theorem sum_measure [PseudoMetrizableSpace β] {m : MeasurableSpace α} {μ : ι
 
 @[simp]
 theorem _root_.aestronglyMeasurable_sum_measure_iff [PseudoMetrizableSpace β]
-    {_m : MeasurableSpace α} {μ : ι → Measure α} :
+    {_m : SigmaAlgebra α} {μ : ι → Measure α} :
     AEStronglyMeasurable f (sum μ) ↔ ∀ i, AEStronglyMeasurable f (μ i) :=
   ⟨fun h _ => h.mono_measure (Measure.le_sum _ _), sum_measure⟩
 
@@ -875,7 +875,7 @@ end AEStronglyMeasurable
 
 namespace AEFinStronglyMeasurable
 
-variable {m : MeasurableSpace α} {μ : Measure α} [TopologicalSpace β] {f g : α → β}
+variable {m : SigmaAlgebra α} {μ : Measure α} [TopologicalSpace β] {f g : α → β}
 
 section Mk
 
@@ -894,7 +894,7 @@ theorem ae_eq_mk (hf : AEFinStronglyMeasurable f μ) : f =ᵐ[μ] hf.mk f :=
   hf.choose_spec.2
 
 @[fun_prop]
-protected theorem aemeasurable {β} [Zero β] [MeasurableSpace β] [TopologicalSpace β]
+protected theorem aemeasurable {β} [Zero β] [SigmaAlgebra β] [TopologicalSpace β]
     [PseudoMetrizableSpace β] [BorelSpace β] {f : α → β} (hf : AEFinStronglyMeasurable f μ) :
     AEMeasurable f μ :=
   ⟨hf.mk f, hf.finStronglyMeasurable_mk.measurable, hf.ae_eq_mk⟩
@@ -985,19 +985,19 @@ end AEFinStronglyMeasurable
 
 section SecondCountableTopology
 
-variable {G : Type*} [SeminormedAddCommGroup G] [MeasurableSpace G] [BorelSpace G]
+variable {G : Type*} [SeminormedAddCommGroup G] [SigmaAlgebra G] [BorelSpace G]
   [SecondCountableTopology G] {f : α → G}
 
 /-- In a space with second countable topology and a sigma-finite measure,
   `AEFinStronglyMeasurable` and `AEMeasurable` are equivalent. -/
-theorem aefinStronglyMeasurable_iff_aemeasurable {_m0 : MeasurableSpace α} (μ : Measure α)
+theorem aefinStronglyMeasurable_iff_aemeasurable {_m0 : SigmaAlgebra α} (μ : Measure α)
     [SigmaFinite μ] : AEFinStronglyMeasurable f μ ↔ AEMeasurable f μ := by
   simp_rw [AEFinStronglyMeasurable, AEMeasurable, finStronglyMeasurable_iff_measurable]
 
 /-- In a space with second countable topology and a sigma-finite measure,
   an `AEMeasurable` function is `AEFinStronglyMeasurable`. -/
 @[aesop 90% apply (rule_sets := [Measurable])]
-theorem aefinStronglyMeasurable_of_aemeasurable {_m0 : MeasurableSpace α} (μ : Measure α)
+theorem aefinStronglyMeasurable_of_aemeasurable {_m0 : SigmaAlgebra α} (μ : Measure α)
     [SigmaFinite μ] (hf : AEMeasurable f μ) : AEFinStronglyMeasurable f μ :=
   (aefinStronglyMeasurable_iff_aemeasurable μ).mpr hf
 

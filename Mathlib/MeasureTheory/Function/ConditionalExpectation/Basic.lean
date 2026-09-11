@@ -39,7 +39,7 @@ performed in this file.
 
 The conditional expectation and its properties
 
-* `condExp (m : MeasurableSpace α) (μ : Measure α) (f : α → E)`: conditional expectation of `f`
+* `condExp (m : SigmaAlgebra α) (μ : Measure α) (f : α → E)`: conditional expectation of `f`
   with respect to `m`.
 * `integrable_condExp` : `condExp` is integrable.
 * `stronglyMeasurable_condExp` : `condExp` is `m`-strongly-measurable.
@@ -81,7 +81,7 @@ open scoped ENNReal Topology MeasureTheory
 namespace MeasureTheory
   -- 𝕜 for ℝ or ℂ
   -- E for integrals on a Lp submodule
-variable {α β E 𝕜 : Type*} [RCLike 𝕜] {m m₀ : MeasurableSpace α} {μ : Measure α} {f g : α → E}
+variable {α β E 𝕜 : Type*} [RCLike 𝕜] {m m₀ : SigmaAlgebra α} {μ : Measure α} {f g : α → E}
   {s : Set α}
 
 section NormedAddCommGroup
@@ -231,7 +231,7 @@ theorem integrable_condExp : Integrable (μ[f | m]) μ := by
 the integral of `f` on that set. -/
 theorem setIntegral_condExp (hm : m ≤ m₀) [SigmaFinite (μ.trim hm)] (hf : Integrable f μ)
     (hs : MeasurableSet[m] s) : ∫ x in s, (μ[f | m]) x ∂μ = ∫ x in s, f x ∂μ := by
-  rw [setIntegral_congr_ae (hm s hs) ((condExp_ae_eq_condExpL1 hm f).mono fun x hx _ => hx)]
+  rw [setIntegral_congr_ae (hm hs) ((condExp_ae_eq_condExpL1 hm f).mono fun x hx _ => hx)]
   exact setIntegral_condExpL1 hf hs
 
 theorem integral_condExp (hm : m ≤ m₀) [hμm : SigmaFinite (μ.trim hm)] :
@@ -243,7 +243,7 @@ theorem integral_condExp (hm : m ≤ m₀) [hμm : SigmaFinite (μ.trim hm)] :
   simp only [condExp_of_not_integrable hf, Pi.zero_apply, integral_zero, integral_undef hf]
 
 /-- **Law of total probability** using `condExp` as conditional probability. -/
-theorem integral_condExp_indicator [mβ : MeasurableSpace β] {Y : α → β} (hY : Measurable Y)
+theorem integral_condExp_indicator [mβ : SigmaAlgebra β] {Y : α → β} (hY : Measurable Y)
     [SigmaFinite (μ.trim hY.comap_le)] {A : Set α} (hA : MeasurableSet A) :
     ∫ x, (μ[(A.indicator fun _ ↦ (1 : ℝ)) | mβ.comap Y]) x ∂μ = μ.real A := by
   rw [integral_condExp, integral_indicator hA, setIntegral_const, smul_eq_mul, mul_one]
@@ -290,7 +290,7 @@ theorem condExp_bot [IsProbabilityMeasure μ] (f : α → E) : μ[f | ⊥] = fun
   refine (condExp_bot' f).trans ?_
   rw [probReal_univ, inv_one, one_smul]
 
-theorem condExp_add (hf : Integrable f μ) (hg : Integrable g μ) (m : MeasurableSpace α) :
+theorem condExp_add (hf : Integrable f μ) (hg : Integrable g μ) (m : SigmaAlgebra α) :
     μ[f + g | m] =ᵐ[μ] μ[f | m] + μ[g | m] := by
   by_cases hm : m ≤ m₀
   swap; · simp_rw [condExp_of_not_le hm]; simp
@@ -302,7 +302,7 @@ theorem condExp_add (hf : Integrable f μ) (hg : Integrable g μ) (m : Measurabl
     ((condExp_ae_eq_condExpL1 hm _).symm.add (condExp_ae_eq_condExpL1 hm _).symm)
 
 theorem condExp_finsetSum {ι : Type*} {s : Finset ι} {f : ι → α → E}
-    (hf : ∀ i ∈ s, Integrable (f i) μ) (m : MeasurableSpace α) :
+    (hf : ∀ i ∈ s, Integrable (f i) μ) (m : SigmaAlgebra α) :
     μ[∑ i ∈ s, f i | m] =ᵐ[μ] ∑ i ∈ s, μ[f i | m] := by
   classical
   induction s using Finset.induction_on with
@@ -315,7 +315,7 @@ theorem condExp_finsetSum {ι : Type*} {s : Finset ι} {f : ι → α → E}
 
 @[deprecated (since := "2026-04-08")] alias condExp_finset_sum := condExp_finsetSum
 
-theorem condExp_smul [NormedSpace 𝕜 E] (c : 𝕜) (f : α → E) (m : MeasurableSpace α) :
+theorem condExp_smul [NormedSpace 𝕜 E] (c : 𝕜) (f : α → E) (m : SigmaAlgebra α) :
     μ[c • f | m] =ᵐ[μ] c • μ[f | m] := by
   by_cases hm : m ≤ m₀
   swap; · simp_rw [condExp_of_not_le hm]; simp
@@ -327,13 +327,13 @@ theorem condExp_smul [NormedSpace 𝕜 E] (c : 𝕜) (f : α → E) (m : Measura
   refine (coeFn_smul c (condExpL1 hm μ f)).mono fun x hx1 hx2 => ?_
   simp only [hx1, hx2, Pi.smul_apply]
 
-theorem condExp_neg (f : α → E) (m : MeasurableSpace α) : μ[-f | m] =ᵐ[μ] -μ[f | m] := by
+theorem condExp_neg (f : α → E) (m : SigmaAlgebra α) : μ[-f | m] =ᵐ[μ] -μ[f | m] := by
   calc
     μ[-f | m] = μ[(-1 : ℝ) • f | m] := by rw [neg_one_smul ℝ f]
     _ =ᵐ[μ] (-1 : ℝ) • μ[f | m] := condExp_smul ..
     _ = -μ[f | m] := neg_one_smul ℝ (μ[f | m])
 
-theorem condExp_sub (hf : Integrable f μ) (hg : Integrable g μ) (m : MeasurableSpace α) :
+theorem condExp_sub (hf : Integrable f μ) (hg : Integrable g μ) (m : SigmaAlgebra α) :
     μ[f - g | m] =ᵐ[μ] μ[f | m] - μ[g | m] := by
   simp_rw [sub_eq_add_neg]
   exact (condExp_add hf hg.neg _).trans (EventuallyEq.rfl.add (condExp_neg ..))
@@ -342,7 +342,7 @@ theorem condExp_sub (hf : Integrable f μ) (hg : Integrable g μ) (m : Measurabl
 
 Taking the `m₂`-conditional expectation then the `m₁`-conditional expectation, where `m₁` is a
 smaller σ-algebra, is the same as taking the `m₁`-conditional expectation directly. -/
-theorem condExp_condExp_of_le {m₁ m₂ m₀ : MeasurableSpace α} {μ : Measure α} (hm₁₂ : m₁ ≤ m₂)
+theorem condExp_condExp_of_le {m₁ m₂ m₀ : SigmaAlgebra α} {μ : Measure α} (hm₁₂ : m₁ ≤ m₂)
     (hm₂ : m₂ ≤ m₀) [SigmaFinite (μ.trim hm₂)] : μ[μ[f | m₂] | m₁] =ᵐ[μ] μ[f | m₁] := by
   by_cases hμm₁ : SigmaFinite (μ.trim (hm₁₂.trans hm₂))
   swap; · simp_rw [condExp_of_not_sigmaFinite (hm₁₂.trans hm₂) hμm₁]; rfl
@@ -354,7 +354,7 @@ theorem condExp_condExp_of_le {m₁ m₂ m₀ : MeasurableSpace α} {μ : Measur
     stronglyMeasurable_condExp.aestronglyMeasurable
   intro s hs _
   rw [setIntegral_condExp (hm₁₂.trans hm₂) integrable_condExp hs]
-  rw [setIntegral_condExp (hm₁₂.trans hm₂) hf hs, setIntegral_condExp hm₂ hf (hm₁₂ s hs)]
+  rw [setIntegral_condExp (hm₁₂.trans hm₂) hf hs, setIntegral_condExp hm₂ hf (hm₁₂ hs)]
 
 /-- Conditional expectation commutes with continuous linear maps. -/
 theorem _root_.ContinuousLinearMap.comp_condExp_comm {F : Type*} [NormedAddCommGroup F]
@@ -394,7 +394,7 @@ lemma MemLp.condExpL2_ae_eq_condExp' (hm : m ≤ m₀) (hf1 : Integrable f μ) (
     (fun s hs htop ↦ integrableOn_condExpL2_of_measure_ne_top hm htop.ne _) (fun s hs htop ↦ ?_)
     (aestronglyMeasurable_condExpL2 hm _)
   rw [integral_condExpL2_eq hm (hf2.toLp _) hs htop.ne]
-  refine setIntegral_congr_ae (hm _ hs) ?_
+  refine setIntegral_congr_ae (hm hs) ?_
   filter_upwards [hf2.coeFn_toLp] with ω hω _ using hω
 
 lemma MemLp.condExpL2_ae_eq_condExp (hm : m ≤ m₀) (hf : MemLp f 2 μ) [IsFiniteMeasure μ] :

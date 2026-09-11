@@ -54,7 +54,7 @@ namespace MeasureTheory
 
 open ENNReal Filter Set
 
-variable {α β ι : Type*} {m : MeasurableSpace α} {μ : Measure α} [NormedAddCommGroup β]
+variable {α β ι : Type*} {m : SigmaAlgebra α} {μ : Measure α} [NormedAddCommGroup β]
   {f g : ι → α → β} {p : ℝ≥0∞}
 
 /-- Uniform integrability in the measure theory sense.
@@ -64,12 +64,12 @@ some `δ > 0` such that for all sets `s` with measure less than `δ`, the Lp-nor
 restricted to `s` is less than `ε`.
 
 Uniform integrability is also known as uniformly absolutely continuous integrals. -/
-def UnifIntegrable {_ : MeasurableSpace α} (f : ι → α → β) (p : ℝ≥0∞) (μ : Measure α) : Prop :=
+def UnifIntegrable {_ : SigmaAlgebra α} (f : ι → α → β) (p : ℝ≥0∞) (μ : Measure α) : Prop :=
   Tendsto (fun ε ↦ ⨆ (i : ι) (s : Set α) (_ : μ s ≤ ε), eLpNorm (f i) p (μ.restrict s)) (𝓝 0) (𝓝 0)
 
 /-- In probability theory, a family of measurable functions is uniformly integrable if it is
 uniformly integrable in the measure theory sense and is uniformly bounded. -/
-def UniformIntegrable {_ : MeasurableSpace α} (f : ι → α → β) (p : ℝ≥0∞) (μ : Measure α) : Prop :=
+def UniformIntegrable {_ : SigmaAlgebra α} (f : ι → α → β) (p : ℝ≥0∞) (μ : Measure α) : Prop :=
   (∀ i, AEStronglyMeasurable (f i) μ) ∧ UnifIntegrable f p μ ∧ ∃ C : ℝ≥0, ∀ i, eLpNorm (f i) p μ ≤ C
 
 /-- A characterization of `UnifIntegrable` families. This version does not assume that the sets `s`
@@ -196,7 +196,7 @@ theorem unifIntegrable_congr_ae (hfg : ∀ i, f i =ᵐ[μ] g i) :
 
 theorem unifIntegrable_of_isEmpty [IsEmpty ι] : UnifIntegrable f p μ := by simp [UnifIntegrable]
 
-theorem unifIntegrable_zero_meas [MeasurableSpace α] :
+theorem unifIntegrable_zero_meas [SigmaAlgebra α] :
     UnifIntegrable f p (0 : Measure α) := by
   simp [UnifIntegrable]
 
@@ -711,7 +711,7 @@ In this section, we will develop some API for `UniformIntegrable` and prove that
 
 variable {p : ℝ≥0∞} {f : ι → α → β}
 
-theorem uniformIntegrable_zero_meas [MeasurableSpace α] : UniformIntegrable f p (0 : Measure α) :=
+theorem uniformIntegrable_zero_meas [SigmaAlgebra α] : UniformIntegrable f p (0 : Measure α) :=
   ⟨fun _ => aestronglyMeasurable_zero_measure _, unifIntegrable_zero_meas, 0,
     fun _ => eLpNorm_measure_zero.le⟩
 

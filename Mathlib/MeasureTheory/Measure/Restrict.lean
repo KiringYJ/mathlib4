@@ -25,13 +25,13 @@ pullback under `Subtype.val`) and the restriction to a set as above.
 @[expose] public section
 
 open scoped ENNReal NNReal Topology
-open Set MeasureTheory Measure Filter MeasurableSpace ENNReal Function
+open Set MeasureTheory Measure Filter SigmaAlgebra ENNReal Function
 
 variable {R α β δ ι : Type*}
 
 namespace MeasureTheory
 
-variable {m0 : MeasurableSpace α} [MeasurableSpace β]
+variable {m0 : SigmaAlgebra α} [SigmaAlgebra β]
 variable {μ ν : Measure α} {s s' t : Set α}
 
 namespace Measure
@@ -40,18 +40,18 @@ namespace Measure
 
 /-- Restrict a measure `μ` to a set `s` as an `ℝ≥0∞`-linear map. -/
 @[irreducible]
-noncomputable def restrictₗ {m0 : MeasurableSpace α} (s : Set α) : Measure α →ₗ[ℝ≥0∞] Measure α :=
+noncomputable def restrictₗ {m0 : SigmaAlgebra α} (s : Set α) : Measure α →ₗ[ℝ≥0∞] Measure α :=
   liftLinear (OuterMeasure.restrict s) fun μ s' hs' t => by
     suffices μ (s ∩ t) = μ (s ∩ t ∩ s') + μ ((s ∩ t) \ s') by
       simpa [← Set.inter_assoc, Set.inter_comm _ s, ← inter_sdiff_assoc]
-    exact le_toOuterMeasure_caratheodory _ _ hs' _
+    exact le_toOuterMeasure_caratheodory _ hs' _
 
 /-- Restrict a measure `μ` to a set `s`. -/
-noncomputable def restrict {_m0 : MeasurableSpace α} (μ : Measure α) (s : Set α) : Measure α :=
+noncomputable def restrict {_m0 : SigmaAlgebra α} (μ : Measure α) (s : Set α) : Measure α :=
   restrictₗ s μ
 
 @[simp]
-theorem restrictₗ_apply {_m0 : MeasurableSpace α} (s : Set α) (μ : Measure α) :
+theorem restrictₗ_apply {_m0 : SigmaAlgebra α} (s : Set α) (μ : Measure α) :
     restrictₗ s μ = μ.restrict s :=
   rfl
 
@@ -76,7 +76,7 @@ theorem restrict_apply (ht : MeasurableSet t) : μ.restrict s t = μ (t ∩ s) :
   restrict_apply₀ ht.nullMeasurableSet
 
 /-- Restriction of a measure to a subset is monotone both in set and in measure. -/
-theorem restrict_mono' {_m0 : MeasurableSpace α} ⦃s s' : Set α⦄ ⦃μ ν : Measure α⦄ (hs : s ≤ᵐ[μ] s')
+theorem restrict_mono' {_m0 : SigmaAlgebra α} ⦃s s' : Set α⦄ ⦃μ ν : Measure α⦄ (hs : s ≤ᵐ[μ] s')
     (hμν : μ ≤ ν) : μ.restrict s ≤ ν.restrict s' :=
   Measure.le_iff.2 fun t ht => calc
     μ.restrict s t = μ (t ∩ s) := restrict_apply ht
@@ -86,15 +86,15 @@ theorem restrict_mono' {_m0 : MeasurableSpace α} ⦃s s' : Set α⦄ ⦃μ ν :
 
 /-- Restriction of a measure to a subset is monotone both in set and in measure. -/
 @[mono, gcongr]
-theorem restrict_mono {_m0 : MeasurableSpace α} ⦃s s' : Set α⦄ (hs : s ⊆ s') ⦃μ ν : Measure α⦄
+theorem restrict_mono {_m0 : SigmaAlgebra α} ⦃s s' : Set α⦄ (hs : s ⊆ s') ⦃μ ν : Measure α⦄
     (hμν : μ ≤ ν) : μ.restrict s ≤ ν.restrict s' :=
   restrict_mono' (ae_of_all _ hs) hμν
 
-theorem restrict_mono_measure {_ : MeasurableSpace α} {μ ν : Measure α} (h : μ ≤ ν) (s : Set α) :
+theorem restrict_mono_measure {_ : SigmaAlgebra α} {μ ν : Measure α} (h : μ ≤ ν) (s : Set α) :
     μ.restrict s ≤ ν.restrict s :=
   restrict_mono subset_rfl h
 
-theorem restrict_mono_set {_ : MeasurableSpace α} (μ : Measure α) {s t : Set α} (h : s ⊆ t) :
+theorem restrict_mono_set {_ : SigmaAlgebra α} (μ : Measure α) {s t : Set α} (h : s ⊆ t) :
     μ.restrict s ≤ μ.restrict t :=
   restrict_mono h le_rfl
 
@@ -181,16 +181,16 @@ theorem restrict_apply_superset (h : s ⊆ t) : μ.restrict s t = μ s :=
     ((restrict_apply_self μ s).symm.trans_le <| measure_mono h)
 
 @[simp]
-theorem restrict_add {_m0 : MeasurableSpace α} (μ ν : Measure α) (s : Set α) :
+theorem restrict_add {_m0 : SigmaAlgebra α} (μ ν : Measure α) (s : Set α) :
     (μ + ν).restrict s = μ.restrict s + ν.restrict s :=
   (restrictₗ s).map_add μ ν
 
 @[simp]
-theorem restrict_zero {_m0 : MeasurableSpace α} (s : Set α) : (0 : Measure α).restrict s = 0 :=
+theorem restrict_zero {_m0 : SigmaAlgebra α} (s : Set α) : (0 : Measure α).restrict s = 0 :=
   (restrictₗ s).map_zero
 
 @[simp]
-theorem restrict_smul {_m0 : MeasurableSpace α} {R : Type*} [SMul R ℝ≥0∞]
+theorem restrict_smul {_m0 : SigmaAlgebra α} {R : Type*} [SMul R ℝ≥0∞]
     [IsScalarTower R ℝ≥0∞ ℝ≥0∞] (c : R) (μ : Measure α) (s : Set α) :
     (c • μ).restrict s = c • μ.restrict s := by
   simpa only [smul_one_smul] using! (restrictₗ s).map_smul (c • 1) μ
@@ -326,7 +326,9 @@ theorem restrict_iUnion_apply_eq_iSup [Countable ι] {s : ι → Set α} (hd : D
 assuming only `AEMeasurable`, see `restrict_map_of_aemeasurable`. -/
 theorem restrict_map {f : α → β} (hf : Measurable f) {s : Set β} (hs : MeasurableSet s) :
     (μ.map f).restrict s = (μ.restrict <| f ⁻¹' s).map f :=
-  ext fun t ht => by simp [*, hf ht]
+  ext fun t ht => by
+    rw [restrict_apply ht, map_apply hf (ht.inter hs), map_apply hf ht,
+      restrict_apply (hf ht), preimage_inter]
 
 theorem restrict_inter_toMeasurable (h : μ s ≠ ∞) (ht : MeasurableSet t) (hst : s ⊆ t) :
     μ.restrict (t ∩ toMeasurable μ s) = μ.restrict s := by
@@ -339,7 +341,7 @@ theorem restrict_inter_toMeasurable (h : μ s ≠ ∞) (ht : MeasurableSet t) (h
 theorem restrict_toMeasurable (h : μ s ≠ ∞) : μ.restrict (toMeasurable μ s) = μ.restrict s := by
   simpa using restrict_inter_toMeasurable h MeasurableSet.univ (subset_univ _)
 
-theorem restrict_eq_self_of_ae_mem {_m0 : MeasurableSpace α} ⦃s : Set α⦄ ⦃μ : Measure α⦄
+theorem restrict_eq_self_of_ae_mem {_m0 : SigmaAlgebra α} ⦃s : Set α⦄ ⦃μ : Measure α⦄
     (hs : ∀ᵐ x ∂μ, x ∈ s) : μ.restrict s = μ :=
   calc
     μ.restrict s = μ.restrict univ := restrict_congr_set (eventuallyEqSet_univ.mpr hs)
@@ -409,7 +411,7 @@ theorem restrict_sUnion_congr {S : Set (Set α)} (hc : S.Countable) :
   rw [sUnion_eq_biUnion, restrict_biUnion_congr hc]
 
 /-- This lemma shows that `Inf` and `restrict` commute for measures. -/
-theorem restrict_sInf_eq_sInf_restrict {m0 : MeasurableSpace α} {m : Set (Measure α)}
+theorem restrict_sInf_eq_sInf_restrict {m0 : SigmaAlgebra α} {m : Set (Measure α)}
     (hm : m.Nonempty) (ht : MeasurableSet t) :
     (sInf m).restrict t = sInf ((fun μ : Measure α => μ.restrict t) '' m) := by
   ext1 s hs
@@ -431,11 +433,14 @@ theorem QuasiMeasurePreserving.restrict {ν : Measure β} {f : α → β}
   measurable := hf.measurable
   absolutelyContinuous := by
     refine AbsolutelyContinuous.mk fun u hum ↦ ?_
-    suffices ν (u ∩ t) = 0 → μ (f ⁻¹' u ∩ s) = 0 by simpa [hum, hf.measurable, hf.measurable hum]
-    refine fun hu ↦ measure_mono_null ?_ (hf.preimage_null hu)
-    rw [preimage_inter]
-    gcongr
-    assumption
+    intro hu
+    rw [map_apply hf.measurable hum, restrict_apply (hf.measurable hum)]
+    have hut : ν (u ∩ t) = 0 := by
+      rwa [restrict_apply hum] at hu
+    refine measure_mono_null ?_ (hf.preimage_null hut)
+    · rw [preimage_inter]
+      gcongr
+      exact hmaps
 
 /-! ### Extensionality results -/
 
@@ -653,7 +658,7 @@ theorem ae_restrict_of_forall_mem {μ : Measure α} {s : Set α}
     (hs : MeasurableSet s) {p : α → Prop} (h : ∀ x ∈ s, p x) : ∀ᵐ (x : α) ∂μ.restrict s, p x :=
   (ae_restrict_mem hs).mono h
 
-lemma _root_.Set.EqOn.aeEq_restrict {α β : Type*} [MeasurableSpace α] {μ : Measure α} {s : Set α}
+lemma _root_.Set.EqOn.aeEq_restrict {α β : Type*} [SigmaAlgebra α] {μ : Measure α} {s : Set α}
     {f g : α → β} (h : s.EqOn f g) (hs : MeasurableSet s) : f =ᵐ[μ.restrict s] g :=
   ae_restrict_of_forall_mem hs h
 
@@ -676,7 +681,7 @@ theorem ae_of_ae_restrict_of_ae_restrict_compl (t : Set α) {p : α → Prop}
 
 theorem mem_map_restrict_ae_iff {β} {s : Set α} {t : Set β} {f : α → β} (hs : MeasurableSet s) :
     t ∈ Filter.map f (ae (μ.restrict s)) ↔ μ ((f ⁻¹' t)ᶜ ∩ s) = 0 := by
-  rw [mem_map, mem_ae_iff, Measure.restrict_apply' hs]
+  rw [Filter.mem_map, mem_ae_iff, Measure.restrict_apply' hs]
 
 @[simp] theorem ae_add_measure_iff {p : α → Prop} {ν} :
     (∀ᵐ x ∂μ + ν, p x) ↔ (∀ᵐ x ∂μ, p x) ∧ ∀ᵐ x ∂ν, p x :=
@@ -732,7 +737,7 @@ theorem ae_restrict_congr_set {s t} (hst : s =ᵐ[μ] t) {p : α → Prop} :
   ⟨ae_restrict_of_ae_eq_of_ae_restrict hst, ae_restrict_of_ae_eq_of_ae_restrict hst.symm⟩
 
 lemma NullMeasurable.measure_preimage_eq_measure_restrict_preimage_of_ae_compl_eq_const
-    {β : Type*} [MeasurableSpace β] {b : β} {f : α → β} {s : Set α}
+    {β : Type*} [SigmaAlgebra β] {b : β} {f : α → β} {s : Set α}
     (f_mble : NullMeasurable f (μ.restrict s)) (hs : f =ᵐ[Measure.restrict μ sᶜ] (fun _ ↦ b))
     {t : Set β} (t_mble : MeasurableSet t) (ht : b ∉ t) :
     μ (f ⁻¹' t) = μ.restrict s (f ⁻¹' t) := by
@@ -794,12 +799,12 @@ section ComapAnyMeasure
 
 theorem MeasurableSet.nullMeasurableSet_subtype_coe {t : Set s} (hs : NullMeasurableSet s μ)
     (ht : MeasurableSet t) : NullMeasurableSet ((↑) '' t) μ := by
-  rw [Subtype.instMeasurableSpace, comap_eq_generateFrom] at ht
-  induction t, ht using generateFrom_induction with
-  | hC t' ht' =>
+  rw [Subtype.instSigmaAlgebra, comap_eq_generateFrom] at ht
+  induction ht using generateFrom_induction with
+  | basic t' ht' =>
     obtain ⟨s', hs', rfl⟩ := ht'
     rw [Subtype.image_preimage_coe]
-    exact hs.inter (hs'.nullMeasurableSet)
+    exact hs.inter (MeasurableSet.nullMeasurableSet hs')
   | empty => simp only [image_empty, nullMeasurableSet_empty]
   | compl t' _ ht' =>
     simp only [← range_sdiff_image Subtype.coe_injective, Subtype.range_coe_subtype, ofPred_mem_eq]
@@ -867,7 +872,7 @@ open MeasureTheory Measure
 
 namespace MeasurableEmbedding
 
-variable {m0 : MeasurableSpace α} {m1 : MeasurableSpace β} {f : α → β}
+variable {m0 : SigmaAlgebra α} {m1 : SigmaAlgebra β} {f : α → β}
 
 section
 variable (hf : MeasurableEmbedding f)
@@ -895,7 +900,9 @@ theorem ae_map_iff {p : β → Prop} {μ : Measure α} : (∀ᵐ x ∂μ.map f, 
 
 theorem restrict_map (μ : Measure α) (s : Set β) :
     (μ.map f).restrict s = (μ.restrict <| f ⁻¹' s).map f :=
-  Measure.ext fun t ht => by simp [hf.map_apply, ht, hf.measurable ht]
+  Measure.ext fun t ht => by
+    rw [Measure.restrict_apply ht, hf.map_apply, hf.map_apply,
+      Measure.restrict_apply (hf.measurable ht), preimage_inter]
 
 protected theorem comap_preimage (μ : Measure β) (s : Set β) :
     μ.comap f (f ⁻¹' s) = μ (s ∩ range f) := by
@@ -923,7 +930,7 @@ lemma _root_.MeasurableEquiv.comap_apply (e : α ≃ᵐ β) (μ : Measure β) (s
 
 end MeasurableEmbedding
 
-lemma MeasureTheory.Measure.map_eq_comap {_ : MeasurableSpace α} {_ : MeasurableSpace β} {f : α → β}
+lemma MeasureTheory.Measure.map_eq_comap {_ : SigmaAlgebra α} {_ : SigmaAlgebra β} {f : α → β}
     {g : β → α} {μ : Measure α} (hf : Measurable f) (hg : MeasurableEmbedding g)
     (hμg : ∀ᵐ a ∂μ, a ∈ Set.range g) (hfg : ∀ a, f (g a) = a) : μ.map f = μ.comap g := by
   ext s hs
@@ -934,15 +941,15 @@ lemma MeasureTheory.Measure.map_eq_comap {_ : MeasurableSpace α} {_ : Measurabl
 
 section Subtype
 
-theorem comap_subtype_coe_apply {_m0 : MeasurableSpace α} {s : Set α} (hs : MeasurableSet s)
+theorem comap_subtype_coe_apply {_m0 : SigmaAlgebra α} {s : Set α} (hs : MeasurableSet s)
     (μ : Measure α) (t : Set s) : comap (↑) μ t = μ ((↑) '' t) :=
   (MeasurableEmbedding.subtype_coe hs).comap_apply _ _
 
-theorem map_comap_subtype_coe {m0 : MeasurableSpace α} {s : Set α} (hs : MeasurableSet s)
+theorem map_comap_subtype_coe {m0 : SigmaAlgebra α} {s : Set α} (hs : MeasurableSet s)
     (μ : Measure α) : (comap (↑) μ).map ((↑) : s → α) = μ.restrict s := by
   rw [(MeasurableEmbedding.subtype_coe hs).map_comap, Subtype.range_coe]
 
-theorem ae_restrict_iff_subtype {m0 : MeasurableSpace α} {μ : Measure α} {s : Set α}
+theorem ae_restrict_iff_subtype {m0 : SigmaAlgebra α} {μ : Measure α} {s : Set α}
     (hs : MeasurableSet s) {p : α → Prop} :
     (∀ᵐ x ∂μ.restrict s, p x) ↔ ∀ᵐ (x : s) ∂comap ((↑) : s → α) μ, p x := by
   rw [← map_comap_subtype_coe hs, (MeasurableEmbedding.subtype_coe hs).ae_map_iff]
@@ -973,14 +980,14 @@ theorem volume_preimage_coe (hs : NullMeasurableSet s) (ht : MeasurableSet t) :
   rw [volume_set_coe_def,
     comap_apply₀ _ _ Subtype.coe_injective
       (fun h => MeasurableSet.nullMeasurableSet_subtype_coe hs)
-      (measurable_subtype_coe ht).nullMeasurableSet,
+      (MeasurableSet.nullMeasurableSet (measurable_subtype_coe ht)),
     image_preimage_eq_inter_range, Subtype.range_coe]
 
 end Subtype
 
 section Piecewise
 
-variable [MeasurableSpace α] {μ : Measure α} {s t : Set α} {f g : α → β}
+variable [SigmaAlgebra α] {μ : Measure α} {s t : Set α} {f g : α → β}
 
 theorem piecewise_ae_eq_restrict [DecidablePred (· ∈ s)] (hs : MeasurableSet s) :
     piecewise s f g =ᵐ[μ.restrict s] f := by
@@ -1000,13 +1007,13 @@ end Piecewise
 
 section IndicatorFunction
 
-variable [MeasurableSpace α] {μ : Measure α} {s t : Set α} {f : α → β}
+variable [SigmaAlgebra α] {μ : Measure α} {s t : Set α} {f : α → β}
 
 theorem mem_map_indicator_ae_iff_mem_map_restrict_ae_of_zero_mem [Zero β] {t : Set β}
     (ht : (0 : β) ∈ t) (hs : MeasurableSet s) :
     t ∈ Filter.map (s.indicator f) (ae μ) ↔ t ∈ Filter.map f (ae <| μ.restrict s) := by
   classical
-  simp_rw [mem_map, mem_ae_iff]
+  simp_rw [Filter.mem_map, mem_ae_iff]
   rw [Measure.restrict_apply' hs, Set.indicator_preimage, Set.ite]
   simp_rw [Set.compl_union, Set.compl_inter]
   change μ (((f ⁻¹' t)ᶜ ∪ sᶜ) ∩ ((fun _ => (0 : β)) ⁻¹' t \ s)ᶜ) = 0 ↔ μ ((f ⁻¹' t)ᶜ ∩ s) = 0
@@ -1017,7 +1024,8 @@ theorem mem_map_indicator_ae_iff_mem_map_restrict_ae_of_zero_mem [Zero β] {t : 
 theorem mem_map_indicator_ae_iff_of_zero_notMem [Zero β] {t : Set β} (ht : (0 : β) ∉ t) :
     t ∈ Filter.map (s.indicator f) (ae μ) ↔ μ ((f ⁻¹' t)ᶜ ∪ sᶜ) = 0 := by
   classical
-  rw [mem_map, mem_ae_iff, Set.indicator_preimage, Set.ite, Set.compl_union, Set.compl_inter]
+  rw [Filter.mem_map, mem_ae_iff, Set.indicator_preimage, Set.ite, Set.compl_union,
+    Set.compl_inter]
   change μ (((f ⁻¹' t)ᶜ ∪ sᶜ) ∩ ((fun _ => (0 : β)) ⁻¹' t \ s)ᶜ) = 0 ↔ μ ((f ⁻¹' t)ᶜ ∪ sᶜ) = 0
   simp only [ht, ite_false, Set.compl_empty, Set.empty_sdiff, Set.inter_univ, Set.preimage_const]
 
@@ -1078,7 +1086,7 @@ section Sum
 open Finset in
 /-- An upper bound on a sum of restrictions of a measure `μ`. This can be used to compare
 `∫ x ∈ X, f x ∂μ` with `∑ i, ∫ x ∈ (s i), f x ∂μ`, where `s` is a cover of `X`. -/
-lemma MeasureTheory.Measure.sum_restrict_le {_ : MeasurableSpace α}
+lemma MeasureTheory.Measure.sum_restrict_le {_ : SigmaAlgebra α}
     {μ : Measure α} {s : ι → Set α} {M : ℕ} (hs_meas : ∀ i, MeasurableSet (s i))
     (hs : ∀ y, {i | y ∈ s i}.encard ≤ M) :
     Measure.sum (fun i ↦ μ.restrict (s i)) ≤ M • μ.restrict (⋃ i, s i) := by

@@ -27,12 +27,12 @@ an element of `C`.
 
 @[expose] public section
 
-open MeasurableSpace Set Filter
+open SigmaAlgebra Set Filter
 open scoped symmDiff ENNReal Topology
 
 namespace MeasureTheory
 
-variable {α : Type*} [mα : MeasurableSpace α] {μ : Measure α}
+variable {α : Type*} [mα : SigmaAlgebra α] {μ : Measure α}
 
 set_option linter.unusedVariables false in
 /-- The subtype of all measurable sets. We denote it as `MeasuredSets μ`, with an explicit but
@@ -90,7 +90,7 @@ lemma exists_measure_symmDiff_lt_of_generateFrom_isSetRing [IsFiniteMeasure μ]
   /- We check that the set of sets satisfying the conclusion of the lemma for all positive
   `ε` contains `C` and is stable under complement and disjoint union. It follows that it is
   all the sigma-algebra, as desired. -/
-  apply MeasurableSpace.induction_on_inter (C := fun s hs ↦ ∀ (ε : ℝ≥0∞) (hε : 0 < ε),
+  apply SigmaAlgebra.induction_on_inter (C := fun s hs ↦ ∀ (ε : ℝ≥0∞) (hε : 0 < ε),
     ∃ t ∈ C, μ (t ∆ s) < ε) h hC.isSetSemiring.isPiSystem ?_ ?_ ?_ ?_ s hs ε hε
   · intro ε εpos
     exact ⟨∅, hC.empty_mem, by simp [εpos]⟩
@@ -120,7 +120,7 @@ lemma exists_measure_symmDiff_lt_of_generateFrom_isSetRing [IsFiniteMeasure μ]
           (fun i j hij ↦ by simpa using monotone_accumulate hij) ⟨0, by simp⟩
         apply MeasurableSet.nullMeasurableSet
         rw [h]
-        exact (measurableSet_generateFrom (fC i)).compl
+        exact (SigmaAlgebra.mem_generateFrom (fC i)).compl
       obtain ⟨n, hn⟩ : ∃ n, μ (accumulate f n)ᶜ < ε / 2 :=
         ((tendsto_order.1 this).2 _ (ENNReal.half_pos εpos.ne')).exists
       exact ⟨accumulate f n, fC n, hn⟩
@@ -139,7 +139,7 @@ lemma exists_measure_symmDiff_lt_of_generateFrom_isSetRing [IsFiniteMeasure μ]
     choose! t tC ht using A
     have : Tendsto (fun n ↦ μ (⋃ i ∈ Ici n, f i)) atTop (𝓝 0) :=
       tendsto_measure_biUnion_Ici_zero_of_pairwise_disjoint
-        (fun i ↦ (f_meas i).nullMeasurableSet) f_disj
+        (fun i ↦ MeasurableSet.nullMeasurableSet (f_meas i)) f_disj
     obtain ⟨n, hn⟩ : ∃ n, μ (⋃ i ∈ Ici n, f i) < ε / 2 :=
       ((tendsto_order.1 this).2 _ (ENNReal.half_pos εpos.ne')).exists
     refine ⟨⋃ i ∈ Finset.range n, t i, hC.biUnion_mem _ (fun i hi ↦ tC _), ?_⟩
@@ -174,7 +174,7 @@ lemma exists_measure_symmDiff_lt_of_generateFrom_isSetSemiring [IsFiniteMeasure 
   · rw [h]
     apply le_antisymm (generateFrom_mono subset_supClosure)
     apply generateFrom_le (fun t ht ↦ ?_)
-    apply measurableSet_generateFrom_of_mem_supClosure ht
+    apply mem_generateFrom_of_mem_supClosure ht
 
 /-- A ring of sets covering the space modulo `0` and generating the measurable space
 structure is dense among measurable sets. -/
@@ -185,7 +185,7 @@ lemma dense_of_generateFrom_isSetRing [IsFiniteMeasure μ]
   rw [EMetric.dense_iff]
   rintro s ε εpos
   rcases exists_measure_symmDiff_lt_of_generateFrom_isSetRing hC h'C h s.2 εpos with ⟨t, tC, ht⟩
-  have t_meas : MeasurableSet t := by rw [h]; exact measurableSet_generateFrom tC
+  have t_meas : MeasurableSet t := by rw [h]; exact SigmaAlgebra.mem_generateFrom tC
   refine ⟨⟨t, t_meas⟩, ?_, tC⟩
   simpa [MeasuredSets.edist_def] using! ht
 
@@ -201,6 +201,6 @@ lemma dense_of_generateFrom_isSetSemiring [IsFiniteMeasure μ]
     with ⟨t, tC, ht⟩
   refine ⟨⟨t, ?_⟩, by simpa [MeasuredSets.edist_def] using! ht, tC⟩
   rw [h]
-  exact measurableSet_generateFrom_of_mem_supClosure tC
+  exact mem_generateFrom_of_mem_supClosure tC
 
 end MeasureTheory

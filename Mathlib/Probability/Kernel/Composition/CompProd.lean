@@ -49,7 +49,7 @@ namespace ProbabilityTheory
 
 namespace Kernel
 
-variable {α β γ : Type*} {mα : MeasurableSpace α} {mβ : MeasurableSpace β} {mγ : MeasurableSpace γ}
+variable {α β γ : Type*} {mα : SigmaAlgebra α} {mβ : SigmaAlgebra β} {mγ : SigmaAlgebra γ}
 
 section CompositionProduct
 
@@ -162,7 +162,7 @@ lemma compProd_zero_left (κ : Kernel (α × β) γ) :
   · rw [Kernel.compProd_of_not_isSFiniteKernel_right _ _ h]
 
 @[simp]
-lemma compProd_zero_right (κ : Kernel α β) (γ : Type*) {mγ : MeasurableSpace γ} :
+lemma compProd_zero_right (κ : Kernel α β) (γ : Type*) {mγ : SigmaAlgebra γ} :
     κ ⊗ₖ (0 : Kernel (α × β) γ) = 0 := by
   by_cases h : IsSFiniteKernel κ
   · ext a s hs
@@ -463,7 +463,7 @@ instance IsSFiniteKernel.compProd (κ : Kernel α β) (η : Kernel (α × β) γ
 
 /-- `Kernel.compProd` is associative. We have to insert `MeasurableEquiv.prodAssoc` in two places
 because the products of types `α × β × γ` and `(α × β) × γ` are different. -/
-lemma compProd_assoc {δ : Type*} {mδ : MeasurableSpace δ}
+lemma compProd_assoc {δ : Type*} {mδ : SigmaAlgebra δ}
     {κ : Kernel α β} {η : Kernel (α × β) γ} {ξ : Kernel (α × β × γ) δ} :
     (κ ⊗ₖ (η ⊗ₖ (ξ.comap MeasurableEquiv.prodAssoc (MeasurableEquiv.measurable _)))).map
         MeasurableEquiv.prodAssoc.symm
@@ -532,7 +532,7 @@ lemma compProd_sum_right {ι : Type*} [Countable ι]
     exact measurable_prodMk_left hs
   · exact fun _ ↦ (measurable_kernel_prodMk_left' hs a).aemeasurable
 
-lemma comapRight_compProd_id_prod {δ : Type*} {mδ : MeasurableSpace δ}
+lemma comapRight_compProd_id_prod {δ : Type*} {mδ : SigmaAlgebra δ}
     (κ : Kernel α β) [IsSFiniteKernel κ] (η : Kernel (α × β) γ) [IsSFiniteKernel η]
     {f : δ → γ} (hf : MeasurableEmbedding f) :
     comapRight (κ ⊗ₖ η) (MeasurableEmbedding.id.prodMap hf) = κ ⊗ₖ (comapRight η hf) := by

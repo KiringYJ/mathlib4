@@ -19,13 +19,13 @@ public section
 
 open MeasureTheory
 
-variable {α : Type*} [MeasurableSpace α]
+variable {α : Type*} [SigmaAlgebra α]
 
 namespace ContinuousLinearMap
 
 variable {R E F : Type*} [Semiring R]
-  [SeminormedAddCommGroup E] [Module R E] [MeasurableSpace E] [OpensMeasurableSpace E]
-  [SeminormedAddCommGroup F] [Module R F] [MeasurableSpace F] [BorelSpace F]
+  [SeminormedAddCommGroup E] [Module R E] [SigmaAlgebra E] [OpensSigmaAlgebra E]
+  [SeminormedAddCommGroup F] [Module R F] [SigmaAlgebra F] [BorelSpace F]
 
 @[fun_prop]
 protected theorem measurable (L : E →L[R] F) : Measurable L :=
@@ -44,22 +44,22 @@ variable {𝕜 : Type*} [NontriviallyNormedField 𝕜]
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] {F : Type*} [NormedAddCommGroup F]
   [NormedSpace 𝕜 F]
 
-instance instMeasurableSpace : MeasurableSpace (E →L[𝕜] F) :=
+instance instSigmaAlgebra : SigmaAlgebra (E →L[𝕜] F) :=
   borel _
 
 instance instBorelSpace : BorelSpace (E →L[𝕜] F) :=
   ⟨rfl⟩
 
 @[fun_prop]
-theorem measurable_apply [MeasurableSpace F] [BorelSpace F] (x : E) :
+theorem measurable_apply [SigmaAlgebra F] [BorelSpace F] (x : E) :
     Measurable fun f : E →L[𝕜] F => f x :=
   (apply 𝕜 F x).continuous.measurable
 
-theorem measurable_apply' [MeasurableSpace E] [OpensMeasurableSpace E] [MeasurableSpace F]
+theorem measurable_apply' [SigmaAlgebra E] [OpensSigmaAlgebra E] [SigmaAlgebra F]
     [BorelSpace F] : Measurable fun (x : E) (f : E →L[𝕜] F) => f x :=
   .of_eval fun f => f.measurable
 
-theorem measurable_coe [MeasurableSpace F] [BorelSpace F] :
+theorem measurable_coe [SigmaAlgebra F] [BorelSpace F] :
     Measurable fun (f : E →L[𝕜] F) (x : E) => f x :=
   .of_eval measurable_apply
 
@@ -68,7 +68,7 @@ end ContinuousLinearMap
 section ContinuousLinearMapNontriviallyNormedField
 
 variable {𝕜 : Type*} [NontriviallyNormedField 𝕜]
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [MeasurableSpace E] [BorelSpace E]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [SigmaAlgebra E] [BorelSpace E]
   {F : Type*} [NormedAddCommGroup F] [NormedSpace 𝕜 F]
 
 @[fun_prop]
@@ -85,8 +85,8 @@ end ContinuousLinearMapNontriviallyNormedField
 
 section NormedSpace
 
-variable {𝕜 : Type*} [NontriviallyNormedField 𝕜] [CompleteSpace 𝕜] [MeasurableSpace 𝕜]
-variable [BorelSpace 𝕜] {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [MeasurableSpace E]
+variable {𝕜 : Type*} [NontriviallyNormedField 𝕜] [CompleteSpace 𝕜] [SigmaAlgebra 𝕜]
+variable [BorelSpace 𝕜] {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [SigmaAlgebra E]
   [BorelSpace E]
 
 theorem measurable_smul_const {f : α → 𝕜} {c : E} (hc : c ≠ 0) :

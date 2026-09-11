@@ -14,7 +14,7 @@ The definition of a measure and a measure space are in `MeasureTheory.MeasureSpa
 only a few basic properties. This file provides many more properties of these objects related to
 set operations.
 This separation allows the measurability tactic to import only the file `MeasureSpaceDef`, and to
-be available in `MeasureSpace` (through `MeasurableSpace`).
+be available in `MeasureSpace` (through `SigmaAlgebra`).
 
 Given a measurable space `α`, a measure on `α` is a function that sends measurable sets to the
 extended nonnegative reals that satisfies the following conditions:
@@ -72,7 +72,7 @@ open scoped symmDiff
 
 namespace MeasureTheory
 
-variable {α β ι : Type*} {m : MeasurableSpace α} {μ : Measure α} {s s₁ s₂ s₃ t u : Set α}
+variable {α β ι : Type*} {m : SigmaAlgebra α} {μ : Measure α} {s s₁ s₂ s₃ t u : Set α}
 
 theorem measure_union (hd : Disjoint s₁ s₂) (h : MeasurableSet s₂) : μ (s₁ ∪ s₂) = μ s₁ + μ s₂ :=
   measure_union₀ h.nullMeasurableSet hd.aedisjoint
@@ -477,30 +477,33 @@ theorem Measure.measure_toMeasurable_inter (hs : MeasurableSet s) (ht : μ t ≠
 theorem measure_if {x : β} {t : Set β} [Decidable (x ∈ t)] :
     μ (if x ∈ t then s else ∅) = indicator t (fun _ => μ s) x := by split_ifs with h <;> simp [h]
 
-/-- On a countable space, two measures are equal if they agree on measurable atoms. -/
-lemma ext_of_measurableAtoms [Countable α] {ν : Measure α}
-    (h : ∀ x, μ (measurableAtom x) = ν (measurableAtom x)) : μ = ν := by
+/-- On a countable space, two measures are equal if they agree on every indistinguishability
+class. -/
+lemma ext_of_indistinguishabilityClasses [Countable α] {ν : Measure α}
+    (h : ∀ x, μ ((inferInstance : SigmaAlgebra α).indistinguishabilityClass x) =
+      ν ((inferInstance : SigmaAlgebra α).indistinguishabilityClass x)) : μ = ν := by
+  let m := (inferInstance : SigmaAlgebra α)
   ext s hs
-  have h1 : s = ⋃ x ∈ s, measurableAtom x := by
+  have h1 : s = ⋃ x ∈ s, m.indistinguishabilityClass x := by
     ext y
     simp only [mem_iUnion, exists_prop]
     refine ⟨fun hy ↦ ?_, fun ⟨x, hx, hy⟩ ↦ ?_⟩
-    · exact ⟨y, hy, mem_measurableAtom_self y⟩
-    · exact mem_of_mem_measurableAtom hy hs hx
+    · exact ⟨y, hy, m.self_mem_indistinguishabilityClass y⟩
+    · exact m.mem_of_mem_indistinguishabilityClass hy hs hx
   rw [← sUnion_image] at h1
   rw [h1]
-  have h_count : (measurableAtom '' s).Countable := s.to_countable.image _
-  have h_disj : (measurableAtom '' s).Pairwise Disjoint := by
+  have h_count : (m.indistinguishabilityClass '' s).Countable := s.to_countable.image _
+  have h_disj : (m.indistinguishabilityClass '' s).Pairwise Disjoint := by
     intro t ht t' ht' h_eq
     obtain ⟨y, hys, hy⟩ := ht
     obtain ⟨y', hy's, hy'⟩ := ht'
     rw [← hy, ← hy'] at h_eq ⊢
-    refine disjoint_measurableAtom_of_notMem fun hyy' ↦ h_eq ?_
-    exact measurableAtom_eq_of_mem hyy'
-  have h_meas (t) (ht : t ∈ measurableAtom '' s) : MeasurableSet t := by
+    refine m.disjoint_indistinguishabilityClass_of_notMem fun hyy' ↦ h_eq ?_
+    exact m.indistinguishabilityClass_eq_of_mem hyy'
+  have h_meas (t) (ht : t ∈ m.indistinguishabilityClass '' s) : MeasurableSet t := by
     obtain ⟨x, hxs, hx⟩ := ht
     rw [← hx]
-    exact MeasurableSet.measurableAtom_of_countable x
+    exact SigmaAlgebra.indistinguishabilityClass_mem_of_countable x
   rw [measure_sUnion h_count h_disj h_meas, measure_sUnion h_count h_disj h_meas]
   congr with s'
   have hs' := s'.2

@@ -1098,7 +1098,7 @@ open Real Filter MeasureTheory MeasureTheory.Measure Module
 variable [RCLike 𝕜]
 variable [NormedAddCommGroup D] [NormedSpace ℝ D]
 variable [NormedAddCommGroup V] [NormedSpace ℝ V] [NormedSpace 𝕜 V]
-variable [MeasurableSpace D]
+variable [SigmaAlgebra D]
 
 variable {μ : Measure D} [hμ : HasTemperateGrowth μ]
 
@@ -1261,7 +1261,7 @@ section Lp
 open MeasureTheory
 open scoped NNReal ENNReal
 
-variable [NormedAddCommGroup D] [MeasurableSpace D] [MeasurableSpace E] [OpensMeasurableSpace E]
+variable [NormedAddCommGroup D] [SigmaAlgebra D] [SigmaAlgebra E] [OpensSigmaAlgebra E]
   [NormedField 𝕜] [NormedSpace 𝕜 F] [SMulCommClass ℝ 𝕜 F]
 
 variable (𝕜 F) in
@@ -1402,7 +1402,7 @@ section L2
 open MeasureTheory
 
 variable [NormedAddCommGroup H] [NormedSpace ℝ H] [FiniteDimensional ℝ H]
-  [MeasurableSpace H] [BorelSpace H]
+  [SigmaAlgebra H] [BorelSpace H]
   [NormedAddCommGroup V] [InnerProductSpace ℂ V]
 
 @[simp]

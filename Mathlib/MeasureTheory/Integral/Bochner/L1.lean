@@ -70,25 +70,25 @@ section WeightedSMul
 
 open ContinuousLinearMap
 
-variable [NormedAddCommGroup F] [NormedSpace ℝ F] {m : MeasurableSpace α} {μ : Measure α}
+variable [NormedAddCommGroup F] [NormedSpace ℝ F] {m : SigmaAlgebra α} {μ : Measure α}
 
 /-- Given a set `s`, return the continuous linear map `fun x => μ.real s • x`. The extension
 of that set function through `setToL1` gives the Bochner integral of L1 functions. -/
-def weightedSMul {_ : MeasurableSpace α} (μ : Measure α) (s : Set α) : F →L[ℝ] F :=
+def weightedSMul {_ : SigmaAlgebra α} (μ : Measure α) (s : Set α) : F →L[ℝ] F :=
   μ.real s • ContinuousLinearMap.id ℝ F
 
-theorem weightedSMul_apply {m : MeasurableSpace α} (μ : Measure α) (s : Set α) (x : F) :
+theorem weightedSMul_apply {m : SigmaAlgebra α} (μ : Measure α) (s : Set α) (x : F) :
     weightedSMul μ s x = μ.real s • x := by simp [weightedSMul]
 
 @[simp]
-theorem weightedSMul_zero_measure {m : MeasurableSpace α} :
+theorem weightedSMul_zero_measure {m : SigmaAlgebra α} :
     weightedSMul (0 : Measure α) = (0 : Set α → F →L[ℝ] F) := by ext1; simp [weightedSMul]
 
 @[simp]
-theorem weightedSMul_empty {m : MeasurableSpace α} (μ : Measure α) :
+theorem weightedSMul_empty {m : SigmaAlgebra α} (μ : Measure α) :
     weightedSMul μ ∅ = (0 : F →L[ℝ] F) := by ext1 x; rw [weightedSMul_apply]; simp
 
-theorem weightedSMul_add_measure {m : MeasurableSpace α} (μ ν : Measure α) {s : Set α}
+theorem weightedSMul_add_measure {m : SigmaAlgebra α} (μ ν : Measure α) {s : Set α}
     (hμs : μ s ≠ ∞) (hνs : ν s ≠ ∞) :
     (weightedSMul (μ + ν) s : F →L[ℝ] F) = weightedSMul μ s + weightedSMul ν s := by
   ext1 x
@@ -96,7 +96,7 @@ theorem weightedSMul_add_measure {m : MeasurableSpace α} (μ ν : Measure α) {
   simp_rw [Pi.add_apply, weightedSMul_apply]
   rw [measureReal_add_apply, add_smul]
 
-theorem weightedSMul_smul_measure {m : MeasurableSpace α} (μ : Measure α) (c : ℝ≥0∞) {s : Set α} :
+theorem weightedSMul_smul_measure {m : SigmaAlgebra α} (μ : Measure α) (c : ℝ≥0∞) {s : Set α} :
     (weightedSMul (c • μ) s : F →L[ℝ] F) = c.toReal • weightedSMul μ s := by
   ext1 x
   simp [weightedSMul_apply, smul_smul]
@@ -133,7 +133,7 @@ theorem norm_weightedSMul_le (s : Set α) : ‖(weightedSMul μ s : F →L[ℝ] 
     _ = abs μ.real s := Real.norm_eq_abs _
     _ = μ.real s := abs_eq_self.mpr ENNReal.toReal_nonneg
 
-theorem dominatedFinMeasAdditive_weightedSMul {_ : MeasurableSpace α} (μ : Measure α) :
+theorem dominatedFinMeasAdditive_weightedSMul {_ : SigmaAlgebra α} (μ : Measure α) :
     DominatedFinMeasAdditive μ (weightedSMul μ : Set α → F →L[ℝ] F) 1 :=
   ⟨weightedSMul_union, fun s _ _ => (norm_weightedSMul_le s).trans (one_mul _).symm.le⟩
 
@@ -150,7 +150,7 @@ namespace SimpleFunc
 
 section PosPart
 
-variable [LinearOrder E] [Zero E] [MeasurableSpace α]
+variable [LinearOrder E] [Zero E] [SigmaAlgebra α]
 
 /-- Positive part of a simple function. -/
 def posPart (f : α →ₛ E) : α →ₛ E :=
@@ -187,21 +187,21 @@ and prove basic properties of this integral.
 open Finset
 
 variable [NormedAddCommGroup E] [NormedAddCommGroup F] [NormedSpace ℝ F]
-  {m : MeasurableSpace α} {μ : Measure α}
+  {m : SigmaAlgebra α} {μ : Measure α}
 
 /-- Bochner integral of simple functions whose codomain is a real `NormedSpace`.
 This is equal to `∑ x ∈ f.range, μ.real (f ⁻¹' {x}) • x` (see `integral_eq`). -/
-def integral {_ : MeasurableSpace α} (μ : Measure α) (f : α →ₛ F) : F :=
+def integral {_ : SigmaAlgebra α} (μ : Measure α) (f : α →ₛ F) : F :=
   f.setToSimpleFunc (weightedSMul μ)
 
-theorem integral_def {_ : MeasurableSpace α} (μ : Measure α) (f : α →ₛ F) :
+theorem integral_def {_ : SigmaAlgebra α} (μ : Measure α) (f : α →ₛ F) :
     f.integral μ = f.setToSimpleFunc (weightedSMul μ) := rfl
 
-theorem integral_eq {m : MeasurableSpace α} (μ : Measure α) (f : α →ₛ F) :
+theorem integral_eq {m : SigmaAlgebra α} (μ : Measure α) (f : α →ₛ F) :
     f.integral μ = ∑ x ∈ f.range, μ.real (f ⁻¹' {x}) • x := by
   simp [integral, setToSimpleFunc, weightedSMul_apply]
 
-theorem integral_eq_sum_filter [DecidablePred fun x : F => x ≠ 0] {m : MeasurableSpace α}
+theorem integral_eq_sum_filter [DecidablePred fun x : F => x ≠ 0] {m : SigmaAlgebra α}
     (f : α →ₛ F) (μ : Measure α) :
     f.integral μ = ∑ x ∈ {x ∈ f.range | x ≠ 0}, μ.real (f ⁻¹' {x}) • x := by
   simp_rw [integral_def, setToSimpleFunc_eq_sum_filter, weightedSMul_apply]
@@ -218,7 +218,7 @@ theorem integral_eq_sum_of_subset [DecidablePred fun x : F => x ≠ 0] {f : α �
   rw [preimage_eq_empty] <;> simp [Set.disjoint_singleton_left, hx]
 
 @[simp]
-theorem integral_const {m : MeasurableSpace α} (μ : Measure α) (y : F) :
+theorem integral_const {m : SigmaAlgebra α} (μ : Measure α) (y : F) :
     (const α y).integral μ = μ.real univ • y := by
   classical
   calc
@@ -228,7 +228,7 @@ theorem integral_const {m : MeasurableSpace α} (μ : Measure α) (y : F) :
 
 set_option backward.defeqAttrib.useBackward true in
 @[simp]
-theorem integral_piecewise_zero {m : MeasurableSpace α} (f : α →ₛ F) (μ : Measure α) {s : Set α}
+theorem integral_piecewise_zero {m : SigmaAlgebra α} (f : α →ₛ F) (μ : Measure α) {s : Set α}
     (hs : MeasurableSet s) : (piecewise s hs f 0).integral μ = f.integral (μ.restrict s) := by
   classical
   refine (integral_eq_sum_of_subset ?_).trans
@@ -372,7 +372,7 @@ namespace L1
 
 open AEEqFun Lp.simpleFunc Lp
 
-variable [NormedAddCommGroup E] {m : MeasurableSpace α} {μ : Measure α}
+variable [NormedAddCommGroup E] {m : SigmaAlgebra α} {μ : Measure α}
 
 namespace SimpleFunc
 

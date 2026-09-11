@@ -63,10 +63,10 @@ namespace SimpleFunc
 
 section Lp
 
-variable [MeasurableSpace β] [MeasurableSpace E] [NormedAddCommGroup E] [NormedAddCommGroup F]
+variable [SigmaAlgebra β] [SigmaAlgebra E] [NormedAddCommGroup E] [NormedAddCommGroup F]
   {p : ℝ≥0∞}
 
-theorem nnnorm_approxOn_le [OpensMeasurableSpace E] {f : β → E} (hf : Measurable f) {s : Set E}
+theorem nnnorm_approxOn_le [OpensSigmaAlgebra E] {f : β → E} (hf : Measurable f) {s : Set E}
     {y₀ : E} (h₀ : y₀ ∈ s) [SeparableSpace s] (x : β) (n : ℕ) :
     ‖approxOn f hf s y₀ h₀ n x - f x‖₊ ≤ ‖f x - y₀‖₊ := by
   have := edist_approxOn_le hf h₀ x n
@@ -74,19 +74,19 @@ theorem nnnorm_approxOn_le [OpensMeasurableSpace E] {f : β → E} (hf : Measura
   simp only [edist_nndist, nndist_eq_nnnorm] at this
   exact mod_cast this
 
-theorem norm_approxOn_y₀_le [OpensMeasurableSpace E] {f : β → E} (hf : Measurable f) {s : Set E}
+theorem norm_approxOn_y₀_le [OpensSigmaAlgebra E] {f : β → E} (hf : Measurable f) {s : Set E}
     {y₀ : E} (h₀ : y₀ ∈ s) [SeparableSpace s] (x : β) (n : ℕ) :
     ‖approxOn f hf s y₀ h₀ n x - y₀‖ ≤ ‖f x - y₀‖ + ‖f x - y₀‖ := by
   simpa [enorm, edist_eq_enorm_sub, ← ENNReal.coe_add, norm_sub_rev]
     using! edist_approxOn_y0_le hf h₀ x n
 
-theorem norm_approxOn_zero_le [OpensMeasurableSpace E] {f : β → E} (hf : Measurable f) {s : Set E}
+theorem norm_approxOn_zero_le [OpensSigmaAlgebra E] {f : β → E} (hf : Measurable f) {s : Set E}
     (h₀ : (0 : E) ∈ s) [SeparableSpace s] (x : β) (n : ℕ) :
     ‖approxOn f hf s 0 h₀ n x‖ ≤ ‖f x‖ + ‖f x‖ := by
   simpa [enorm, edist_eq_enorm_sub, ← ENNReal.coe_add, norm_sub_rev]
     using! edist_approxOn_y0_le hf h₀ x n
 
-theorem tendsto_approxOn_Lp_eLpNorm [OpensMeasurableSpace E] {f : β → E} (hf : Measurable f)
+theorem tendsto_approxOn_Lp_eLpNorm [OpensSigmaAlgebra E] {f : β → E} (hf : Measurable f)
     {s : Set E} {y₀ : E} (h₀ : y₀ ∈ s) [SeparableSpace s] (hp_ne_top : p ≠ ∞) {μ : Measure β}
     (hμ : ∀ᵐ x ∂μ, f x ∈ closure s) (hi : eLpNorm (fun x => f x - y₀) p μ < ∞) :
     Tendsto (fun n => eLpNorm (⇑(approxOn f hf s y₀ h₀ n) - f) p μ) atTop (𝓝 0) := by
@@ -204,10 +204,10 @@ end Lp
 
 section Integrable
 
-variable [MeasurableSpace β]
-variable [MeasurableSpace E] [NormedAddCommGroup E]
+variable [SigmaAlgebra β]
+variable [SigmaAlgebra E] [NormedAddCommGroup E]
 
-theorem tendsto_approxOn_L1_enorm [OpensMeasurableSpace E] {f : β → E} (hf : Measurable f)
+theorem tendsto_approxOn_L1_enorm [OpensSigmaAlgebra E] {f : β → E} (hf : Measurable f)
     {s : Set E} {y₀ : E} (h₀ : y₀ ∈ s) [SeparableSpace s] {μ : Measure β}
     (hμ : ∀ᵐ x ∂μ, f x ∈ closure s) (hi : HasFiniteIntegral (fun x => f x - y₀) μ) :
     Tendsto (fun n => ∫⁻ x, ‖approxOn f hf s y₀ h₀ n x - f x‖ₑ ∂μ) atTop (𝓝 0) := by
@@ -221,7 +221,7 @@ theorem integrable_approxOn [BorelSpace E] {f : β → E} {μ : Measure β} (fme
   rw [← memLp_one_iff_integrable] at hf hi₀ ⊢
   exact memLp_approxOn fmeas hf h₀ hi₀ n
 
-theorem tendsto_approxOn_range_L1_enorm [OpensMeasurableSpace E] {f : β → E} {μ : Measure β}
+theorem tendsto_approxOn_range_L1_enorm [OpensSigmaAlgebra E] {f : β → E} {μ : Measure β}
     [SeparableSpace (range f ∪ {0} : Set E)] (fmeas : Measurable f) (hf : Integrable f μ) :
     Tendsto (fun n => ∫⁻ x, ‖approxOn f fmeas (range f ∪ {0}) 0 (by simp) n x - f x‖ₑ ∂μ) atTop
       (𝓝 0) := by
@@ -238,7 +238,7 @@ end Integrable
 
 section SimpleFuncProperties
 
-variable [MeasurableSpace α]
+variable [SigmaAlgebra α]
 variable [NormedAddCommGroup E] [NormedAddCommGroup F]
 variable {μ : Measure α} {p : ℝ≥0∞}
 
@@ -360,7 +360,7 @@ namespace Lp
 
 open AEEqFun
 
-variable [MeasurableSpace α] [NormedAddCommGroup E] [NormedAddCommGroup F] (p : ℝ≥0∞)
+variable [SigmaAlgebra α] [NormedAddCommGroup E] [NormedAddCommGroup F] (p : ℝ≥0∞)
   (μ : Measure α)
 
 variable (E)
@@ -500,7 +500,7 @@ def toSimpleFunc (f : Lp.simpleFunc E p μ) : α →ₛ E :=
 
 /-- `(toSimpleFunc f)` is measurable. -/
 @[fun_prop]
-protected theorem measurable [MeasurableSpace E] (f : Lp.simpleFunc E p μ) :
+protected theorem measurable [SigmaAlgebra E] (f : Lp.simpleFunc E p μ) :
     Measurable (toSimpleFunc f) :=
   (toSimpleFunc f).measurable
 
@@ -509,7 +509,7 @@ protected theorem stronglyMeasurable (f : Lp.simpleFunc E p μ) :
   (toSimpleFunc f).stronglyMeasurable
 
 @[fun_prop]
-protected theorem aemeasurable [MeasurableSpace E] (f : Lp.simpleFunc E p μ) :
+protected theorem aemeasurable [SigmaAlgebra E] (f : Lp.simpleFunc E p μ) :
     AEMeasurable (toSimpleFunc f) μ :=
   (simpleFunc.measurable f).aemeasurable
 
@@ -781,7 +781,7 @@ end simpleFunc
 
 end Lp
 
-variable [MeasurableSpace α] [NormedAddCommGroup E] {f : α → E} {p : ℝ≥0∞} {μ : Measure α}
+variable [SigmaAlgebra α] [NormedAddCommGroup E] {f : α → E} {p : ℝ≥0∞} {μ : Measure α}
 
 /-- To prove something for an arbitrary `Lp` function in a second countable Borel normed group, it
 suffices to show that

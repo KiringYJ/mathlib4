@@ -61,7 +61,7 @@ variable [TopologicalSpace β]
 
 /-- A function is `StronglyMeasurable` if it is the limit of simple functions. -/
 @[fun_prop]
-def StronglyMeasurable [MeasurableSpace α] (f : α → β) : Prop :=
+def StronglyMeasurable [SigmaAlgebra α] (f : α → β) : Prop :=
   ∃ fs : ℕ → α →ₛ β, ∀ x, Tendsto (fun n => fs n x) atTop (𝓝 (f x))
 
 add_aesop_rules safe tactic
@@ -75,7 +75,7 @@ scoped notation "StronglyMeasurable[" m "]" => @MeasureTheory.StronglyMeasurable
 /-- A function is `FinStronglyMeasurable` with respect to a measure if it is the limit of simple
   functions with support with finite measure. -/
 def FinStronglyMeasurable [Zero β]
-    {_ : MeasurableSpace α} (f : α → β) (μ : Measure α := by volume_tac) : Prop :=
+    {_ : SigmaAlgebra α} (f : α → β) (μ : Measure α := by volume_tac) : Prop :=
   ∃ fs : ℕ → α →ₛ β, (∀ n, μ (support (fs n)) < ∞) ∧ ∀ x, Tendsto (fun n => fs n x) atTop (𝓝 (f x))
 
 end Definitions
@@ -85,7 +85,7 @@ open MeasureTheory
 /-! ## Strongly measurable functions -/
 
 section StronglyMeasurable
-variable {_ : MeasurableSpace α} {f : α → β} {g : ℕ → α} {m : ℕ}
+variable {_ : SigmaAlgebra α} {f : α → β} {g : ℕ → α} {m : ℕ}
 
 variable [TopologicalSpace β]
 
@@ -159,23 +159,23 @@ variable [TopologicalSpace β]
 /-- A sequence of simple functions such that
 `∀ x, Tendsto (fun n => hf.approx n x) atTop (𝓝 (f x))`.
 That property is given by `stronglyMeasurable.tendsto_approx`. -/
-protected noncomputable def approx {_ : MeasurableSpace α} (hf : StronglyMeasurable f) :
+protected noncomputable def approx {_ : SigmaAlgebra α} (hf : StronglyMeasurable f) :
     ℕ → α →ₛ β :=
   hf.choose
 
-protected theorem tendsto_approx {_ : MeasurableSpace α} (hf : StronglyMeasurable f) :
+protected theorem tendsto_approx {_ : SigmaAlgebra α} (hf : StronglyMeasurable f) :
     ∀ x, Tendsto (fun n => hf.approx n x) atTop (𝓝 (f x)) :=
   hf.choose_spec
 
 /-- Similar to `stronglyMeasurable.approx`, but enforces that the norm of every function in the
 sequence is less than `c` everywhere. If `‖f x‖ ≤ c` this sequence of simple functions verifies
 `Tendsto (fun n => hf.approxBounded n x) atTop (𝓝 (f x))`. -/
-noncomputable def approxBounded {_ : MeasurableSpace α} [Norm β] [SMul ℝ β]
+noncomputable def approxBounded {_ : SigmaAlgebra α} [Norm β] [SMul ℝ β]
     (hf : StronglyMeasurable f) (c : ℝ) : ℕ → SimpleFunc α β := fun n =>
   (hf.approx n).map fun x => min 1 (c / ‖x‖) • x
 
 theorem tendsto_approxBounded_of_norm_le {β} {f : α → β} [NormedAddCommGroup β] [NormedSpace ℝ β]
-    {m : MeasurableSpace α} (hf : StronglyMeasurable[m] f) {c : ℝ} {x : α} (hfx : ‖f x‖ ≤ c) :
+    {m : SigmaAlgebra α} (hf : StronglyMeasurable[m] f) {c : ℝ} {x : α} (hfx : ‖f x‖ ≤ c) :
     Tendsto (fun n => hf.approxBounded c n x) atTop (𝓝 (f x)) := by
   have h_tendsto := hf.tendsto_approx x
   simp only [StronglyMeasurable.approxBounded, SimpleFunc.coe_map, Function.comp_apply]
@@ -206,13 +206,13 @@ theorem tendsto_approxBounded_of_norm_le {β} {f : α → β} [NormedAddCommGrou
   exact Tendsto.div tendsto_const_nhds h_tendsto.norm hfx0
 
 theorem tendsto_approxBounded_ae {β} {f : α → β} [NormedAddCommGroup β] [NormedSpace ℝ β]
-    {m m0 : MeasurableSpace α} {μ : Measure α} (hf : StronglyMeasurable[m] f) {c : ℝ}
+    {m m0 : SigmaAlgebra α} {μ : Measure α} (hf : StronglyMeasurable[m] f) {c : ℝ}
     (hf_bound : ∀ᵐ x ∂μ, ‖f x‖ ≤ c) :
     ∀ᵐ x ∂μ, Tendsto (fun n => hf.approxBounded c n x) atTop (𝓝 (f x)) := by
   filter_upwards [hf_bound] with x hfx using tendsto_approxBounded_of_norm_le hf hfx
 
 theorem norm_approxBounded_le {β} {f : α → β} [SeminormedAddCommGroup β] [NormedSpace ℝ β]
-    {m : MeasurableSpace α} {c : ℝ} (hf : StronglyMeasurable[m] f) (hc : 0 ≤ c) (n : ℕ) (x : α) :
+    {m : SigmaAlgebra α} {c : ℝ} (hf : StronglyMeasurable[m] f) (hc : 0 ≤ c) (n : ℕ) (x : α) :
     ‖hf.approxBounded c n x‖ ≤ c := by
   simp only [StronglyMeasurable.approxBounded, SimpleFunc.coe_map, Function.comp_apply]
   refine (norm_smul_le _ _).trans ?_
@@ -249,7 +249,7 @@ theorem _root_.stronglyMeasurable_bot_iff [Nonempty β] [T2Space β] :
 end BasicPropertiesInAnyTopologicalSpace
 
 theorem finStronglyMeasurable_of_set_sigmaFinite [TopologicalSpace β] [Zero β]
-    {m : MeasurableSpace α} {μ : Measure α} (hf_meas : StronglyMeasurable f) {t : Set α}
+    {m : SigmaAlgebra α} {μ : Measure α} (hf_meas : StronglyMeasurable f) {t : Set α}
     (ht : MeasurableSet t) (hft_zero : ∀ x ∈ tᶜ, f x = 0) (htμ : SigmaFinite (μ.restrict t)) :
     FinStronglyMeasurable f μ := by
   have : SigmaFinite (μ.restrict t) := htμ
@@ -300,57 +300,57 @@ theorem finStronglyMeasurable_of_set_sigmaFinite [TopologicalSpace β] [Zero β]
 /-- If the measure is sigma-finite, all strongly measurable functions are
   `FinStronglyMeasurable`. -/
 @[aesop 5% apply (rule_sets := [Measurable])]
-protected theorem finStronglyMeasurable [TopologicalSpace β] [Zero β] {m0 : MeasurableSpace α}
+protected theorem finStronglyMeasurable [TopologicalSpace β] [Zero β] {m0 : SigmaAlgebra α}
     (hf : StronglyMeasurable f) (μ : Measure α) [SigmaFinite μ] : FinStronglyMeasurable f μ :=
   hf.finStronglyMeasurable_of_set_sigmaFinite MeasurableSet.univ (by simp)
     (by rwa [Measure.restrict_univ])
 
 /-- A strongly measurable function is measurable. -/
 @[fun_prop]
-protected theorem measurable {_ : MeasurableSpace α} [TopologicalSpace β] [PseudoMetrizableSpace β]
-    [MeasurableSpace β] [BorelSpace β] (hf : StronglyMeasurable f) : Measurable f :=
+protected theorem measurable {_ : SigmaAlgebra α} [TopologicalSpace β] [PseudoMetrizableSpace β]
+    [SigmaAlgebra β] [BorelSpace β] (hf : StronglyMeasurable f) : Measurable f :=
   measurable_of_tendsto_metrizable (fun n => (hf.approx n).measurable)
     (tendsto_pi_nhds.mpr hf.tendsto_approx)
 
 /-- A strongly measurable function is almost everywhere measurable. -/
 @[fun_prop]
-protected theorem aemeasurable {_ : MeasurableSpace α} [TopologicalSpace β]
-    [PseudoMetrizableSpace β] [MeasurableSpace β] [BorelSpace β] {μ : Measure α}
+protected theorem aemeasurable {_ : SigmaAlgebra α} [TopologicalSpace β]
+    [PseudoMetrizableSpace β] [SigmaAlgebra β] [BorelSpace β] {μ : Measure α}
     (hf : StronglyMeasurable f) : AEMeasurable f μ :=
   hf.measurable.aemeasurable
 
-theorem _root_.Continuous.comp_stronglyMeasurable {_ : MeasurableSpace α} [TopologicalSpace β]
+theorem _root_.Continuous.comp_stronglyMeasurable {_ : SigmaAlgebra α} [TopologicalSpace β]
     [TopologicalSpace γ] {g : β → γ} {f : α → β} (hg : Continuous g) (hf : StronglyMeasurable f) :
     StronglyMeasurable fun x => g (f x) :=
   ⟨fun n => SimpleFunc.map g (hf.approx n), fun x => (hg.tendsto _).comp (hf.tendsto_approx x)⟩
 
 @[to_additive]
-nonrec theorem measurableSet_mulSupport {m : MeasurableSpace α} [One β] [TopologicalSpace β]
+nonrec theorem measurableSet_mulSupport {m : SigmaAlgebra α} [One β] [TopologicalSpace β]
     [MetrizableSpace β] (hf : StronglyMeasurable f) : MeasurableSet (mulSupport f) := by
   borelize β
   exact measurableSet_mulSupport hf.measurable
 
-protected theorem mono {m m' : MeasurableSpace α} [TopologicalSpace β]
+protected theorem mono {m m' : SigmaAlgebra α} [TopologicalSpace β]
     (hf : StronglyMeasurable[m'] f) (h_mono : m' ≤ m) : StronglyMeasurable[m] f := by
   let f_approx : ℕ → @SimpleFunc α m β := fun n =>
     @SimpleFunc.mk α m β
       (hf.approx n)
-      (fun x => h_mono _ (SimpleFunc.measurableSet_fiber' _ x))
+      (fun x => h_mono (SimpleFunc.measurableSet_fiber' _ x))
       (SimpleFunc.finite_range (hf.approx n))
   exact ⟨f_approx, hf.tendsto_approx⟩
 
 @[fun_prop]
-protected theorem fst {m : MeasurableSpace α} [TopologicalSpace β] [TopologicalSpace γ]
+protected theorem fst {m : SigmaAlgebra α} [TopologicalSpace β] [TopologicalSpace γ]
     {f : α → β × γ} (hf : StronglyMeasurable f) : StronglyMeasurable fun x ↦ (f x).1 :=
   continuous_fst.comp_stronglyMeasurable hf
 
 @[fun_prop]
-protected theorem snd {m : MeasurableSpace α} [TopologicalSpace β] [TopologicalSpace γ]
+protected theorem snd {m : SigmaAlgebra α} [TopologicalSpace β] [TopologicalSpace γ]
     {f : α → β × γ} (hf : StronglyMeasurable f) : StronglyMeasurable fun x ↦ (f x).2 :=
   continuous_snd.comp_stronglyMeasurable hf
 
 @[fun_prop]
-protected theorem prodMk {m : MeasurableSpace α} [TopologicalSpace β] [TopologicalSpace γ]
+protected theorem prodMk {m : SigmaAlgebra α} [TopologicalSpace β] [TopologicalSpace γ]
     {f : α → β} {g : α → γ} (hf : StronglyMeasurable f) (hg : StronglyMeasurable g) :
     StronglyMeasurable fun x => (f x, g x) := by
   refine ⟨fun n => SimpleFunc.pair (hf.approx n) (hg.approx n), fun x => ?_⟩
@@ -358,38 +358,38 @@ protected theorem prodMk {m : MeasurableSpace α} [TopologicalSpace β] [Topolog
   exact Tendsto.prodMk (hf.tendsto_approx x) (hg.tendsto_approx x)
 
 @[fun_prop]
-theorem comp_measurable [TopologicalSpace β] {_ : MeasurableSpace α} {_ : MeasurableSpace γ}
+theorem comp_measurable [TopologicalSpace β] {_ : SigmaAlgebra α} {_ : SigmaAlgebra γ}
     {f : α → β} {g : γ → α} (hf : StronglyMeasurable f) (hg : Measurable g) :
     StronglyMeasurable (f ∘ g) :=
   ⟨fun n => SimpleFunc.comp (hf.approx n) g hg, fun x => hf.tendsto_approx (g x)⟩
 
-theorem of_uncurry_left [TopologicalSpace β] {_ : MeasurableSpace α} {_ : MeasurableSpace γ}
+theorem of_uncurry_left [TopologicalSpace β] {_ : SigmaAlgebra α} {_ : SigmaAlgebra γ}
     {f : α → γ → β} (hf : StronglyMeasurable (uncurry f)) {x : α} : StronglyMeasurable (f x) :=
   hf.comp_measurable measurable_prodMk_left
 
-theorem of_uncurry_right [TopologicalSpace β] {_ : MeasurableSpace α} {_ : MeasurableSpace γ}
+theorem of_uncurry_right [TopologicalSpace β] {_ : SigmaAlgebra α} {_ : SigmaAlgebra γ}
     {f : α → γ → β} (hf : StronglyMeasurable (uncurry f)) {y : γ} :
     StronglyMeasurable fun x => f x y :=
   hf.comp_measurable measurable_prodMk_right
 
-protected theorem prod_swap {_ : MeasurableSpace α} {_ : MeasurableSpace β} [TopologicalSpace γ]
+protected theorem prod_swap {_ : SigmaAlgebra α} {_ : SigmaAlgebra β} [TopologicalSpace γ]
     {f : β × α → γ} (hf : StronglyMeasurable f) :
     StronglyMeasurable (fun z : α × β => f z.swap) :=
   hf.comp_measurable measurable_swap
 
-protected theorem comp_fst {_ : MeasurableSpace α} [mβ : MeasurableSpace β] [TopologicalSpace γ]
+protected theorem comp_fst {_ : SigmaAlgebra α} [mβ : SigmaAlgebra β] [TopologicalSpace γ]
     {f : α → γ} (hf : StronglyMeasurable f) :
     StronglyMeasurable (fun z : α × β => f z.1) :=
   hf.comp_measurable measurable_fst
 
-protected theorem comp_snd [mα : MeasurableSpace α] {_ : MeasurableSpace β} [TopologicalSpace γ]
+protected theorem comp_snd [mα : SigmaAlgebra α] {_ : SigmaAlgebra β} [TopologicalSpace γ]
     {f : β → γ} (hf : StronglyMeasurable f) :
     StronglyMeasurable (fun z : α × β => f z.2) :=
   hf.comp_measurable measurable_snd
 
 section Arithmetic
 
-variable {mα : MeasurableSpace α} [TopologicalSpace β]
+variable {mα : SigmaAlgebra α} [TopologicalSpace β]
 
 @[to_fun (attr := to_additive (attr := fun_prop))]
 protected theorem mul [Mul β] [ContinuousMul β] (hf : StronglyMeasurable f)
@@ -492,7 +492,7 @@ protected theorem smul_const {𝕜} [TopologicalSpace 𝕜] [SMul 𝕜 β] [Cont
 
 /-- Pointwise star on functions induced from continuous star preserves strong measurability. -/
 @[fun_prop]
-protected theorem star {R : Type*} [MeasurableSpace α] [Star R] [TopologicalSpace R]
+protected theorem star {R : Type*} [SigmaAlgebra α] [Star R] [TopologicalSpace R]
     [ContinuousStar R] (f : α → R) (hf : StronglyMeasurable f) : StronglyMeasurable (star f) :=
   ⟨fun n => star (hf.approx n), fun x => (hf.tendsto_approx x).star⟩
 
@@ -500,8 +500,8 @@ protected theorem star {R : Type*} [MeasurableSpace α] [Star R] [TopologicalSpa
 function is measurable. Note that this is not true without further second-countability assumptions
 for the addition of two measurable functions. -/
 theorem _root_.Measurable.add_stronglyMeasurable
-    {α E : Type*} {_ : MeasurableSpace α} [AddCancelMonoid E] [TopologicalSpace E]
-    [MeasurableSpace E] [BorelSpace E] [ContinuousAdd E] [PseudoMetrizableSpace E]
+    {α E : Type*} {_ : SigmaAlgebra α} [AddCancelMonoid E] [TopologicalSpace E]
+    [SigmaAlgebra E] [BorelSpace E] [ContinuousAdd E] [PseudoMetrizableSpace E]
     {g f : α → E} (hg : Measurable g) (hf : StronglyMeasurable f) :
     Measurable (g + f) := by
   rcases hf with ⟨φ, hφ⟩
@@ -514,8 +514,8 @@ theorem _root_.Measurable.add_stronglyMeasurable
 function is measurable. Note that this is not true without further second-countability assumptions
 for the subtraction of two measurable functions. -/
 theorem _root_.Measurable.sub_stronglyMeasurable
-    {α E : Type*} {_ : MeasurableSpace α} [AddGroup E] [TopologicalSpace E]
-    [MeasurableSpace E] [BorelSpace E] [ContinuousAdd E] [ContinuousNeg E] [PseudoMetrizableSpace E]
+    {α E : Type*} {_ : SigmaAlgebra α} [AddGroup E] [TopologicalSpace E]
+    [SigmaAlgebra E] [BorelSpace E] [ContinuousAdd E] [ContinuousNeg E] [PseudoMetrizableSpace E]
     {g f : α → E} (hg : Measurable g) (hf : StronglyMeasurable f) :
     Measurable (g - f) := by
   rw [sub_eq_add_neg]
@@ -525,8 +525,8 @@ theorem _root_.Measurable.sub_stronglyMeasurable
 function is measurable. Note that this is not true without further second-countability assumptions
 for the addition of two measurable functions. -/
 theorem _root_.Measurable.stronglyMeasurable_add
-    {α E : Type*} {_ : MeasurableSpace α} [AddCancelMonoid E] [TopologicalSpace E]
-    [MeasurableSpace E] [BorelSpace E] [ContinuousAdd E] [PseudoMetrizableSpace E]
+    {α E : Type*} {_ : SigmaAlgebra α} [AddCancelMonoid E] [TopologicalSpace E]
+    [SigmaAlgebra E] [BorelSpace E] [ContinuousAdd E] [PseudoMetrizableSpace E]
     {g f : α → E} (hg : Measurable g) (hf : StronglyMeasurable f) :
     Measurable (f + g) := by
   rcases hf with ⟨φ, hφ⟩
@@ -545,17 +545,17 @@ variable [Monoid M] [MulAction M β] [ContinuousConstSMul M β]
 variable [Group G] [MulAction G β] [ContinuousConstSMul G β]
 variable [GroupWithZero G₀] [MulAction G₀ β] [ContinuousConstSMul G₀ β]
 
-theorem _root_.stronglyMeasurable_const_smul_iff {m : MeasurableSpace α} (c : G) :
+theorem _root_.stronglyMeasurable_const_smul_iff {m : SigmaAlgebra α} (c : G) :
     (StronglyMeasurable fun x => c • f x) ↔ StronglyMeasurable f :=
   ⟨fun h => by simpa only [inv_smul_smul] using h.fun_const_smul c⁻¹, fun h => h.const_smul c⟩
 
-nonrec theorem _root_.IsUnit.stronglyMeasurable_const_smul_iff {_ : MeasurableSpace α} {c : M}
+nonrec theorem _root_.IsUnit.stronglyMeasurable_const_smul_iff {_ : SigmaAlgebra α} {c : M}
     (hc : IsUnit c) :
     (StronglyMeasurable fun x => c • f x) ↔ StronglyMeasurable f :=
   let ⟨u, hu⟩ := hc
   hu ▸ stronglyMeasurable_const_smul_iff u
 
-theorem _root_.stronglyMeasurable_const_smul_iff₀ {_ : MeasurableSpace α} {c : G₀} (hc : c ≠ 0) :
+theorem _root_.stronglyMeasurable_const_smul_iff₀ {_ : SigmaAlgebra α} {c : G₀} (hc : c ≠ 0) :
     (StronglyMeasurable fun x => c • f x) ↔ StronglyMeasurable f :=
   (IsUnit.mk0 _ hc).stronglyMeasurable_const_smul_iff
 
@@ -563,7 +563,7 @@ end MulAction
 
 section Order
 
-variable [MeasurableSpace α] [TopologicalSpace β]
+variable [SigmaAlgebra α] [TopologicalSpace β]
 
 open Filter
 
@@ -599,7 +599,7 @@ end Order
 
 section Monoid
 
-variable {M : Type*} [Monoid M] [TopologicalSpace M] [ContinuousMul M] {m : MeasurableSpace α}
+variable {M : Type*} [Monoid M] [TopologicalSpace M] [ContinuousMul M] {m : SigmaAlgebra α}
 
 -- TODO: `fun_prop` cannot use lemmas with a condition quantifying over the function
 @[to_additive (attr := fun_prop)]
@@ -622,7 +622,7 @@ end Monoid
 
 section CommMonoid
 
-variable {M : Type*} [CommMonoid M] [TopologicalSpace M] [ContinuousMul M] {m : MeasurableSpace α}
+variable {M : Type*} [CommMonoid M] [TopologicalSpace M] [ContinuousMul M] {m : SigmaAlgebra α}
 
 
 @[to_additive (attr := fun_prop)]
@@ -647,7 +647,7 @@ theorem _root_.Finset.stronglyMeasurable_fun_prod {ι : Type*} {f : ι → α �
     (hf : ∀ i ∈ s, StronglyMeasurable (f i)) : StronglyMeasurable fun a => ∏ i ∈ s, f i a := by
   simpa only [← Finset.prod_apply] using s.stronglyMeasurable_prod hf
 
-variable {n : MeasurableSpace β} in
+variable {n : SigmaAlgebra β} in
 /-- Compositional version of `Finset.stronglyMeasurable_prod` for use by `fun_prop`. -/
 @[to_additive (attr := fun_prop)
 /-- Compositional version of `Finset.stronglyMeasurable_sum` for use by `fun_prop`. -/]
@@ -659,7 +659,7 @@ lemma Finset.stronglyMeasurable_prod_apply {ι : Type*} {f : ι → α → β �
 end CommMonoid
 
 /-- The range of a strongly measurable function is separable. -/
-protected theorem isSeparable_range {m : MeasurableSpace α} [TopologicalSpace β]
+protected theorem isSeparable_range {m : SigmaAlgebra α} [TopologicalSpace β]
     (hf : StronglyMeasurable f) : TopologicalSpace.IsSeparable (range f) := by
   have : IsSeparable (closure (⋃ n, range (hf.approx n))) :=
     .closure <| .iUnion fun n => (hf.approx n).finite_range.isSeparable
@@ -670,7 +670,7 @@ protected theorem isSeparable_range {m : MeasurableSpace α} [TopologicalSpace �
   apply mem_iUnion_of_mem n
   exact mem_range_self _
 
-theorem separableSpace_range_union_singleton {_ : MeasurableSpace α} [TopologicalSpace β]
+theorem separableSpace_range_union_singleton {_ : SigmaAlgebra α} [TopologicalSpace β]
     [PseudoMetrizableSpace β] (hf : StronglyMeasurable f) {b : β} :
     SeparableSpace (range f ∪ {b} : Set β) :=
   letI := pseudoMetrizableSpacePseudoMetric β
@@ -678,12 +678,12 @@ theorem separableSpace_range_union_singleton {_ : MeasurableSpace α} [Topologic
 
 section SecondCountableStronglyMeasurable
 
-variable {mα : MeasurableSpace α} [MeasurableSpace β]
+variable {mα : SigmaAlgebra α} [SigmaAlgebra β]
 
 /-- In a space with second countable topology, measurable implies strongly measurable. -/
 @[fun_prop]
 theorem _root_.Measurable.stronglyMeasurable [TopologicalSpace β] [PseudoMetrizableSpace β]
-    [SecondCountableTopology β] [OpensMeasurableSpace β] (hf : Measurable f) :
+    [SecondCountableTopology β] [OpensSigmaAlgebra β] (hf : Measurable f) :
     StronglyMeasurable f := by
   let := pseudoMetrizableSpacePseudoMetric β
   nontriviality β; inhabit β
@@ -697,15 +697,15 @@ theorem _root_.stronglyMeasurable_iff_measurable [TopologicalSpace β] [PseudoMe
 
 @[fun_prop]
 theorem _root_.stronglyMeasurable_id [TopologicalSpace α] [PseudoMetrizableSpace α]
-    [OpensMeasurableSpace α] [SecondCountableTopology α] : StronglyMeasurable (id : α → α) :=
+    [OpensSigmaAlgebra α] [SecondCountableTopology α] : StronglyMeasurable (id : α → α) :=
   measurable_id.stronglyMeasurable
 
 end SecondCountableStronglyMeasurable
 
 /-- A function is strongly measurable if and only if it is measurable and has separable
 range. -/
-theorem _root_.stronglyMeasurable_iff_measurable_separable {m : MeasurableSpace α}
-    [TopologicalSpace β] [PseudoMetrizableSpace β] [MeasurableSpace β] [BorelSpace β] :
+theorem _root_.stronglyMeasurable_iff_measurable_separable {m : SigmaAlgebra α}
+    [TopologicalSpace β] [PseudoMetrizableSpace β] [SigmaAlgebra β] [BorelSpace β] :
     StronglyMeasurable f ↔ Measurable f ∧ IsSeparable (range f) := by
   refine ⟨fun H ↦ ⟨H.measurable, H.isSeparable_range⟩, fun ⟨Hm, Hsep⟩  ↦ ?_⟩
   have := Hsep.secondCountableTopology
@@ -714,8 +714,8 @@ theorem _root_.stronglyMeasurable_iff_measurable_separable {m : MeasurableSpace 
 
 /-- A continuous function is strongly measurable when either the source space or the target space
 is second-countable. -/
-theorem _root_.Continuous.stronglyMeasurable [MeasurableSpace α] [TopologicalSpace α]
-    [OpensMeasurableSpace α] [TopologicalSpace β] [PseudoMetrizableSpace β]
+theorem _root_.Continuous.stronglyMeasurable [SigmaAlgebra α] [TopologicalSpace α]
+    [OpensSigmaAlgebra α] [TopologicalSpace β] [PseudoMetrizableSpace β]
     [h : SecondCountableTopologyEither α β] {f : α → β} (hf : Continuous f) :
     StronglyMeasurable f := by
   borelize β
@@ -729,7 +729,7 @@ theorem _root_.Continuous.stronglyMeasurable [MeasurableSpace α] [TopologicalSp
 @[to_additive /-- A continuous function whose support is contained in a compact set is strongly
 measurable. -/]
 theorem _root_.Continuous.stronglyMeasurable_of_mulSupport_subset_isCompact
-    [MeasurableSpace α] [TopologicalSpace α] [OpensMeasurableSpace α] [TopologicalSpace β]
+    [SigmaAlgebra α] [TopologicalSpace α] [OpensSigmaAlgebra α] [TopologicalSpace β]
     [PseudoMetrizableSpace β] [One β] {f : α → β} (hf : Continuous f) {k : Set α}
     (hk : IsCompact k) (h'f : mulSupport f ⊆ k) : StronglyMeasurable f := by
   borelize β
@@ -740,7 +740,7 @@ theorem _root_.Continuous.stronglyMeasurable_of_mulSupport_subset_isCompact
 /-- A continuous function with compact support is strongly measurable. -/
 @[to_additive /-- A continuous function with compact support is strongly measurable. -/]
 theorem _root_.Continuous.stronglyMeasurable_of_hasCompactMulSupport
-    [MeasurableSpace α] [TopologicalSpace α] [OpensMeasurableSpace α] [TopologicalSpace β]
+    [SigmaAlgebra α] [TopologicalSpace α] [OpensSigmaAlgebra α] [TopologicalSpace β]
     [PseudoMetrizableSpace β] [One β] {f : α → β} (hf : Continuous f)
     (h'f : HasCompactMulSupport f) : StronglyMeasurable f :=
   hf.stronglyMeasurable_of_mulSupport_subset_isCompact h'f (subset_mulTSupport f)
@@ -750,8 +750,8 @@ product sigma-algebra. The subtlety is that we do not assume that the spaces are
 product of the Borel sigma algebras might not contain all open sets, but still it contains enough
 of them to approximate compactly supported continuous functions. -/
 lemma _root_.HasCompactSupport.stronglyMeasurable_of_prod {X Y : Type*} [Zero α]
-    [TopologicalSpace X] [TopologicalSpace Y] [MeasurableSpace X] [MeasurableSpace Y]
-    [OpensMeasurableSpace X] [OpensMeasurableSpace Y] [TopologicalSpace α] [PseudoMetrizableSpace α]
+    [TopologicalSpace X] [TopologicalSpace Y] [SigmaAlgebra X] [SigmaAlgebra Y]
+    [OpensSigmaAlgebra X] [OpensSigmaAlgebra Y] [TopologicalSpace α] [PseudoMetrizableSpace α]
     {f : X × Y → α} (hf : Continuous f) (h'f : HasCompactSupport f) :
     StronglyMeasurable f := by
   borelize α
@@ -760,7 +760,7 @@ lemma _root_.HasCompactSupport.stronglyMeasurable_of_prod {X Y : Type*} [Zero α
   exact IsCompact.isSeparable (s := range f) (h'f.isCompact_range hf)
 
 /-- If `g` is a topological embedding, then `f` is strongly measurable iff `g ∘ f` is. -/
-theorem _root_.Embedding.comp_stronglyMeasurable_iff {m : MeasurableSpace α} [TopologicalSpace β]
+theorem _root_.Embedding.comp_stronglyMeasurable_iff {m : SigmaAlgebra α} [TopologicalSpace β]
     [PseudoMetrizableSpace β] [TopologicalSpace γ] [PseudoMetrizableSpace γ] {g : β → γ} {f : α → β}
     (hg : IsEmbedding g) : (StronglyMeasurable fun x => g (f x)) ↔ StronglyMeasurable f := by
   let := pseudoMetrizableSpacePseudoMetric γ
@@ -780,7 +780,7 @@ theorem _root_.Embedding.comp_stronglyMeasurable_iff {m : MeasurableSpace α} [T
     rwa [range_comp, hg.injective.preimage_image] at this
 
 /-- A sequential limit of strongly measurable functions is strongly measurable. -/
-theorem _root_.stronglyMeasurable_of_tendsto {ι : Type*} {m : MeasurableSpace α}
+theorem _root_.stronglyMeasurable_of_tendsto {ι : Type*} {m : SigmaAlgebra α}
     [TopologicalSpace β] [PseudoMetrizableSpace β] (u : Filter ι) [NeBot u] [IsCountablyGenerated u]
     {f : ι → α → β} {g : α → β} (hf : ∀ i, StronglyMeasurable (f i)) (lim : Tendsto f u (𝓝 g)) :
     StronglyMeasurable g := by
@@ -798,7 +798,7 @@ theorem _root_.stronglyMeasurable_of_tendsto {ι : Type*} {m : MeasurableSpace �
     apply mem_iUnion_of_mem n
     exact mem_range_self _
 
-protected theorem piecewise {m : MeasurableSpace α} [TopologicalSpace β] {s : Set α}
+protected theorem piecewise {m : SigmaAlgebra α} [TopologicalSpace β] {s : Set α}
     {_ : DecidablePred (· ∈ s)} (hs : MeasurableSet s) (hf : StronglyMeasurable f)
     (hg : StronglyMeasurable g) : StronglyMeasurable (Set.piecewise s f g) := by
   refine ⟨fun n => SimpleFunc.piecewise s hs (hf.approx n) (hg.approx n), fun x => ?_⟩
@@ -813,12 +813,12 @@ protected theorem piecewise {m : MeasurableSpace α} [TopologicalSpace β] {s : 
 `exact StronglyMeasurable.ite (measurableSet_singleton 0) stronglyMeasurable_const
 stronglyMeasurable_const`, but replacing `StronglyMeasurable.ite` by
 `StronglyMeasurable.piecewise` in that example proof does not work. -/
-protected theorem ite {_ : MeasurableSpace α} [TopologicalSpace β] {p : α → Prop}
+protected theorem ite {_ : SigmaAlgebra α} [TopologicalSpace β] {p : α → Prop}
     {_ : DecidablePred p} (hp : MeasurableSet { a : α | p a }) (hf : StronglyMeasurable f)
     (hg : StronglyMeasurable g) : StronglyMeasurable fun x => ite (p x) (f x) (g x) :=
   StronglyMeasurable.piecewise hp hf hg
 
-protected theorem dite {s : Set α} {m : MeasurableSpace α} [TopologicalSpace β]
+protected theorem dite {s : Set α} {m : SigmaAlgebra α} [TopologicalSpace β]
     [(x : α) → Decidable (x ∈ s)] {f : ↑s → β} (hf : StronglyMeasurable f)
     {g : ↑sᶜ → β} (hg : StronglyMeasurable g) (hs : MeasurableSet s) :
     StronglyMeasurable fun x ↦ if hx : x ∈ s then f ⟨x, hx⟩ else g ⟨x, hx⟩ := by
@@ -828,8 +828,8 @@ protected theorem dite {s : Set α} {m : MeasurableSpace α} [TopologicalSpace �
   · simpa [hx] using hg.tendsto_approx ⟨x, hx⟩
 
 /-- If a function is continuous outside of a countable set, then it is strongly measurable. -/
-theorem _root_.ContinuousOn.stronglyMeasurable_of_countable_compl [MeasurableSpace α]
-    [TopologicalSpace α] [OpensMeasurableSpace α] [MeasurableSingletonClass α]
+theorem _root_.ContinuousOn.stronglyMeasurable_of_countable_compl [SigmaAlgebra α]
+    [TopologicalSpace α] [OpensSigmaAlgebra α] [MeasurableSingletonClass α]
     [TopologicalSpace β] [PseudoMetrizableSpace β]
     [h : SecondCountableTopologyEither α β] {f : α → β} {s : Set α} (hf : ContinuousOn f s)
     (hs : (sᶜ).Countable) : StronglyMeasurable f := by
@@ -844,8 +844,8 @@ theorem _root_.ContinuousOn.stronglyMeasurable_of_countable_compl [MeasurableSpa
     exact MeasureTheory.StronglyMeasurable.of_discrete
 
 /-- If a function is continuous outside of a countable set, then it is strongly measurable. -/
-theorem of_countable_not_continuousAt [MeasurableSpace α] [TopologicalSpace α]
-    [OpensMeasurableSpace α] [MeasurableSingletonClass α]
+theorem of_countable_not_continuousAt [SigmaAlgebra α] [TopologicalSpace α]
+    [OpensSigmaAlgebra α] [MeasurableSingletonClass α]
     [TopologicalSpace β] [PseudoMetrizableSpace β]
     [h : SecondCountableTopologyEither α β] {f : α → β}
     (hf : Set.Countable {x | ¬ ContinuousAt f x}) : StronglyMeasurable f := by
@@ -856,7 +856,7 @@ theorem of_countable_not_continuousAt [MeasurableSpace α] [TopologicalSpace α]
 
 @[fun_prop]
 theorem _root_.MeasurableEmbedding.stronglyMeasurable_extend {f : α → β} {g : α → γ} {g' : γ → β}
-    {mα : MeasurableSpace α} {mγ : MeasurableSpace γ} [TopologicalSpace β]
+    {mα : SigmaAlgebra α} {mγ : SigmaAlgebra γ} [TopologicalSpace β]
     (hg : MeasurableEmbedding g) (hf : StronglyMeasurable f) (hg' : StronglyMeasurable g') :
     StronglyMeasurable (Function.extend g f g') := by
   refine ⟨fun n => SimpleFunc.extend (hf.approx n) g hg (hg'.approx n), ?_⟩
@@ -869,14 +869,14 @@ theorem _root_.MeasurableEmbedding.stronglyMeasurable_extend {f : α → β} {g 
       hg'.tendsto_approx x
 
 theorem _root_.MeasurableEmbedding.exists_stronglyMeasurable_extend {f : α → β} {g : α → γ}
-    {_ : MeasurableSpace α} {_ : MeasurableSpace γ} [TopologicalSpace β]
+    {_ : SigmaAlgebra α} {_ : SigmaAlgebra γ} [TopologicalSpace β]
     (hg : MeasurableEmbedding g) (hf : StronglyMeasurable f) (hne : γ → Nonempty β) :
     ∃ f' : γ → β, StronglyMeasurable f' ∧ f' ∘ g = f :=
   ⟨Function.extend g f fun x => Classical.choice (hne x),
     hg.stronglyMeasurable_extend hf (stronglyMeasurable_const' fun _ _ => rfl),
     funext fun _ => hg.injective.extend_apply _ _ _⟩
 
-theorem _root_.stronglyMeasurable_of_stronglyMeasurable_union_cover {m : MeasurableSpace α}
+theorem _root_.stronglyMeasurable_of_stronglyMeasurable_union_cover {m : SigmaAlgebra α}
     [TopologicalSpace β] {f : α → β} (s t : Set α) (hs : MeasurableSet s) (ht : MeasurableSet t)
     (h : univ ⊆ s ∪ t) (hc : StronglyMeasurable fun a : s => f a)
     (hd : StronglyMeasurable fun a : t => f a) : StronglyMeasurable f := by
@@ -893,7 +893,7 @@ theorem _root_.stronglyMeasurable_of_stronglyMeasurable_union_cover {m : Measura
     rw [extend_apply', Subtype.coe_injective.extend_apply]
     exact fun ⟨y, hy⟩ ↦ hxs <| hy ▸ y.2
 
-theorem _root_.stronglyMeasurable_of_restrict_of_restrict_compl {_ : MeasurableSpace α}
+theorem _root_.stronglyMeasurable_of_restrict_of_restrict_compl {_ : SigmaAlgebra α}
     [TopologicalSpace β] {f : α → β} {s : Set α} (hs : MeasurableSet s)
     (h₁ : StronglyMeasurable (s.domRestrict f)) (h₂ : StronglyMeasurable (sᶜ.domRestrict f)) :
     StronglyMeasurable f :=
@@ -901,7 +901,7 @@ theorem _root_.stronglyMeasurable_of_restrict_of_restrict_compl {_ : MeasurableS
     h₂
 
 @[fun_prop]
-protected theorem indicator {_ : MeasurableSpace α} [TopologicalSpace β] [Zero β]
+protected theorem indicator {_ : SigmaAlgebra α} [TopologicalSpace β] [Zero β]
     (hf : StronglyMeasurable f) {s : Set α} (hs : MeasurableSet s) :
     StronglyMeasurable (s.indicator f) :=
   hf.piecewise hs stronglyMeasurable_const
@@ -912,7 +912,7 @@ addition and pointwise limit.
 
 To use in an induction proof, the syntax is
 `induction f, hf using StronglyMeasurable.induction with`. -/
-theorem induction [MeasurableSpace α] [AddZeroClass β] [TopologicalSpace β]
+theorem induction [SigmaAlgebra α] [AddZeroClass β] [TopologicalSpace β]
     {P : (f : α → β) → StronglyMeasurable f → Prop}
     (ind : ∀ c ⦃s : Set α⦄ (hs : MeasurableSet s),
       P (s.indicator fun _ ↦ c) (stronglyMeasurable_const.indicator hs))
@@ -937,7 +937,7 @@ and pointwise limits.
 
 To use in an induction proof, the syntax is
 `induction f, hf using StronglyMeasurable.induction' with`. -/
-theorem induction' [MeasurableSpace α] [Nonempty β] [TopologicalSpace β]
+theorem induction' [SigmaAlgebra α] [Nonempty β] [TopologicalSpace β]
     {P : (f : α → β) → StronglyMeasurable f → Prop}
     (const : ∀ (c), P (fun _ ↦ c) stronglyMeasurable_const)
     (pcw : ∀ ⦃f g : α → β⦄ {s} (hf : StronglyMeasurable f) (hg : StronglyMeasurable g)
@@ -955,24 +955,24 @@ theorem induction' [MeasurableSpace α] [Nonempty β] [TopologicalSpace β]
     exact pcw f.stronglyMeasurable g.stronglyMeasurable hs Pf Pg
 
 @[fun_prop]
-protected theorem dist {_ : MeasurableSpace α} {β : Type*} [PseudoMetricSpace β] {f g : α → β}
+protected theorem dist {_ : SigmaAlgebra α} {β : Type*} [PseudoMetricSpace β] {f g : α → β}
     (hf : StronglyMeasurable f) (hg : StronglyMeasurable g) :
     StronglyMeasurable fun x => dist (f x) (g x) :=
   continuous_dist.comp_stronglyMeasurable (hf.prodMk hg)
 
 @[fun_prop]
-protected theorem edist {_ : MeasurableSpace α} {β : Type*} [PseudoEMetricSpace β] {f g : α → β}
+protected theorem edist {_ : SigmaAlgebra α} {β : Type*} [PseudoEMetricSpace β] {f g : α → β}
     (hf : StronglyMeasurable f) (hg : StronglyMeasurable g) :
     StronglyMeasurable fun x => edist (f x) (g x) :=
   continuous_edist.comp_stronglyMeasurable (hf.prodMk hg)
 
 @[fun_prop]
-protected theorem norm {_ : MeasurableSpace α} {β : Type*} [SeminormedAddCommGroup β] {f : α → β}
+protected theorem norm {_ : SigmaAlgebra α} {β : Type*} [SeminormedAddCommGroup β] {f : α → β}
     (hf : StronglyMeasurable f) : StronglyMeasurable fun x => ‖f x‖ :=
   continuous_norm.comp_stronglyMeasurable hf
 
 @[fun_prop]
-protected theorem nnnorm {_ : MeasurableSpace α} {β : Type*} [SeminormedAddCommGroup β] {f : α → β}
+protected theorem nnnorm {_ : SigmaAlgebra α} {β : Type*} [SeminormedAddCommGroup β] {f : α → β}
     (hf : StronglyMeasurable f) : StronglyMeasurable fun x => ‖f x‖₊ :=
   continuous_nnnorm.comp_stronglyMeasurable hf
 
@@ -982,17 +982,17 @@ Unlike `StrongMeasurable.norm` and `StronglyMeasurable.nnnorm`, this lemma prove
 **not** strong measurability. This is an intentional decision: for functions taking values in
 ℝ≥0∞, measurability is much more useful than strong measurability. -/
 @[fun_prop]
-protected theorem enorm {_ : MeasurableSpace α} {ε : Type*} [TopologicalSpace ε] [ContinuousENorm ε]
+protected theorem enorm {_ : SigmaAlgebra α} {ε : Type*} [TopologicalSpace ε] [ContinuousENorm ε]
     {f : α → ε} (hf : StronglyMeasurable f) : Measurable (‖f ·‖ₑ) :=
   (continuous_enorm.comp_stronglyMeasurable hf).measurable
 
 @[fun_prop]
-protected theorem real_toNNReal {_ : MeasurableSpace α} {f : α → ℝ} (hf : StronglyMeasurable f) :
+protected theorem real_toNNReal {_ : SigmaAlgebra α} {f : α → ℝ} (hf : StronglyMeasurable f) :
     StronglyMeasurable fun x => (f x).toNNReal :=
   continuous_real_toNNReal.comp_stronglyMeasurable hf
 
 section PseudoMetrizableSpace
-variable {E : Type*} {m m₀ : MeasurableSpace α} {μ : Measure[m₀] α} {f g : α → E}
+variable {E : Type*} {m m₀ : SigmaAlgebra α} {μ : Measure[m₀] α} {f g : α → E}
   [TopologicalSpace E] [Preorder E] [OrderClosedTopology E] [PseudoMetrizableSpace E]
 
 lemma measurableSet_le (hf : StronglyMeasurable[m] f) (hg : StronglyMeasurable[m] g) :
@@ -1016,7 +1016,7 @@ lemma ae_le_trim_iff (hm : m ≤ m₀) (hf : StronglyMeasurable[m] f) (hg : Stro
 end PseudoMetrizableSpace
 
 section MetrizableSpace
-variable {E : Type*} {m m₀ : MeasurableSpace α} {μ : Measure[m₀] α} {f g : α → E}
+variable {E : Type*} {m m₀ : SigmaAlgebra α} {μ : Measure[m₀] α} {f g : α → E}
   [TopologicalSpace E] [MetrizableSpace E]
 
 lemma measurableSet_eq_fun (hf : StronglyMeasurable[m] f) (hg : StronglyMeasurable[m] g) :
@@ -1035,7 +1035,7 @@ lemma ae_eq_trim_iff (hm : m ≤ m₀) (hf : StronglyMeasurable[m] f) (hg : Stro
 
 end MetrizableSpace
 
-theorem stronglyMeasurable_in_set {m : MeasurableSpace α} [TopologicalSpace β] [Zero β] {s : Set α}
+theorem stronglyMeasurable_in_set {m : SigmaAlgebra α} [TopologicalSpace β] [Zero β] {s : Set α}
     {f : α → β} (hs : MeasurableSet s) (hf : StronglyMeasurable f)
     (hf_zero : ∀ x, x ∉ s → f x = 0) :
     ∃ fs : ℕ → α →ₛ β,
@@ -1051,7 +1051,7 @@ theorem stronglyMeasurable_in_set {m : MeasurableSpace α} [TopologicalSpace β]
 /-- If the restriction to a set `s` of a σ-algebra `m` is included in the restriction to `s` of
 another σ-algebra `m₂` (hypothesis `hs`), the set `s` is `m` measurable and a function `f` supported
 on `s` is `m`-strongly-measurable, then `f` is also `m₂`-strongly-measurable. -/
-theorem stronglyMeasurable_of_measurableSpace_le_on {α E} {m m₂ : MeasurableSpace α}
+theorem stronglyMeasurable_of_sigmaAlgebra_le_on {α E} {m m₂ : SigmaAlgebra α}
     [TopologicalSpace E] [Zero E] {s : Set α} {f : α → E} (hs_m : MeasurableSet[m] s)
     (hs : ∀ t, MeasurableSet[m] (s ∩ t) → MeasurableSet[m₂] (s ∩ t))
     (hf : StronglyMeasurable[m] f) (hf_zero : ∀ x ∉ s, f x = 0) :
@@ -1070,7 +1070,7 @@ theorem stronglyMeasurable_of_measurableSpace_le_on {α E} {m m₂ : MeasurableS
 /-- If a function `f` is strongly measurable w.r.t. a sub-σ-algebra `m` and the measure is σ-finite
 on `m`, then there exists spanning measurable sets with finite measure on which `f` has bounded
 norm. In particular, `f` is integrable on each of those sets. -/
-theorem exists_spanning_measurableSet_norm_le [SeminormedAddCommGroup β] {m m0 : MeasurableSpace α}
+theorem exists_spanning_measurableSet_norm_le [SeminormedAddCommGroup β] {m m0 : SigmaAlgebra α}
     (hm : m ≤ m0) (hf : StronglyMeasurable[m] f) (μ : Measure α) [SigmaFinite (μ.trim hm)] :
     ∃ s : ℕ → Set α,
       (∀ n, MeasurableSet[m] (s n) ∧ μ (s n) < ∞ ∧ ∀ x ∈ s n, ‖f x‖ ≤ n) ∧
@@ -1087,7 +1087,7 @@ end StronglyMeasurable
 /-! ## Finitely strongly measurable functions -/
 
 
-theorem finStronglyMeasurable_zero {α β} {m : MeasurableSpace α} {μ : Measure α} [Zero β]
+theorem finStronglyMeasurable_zero {α β} {m : SigmaAlgebra α} {μ : Measure α} [Zero β]
     [TopologicalSpace β] : FinStronglyMeasurable (0 : α → β) μ :=
   ⟨0, by
     simp only [Pi.zero_apply, SimpleFunc.coe_zero, support_zero, measure_empty,
@@ -1096,7 +1096,7 @@ theorem finStronglyMeasurable_zero {α β} {m : MeasurableSpace α} {μ : Measur
 
 namespace FinStronglyMeasurable
 
-variable {m0 : MeasurableSpace α} {μ : Measure α} {f g : α → β}
+variable {m0 : SigmaAlgebra α} {μ : Measure α} {f g : α → β}
 
 section sequence
 
@@ -1146,7 +1146,7 @@ theorem exists_set_sigmaFinite [Zero β] [TopologicalSpace β] [T2Space β]
 
 /-- A finitely strongly measurable function is measurable. -/
 protected theorem measurable [Zero β] [TopologicalSpace β] [PseudoMetrizableSpace β]
-    [MeasurableSpace β] [BorelSpace β] (hf : FinStronglyMeasurable f μ) : Measurable f :=
+    [SigmaAlgebra β] [BorelSpace β] (hf : FinStronglyMeasurable f μ) : Measurable f :=
   hf.stronglyMeasurable.measurable
 
 section Arithmetic
@@ -1225,7 +1225,7 @@ end Order
 end FinStronglyMeasurable
 
 theorem finStronglyMeasurable_iff_stronglyMeasurable_and_exists_set_sigmaFinite {α β} {f : α → β}
-    [TopologicalSpace β] [T2Space β] [Zero β] {_ : MeasurableSpace α} {μ : Measure α} :
+    [TopologicalSpace β] [T2Space β] [Zero β] {_ : SigmaAlgebra α} {μ : Measure α} :
     FinStronglyMeasurable f μ ↔
       StronglyMeasurable f ∧
         ∃ t, MeasurableSet t ∧ (∀ x ∈ tᶜ, f x = 0) ∧ SigmaFinite (μ.restrict t) :=
@@ -1235,28 +1235,28 @@ theorem finStronglyMeasurable_iff_stronglyMeasurable_and_exists_set_sigmaFinite 
 
 section SecondCountableTopology
 
-variable {G : Type*} [SeminormedAddCommGroup G] [MeasurableSpace G] [BorelSpace G]
+variable {G : Type*} [SeminormedAddCommGroup G] [SigmaAlgebra G] [BorelSpace G]
   [SecondCountableTopology G] {f : α → G}
 
 /-- In a space with second countable topology and a sigma-finite measure, `FinStronglyMeasurable`
   and `Measurable` are equivalent. -/
-theorem finStronglyMeasurable_iff_measurable {_m0 : MeasurableSpace α} (μ : Measure α)
+theorem finStronglyMeasurable_iff_measurable {_m0 : SigmaAlgebra α} (μ : Measure α)
     [SigmaFinite μ] : FinStronglyMeasurable f μ ↔ Measurable f :=
   ⟨fun h => h.measurable, fun h => (Measurable.stronglyMeasurable h).finStronglyMeasurable μ⟩
 
 /-- In a space with second countable topology and a sigma-finite measure, a measurable function
 is `FinStronglyMeasurable`. -/
 @[aesop 90% apply (rule_sets := [Measurable])]
-theorem finStronglyMeasurable_of_measurable {_m0 : MeasurableSpace α} (μ : Measure α)
+theorem finStronglyMeasurable_of_measurable {_m0 : SigmaAlgebra α} (μ : Measure α)
     [SigmaFinite μ] (hf : Measurable f) : FinStronglyMeasurable f μ :=
   (finStronglyMeasurable_iff_measurable μ).mpr hf
 
 end SecondCountableTopology
 
 theorem measurable_uncurry_of_continuous_of_measurable {α β ι : Type*} [TopologicalSpace ι]
-    [MetrizableSpace ι] [MeasurableSpace ι] [SecondCountableTopology ι] [OpensMeasurableSpace ι]
-    {mβ : MeasurableSpace β} [TopologicalSpace β] [PseudoMetrizableSpace β] [BorelSpace β]
-    {m : MeasurableSpace α} {u : ι → α → β} (hu_cont : ∀ x, Continuous fun i => u i x)
+    [MetrizableSpace ι] [SigmaAlgebra ι] [SecondCountableTopology ι] [OpensSigmaAlgebra ι]
+    {mβ : SigmaAlgebra β} [TopologicalSpace β] [PseudoMetrizableSpace β] [BorelSpace β]
+    {m : SigmaAlgebra α} {u : ι → α → β} (hu_cont : ∀ x, Continuous fun i => u i x)
     (h : ∀ i, Measurable (u i)) : Measurable (Function.uncurry u) := by
   obtain ⟨t_sf, ht_sf⟩ :
     ∃ t : ℕ → SimpleFunc ι ι, ∀ j x, Tendsto (fun n => u (t n j) x) atTop (𝓝 <| u j x) := by
@@ -1285,8 +1285,8 @@ theorem measurable_uncurry_of_continuous_of_measurable {α β ι : Type*} [Topol
   exact ((t_sf n).measurable.comp measurable_fst).subtype_mk
 
 theorem stronglyMeasurable_uncurry_of_continuous_of_stronglyMeasurable {α β ι : Type*}
-    [TopologicalSpace ι] [MetrizableSpace ι] [MeasurableSpace ι] [SecondCountableTopology ι]
-    [OpensMeasurableSpace ι] [TopologicalSpace β] [PseudoMetrizableSpace β] [MeasurableSpace α]
+    [TopologicalSpace ι] [MetrizableSpace ι] [SigmaAlgebra ι] [SecondCountableTopology ι]
+    [OpensSigmaAlgebra ι] [TopologicalSpace β] [PseudoMetrizableSpace β] [SigmaAlgebra α]
     {u : ι → α → β} (hu_cont : ∀ x, Continuous fun i => u i x) (h : ∀ i, StronglyMeasurable (u i)) :
     StronglyMeasurable (Function.uncurry u) := by
   borelize β

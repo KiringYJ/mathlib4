@@ -46,7 +46,7 @@ section Levy_Prokhorov
 
 /-! ### Lévy-Prokhorov metric -/
 
-variable {Ω : Type*} [MeasurableSpace Ω] [PseudoEMetricSpace Ω]
+variable {Ω : Type*} [SigmaAlgebra Ω] [PseudoEMetricSpace Ω]
 
 /-- The Lévy-Prokhorov edistance between measures:
 `d(μ,ν) = inf {r ≥ 0 | ∀ B, μ B ≤ ν Bᵣ + r ∧ ν B ≤ μ Bᵣ + r}`. -/
@@ -124,7 +124,7 @@ lemma levyProkhorovEDist_comm (μ ν : Measure Ω) :
     levyProkhorovEDist μ ν = levyProkhorovEDist ν μ := by
   simp only [levyProkhorovEDist, and_comm]
 
-lemma levyProkhorovEDist_triangle [OpensMeasurableSpace Ω] (μ ν κ : Measure Ω) :
+lemma levyProkhorovEDist_triangle [OpensSigmaAlgebra Ω] (μ ν κ : Measure Ω) :
     levyProkhorovEDist μ κ ≤ levyProkhorovEDist μ ν + levyProkhorovEDist ν κ := by
   by_cases LPμν_finite : levyProkhorovEDist μ ν = ∞
   · simp [LPμν_finite]
@@ -174,7 +174,7 @@ lemma levyProkhorovDist_comm (μ ν : Measure Ω) :
     levyProkhorovDist μ ν = levyProkhorovDist ν μ := by
   simp only [levyProkhorovDist, levyProkhorovEDist_comm]
 
-lemma levyProkhorovDist_triangle [OpensMeasurableSpace Ω] (μ ν κ : Measure Ω)
+lemma levyProkhorovDist_triangle [OpensSigmaAlgebra Ω] (μ ν κ : Measure Ω)
     [IsFiniteMeasure μ] [IsFiniteMeasure ν] [IsFiniteMeasure κ] :
     levyProkhorovDist μ κ ≤ levyProkhorovDist μ ν + levyProkhorovDist ν κ := by
   have dμν_finite := (levyProkhorovEDist_lt_top μ ν).ne
@@ -183,7 +183,7 @@ lemma levyProkhorovDist_triangle [OpensMeasurableSpace Ω] (μ ν κ : Measure �
   · simp only [levyProkhorovDist, ENNReal.toReal_add dμν_finite dνκ_finite]
   · exact ENNReal.add_ne_top.mpr ⟨dμν_finite, dνκ_finite⟩
 
-variable [OpensMeasurableSpace Ω]
+variable [OpensSigmaAlgebra Ω]
 
 lemma measure_le_measure_closure_of_levyProkhorovEDist_eq_zero {μ ν : Measure Ω}
     (hLP : levyProkhorovEDist μ ν = 0) {s : Set Ω} (s_mble : MeasurableSet s)
@@ -339,7 +339,7 @@ noncomputable instance levyProkhorovDist_metricSpace_probabilityMeasure [BorelSp
     apply toMeasure_injective
     apply ProbabilityMeasure.toMeasure_injective
     refine ext_of_generate_finite _ ?_ isPiSystem_isClosed (fun A hA ↦ ?_) (by simp)
-    · rw [BorelSpace.measurable_eq (α := Ω), borel_eq_generateFrom_isClosed]
+    · rw [BorelSpace.sigmaAlgebra_eq (α := Ω), borel_eq_generateFrom_isClosed]
     refine measure_eq_measure_of_levyProkhorovEDist_eq_zero_of_isClosed ?_ hA ?_ ?_
     · simpa [dist_probabilityMeasure_def, levyProkhorovDist, toReal_eq_zero_iff] using h
     · exact ⟨1, Real.zero_lt_one, measure_ne_top _ _⟩
@@ -354,14 +354,14 @@ section Levy_Prokhorov_is_finer
 
 open BoundedContinuousFunction
 
-variable {Ω : Type*} [MeasurableSpace Ω]
+variable {Ω : Type*} [SigmaAlgebra Ω]
 
-variable [PseudoMetricSpace Ω] [OpensMeasurableSpace Ω]
+variable [PseudoMetricSpace Ω] [OpensSigmaAlgebra Ω]
 
 /-- A version of the layer cake formula for bounded continuous functions which have finite integral:
 `∫ f dμ = ∫ t in (0, ‖f‖], μ {x | f(x) ≥ t} dt`. -/
 lemma BoundedContinuousFunction.integral_eq_integral_meas_le_of_hasFiniteIntegral
-    {α : Type*} [MeasurableSpace α] [TopologicalSpace α] [OpensMeasurableSpace α]
+    {α : Type*} [SigmaAlgebra α] [TopologicalSpace α] [OpensSigmaAlgebra α]
     (f : α →ᵇ ℝ) (μ : Measure α) (f_nn : 0 ≤ᵐ[μ] f) (hf : HasFiniteIntegral f μ) :
     ∫ ω, f ω ∂μ = ∫ t in Ioc 0 ‖f‖, μ.real {a : α | t ≤ f a} := by
   rw [Integrable.integral_eq_integral_Ioc_meas_le (M := ‖f‖) ?_ f_nn ?_]
@@ -371,7 +371,7 @@ lemma BoundedContinuousFunction.integral_eq_integral_meas_le_of_hasFiniteIntegra
 /-- A version of the layer cake formula for bounded continuous functions and finite measures:
 `∫ f dμ = ∫ t in (0, ‖f‖], μ {x | f(x) ≥ t} dt`. -/
 lemma BoundedContinuousFunction.integral_eq_integral_meas_le
-    {α : Type*} [MeasurableSpace α] [TopologicalSpace α] [OpensMeasurableSpace α]
+    {α : Type*} [SigmaAlgebra α] [TopologicalSpace α] [OpensSigmaAlgebra α]
     (f : α →ᵇ ℝ) (μ : Measure α) [IsFiniteMeasure μ] (f_nn : 0 ≤ᵐ[μ] f) :
     ∫ ω, f ω ∂μ = ∫ t in Ioc 0 ‖f‖, μ.real {a : α | t ≤ f a} :=
   integral_eq_integral_meas_le_of_hasFiniteIntegral _ _ f_nn (f.integrable μ).2
@@ -512,7 +512,7 @@ section Levy_Prokhorov_metrizes_convergence_in_distribution
 open TopologicalSpace
 
 variable {Ω : Type*} [PseudoMetricSpace Ω]
-variable [MeasurableSpace Ω] [OpensMeasurableSpace Ω]
+variable [SigmaAlgebra Ω] [OpensSigmaAlgebra Ω]
 
 lemma ProbabilityMeasure.toMeasure_add_pos_gt_mem_nhds (P : ProbabilityMeasure Ω)
     {G : Set Ω} (G_open : IsOpen G) {ε : ℝ≥0∞} (ε_pos : 0 < ε) :
@@ -686,14 +686,14 @@ end LevyProkhorov
 
 /-- The topology of convergence in distribution on a separable space is pseudo-metrizable. -/
 instance (X : Type*) [TopologicalSpace X] [PseudoMetrizableSpace X] [SeparableSpace X]
-    [MeasurableSpace X] [OpensMeasurableSpace X] :
+    [SigmaAlgebra X] [OpensSigmaAlgebra X] :
     PseudoMetrizableSpace (ProbabilityMeasure X) :=
   letI : PseudoMetricSpace X := TopologicalSpace.pseudoMetrizableSpacePseudoMetric X
   (LevyProkhorov.probabilityMeasureHomeomorph (Ω := X)).isInducing.pseudoMetrizableSpace
 
 /-- The topology of convergence in distribution on a separable Borel space is metrizable. -/
 instance instMetrizableSpaceProbabilityMeasure (X : Type*) [TopologicalSpace X]
-    [PseudoMetrizableSpace X] [SeparableSpace X] [MeasurableSpace X] [BorelSpace X] :
+    [PseudoMetrizableSpace X] [SeparableSpace X] [SigmaAlgebra X] [BorelSpace X] :
     MetrizableSpace (ProbabilityMeasure X) := by
   let : PseudoMetricSpace X := TopologicalSpace.pseudoMetrizableSpacePseudoMetric X
   exact LevyProkhorov.probabilityMeasureHomeomorph.isEmbedding.metrizableSpace

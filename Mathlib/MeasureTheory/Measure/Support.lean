@@ -51,7 +51,7 @@ namespace Measure
 
 open scoped Topology ENNReal
 
-variable {X : Type*} [TopologicalSpace X] [MeasurableSpace X]
+variable {X : Type*} [TopologicalSpace X] [SigmaAlgebra X]
 
 /-- A point `x` is in the support of `μ` if any open neighborhood of `x` has positive measure.
 We provide the definition in terms of the filter-theoretic equivalent
@@ -163,14 +163,14 @@ lemma measure_compl_support_of_innerRegularWRT_isCompact_isOpen
   support_mem_ae_of_innerRegularWRT_isCompact_isOpen hμ
 
 /-- An inner regular measure has conull support when open sets are measurable. -/
-lemma support_mem_ae_of_innerRegular [OpensMeasurableSpace X] [μ.InnerRegular] :
+lemma support_mem_ae_of_innerRegular [OpensSigmaAlgebra X] [μ.InnerRegular] :
     μ.support ∈ ae μ :=
   support_mem_ae_of_innerRegularWRT_isCompact_isOpen fun _ hU r hr =>
     InnerRegular.innerRegular hU.measurableSet r hr
 
 /-- An inner regular measure has conull support when open sets are measurable. -/
 @[simp]
-lemma measure_compl_support_of_innerRegular [OpensMeasurableSpace X] [μ.InnerRegular] :
+lemma measure_compl_support_of_innerRegular [OpensSigmaAlgebra X] [μ.InnerRegular] :
     μ μ.supportᶜ = 0 := support_mem_ae_of_innerRegular
 
 /-- A regular measure has conull support. -/
@@ -209,12 +209,12 @@ lemma nonempty_inter_support_of_pos {s : Set X} (hμ : 0 < μ s) :
   contrapose! hμ
   exact μ.mono hμ.subset_compl_right |>.trans <| by simp
 
-/-- Under the assumption `OpensMeasurableSpace`, this is redundant because
+/-- Under the assumption `OpensSigmaAlgebra`, this is redundant because
 the complement of the support is open, and therefore measurable. -/
 lemma nullMeasurableSet_compl_support : NullMeasurableSet (μ.supportᶜ) μ :=
   NullMeasurableSet.of_null measure_compl_support
 
-/-- Under the assumption `OpensMeasurableSpace`, this is redundant because
+/-- Under the assumption `OpensSigmaAlgebra`, this is redundant because
 the support is closed, and therefore measurable. -/
 lemma nullMeasurableSet_support : NullMeasurableSet μ.support μ :=
   NullMeasurableSet.compl_iff.mp nullMeasurableSet_compl_support
@@ -234,7 +234,7 @@ end Lindelof
 
 section Restrict
 
-variable [OpensMeasurableSpace X]
+variable [OpensSigmaAlgebra X]
 
 lemma mem_support_restrict {s : Set X} {x : X} :
     x ∈ (μ.restrict s).support ↔ ∃ᶠ u in (𝓝[s] x).smallSets, 0 < μ u := by

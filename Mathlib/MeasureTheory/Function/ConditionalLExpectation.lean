@@ -30,7 +30,7 @@ expectation `P⁻[X|mΩ]` of `X` is the `mΩ`-measurable function such that for 
 
 ## Notation
 
-For a measure `P : Measure[mΩ₀] Ω`, and another `mΩ : MeasurableSpace Ω`, we define the notation
+For a measure `P : Measure[mΩ₀] Ω`, and another `mΩ : SigmaAlgebra Ω`, we define the notation
 * `P⁻[X|mΩ] = condLExp mΩ P X`
 
 ## Design decisions
@@ -61,7 +61,7 @@ open scoped ENNReal
 
 namespace MeasureTheory
 
-variable {Ω : Type*} {mΩ₀ mΩ : MeasurableSpace Ω} {P : Measure[mΩ₀] Ω} {X Y : Ω → ℝ≥0∞}
+variable {Ω : Type*} {mΩ₀ mΩ : SigmaAlgebra Ω} {P : Measure[mΩ₀] Ω} {X Y : Ω → ℝ≥0∞}
 
 open scoped Classical in
 /-- Conditional (Lebesgue) expectation of a function, with notation `P⁻[X|mΩ]`.
@@ -70,7 +70,7 @@ It is defined as `0` if either `¬ mΩ ≤ mΩ₀` or `hm : mΩ ≤ mΩ₀` but 
 
 One should typically not use the definition directly.
 -/
-noncomputable irreducible_def condLExp (mΩ : MeasurableSpace Ω) (P : Measure[mΩ₀] Ω)
+noncomputable irreducible_def condLExp (mΩ : SigmaAlgebra Ω) (P : Measure[mΩ₀] Ω)
     (X : Ω → ℝ≥0∞) : Ω → ℝ≥0∞ :=
   if hm : mΩ ≤ mΩ₀ then
     if SigmaFinite (P.trim hm) then
@@ -112,7 +112,7 @@ theorem condLExp_of_not_sub_sigma_measurable (hm : mΩ ≤ mΩ₀) (P : Measure[
   simp [condLExp, hm, hσ, hX]
 
 @[fun_prop]
-theorem measurable_condLExp (mΩ : MeasurableSpace Ω) (P : Measure[mΩ₀] Ω) (X : Ω → ℝ≥0∞) :
+theorem measurable_condLExp (mΩ : SigmaAlgebra Ω) (P : Measure[mΩ₀] Ω) (X : Ω → ℝ≥0∞) :
     Measurable[mΩ] P⁻[X|mΩ] := by
   by_cases hm : mΩ ≤ mΩ₀
   · by_cases hσ : SigmaFinite (P.trim hm)
@@ -123,7 +123,7 @@ theorem measurable_condLExp (mΩ : MeasurableSpace Ω) (P : Measure[mΩ₀] Ω) 
   simp [condLExp_of_not_le hm, measurable_zero]
 
 @[fun_prop]
-theorem measurable_condLExp' (mΩ : MeasurableSpace Ω) (P : Measure[mΩ₀] Ω) (X : Ω → ℝ≥0∞) :
+theorem measurable_condLExp' (mΩ : SigmaAlgebra Ω) (P : Measure[mΩ₀] Ω) (X : Ω → ℝ≥0∞) :
     Measurable[mΩ₀] P⁻[X|mΩ] := by
   by_cases hm : mΩ ≤ mΩ₀
   · exact (measurable_condLExp _ _ _).mono hm (le_refl _)
@@ -140,9 +140,9 @@ theorem setLIntegral_condLExp (P : Measure[mΩ₀] Ω) [hσ : SigmaFinite (P.tri
   · simp [condLExp_eq_self hm _ hX]
   have h := AbsolutelyContinuous.trim (withDensity_absolutelyContinuous P X) hm
   have : SFinite ((P.withDensity X).trim hm) := sFinite_of_absolutelyContinuous h
-  rw [condLExp_of_not_sub_sigma_measurable hm _ hX, ← lintegral_indicator (hm s hs),
+  rw [condLExp_of_not_sub_sigma_measurable hm _ hX, ← lintegral_indicator (hm hs),
     ← lintegral_trim hm (by measurability), lintegral_indicator hs, setLIntegral_rnDeriv' h hs,
-    trim_measurableSet_eq hm hs, withDensity_apply _ (hm s hs)]
+    trim_measurableSet_eq hm hs, withDensity_apply _ (hm hs)]
 
 theorem setLIntegral_condLExp_trim (P : Measure[mΩ₀] Ω) [hσ : SigmaFinite (P.trim hm)]
     (X : Ω → ℝ≥0∞) {s : Set Ω} (hs : MeasurableSet[mΩ] s) :
@@ -190,7 +190,7 @@ theorem condLExp_congr_ae {P : Measure[mΩ₀] Ω}
   · by_cases hσ : SigmaFinite (P.trim hm)
     · refine ae_eq_condLExp _ _ _ (measurable_condLExp _ _ _) (fun s hs ↦ ?_)
       rw [setLIntegral_condLExp _ _ _ hs]
-      apply setLIntegral_congr_fun_ae (hm s hs)
+      apply setLIntegral_congr_fun_ae (hm hs)
       filter_upwards [hXY] with _ h _ using h
     simp [condLExp_of_not_sigmaFinite hm hσ]
   simp [condLExp_of_not_le hm]
@@ -246,7 +246,7 @@ theorem condLExp_mono (hXY : X ≤ᵐ[P] Y) :
   apply ae_le_of_forall_setLIntegral_le_of_sigmaFinite (μ := P.trim hm) (by fun_prop)
   intro s hs _
   repeat rw [setLIntegral_condLExp_trim hm _ _ hs]
-  apply setLIntegral_mono_ae' (hm s hs)
+  apply setLIntegral_mono_ae' (hm hs)
   filter_upwards [hXY] using fun _ h _ ↦ h
 
 theorem condLExp_add_le (X Y : Ω → ℝ≥0∞) :
@@ -319,7 +319,7 @@ theorem condLExp_smul' (X : Ω → ℝ≥0∞) {c : ℝ≥0∞} (hc : c ≠ ∞)
 
 section Sum
 
-variable {ι : Type*} (mΩ : MeasurableSpace Ω)
+variable {ι : Type*} (mΩ : SigmaAlgebra Ω)
 
 theorem condLExp_tsum [Countable ι] {X : ι → Ω → ℝ≥0∞}
     (hX : ∀ i, AEMeasurable[mΩ₀] (X i) P) :

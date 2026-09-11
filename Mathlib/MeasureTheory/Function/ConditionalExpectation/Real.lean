@@ -38,7 +38,7 @@ open scoped NNReal
 
 namespace MeasureTheory
 
-variable {α : Type*} {m m0 : MeasurableSpace α} {μ : Measure α}
+variable {α : Type*} {m m0 : SigmaAlgebra α} {μ : Measure α}
 
 theorem rnDeriv_ae_eq_condExp {hm : m ≤ m0} [hμm : SigmaFinite (μ.trim hm)] {f : α → ℝ}
     (hf : Integrable f μ) :
@@ -71,7 +71,7 @@ lemma condExp_le_nonneg_const [PartialOrder E] [ClosedIciTopology E] [IsOrderedA
   · filter_upwards with a using by simpa [condExp_of_not_sigmaFinite hm hsig]
   refine (isCountablySpanning_spanningSets (μ.trim hm)).null_of_forall_restrict_null ?_ ?_ <;>
     rintro - ⟨n, rfl⟩
-  · exact hm _ (measurableSet_spanningSets (μ.trim hm) n)
+  · exact hm (measurableSet_spanningSets (μ.trim hm) n)
   · have h1 := condExp_restrict_ae_eq_restrict hm (measurableSet_spanningSets (μ.trim hm) n) hfint
     have h2 := condExp_mono (μ := μ.restrict (spanningSets (μ.trim hm) n)) (m := m)
       hfint.restrict (integrable_const c) (ae_restrict_of_ae hfc)
@@ -304,9 +304,9 @@ end NormedSpace
 /-- Given an integrable function `g`, the conditional expectations of `g` with respect to
 a sequence of sub-σ-algebras is uniformly integrable. -/
 theorem Integrable.uniformIntegrable_condExp {ι : Type*} [IsFiniteMeasure μ] {g : α → ℝ}
-    (hint : Integrable g μ) {ℱ : ι → MeasurableSpace α} (hℱ : ∀ i, ℱ i ≤ m0) :
+    (hint : Integrable g μ) {ℱ : ι → SigmaAlgebra α} (hℱ : ∀ i, ℱ i ≤ m0) :
     UniformIntegrable (fun i => μ[g | ℱ i]) 1 μ := by
-  let A : MeasurableSpace α := m0
+  let A : SigmaAlgebra α := m0
   have hmeas : ∀ n, ∀ C, MeasurableSet {x | C ≤ ‖(μ[g|ℱ n]) x‖₊} := fun n C =>
     measurableSet_le measurable_const (stronglyMeasurable_condExp.mono (hℱ n)).measurable.nnnorm
   have hg : MemLp g 1 μ := memLp_one_iff_integrable.2 hint

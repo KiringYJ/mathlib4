@@ -394,7 +394,7 @@ theorem normDet_eq_abs_det (f : U →ₗ[ℝ] U) : f.normDet = |f.det| := by
 Using Hausdorff measure with the domain dimension, the volume of the image is scaled by
 `LinearMap.normDet`.
 -/
-theorem hausdorffMeasure_image [MeasurableSpace U] [BorelSpace U] [MeasurableSpace V] [BorelSpace V]
+theorem hausdorffMeasure_image [SigmaAlgebra U] [BorelSpace U] [SigmaAlgebra V] [BorelSpace V]
     (f : U →ₗ[ℝ] V) (s : Set U) :
     μH[finrank ℝ U] (f '' s) = ENNReal.ofReal f.normDet * μH[finrank ℝ U] s := by
   by_cases h : f.ker = ⊥
@@ -420,7 +420,7 @@ theorem hausdorffMeasure_image [MeasurableSpace U] [BorelSpace U] [MeasurableSpa
 Using Euclidean Hausdorff measure with the domain dimension, the volume of the image is scaled by
 `LinearMap.normDet`.
 -/
-theorem euclideanHausdorffMeasure_image [MeasurableSpace U] [BorelSpace U] [MeasurableSpace V]
+theorem euclideanHausdorffMeasure_image [SigmaAlgebra U] [BorelSpace U] [SigmaAlgebra V]
     [BorelSpace V] (f : U →ₗ[ℝ] V) (s : Set U) :
     μHE[finrank ℝ U] (f '' s) = ENNReal.ofReal f.normDet * μHE[finrank ℝ U] s := by
   simp_rw [euclideanHausdorffMeasure_def, Measure.smul_apply, nnreal_smul_coe_apply,
@@ -431,8 +431,8 @@ theorem euclideanHausdorffMeasure_image [MeasurableSpace U] [BorelSpace U] [Meas
 The volume of the image measured by Euclidean Hausdorff measure is equal to the Lebesgue measure
 scaled by `LinearMap.normDet`.
 -/
-theorem euclideanHausdorffMeasure_image_eq_normDet_mul_volume [MeasurableSpace U] [BorelSpace U]
-    [MeasurableSpace V] [BorelSpace V] (f : U →ₗ[ℝ] V) (s : Set U) :
+theorem euclideanHausdorffMeasure_image_eq_normDet_mul_volume [SigmaAlgebra U] [BorelSpace U]
+    [SigmaAlgebra V] [BorelSpace V] (f : U →ₗ[ℝ] V) (s : Set U) :
     μHE[finrank ℝ U] (f '' s) = ENNReal.ofReal f.normDet * volume s := by
   rw [f.euclideanHausdorffMeasure_image, InnerProductSpace.euclideanHausdorffMeasure_eq_volume]
 

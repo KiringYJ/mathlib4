@@ -51,7 +51,7 @@ namespace SimpleFunc
 /-! ### Pointwise approximation by simple functions -/
 
 
-variable [MeasurableSpace α] [PseudoEMetricSpace α] [OpensMeasurableSpace α]
+variable [SigmaAlgebra α] [PseudoEMetricSpace α] [OpensSigmaAlgebra α]
 
 /-- `nearestPtInd e N x` is the index `k` such that `e k` is the nearest point to `x` among the
 points `e 0`, ..., `e N`. If more than one point are at the same distance from `x`, then
@@ -115,7 +115,7 @@ theorem tendsto_nearestPt {e : ℕ → α} {x : α} (hx : x ∈ closure (range e
   rw [edist_comm] at hN
   exact ⟨N, trivial, fun n hn => (edist_nearestPt_le e x hn).trans_lt hN⟩
 
-variable [MeasurableSpace β] {f : β → α}
+variable [SigmaAlgebra β] {f : β → α}
 
 /-- Approximate a measurable function by a sequence of simple functions `F n` such that
 `F n x ∈ s`. -/
@@ -146,7 +146,7 @@ lemma approxOn_range_nonneg [Zero α] [Preorder α] {f : β → α}
   exact fun _ ↦ this <| approxOn_mem ..
 
 @[simp]
-theorem approxOn_comp {γ : Type*} [MeasurableSpace γ] {f : β → α} (hf : Measurable f) {g : γ → β}
+theorem approxOn_comp {γ : Type*} [SigmaAlgebra γ] {f : β → α} (hf : Measurable f) {g : γ → β}
     (hg : Measurable g) {s : Set α} {y₀ : α} (h₀ : y₀ ∈ s) [SeparableSpace s] (n : ℕ) :
     approxOn (f ∘ g) (hf.comp hg) s y₀ h₀ n = (approxOn f hf s y₀ h₀ n).comp g hg :=
   rfl
@@ -189,8 +189,8 @@ end MeasureTheory
 section CompactSupport
 
 variable {X Y α : Type*} [Zero α]
-    [TopologicalSpace X] [TopologicalSpace Y] [MeasurableSpace X] [MeasurableSpace Y]
-    [OpensMeasurableSpace X] [OpensMeasurableSpace Y]
+    [TopologicalSpace X] [TopologicalSpace Y] [SigmaAlgebra X] [SigmaAlgebra Y]
+    [OpensSigmaAlgebra X] [OpensSigmaAlgebra Y]
 
 /-- A continuous function with compact support on a product space can be uniformly approximated by
 simple functions. The subtlety is that we do not assume that the spaces are separable, so the
@@ -241,7 +241,7 @@ sigma-algebra. The subtlety is that we do not assume that the spaces are separab
 product of the Borel sigma algebras might not contain all open sets, but still it contains enough
 of them to approximate compactly supported continuous functions. -/
 lemma HasCompactSupport.measurable_of_prod
-    [TopologicalSpace α] [PseudoMetrizableSpace α] [MeasurableSpace α] [BorelSpace α]
+    [TopologicalSpace α] [PseudoMetrizableSpace α] [SigmaAlgebra α] [BorelSpace α]
     {f : X × Y → α} (hf : Continuous f) (h'f : HasCompactSupport f) :
     Measurable f := by
   let : PseudoMetricSpace α := TopologicalSpace.pseudoMetrizableSpacePseudoMetric α

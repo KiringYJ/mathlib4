@@ -36,8 +36,8 @@ open scoped ENNReal
 
 namespace ProbabilityTheory.Kernel
 
-variable {α β γ δ : Type*} {mα : MeasurableSpace α} {mβ : MeasurableSpace β}
-  {mγ : MeasurableSpace γ} {mδ : MeasurableSpace δ}
+variable {α β γ δ : Type*} {mα : SigmaAlgebra α} {mβ : SigmaAlgebra β}
+  {mγ : SigmaAlgebra γ} {mδ : SigmaAlgebra δ}
   {κ : Kernel α β} {η : Kernel γ δ} {x : α × γ}
 
 open scoped Classical in

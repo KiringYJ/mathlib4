@@ -42,7 +42,7 @@ open scoped Pointwise NNReal
 
 namespace MeasurableEquiv
 
-variable {G G₀ α : Type*} [MeasurableSpace α] [Group G] [GroupWithZero G₀] [MulAction G α]
+variable {G G₀ α : Type*} [SigmaAlgebra α] [Group G] [GroupWithZero G₀] [MulAction G α]
   [MulAction G₀ α] [MeasurableConstSMul G α] [MeasurableConstSMul G₀ α]
 
 /-- If a group `G` acts on `α` by measurable maps, then each element `c : G` defines a measurable
@@ -79,7 +79,7 @@ theorem _root_.measurableEmbedding_const_smul₀ {c : G₀} (hc : c ≠ 0) :
     MeasurableEmbedding (c • · : α → α) :=
   (smul₀ c hc).measurableEmbedding
 
-variable [MeasurableSpace G] [MeasurableSpace G₀]
+variable [SigmaAlgebra G] [SigmaAlgebra G₀]
 
 section Mul
 
@@ -180,11 +180,11 @@ end Mul
 /-- Inversion as a measurable automorphism of a group or group with zero. -/
 @[to_additive (attr := simps! -fullyApplied toEquiv apply)
     /-- Negation as a measurable automorphism of an additive group. -/]
-def inv (G) [MeasurableSpace G] [InvolutiveInv G] [MeasurableInv G] : G ≃ᵐ G where
+def inv (G) [SigmaAlgebra G] [InvolutiveInv G] [MeasurableInv G] : G ≃ᵐ G where
   toEquiv := Equiv.inv G
 
 @[to_additive (attr := simp)]
-theorem symm_inv {G} [MeasurableSpace G] [InvolutiveInv G] [MeasurableInv G] :
+theorem symm_inv {G} [SigmaAlgebra G] [InvolutiveInv G] [MeasurableInv G] :
     (inv G).symm = inv G :=
   rfl
 
@@ -215,7 +215,7 @@ lemma _root_.measurableEmbedding_divLeft [MeasurableMul G] [MeasurableInv G] (g 
 end MeasurableEquiv
 
 namespace MeasureTheory.Measure
-variable {G A : Type*} [Group G] [MulAction G A] [MeasurableSpace A]
+variable {G A : Type*} [Group G] [MulAction G A] [SigmaAlgebra A]
   [MeasurableConstSMul G A] {μ ν : Measure A} {g : G}
 
 noncomputable instance : DistribMulAction Gᵈᵐᵃ (Measure A) where

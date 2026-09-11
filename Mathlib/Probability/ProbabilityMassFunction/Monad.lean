@@ -78,7 +78,7 @@ theorem toOuterMeasure_pure_apply : (pure a).toOuterMeasure s = if a ∈ s then 
     exact ite_eq_right_iff.2 fun hb =>
       ite_eq_right_iff.2 fun h => (ha <| h ▸ hb).elim
 
-variable [MeasurableSpace α]
+variable [SigmaAlgebra α]
 
 open scoped Classical in
 /-- The measure of a set under `pure a` is `1` for sets containing `a` and `0` otherwise. -/
@@ -169,7 +169,7 @@ theorem toOuterMeasure_bind_apply :
 /-- The measure of a set under `p.bind f` is the sum over `a : α`
   of the probability of `a` under `p` times the measure of the set under `f a`. -/
 @[simp]
-theorem toMeasure_bind_apply [MeasurableSpace β] (hs : MeasurableSet s) :
+theorem toMeasure_bind_apply [SigmaAlgebra β] (hs : MeasurableSet s) :
     (p.bind f).toMeasure s = ∑' a, p a * (f a).toMeasure s :=
   (toMeasure_apply_eq_toOuterMeasure_apply (p.bind f) hs).trans
     ((toOuterMeasure_bind_apply p f s).trans
@@ -297,7 +297,7 @@ theorem toOuterMeasure_bindOnSupport_apply :
   of the probability of `a` under `p` times the measure of the set under `f a _`.
   The additional if statement is needed since `f` is only a partial function. -/
 @[simp]
-theorem toMeasure_bindOnSupport_apply [MeasurableSpace β] (hs : MeasurableSet s) :
+theorem toMeasure_bindOnSupport_apply [SigmaAlgebra β] (hs : MeasurableSet s) :
     (p.bindOnSupport f).toMeasure s =
       ∑' a, p a * if h : p a = 0 then 0 else (f a h).toMeasure s := by
   simp only [toMeasure_apply_eq_toOuterMeasure_apply _ hs, toOuterMeasure_bindOnSupport_apply]

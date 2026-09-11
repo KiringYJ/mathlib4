@@ -48,7 +48,7 @@ open scoped ENNReal
 
 namespace ProbabilityTheory
 
-variable {α β ι : Type*} {mα : MeasurableSpace α} {mβ : MeasurableSpace β} {κ : Kernel α β}
+variable {α β ι : Type*} {mα : SigmaAlgebra α} {mβ : SigmaAlgebra β} {κ : Kernel α β}
 
 namespace Kernel
 
@@ -129,7 +129,7 @@ section Copy
 
 /-- The deterministic kernel that maps `x : α` to the Dirac measure at `(x, x) : α × α`. -/
 noncomputable
-def copy (α : Type*) [MeasurableSpace α] : Kernel α (α × α) :=
+def copy (α : Type*) [SigmaAlgebra α] : Kernel α (α × α) :=
   Kernel.deterministic Function.diag (measurable_id.prod measurable_id)
 
 instance : IsMarkovKernel (copy α) := by rw [copy]; infer_instance
@@ -142,7 +142,7 @@ section Discard
 
 /-- The Markov kernel to the `PUnit` type. -/
 noncomputable
-def discard (α : Type*) [MeasurableSpace α] : Kernel α PUnit :=
+def discard (α : Type*) [SigmaAlgebra α] : Kernel α PUnit :=
   Kernel.deterministic (fun _ ↦ PUnit.unit) measurable_const
 
 instance : IsMarkovKernel (discard α) := by rw [discard]; infer_instance
@@ -156,7 +156,7 @@ section Swap
 
 /-- The deterministic kernel that maps `(x, y)` to the Dirac measure at `(y, x)`. -/
 noncomputable
-def swap (α β : Type*) [MeasurableSpace α] [MeasurableSpace β] : Kernel (α × β) (β × α) :=
+def swap (α β : Type*) [SigmaAlgebra α] [SigmaAlgebra β] : Kernel (α × β) (β × α) :=
   Kernel.deterministic Prod.swap measurable_swap
 
 instance : IsMarkovKernel (swap α β) := by rw [swap]; infer_instance
@@ -175,7 +175,7 @@ end Swap
 section Const
 
 /-- Constant kernel, which always returns the same measure. -/
-def const (α : Type*) {β : Type*} [MeasurableSpace α] {_ : MeasurableSpace β} (μβ : Measure β) :
+def const (α : Type*) {β : Type*} [SigmaAlgebra α] {_ : SigmaAlgebra β} (μβ : Measure β) :
     Kernel α β where
   toFun _ := μβ
   measurable' := measurable_const
@@ -188,7 +188,7 @@ theorem const_apply (μβ : Measure β) (a : α) : const α μβ a = μβ :=
 lemma const_zero : const α (0 : Measure β) = 0 := by
   ext x s _; simp [const_apply]
 
-lemma const_add (β : Type*) [MeasurableSpace β] (μ ν : Measure α) :
+lemma const_add (β : Type*) [SigmaAlgebra β] (μ ν : Measure α) :
     const β (μ + ν) = const β μ + const β ν := by ext; simp
 
 lemma sum_const [Countable ι] (μ : ι → Measure β) :
@@ -234,7 +234,7 @@ end Const
 
 /-- In a countable space with measurable singletons, every function `α → MeasureTheory.Measure β`
 defines a kernel. -/
-def ofFunOfCountable [MeasurableSpace α] {_ : MeasurableSpace β} [Countable α]
+def ofFunOfCountable [SigmaAlgebra α] {_ : SigmaAlgebra β} [Countable α]
     [MeasurableSingletonClass α] (f : α → Measure β) : Kernel α β where
   toFun := f
   measurable' := measurable_of_countable f
@@ -297,7 +297,7 @@ end Restrict
 
 section ComapRight
 
-variable {γ : Type*} {mγ : MeasurableSpace γ} {f : γ → β}
+variable {γ : Type*} {mγ : SigmaAlgebra γ} {f : γ → β}
 
 /-- Kernel with value `(κ a).comap f`, for a measurable embedding `f`. That is, for a measurable set
 `t : Set β`, `ProbabilityTheory.Kernel.comapRight κ hf a t = κ a (f '' t)`. -/

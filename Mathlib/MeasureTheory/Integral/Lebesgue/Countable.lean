@@ -24,7 +24,7 @@ namespace MeasureTheory
 
 open Set ENNReal NNReal Measure
 
-variable {α : Type*} [MeasurableSpace α] {μ : Measure α}
+variable {α : Type*} [SigmaAlgebra α] {μ : Measure α}
 
 section FiniteMeasure
 
@@ -242,9 +242,9 @@ theorem exists_pos_lintegral_lt_of_sigmaFinite (μ : Measure α) [SigmaFinite μ
     lintegral_comp measurable_from_nat.coe_nnreal_ennreal hN_meas]
   simpa [N, hNs, lintegral_countable', measurableSet_spanningSetsIndex, mul_comm] using δsum
 
-omit [MeasurableSpace α]
+omit [SigmaAlgebra α]
 
-variable {m m0 : MeasurableSpace α}
+variable {m m0 : SigmaAlgebra α}
 
 local infixr:25 " →ₛ " => SimpleFunc
 
@@ -278,13 +278,13 @@ alias lintegral_le_of_forall_fin_meas_le_of_measurable := lintegral_le_of_forall
 /-- If the Lebesgue integral of a function is bounded by some constant on all sets with finite
 measure and the measure is σ-finite, then the integral over the whole space is bounded by that same
 constant. -/
-theorem lintegral_le_of_forall_fin_meas_le [MeasurableSpace α] {μ : Measure α} [SigmaFinite μ]
+theorem lintegral_le_of_forall_fin_meas_le [SigmaAlgebra α] {μ : Measure α} [SigmaFinite μ]
     (C : ℝ≥0∞) {f : α → ℝ≥0∞}
     (hf : ∀ s, MeasurableSet s → μ s ≠ ∞ → ∫⁻ x in s, f x ∂μ ≤ C) : ∫⁻ x, f x ∂μ ≤ C :=
   have : SigmaFinite (μ.trim le_rfl) := by rwa [trim_eq_self]
   lintegral_le_of_forall_fin_meas_trim_le _ C hf
 
-theorem SimpleFunc.exists_lt_lintegral_simpleFunc_of_lt_lintegral {m : MeasurableSpace α}
+theorem SimpleFunc.exists_lt_lintegral_simpleFunc_of_lt_lintegral {m : SigmaAlgebra α}
     {μ : Measure α} [SigmaFinite μ] {f : α →ₛ ℝ≥0} {L : ℝ≥0∞} (hL : L < ∫⁻ x, f x ∂μ) :
     ∃ g : α →ₛ ℝ≥0, (∀ x, g x ≤ f x) ∧ ∫⁻ x, g x ∂μ < ∞ ∧ L < ∫⁻ x, g x ∂μ := by
   induction f using MeasureTheory.SimpleFunc.induction generalizing L with
@@ -339,7 +339,7 @@ theorem SimpleFunc.exists_lt_lintegral_simpleFunc_of_lt_lintegral {m : Measurabl
       rw [← lintegral_add_left g₁.measurable.coe_nnreal_ennreal]
       simp only [coe_add, Pi.add_apply, ENNReal.coe_add, le_rfl]
 
-theorem exists_lt_lintegral_simpleFunc_of_lt_lintegral {m : MeasurableSpace α} {μ : Measure α}
+theorem exists_lt_lintegral_simpleFunc_of_lt_lintegral {m : SigmaAlgebra α} {μ : Measure α}
     [SigmaFinite μ] {f : α → ℝ≥0} {L : ℝ≥0∞} (hL : L < ∫⁻ x, f x ∂μ) :
     ∃ g : α →ₛ ℝ≥0, (∀ x, g x ≤ f x) ∧ ∫⁻ x, g x ∂μ < ∞ ∧ L < ∫⁻ x, g x ∂μ := by
   simp_rw [lintegral_eq_nnreal, lt_iSup_iff] at hL

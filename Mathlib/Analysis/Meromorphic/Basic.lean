@@ -897,8 +897,8 @@ theorem countable_compl_analyticAt [SecondCountableTopology 𝕜] [CompleteSpace
 /--
 Meromorphic functions are measurable.
 -/
-@[fun_prop] theorem measurable [MeasurableSpace 𝕜] [SecondCountableTopology 𝕜] [BorelSpace 𝕜]
-    [MeasurableSpace E] [CompleteSpace E] [BorelSpace E] (h : Meromorphic f) :
+@[fun_prop] theorem measurable [SigmaAlgebra 𝕜] [SecondCountableTopology 𝕜] [BorelSpace 𝕜]
+    [SigmaAlgebra E] [CompleteSpace E] [BorelSpace E] (h : Meromorphic f) :
     Measurable f := by
   set s := {z : 𝕜 | AnalyticAt 𝕜 f z}
   have h₁ : sᶜ.Countable := by simpa using h.countable_compl_analyticAt

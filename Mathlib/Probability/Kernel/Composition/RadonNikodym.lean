@@ -42,7 +42,7 @@ open scoped ENNReal
 
 namespace ProbabilityTheory
 
-variable {α β : Type*} {mα : MeasurableSpace α} {mβ : MeasurableSpace β}
+variable {α β : Type*} {mα : SigmaAlgebra α} {mβ : SigmaAlgebra β}
   {μ ν : Measure α} {κ η : Kernel α β}
 
 /-- Auxiliary lemma for `rnDeriv_measure_compProd_left`. -/
@@ -60,7 +60,7 @@ private lemma rnDeriv_measure_compProd_left_of_ac (hμν : μ ≪ ν) (κ : Kern
       univ_inter]
     rw [setLIntegral_rnDeriv_mul hμν (κ.measurable_coe ht₂).aemeasurable ht₁,
       Measure.compProd_apply_prod ht₁ ht₂]
-  refine MeasurableSpace.induction_on_inter generateFrom_prod.symm isPiSystem_prod ?_ ?_ ?_ ?_ s hs
+  refine SigmaAlgebra.induction_on_inter generateFrom_prod.symm isPiSystem_prod ?_ ?_ ?_ ?_ s hs
   · simp
   · rintro _ ⟨t₁, ht₁, t₂, ht₂, rfl⟩
     exact h_key t₁ t₂ ht₁ ht₂
@@ -122,7 +122,7 @@ lemma rnDeriv_compProd [IsFiniteMeasure μ] [IsFiniteKernel κ] [IsFiniteKernel 
 
 section CountableOrCountablyGenerated
 
-variable [MeasurableSpace.CountableOrCountablyGenerated α β]
+variable [SigmaAlgebra.CountableOrCountablyGenerated α β]
 
 /-- The Radon-Nikodym derivative `∂(μ ⊗ₘ κ)/∂(ν ⊗ₘ η)` equals the product of `∂μ/∂ν` and
 `∂κ/∂η`. -/

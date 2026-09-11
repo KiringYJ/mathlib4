@@ -57,7 +57,7 @@ namespace MeasureTheory
 
 section Preliminaries
 
-variable {ι : Type*} {X : ι → Type*} {mX : ∀ i, MeasurableSpace (X i)}
+variable {ι : Type*} {X : ι → Type*} {mX : ∀ i, SigmaAlgebra (X i)}
 variable (μ : (i : ι) → Measure (X i)) [hμ : ∀ i, IsProbabilityMeasure (μ i)]
 
 /-- Consider a family of probability measures. You can take their products for any finite
@@ -103,7 +103,7 @@ open Kernel
 
 variable {X : ℕ → Type*}
 
-variable {mX : ∀ n, MeasurableSpace (X n)}
+variable {mX : ∀ n, SigmaAlgebra (X n)}
   (μ : (n : ℕ) → Measure (X n)) [hμ : ∀ n, IsProbabilityMeasure (μ n)]
 
 namespace Measure
@@ -238,7 +238,7 @@ open Measure
 
 /-! ### Product of infinitely many probability measures -/
 
-variable {ι : Type*} {X : ι → Type*} {mX : ∀ i, MeasurableSpace (X i)}
+variable {ι : Type*} {X : ι → Type*} {mX : ∀ i, SigmaAlgebra (X i)}
   (μ : (i : ι) → Measure (X i)) [hμ : ∀ i, IsProbabilityMeasure (μ i)]
 
 /-- If we push the product measure forward by a reindexing equivalence, we get a product measure
@@ -254,7 +254,7 @@ lemma Measure.infinitePiNat_map_piCongrLeft (e : ℕ ≃ ι) {s : Set (Π i, X i
     ← pi_map_piCongrLeft (e.restrictPreimageFinset I), map_apply _ hS, coe_piCongrLeft]
   · simp
   any_goals fun_prop
-  exact hS.preimage (by fun_prop)
+  exact hS.preimage (MeasurableEquiv.piCongrLeft _ _).measurable
 
 /-- This is the key theorem to build the product of an arbitrary family of probability measures:
 the `piContent` of a decreasing sequence of cylinders with empty intersection converges to `0`.
@@ -479,7 +479,7 @@ lemma infinitePi_map_eval (i : ι) :
     (infinitePi μ).map (fun x ↦ x i) = μ i :=
   (measurePreserving_eval_infinitePi μ i).map_eq
 
-lemma infinitePi_map_pi {Y : ι → Type*} [∀ i, MeasurableSpace (Y i)] {f : (i : ι) → X i → Y i}
+lemma infinitePi_map_pi {Y : ι → Type*} [∀ i, SigmaAlgebra (Y i)] {f : (i : ι) → X i → Y i}
     (hf : ∀ i, Measurable (f i)) :
     (infinitePi μ).map (fun x i ↦ f i (x i)) = infinitePi (fun i ↦ (μ i).map (f i)) := by
   refine eq_infinitePi _ fun s t ht ↦ ?_
@@ -516,7 +516,7 @@ lemma infinitePi_cylinder {s : Finset ι} {S : Set (Π i : s, X i)} (mS : Measur
 section curry
 
 variable {ι : Type*} {κ : ι → Type*} {X : (i : ι) → κ i → Type*}
-  {mX : ∀ i, ∀ j, MeasurableSpace (X i j)} (μ : (i : ι) → (j : κ i) → Measure (X i j))
+  {mX : ∀ i, ∀ j, SigmaAlgebra (X i j)} (μ : (i : ι) → (j : κ i) → Measure (X i j))
   [hμ : ∀ i j, IsProbabilityMeasure (μ i j)]
 
 lemma infinitePi_map_piCurry_symm :
@@ -537,7 +537,7 @@ lemma infinitePi_map_piCurry :
       infinitePi fun i : ι ↦ infinitePi fun j : κ i ↦ μ i j := by
   rw [MeasurableEquiv.map_apply_eq_iff_map_symm_apply_eq, infinitePi_map_piCurry_symm]
 
-variable {ι κ X : Type*} {mX : MeasurableSpace X} (μ : ι → κ → Measure X)
+variable {ι κ X : Type*} {mX : SigmaAlgebra X} (μ : ι → κ → Measure X)
   [hμ : ∀ i j, IsProbabilityMeasure (μ i j)]
 
 lemma infinitePi_map_curry_symm :

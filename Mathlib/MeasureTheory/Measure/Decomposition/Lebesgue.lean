@@ -57,7 +57,7 @@ namespace MeasureTheory
 
 namespace Measure
 
-variable {α : Type*} {m : MeasurableSpace α} {μ ν : Measure α}
+variable {α : Type*} {m : SigmaAlgebra α} {μ ν : Measure α}
 
 /-- A pair of measures `μ` and `ν` is said to `HaveLebesgueDecomposition` if there exists a
 measure `ξ` and a measurable function `f`, such that `ξ` is mutually singular with respect to
@@ -207,12 +207,12 @@ theorem withDensity_rnDeriv_le (μ ν : Measure α) : ν.withDensity (μ.rnDeriv
   · rw [rnDeriv, dite_eq_right hl, withDensity_zero]
     exact Measure.zero_le μ
 
-lemma _root_.AEMeasurable.singularPart {β : Type*} {_ : MeasurableSpace β} {f : α → β}
+lemma _root_.AEMeasurable.singularPart {β : Type*} {_ : SigmaAlgebra β} {f : α → β}
     (hf : AEMeasurable f μ) (ν : Measure α) :
     AEMeasurable f (μ.singularPart ν) :=
   AEMeasurable.mono_measure hf (Measure.singularPart_le _ _)
 
-lemma _root_.AEMeasurable.withDensity_rnDeriv {β : Type*} {_ : MeasurableSpace β} {f : α → β}
+lemma _root_.AEMeasurable.withDensity_rnDeriv {β : Type*} {_ : SigmaAlgebra β} {f : α → β}
     (hf : AEMeasurable f μ) (ν : Measure α) :
     AEMeasurable f (ν.withDensity (μ.rnDeriv ν)) :=
   AEMeasurable.mono_measure hf (Measure.withDensity_rnDeriv_le _ _)

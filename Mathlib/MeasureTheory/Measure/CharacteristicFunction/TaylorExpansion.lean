@@ -40,7 +40,7 @@ namespace MeasureTheory
 section InnerProductSpace
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
-  [MeasurableSpace E] [BorelSpace E] [SecondCountableTopology E]
+  [SigmaAlgebra E] [BorelSpace E] [SecondCountableTopology E]
   {μ : Measure E} [IsFiniteMeasure μ]
 
 /-- The characteristic function of a finite measure with a moment of order `n` is `C^n`.
@@ -121,7 +121,7 @@ lemma taylorWithinEval_charFun_zero {n : ℕ} (hint : MemLp id n μ) (t : ℝ) :
   have hint' : MemLp id k μ := hint.mono_exponent (by simp_all)
   simp [iteratedDeriv_charFun_zero hint', mul_pow, mul_comm, mul_assoc, mul_left_comm]
 
-variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} [IsProbabilityMeasure P]
+variable {Ω : Type*} {mΩ : SigmaAlgebra Ω} {P : Measure Ω} [IsProbabilityMeasure P]
   {X : Ω → ℝ}
 
 lemma taylorWithinEval_charFun_two_zero (hX : AEMeasurable X P)

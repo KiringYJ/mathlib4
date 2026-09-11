@@ -378,7 +378,7 @@ lemma gaussianReal_map_const_sub (y : ℝ) :
   rw [this, ← Measure.map_map (by fun_prop) (by fun_prop), gaussianReal_map_neg,
     gaussianReal_map_const_add, add_comm]
 
-variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} {X : Ω → ℝ}
+variable {Ω : Type*} {mΩ : SigmaAlgebra Ω} {P : Measure Ω} {X : Ω → ℝ}
 
 /-- If `X` is a real random variable with Gaussian law with mean `μ` and variance `v`, then `X + y`
 has Gaussian law with mean `μ + y` and variance `v`. -/
@@ -433,7 +433,7 @@ section CharacteristicFunction
 
 open Real Complex
 
-variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {p : Measure Ω} {μ : ℝ} {v : ℝ≥0} {X : Ω → ℝ}
+variable {Ω : Type*} {mΩ : SigmaAlgebra Ω} {p : Measure Ω} {μ : ℝ} {v : ℝ≥0} {X : Ω → ℝ}
 
 -- see https://github.com/leanprover-community/mathlib4/issues/29041
 set_option linter.unusedSimpArgs false in
@@ -650,7 +650,7 @@ lemma gaussianReal_conv_gaussianReal {m₁ m₂ : ℝ} {v₁ v₂ : ℝ≥0} :
 
 /- The sum of two real Gaussian variables with means `m₁, m₂` and variances `v₁, v₂` is a real
 Gaussian distribution with mean `m₁ + m₂` and variance `v_1 + v_2`. -/
-lemma gaussianReal_add_gaussianReal_of_indepFun {Ω} {mΩ : MeasurableSpace Ω} {P : Measure Ω}
+lemma gaussianReal_add_gaussianReal_of_indepFun {Ω} {mΩ : SigmaAlgebra Ω} {P : Measure Ω}
     {m₁ m₂ : ℝ} {v₁ v₂ : ℝ≥0} {X Y : Ω → ℝ} (hXY : IndepFun X Y P)
     (hX : HasLaw X (gaussianReal m₁ v₁) P) (hY : HasLaw Y (gaussianReal m₂ v₂) P) :
     P.map (X + Y) = gaussianReal (m₁ + m₂) (v₁ + v₂) := by

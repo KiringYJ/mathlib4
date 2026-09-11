@@ -48,7 +48,7 @@ open Set Filter Finset Function TopologicalSpace
 
 open scoped Topology
 
-variable {α : Type*} [MeasurableSpace α] {f : α → α} {s : Set α} {μ : Measure α}
+variable {α : Type*} [SigmaAlgebra α] {f : α → α} {s : Set α} {μ : Measure α}
 
 open Measure
 
@@ -195,7 +195,7 @@ theorem frequently_ae_mem_and_frequently_image_mem (hf : Conservative f μ)
 space with second countable topology and measurable open sets. Then almost every point `x : α`
 is recurrent: it visits every neighborhood `s ∈ 𝓝 x` infinitely many times. -/
 theorem ae_frequently_mem_of_mem_nhds [TopologicalSpace α] [SecondCountableTopology α]
-    [OpensMeasurableSpace α] {f : α → α} {μ : Measure α} (h : Conservative f μ) :
+    [OpensSigmaAlgebra α] {f : α → α} {μ : Measure α} (h : Conservative f μ) :
     ∀ᵐ x ∂μ, ∀ s ∈ 𝓝 x, ∃ᶠ n in atTop, f^[n] x ∈ s := by
   have : ∀ s ∈ countableBasis α, ∀ᵐ x ∂μ, x ∈ s → ∃ᶠ n in atTop, f^[n] x ∈ s := fun s hs =>
     h.ae_mem_imp_frequently_image_mem (isOpen_of_mem_countableBasis hs).nullMeasurableSet

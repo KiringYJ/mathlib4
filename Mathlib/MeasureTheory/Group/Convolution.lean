@@ -28,7 +28,7 @@ namespace MeasureTheory
 namespace Measure
 open scoped ENNReal
 
-variable {M : Type*} [Monoid M] [MeasurableSpace M]
+variable {M : Type*} [Monoid M] [SigmaAlgebra M]
 
 /-- Multiplicative convolution of measures. -/
 @[to_additive /-- Additive convolution of measures. -/]
@@ -124,7 +124,7 @@ theorem add_mconv [MeasurableMul₂ M] (μ : Measure M) (ν : Measure M) (ρ : M
 
 /-- To get commutativity, we need the underlying multiplication to be commutative. -/
 @[to_additive /-- To get commutativity, we need the underlying addition to be commutative. -/]
-theorem mconv_comm {M : Type*} [CommMonoid M] [MeasurableSpace M] [MeasurableMul₂ M] (μ : Measure M)
+theorem mconv_comm {M : Type*} [CommMonoid M] [SigmaAlgebra M] [MeasurableMul₂ M] (μ : Measure M)
     (ν : Measure M) [SFinite μ] [SFinite ν] : μ ∗ₘ ν = ν ∗ₘ μ := by
   unfold mconv
   rw [← prod_swap, map_map (by fun_prop)]
@@ -178,8 +178,8 @@ theorem mconv_absolutelyContinuous [MeasurableMul₂ M] {μ ν ρ : Measure M}
   simp [h0]
 
 @[to_additive]
-lemma map_mconv_monoidHom {M M' : Type*} {mM : MeasurableSpace M} [Monoid M] [MeasurableMul₂ M]
-    {mM' : MeasurableSpace M'} [Monoid M'] [MeasurableMul₂ M']
+lemma map_mconv_monoidHom {M M' : Type*} {mM : SigmaAlgebra M} [Monoid M] [MeasurableMul₂ M]
+    {mM' : SigmaAlgebra M'} [Monoid M'] [MeasurableMul₂ M']
     {μ ν : Measure M} [SFinite μ] [SFinite ν]
     (L : M →* M') (hL : Measurable L) :
     (μ ∗ₘ ν).map L = (μ.map L) ∗ₘ (ν.map L) := by
@@ -191,8 +191,8 @@ lemma map_mconv_monoidHom {M M' : Type*} {mM : MeasurableSpace M} [Monoid M] [Me
 
 lemma map_conv_continuousLinearMap {E F : Type*} [AddCommMonoid E] [AddCommMonoid F]
     [Module ℝ E] [Module ℝ F] [TopologicalSpace E] [TopologicalSpace F]
-    {mE : MeasurableSpace E} [MeasurableAdd₂ E] {mF : MeasurableSpace F} [MeasurableAdd₂ F]
-    [OpensMeasurableSpace E] [BorelSpace F]
+    {mE : SigmaAlgebra E} [MeasurableAdd₂ E] {mF : SigmaAlgebra F} [MeasurableAdd₂ F]
+    [OpensSigmaAlgebra E] [BorelSpace F]
     {μ ν : Measure E} [SFinite μ] [SFinite ν]
     (L : E →L[ℝ] F) :
     (μ ∗ ν).map L = (μ.map L) ∗ (ν.map L) := by

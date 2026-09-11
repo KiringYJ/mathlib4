@@ -21,7 +21,7 @@ basic facts about them.
   filtration `f` if at each point in time `i`, `u i` is `f i`-measurable
 * `MeasureTheory.IsProgressive`: a sequence of functions `u` is said to be progressive with respect
   to a filtration `f` if at each point in time `i`, `u` restricted to `Set.Iic i × Ω` is strongly
-  measurable with respect to the product `MeasurableSpace` structure where the σ-algebra used for
+  measurable with respect to the product `SigmaAlgebra` structure where the σ-algebra used for
   `Ω` is `f i`.
 We also provide the following variants, which use `MeasureTheory.StronglyMeasurable` instead
 of `Measurable`:
@@ -47,11 +47,11 @@ open scoped MeasureTheory NNReal ENNReal Topology
 
 namespace MeasureTheory
 
-variable {Ω ι : Type*} {m : MeasurableSpace Ω} [Preorder ι] {f : Filtration ι m}
+variable {Ω ι : Type*} {m : SigmaAlgebra Ω} [Preorder ι] {f : Filtration ι m}
 
 section Adapted
 
-variable {β : ι → Type*} [∀ i, MeasurableSpace (β i)] {u v : (i : ι) → Ω → β i}
+variable {β : ι → Type*} [∀ i, SigmaAlgebra (β i)] {u v : (i : ι) → Ω → β i}
 
 /-- A sequence of functions `u` is adapted to a filtration `f` if for all `i`,
 `u i` is `f i`-measurable.
@@ -76,7 +76,7 @@ protected theorem div [∀ i, Div (β i)] [∀ i, MeasurableDiv₂ (β i)]
 protected theorem inv [∀ i, Group (β i)] [∀ i, MeasurableInv (β i)] (hu : Adapted f u) :
     Adapted f u⁻¹ := fun i => (hu i).inv
 
-protected theorem smul {𝕂 : Type*} [MeasurableSpace 𝕂]
+protected theorem smul {𝕂 : Type*} [SigmaAlgebra 𝕂]
     [∀ i, SMul 𝕂 (β i)] [∀ i, MeasurableSMul 𝕂 (β i)] (c : 𝕂) (hu : Adapted f u) :
     Adapted f (c • u) := fun i => (hu i).const_smul c
 
@@ -91,7 +91,7 @@ end Adapted
 theorem adapted_const' (f : Filtration ι m) (x : (i : ι) → β i) : Adapted f fun i _ ↦ x i :=
   fun _ ↦ measurable_const
 
-theorem adapted_const {β : Type*} [MeasurableSpace β] (f : Filtration ι m) (x : β) :
+theorem adapted_const {β : Type*} [SigmaAlgebra β] (f : Filtration ι m) (x : β) :
     Adapted f fun _ _ ↦ x := adapted_const' _ _
 
 end Adapted
@@ -138,16 +138,16 @@ theorem stronglyMeasurable_le {i j : ι} (hf : StronglyAdapted f u) (hij : i ≤
 
 end StronglyAdapted
 
-theorem StronglyAdapted.adapted [mΒ : ∀ i, MeasurableSpace (β i)] [∀ i, BorelSpace (β i)]
+theorem StronglyAdapted.adapted [mΒ : ∀ i, SigmaAlgebra (β i)] [∀ i, BorelSpace (β i)]
     [∀ i, PseudoMetrizableSpace (β i)] (hf : StronglyAdapted f u) :
     Adapted f u := fun _ ↦ (hf _).measurable
 
-theorem Adapted.stronglyAdapted [mΒ : ∀ i, MeasurableSpace (β i)]
-    [∀ i, OpensMeasurableSpace (β i)] [∀ i, PseudoMetrizableSpace (β i)]
+theorem Adapted.stronglyAdapted [mΒ : ∀ i, SigmaAlgebra (β i)]
+    [∀ i, OpensSigmaAlgebra (β i)] [∀ i, PseudoMetrizableSpace (β i)]
     [∀ i, SecondCountableTopology (β i)] (hf : Adapted f u) :
     StronglyAdapted f u := fun _ ↦ (hf _).stronglyMeasurable
 
-theorem stronglyAdapted_iff_adapted [mΒ : ∀ i, MeasurableSpace (β i)]
+theorem stronglyAdapted_iff_adapted [mΒ : ∀ i, SigmaAlgebra (β i)]
     [∀ i, BorelSpace (β i)] [∀ i, PseudoMetrizableSpace (β i)]
     [∀ i, SecondCountableTopology (β i)] :
     StronglyAdapted f u ↔ Adapted f u := ⟨fun h ↦ h.adapted, fun h ↦ h.stronglyAdapted⟩
@@ -170,7 +170,7 @@ theorem stronglyAdapted_zero (β : Type*) [TopologicalSpace β] [Zero β] (f : F
   fun i ↦ @stronglyMeasurable_zero Ω β (f i) _ _
 
 theorem Filtration.stronglyAdapted_natural [∀ i, MetrizableSpace (β i)]
-    [mβ : ∀ i, MeasurableSpace (β i)] [∀ i, BorelSpace (β i)]
+    [mβ : ∀ i, SigmaAlgebra (β i)] [∀ i, BorelSpace (β i)]
     (hum : ∀ i, StronglyMeasurable[m] (u i)) :
     StronglyAdapted (Filtration.natural u hum) u := by
   intro i
@@ -186,20 +186,20 @@ variable {β : Type*} {u v : ι → Ω → β}
 
 /-- Progressive process. A sequence of functions `u` is said to be progressive with respect
 to a filtration `f` if at each point in time `i`, `u` restricted to `Set.Iic i × Ω` is measurable
-with respect to the product `MeasurableSpace` structure where the σ-algebra used for `Ω` is `f i`.
+with respect to the product `SigmaAlgebra` structure where the σ-algebra used for `Ω` is `f i`.
 The usual definition uses the interval `[0,i]`, which we replace by `Set.Iic i`. We recover the
 usual definition for index types `ℝ≥0` or `ℕ`. -/
-def IsProgressive [MeasurableSpace ι] [MeasurableSpace β] (f : Filtration ι m)
+def IsProgressive [SigmaAlgebra ι] [SigmaAlgebra β] (f : Filtration ι m)
     (u : ι → Ω → β) : Prop :=
-  ∀ i, Measurable[Subtype.instMeasurableSpace.prod (f i)] fun p : Set.Iic i × Ω => u p.1 p.2
+  ∀ i, Measurable[Subtype.instSigmaAlgebra.prod (f i)] fun p : Set.Iic i × Ω => u p.1 p.2
 
-theorem isProgressive_const {mi : MeasurableSpace ι} {mβ : MeasurableSpace β} (f : Filtration ι m)
+theorem isProgressive_const {mi : SigmaAlgebra ι} {mβ : SigmaAlgebra β} (f : Filtration ι m)
     (b : β) : IsProgressive f (fun _ _ => b : ι → Ω → β) :=
   fun _ ↦ by exact measurable_const
 
 namespace IsProgressive
 
-variable {mi : MeasurableSpace ι} {mβ : MeasurableSpace β}
+variable {mi : SigmaAlgebra ι} {mβ : SigmaAlgebra β}
 
 protected theorem adapted (h : IsProgressive f u) : Adapted f u := by
   intro i
@@ -241,7 +241,7 @@ protected theorem div [Group β] [MeasurableDiv₂ β] (hu : IsProgressive f u)
   fun i ↦ Measurable.div (hu i) (hv i)
 
 /-- The norm of a progressive process is progressive. -/
-protected lemma norm [NormedAddCommGroup β] [OpensMeasurableSpace β] (hu : IsProgressive f u) :
+protected lemma norm [NormedAddCommGroup β] [OpensSigmaAlgebra β] (hu : IsProgressive f u) :
     IsProgressive f fun t ω ↦ ‖u t ω‖ :=
   fun i ↦ by apply @(hu i).norm; infer_instance
 
@@ -255,20 +255,20 @@ variable {β : Type*} [TopologicalSpace β] {u v : ι → Ω → β}
 
 /-- Strongly progressive process. A sequence of functions `u` is said to be strongly
 progressive with respect to a filtration `f` if at each point in time `i`, `u` restricted to
-`Set.Iic i × Ω` is strongly measurable with respect to the product `MeasurableSpace` structure
+`Set.Iic i × Ω` is strongly measurable with respect to the product `SigmaAlgebra` structure
 where the σ-algebra used for `Ω` is `f i`.
 The usual definition uses the interval `[0,i]`, which we replace by `Set.Iic i`. We recover the
 usual definition for index types `ℝ≥0` or `ℕ`. -/
-def IsStronglyProgressive [MeasurableSpace ι] (f : Filtration ι m) (u : ι → Ω → β) : Prop :=
-  ∀ i, StronglyMeasurable[Subtype.instMeasurableSpace.prod (f i)] fun p : Set.Iic i × Ω => u p.1 p.2
+def IsStronglyProgressive [SigmaAlgebra ι] (f : Filtration ι m) (u : ι → Ω → β) : Prop :=
+  ∀ i, StronglyMeasurable[Subtype.instSigmaAlgebra.prod (f i)] fun p : Set.Iic i × Ω => u p.1 p.2
 
-theorem isStronglyProgressive_const [MeasurableSpace ι] (f : Filtration ι m) (b : β) :
+theorem isStronglyProgressive_const [SigmaAlgebra ι] (f : Filtration ι m) (b : β) :
     IsStronglyProgressive f (fun _ _ => b : ι → Ω → β) := fun i =>
-  @stronglyMeasurable_const _ _ (Subtype.instMeasurableSpace.prod (f i)) _ _
+  @stronglyMeasurable_const _ _ (Subtype.instSigmaAlgebra.prod (f i)) _ _
 
 namespace IsStronglyProgressive
 
-variable [MeasurableSpace ι]
+variable [SigmaAlgebra ι]
 
 protected theorem stronglyAdapted (h : IsStronglyProgressive f u) : StronglyAdapted f u := by
   intro i
@@ -337,33 +337,33 @@ end Arithmetic
 
 end IsStronglyProgressive
 
-lemma IsProgressive.isStronglyProgressive {mi : MeasurableSpace ι} {mβ : MeasurableSpace β}
-    [PseudoMetrizableSpace β] [SecondCountableTopology β] [OpensMeasurableSpace β]
+lemma IsProgressive.isStronglyProgressive {mi : SigmaAlgebra ι} {mβ : SigmaAlgebra β}
+    [PseudoMetrizableSpace β] [SecondCountableTopology β] [OpensSigmaAlgebra β]
   (h : IsProgressive f u) : IsStronglyProgressive f u :=
   fun i ↦ (h i).stronglyMeasurable
 
-lemma IsStronglyProgressive.isProgressive {mi : MeasurableSpace ι} {mβ : MeasurableSpace β}
+lemma IsStronglyProgressive.isProgressive {mi : SigmaAlgebra ι} {mβ : SigmaAlgebra β}
     [PseudoMetrizableSpace β] [BorelSpace β] (h : IsStronglyProgressive f u) : IsProgressive f u :=
   fun i ↦ (h i).measurable
 
-theorem isStronglyProgressive_of_tendsto' {γ} [MeasurableSpace ι] [PseudoMetrizableSpace β]
+theorem isStronglyProgressive_of_tendsto' {γ} [SigmaAlgebra ι] [PseudoMetrizableSpace β]
     (fltr : Filter γ) [fltr.NeBot] [fltr.IsCountablyGenerated] {U : γ → ι → Ω → β}
     (h : ∀ l, IsStronglyProgressive f (U l)) (h_tendsto : Tendsto U fltr (𝓝 u)) :
     IsStronglyProgressive f u := by
   intro i
   apply @stronglyMeasurable_of_tendsto (Set.Iic i × Ω) β γ
-    (MeasurableSpace.prod _ (f i)) _ _ fltr _ _ _ _ fun l => h l i
+    (SigmaAlgebra.prod _ (f i)) _ _ fltr _ _ _ _ fun l => h l i
   rw [tendsto_pi_nhds] at h_tendsto ⊢
   exact fun _ ↦ Tendsto.apply_nhds (h_tendsto _) _
 
-theorem isStronglyProgressive_of_tendsto [MeasurableSpace ι] [PseudoMetrizableSpace β]
+theorem isStronglyProgressive_of_tendsto [SigmaAlgebra ι] [PseudoMetrizableSpace β]
     {U : ℕ → ι → Ω → β} (h : ∀ l, IsStronglyProgressive f (U l))
     (h_tendsto : Tendsto U atTop (𝓝 u)) : IsStronglyProgressive f u :=
   isStronglyProgressive_of_tendsto' atTop h h_tendsto
 
 /-- A continuous and strongly adapted process is strongly progressive. -/
 theorem StronglyAdapted.isStronglyProgressive_of_continuous [TopologicalSpace ι] [MetrizableSpace ι]
-    [SecondCountableTopology ι] [MeasurableSpace ι] [OpensMeasurableSpace ι]
+    [SecondCountableTopology ι] [SigmaAlgebra ι] [OpensSigmaAlgebra ι]
     [PseudoMetrizableSpace β] (h : StronglyAdapted f u) (hu_cont : ∀ ω, Continuous fun i => u i ω) :
     IsStronglyProgressive f u := fun i =>
   @stronglyMeasurable_uncurry_of_continuous_of_stronglyMeasurable _ _ (Set.Iic i) _ _ _ _ _ _ _
@@ -374,7 +374,7 @@ equivalent. This lemma provides `StronglyAdapted f u → IsStronglyProgressive f
 See `IsStronglyProgressive.stronglyAdapted` for the reverse direction, which is true more generally.
 -/
 theorem StronglyAdapted.isStronglyProgressive_of_discrete [TopologicalSpace ι] [DiscreteTopology ι]
-    [SecondCountableTopology ι] [MeasurableSpace ι] [OpensMeasurableSpace ι]
+    [SecondCountableTopology ι] [SigmaAlgebra ι] [OpensSigmaAlgebra ι]
     [PseudoMetrizableSpace β] (h : StronglyAdapted f u) : IsStronglyProgressive f u :=
   h.isStronglyProgressive_of_continuous fun _ => continuous_of_discreteTopology
 

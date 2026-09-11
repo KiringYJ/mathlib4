@@ -175,12 +175,12 @@ lemma measurable_log : Measurable log := continuous_log.measurable
 lemma _root_.EReal.measurable_exp : Measurable exp := continuous_exp.measurable
 
 @[fun_prop]
-lemma _root_.Measurable.ennreal_log {α : Type*} {_ : MeasurableSpace α}
+lemma _root_.Measurable.ennreal_log {α : Type*} {_ : SigmaAlgebra α}
     {f : α → ℝ≥0∞} (hf : Measurable f) :
     Measurable fun x ↦ log (f x) := measurable_log.comp hf
 
 @[fun_prop]
-lemma _root_.Measurable.ereal_exp {α : Type*} {_ : MeasurableSpace α}
+lemma _root_.Measurable.ereal_exp {α : Type*} {_ : SigmaAlgebra α}
     {f : α → EReal} (hf : Measurable f) :
     Measurable fun x ↦ exp (f x) := measurable_exp.comp hf
 

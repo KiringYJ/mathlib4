@@ -49,12 +49,12 @@ open scoped NNReal ENNReal MeasureTheory Topology
 
 namespace MeasureTheory
 
-variable {α ι κ E : Type*} {m : MeasurableSpace α} {μ : Measure α}
+variable {α ι κ E : Type*} {m : SigmaAlgebra α} {μ : Measure α}
 
 /-- A sequence of functions `f` is said to converge in measure to some function `g` if for all
 `ε > 0`, the measure of the set `{x | ε ≤ dist (f i x) (g x)}` tends to 0 as `i` converges along
 some given filter `l`. -/
-def TendstoInMeasure [EDist E] {_ : MeasurableSpace α} (μ : Measure α) (f : ι → α → E)
+def TendstoInMeasure [EDist E] {_ : SigmaAlgebra α} (μ : Measure α) (f : ι → α → E)
     (l : Filter ι) (g : α → E) : Prop :=
   ∀ ε, 0 < ε → Tendsto (fun i => μ { x | ε ≤ edist (f i x) (g x) }) l (𝓝 0)
 
@@ -385,7 +385,7 @@ theorem TendstoInMeasure.aestronglyMeasurable {u : Filter ι} [NeBot u] [IsCount
   obtain ⟨ns, -, hns⟩ := h_tendsto.exists_seq_tendsto_ae'
   exact aestronglyMeasurable_of_tendsto_ae atTop (fun n => hf (ns n)) hns
 
-variable [MeasurableSpace E] [BorelSpace E]
+variable [SigmaAlgebra E] [BorelSpace E]
 
 theorem TendstoInMeasure.aemeasurable {u : Filter ι} [NeBot u] [IsCountablyGenerated u]
     {f : ι → α → E} {g : α → E} (hf : ∀ n, AEMeasurable (f n) μ)

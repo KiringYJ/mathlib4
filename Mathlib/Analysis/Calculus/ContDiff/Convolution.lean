@@ -48,7 +48,7 @@ variable [RCLike 𝕜]
 variable [NormedSpace 𝕜 E]
 variable [NormedSpace 𝕜 E']
 variable [NormedSpace ℝ F] [NormedSpace 𝕜 F]
-variable [MeasurableSpace G] {μ : Measure G}
+variable [SigmaAlgebra G] {μ : Measure G}
 variable (L : E →L[𝕜] E' →L[𝕜] F)
 
 variable [NormedAddCommGroup G] [BorelSpace G]
@@ -127,7 +127,7 @@ end Real
 section WithParam
 
 variable [RCLike 𝕜] [NormedSpace 𝕜 E] [NormedSpace 𝕜 E'] [NormedSpace ℝ F]
-  [NormedSpace 𝕜 F] [MeasurableSpace G] [NormedAddCommGroup G] [BorelSpace G]
+  [NormedSpace 𝕜 F] [SigmaAlgebra G] [NormedAddCommGroup G] [BorelSpace G]
   [NormedSpace 𝕜 G] [NormedAddCommGroup P] [NormedSpace 𝕜 P] {μ : Measure G}
   (L : E →L[𝕜] E' →L[𝕜] F)
 
@@ -277,7 +277,7 @@ In this version, all the types belong to the same universe (to get an induction 
 proof). Use instead `contDiffOn_convolution_right_with_param`, which removes this restriction. -/
 theorem contDiffOn_convolution_right_with_param_aux {G : Type uP} {E' : Type uP} {F : Type uP}
     {P : Type uP} [NormedAddCommGroup E'] [NormedAddCommGroup F] [NormedSpace 𝕜 E']
-    [NormedSpace ℝ F] [NormedSpace 𝕜 F] [MeasurableSpace G]
+    [NormedSpace ℝ F] [NormedSpace 𝕜 F] [SigmaAlgebra G]
     {μ : Measure G}
     [NormedAddCommGroup G] [BorelSpace G] [NormedSpace 𝕜 G] [NormedAddCommGroup P] [NormedSpace 𝕜 P]
     {f : G → E} {n : ℕ∞} (L : E →L[𝕜] E' →L[𝕜] F) {g : P → G → E'} {s : Set P} {k : Set G}

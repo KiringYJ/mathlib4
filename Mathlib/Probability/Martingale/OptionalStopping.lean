@@ -34,7 +34,7 @@ open scoped NNReal ENNReal MeasureTheory ProbabilityTheory
 
 namespace MeasureTheory
 
-variable {Ω : Type*} {m0 : MeasurableSpace Ω} {μ : Measure Ω} {𝒢 : Filtration ℕ m0} {f : ℕ → Ω → ℝ}
+variable {Ω : Type*} {m0 : SigmaAlgebra Ω} {μ : Measure Ω} {𝒢 : Filtration ℕ m0} {f : ℕ → Ω → ℝ}
   {τ π : Ω → WithTop ℕ}
 
 /-- Given a submartingale `f` and bounded stopping times `τ` and `π` such that `τ ≤ π`, the
@@ -52,13 +52,13 @@ theorem Submartingale.expected_stoppedValue_mono {E : Type*} [NormedAddCommGroup
       exact (hτ i).inter (hπ i).compl
     rw [integral_finsetSum]
     · refine Finset.sum_nonneg fun i _ => ?_
-      rw [integral_indicator (𝒢.le _ _ (this _)), integral_sub', sub_nonneg]
+      rw [integral_indicator (𝒢.le _ (this _)), integral_sub', sub_nonneg]
       · exact hf.setIntegral_le (Nat.le_succ i) (this _)
       · exact (hf.integrable _).integrableOn
       · exact (hf.integrable _).integrableOn
     intro i _
     exact Integrable.indicator (Integrable.sub (hf.integrable _) (hf.integrable _))
-      (𝒢.le _ _ (this _))
+      (𝒢.le _ (this _))
   · exact hf.integrable_stoppedValue hπ hbdd
   · exact hf.integrable_stoppedValue hτ fun ω => le_trans (hle ω) (hbdd ω)
 
@@ -78,8 +78,8 @@ theorem submartingale_of_expected_stoppedValue_mono [SigmaFiniteFiltration μ �
     (Set.piecewise_le (fun _ _ ↦ WithTop.coe_le_coe.mpr hij) fun _ _ ↦ le_rfl)
     ⟨j, fun _ => le_rfl⟩
   rwa [stoppedValue_const, stoppedValue_piecewise_const,
-    integral_piecewise (𝒢.le _ _ hs) (hint _).integrableOn (hint _).integrableOn, ←
-    integral_add_compl (𝒢.le _ _ hs) (hint j), add_le_add_iff_right] at hf
+    integral_piecewise (𝒢.le _ hs) (hint _).integrableOn (hint _).integrableOn, ←
+    integral_add_compl (𝒢.le _ hs) (hint j), add_le_add_iff_right] at hf
 
 /-- **The optional stopping theorem** (fair game theorem): a strongly adapted integrable process `f`
 is a submartingale if and only if for all bounded stopping times `τ` and `π` such that `τ ≤ π`, the

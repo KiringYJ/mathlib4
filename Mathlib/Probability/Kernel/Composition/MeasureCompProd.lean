@@ -35,7 +35,7 @@ open ProbabilityTheory Set
 
 namespace MeasureTheory.Measure
 
-variable {α β : Type*} {mα : MeasurableSpace α} {mβ : MeasurableSpace β}
+variable {α β : Type*} {mα : SigmaAlgebra α} {mβ : SigmaAlgebra β}
   {μ ν : Measure α} {κ η : Kernel α β}
 
 /-- The composition-product of a measure and a kernel. -/
@@ -93,7 +93,7 @@ lemma compProd_eq_zero_iff [SFinite μ] [IsSFiniteKernel κ] :
     exact compProd_congr h
 
 lemma _root_.ProbabilityTheory.Kernel.compProd_apply_eq_compProd_sectR {γ : Type*}
-    {mγ : MeasurableSpace γ} (κ : Kernel α β) (η : Kernel (α × β) γ)
+    {mγ : SigmaAlgebra γ} (κ : Kernel α β) (η : Kernel (α × β) γ)
     [IsSFiniteKernel κ] [IsSFiniteKernel η] (a : α) :
     (κ ⊗ₖ η) a = (κ a) ⊗ₘ (Kernel.sectR η a) := by
   ext s hs
@@ -130,7 +130,7 @@ lemma ae_compProd_of_ae_fst (κ : Kernel α β) {p : α → Prop} (hp : Measurab
     ∀ᵐ x ∂(μ ⊗ₘ κ), p x.1 :=
   ae_compProd_of_ae_ae (measurable_fst hp) <| by filter_upwards [h] with a ha using by simp [ha]
 
-lemma ae_eq_compProd_of_ae_eq_fst {γ : Type*} {mγ : MeasurableSpace γ} [MeasurableEq γ]
+lemma ae_eq_compProd_of_ae_eq_fst {γ : Type*} {mγ : SigmaAlgebra γ} [MeasurableEq γ]
     (κ : Kernel α β) {f g : α → γ} (hf : Measurable f) (hg : Measurable g) (h : f =ᵐ[μ] g) :
     (fun p ↦ f p.1) =ᵐ[μ ⊗ₘ κ] (fun p ↦ g p.1) :=
   ae_compProd_of_ae_fst κ (measurableSet_eq_fun hf hg) h
@@ -227,7 +227,7 @@ instance [IsZeroOrProbabilityMeasure μ] [IsZeroOrMarkovKernel κ] :
 /-- `Measure.compProd` is associative. We have to insert `MeasurableEquiv.prodAssoc`
 because the products of types `α × β × γ` and `(α × β) × γ` are different. -/
 @[simp]
-lemma compProd_assoc {γ : Type*} {mγ : MeasurableSpace γ} {η : Kernel (α × β) γ} :
+lemma compProd_assoc {γ : Type*} {mγ : SigmaAlgebra γ} {η : Kernel (α × β) γ} :
     (μ ⊗ₘ (κ ⊗ₖ η)).map MeasurableEquiv.prodAssoc.symm = μ ⊗ₘ κ ⊗ₘ η := by
   by_cases hμ : SFinite μ
   swap; · simp [hμ]
@@ -247,7 +247,7 @@ lemma compProd_assoc {γ : Type*} {mγ : MeasurableSpace γ} {η : Kernel (α ×
 /-- `Measure.compProd` is associative. We have to insert `MeasurableEquiv.prodAssoc`
 because the products of types `α × β × γ` and `(α × β) × γ` are different. -/
 @[simp]
-lemma compProd_assoc' {γ : Type*} {mγ : MeasurableSpace γ} {η : Kernel (α × β) γ} :
+lemma compProd_assoc' {γ : Type*} {mγ : SigmaAlgebra γ} {η : Kernel (α × β) γ} :
     (μ ⊗ₘ κ ⊗ₘ η).map MeasurableEquiv.prodAssoc = μ ⊗ₘ (κ ⊗ₖ η) := by
   simp [← Measure.compProd_assoc]
 

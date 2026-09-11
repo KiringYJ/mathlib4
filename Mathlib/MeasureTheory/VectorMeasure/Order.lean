@@ -36,7 +36,7 @@ open NNReal ENNReal
 open scoped Function -- required for scoped `on` notation
 namespace MeasureTheory
 
-variable {α β : Type*} {m : MeasurableSpace α}
+variable {α β : Type*} {m : SigmaAlgebra α}
 
 open Set
 

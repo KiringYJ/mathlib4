@@ -29,8 +29,8 @@ open Filter Set MeasureTheory
 open scoped ENNReal Topology symmDiff
 
 variable {X Y : Type*}
-  [TopologicalSpace X] [MeasurableSpace X] [BorelSpace X] [R1Space X]
-  [TopologicalSpace Y] [MeasurableSpace Y] [BorelSpace Y] [R1Space Y]
+  [TopologicalSpace X] [SigmaAlgebra X] [BorelSpace X] [R1Space X]
+  [TopologicalSpace Y] [SigmaAlgebra Y] [BorelSpace Y] [R1Space Y]
   {μ : Measure X} {ν : Measure Y} [μ.InnerRegularCompactLTTop] [IsLocallyFiniteMeasure ν]
 
 namespace MeasureTheory

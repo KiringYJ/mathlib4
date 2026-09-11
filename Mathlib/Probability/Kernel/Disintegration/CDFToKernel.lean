@@ -55,7 +55,7 @@ open scoped NNReal ENNReal MeasureTheory Topology ProbabilityTheory
 
 namespace ProbabilityTheory
 
-variable {α β : Type*} {mα : MeasurableSpace α} {mβ : MeasurableSpace β}
+variable {α β : Type*} {mα : SigmaAlgebra α} {mβ : SigmaAlgebra β}
   {κ : Kernel α (β × ℝ)} {ν : Kernel α β}
 
 section stieltjesOfMeasurableRat
@@ -443,7 +443,7 @@ end IsCondKernelCDF
 
 section ToKernel
 
-variable {_ : MeasurableSpace β} {f : α × β → StieltjesFunction ℝ}
+variable {_ : SigmaAlgebra β} {f : α × β → StieltjesFunction ℝ}
   {κ : Kernel α (β × ℝ)} {ν : Kernel α β}
 
 /-- A function `f : α × β → StieltjesFunction ℝ` with the property `IsCondKernelCDF f κ ν` gives a
@@ -509,7 +509,7 @@ lemma setLIntegral_toKernel_prod [IsFiniteKernel κ] (hf : IsCondKernelCDF f κ 
   -- π-system that generates the Borel σ-algebra, hence we can get the same equality for any
   -- measurable set `t`.
   induction t, ht
-    using MeasurableSpace.induction_on_inter (borel_eq_generateFrom_Iic ℝ) isPiSystem_Iic with
+    using SigmaAlgebra.induction_on_inter (borel_eq_generateFrom_Iic ℝ) isPiSystem_Iic with
   | empty => simp only [measure_empty, lintegral_const, zero_mul, prod_empty]
   | basic t ht =>
     obtain ⟨q, rfl⟩ := ht
@@ -550,12 +550,11 @@ lemma lintegral_toKernel_mem [IsFiniteKernel κ] (hf : IsCondKernelCDF f κ ν)
   -- sets form a π-system that generates the product σ-algebra, hence we can get the same equality
   -- for any measurable set `s`.
   induction s, hs
-    using MeasurableSpace.induction_on_inter generateFrom_prod.symm isPiSystem_prod with
+    using SigmaAlgebra.induction_on_inter generateFrom_prod.symm isPiSystem_prod with
   | empty =>
     simp only [preimage_empty, measure_empty, lintegral_const, zero_mul]
   | basic s hs =>
     rcases hs with ⟨t₁, ht₁, t₂, ht₂, rfl⟩
-    simp only [mem_ofPred_eq] at ht₁ ht₂
     rw [← lintegral_add_compl _ ht₁]
     have h_eq1 : ∫⁻ x in t₁, hf.toKernel f (a, x) (Prod.mk x ⁻¹' t₁ ×ˢ t₂) ∂(ν a)
         = ∫⁻ x in t₁, hf.toKernel f (a, x) t₂ ∂(ν a) := by
@@ -565,7 +564,7 @@ lemma lintegral_toKernel_mem [IsFiniteKernel κ] (hf : IsCondKernelCDF f κ ν)
         ∫⁻ x in t₁ᶜ, hf.toKernel f (a, x) (Prod.mk x ⁻¹' t₁ ×ˢ t₂) ∂(ν a) = 0 := by
       suffices h_eq_zero :
           ∀ x ∈ t₁ᶜ, hf.toKernel f (a, x) (Prod.mk x ⁻¹' t₁ ×ˢ t₂) = 0 by
-        rw [setLIntegral_congr_fun ht₁.compl h_eq_zero]
+        rw [setLIntegral_congr_fun (MeasurableSet.compl ht₁) h_eq_zero]
         simp only [lintegral_const, zero_mul]
       intro a hat₁
       rw [mem_compl_iff] at hat₁

@@ -6,7 +6,7 @@ Authors: Johannes Hölzl, Mario Carneiro
 module
 
 public import Mathlib.Basic.ENNReal.Action
-public import Mathlib.MeasureTheory.MeasurableSpace.Constructions
+public import Mathlib.MeasureTheory.SigmaAlgebra.Constructions
 public import Mathlib.MeasureTheory.OuterMeasure.Caratheodory
 
 /-!
@@ -237,7 +237,7 @@ theorem inducedOuterMeasure_exists_set {s : Set α} (hs : inducedOuterMeasure m 
   of `s`.
 -/
 theorem inducedOuterMeasure_caratheodory (s : Set α) :
-    MeasurableSet[(inducedOuterMeasure m P0 m0).caratheodory] s ↔
+    s ∈ (inducedOuterMeasure m P0 m0).caratheodory ↔
       ∀ t : Set α,
         P t →
           inducedOuterMeasure m P0 m0 (t ∩ s) + inducedOuterMeasure m P0 m0 (t \ s) ≤
@@ -263,9 +263,9 @@ end ExtendSet
   above lemmas. -/
 
 
-section MeasurableSpace
+section SigmaAlgebra
 
-variable {α : Type*} [MeasurableSpace α]
+variable {α : Type*} [SigmaAlgebra α]
 variable {m : ∀ s : Set α, MeasurableSet s → ℝ≥0∞}
 variable (m0 : m ∅ MeasurableSet.empty = 0)
 variable
@@ -301,11 +301,11 @@ theorem inducedOuterMeasure_eq {s : Set α} (hs : MeasurableSet s) :
     inducedOuterMeasure m MeasurableSet.empty m0 s = m s hs :=
   (inducedOuterMeasure_eq_extend m0 mU hs).trans <| extend_eq _ _
 
-end MeasurableSpace
+end SigmaAlgebra
 
 namespace OuterMeasure
 
-variable {α : Type*} [MeasurableSpace α] (m : OuterMeasure α)
+variable {α : Type*} [SigmaAlgebra α] (m : OuterMeasure α)
 
 /-- Given an outer measure `m` we can forget its value on non-measurable sets, and then consider
   `m.trim`, the unique maximal outer measure less than that function. -/
@@ -335,11 +335,11 @@ theorem trim_mono : Monotone (trim : OuterMeasure α → OuterMeasure α) := fun
   iInf₂_mono fun _f _hs => ENNReal.tsum_le_tsum fun _b => iInf_mono fun _hf => H _
 
 /-- `OuterMeasure.trim` is antitone in the σ-algebra. -/
-theorem trim_anti_measurableSpace {α} (m : OuterMeasure α) {m0 m1 : MeasurableSpace α}
+theorem trim_anti_sigmaAlgebra {α} (m : OuterMeasure α) {m0 m1 : SigmaAlgebra α}
     (h : m0 ≤ m1) : @trim _ m1 m ≤ @trim _ m0 m := by
   simp only [le_trim_iff]
   intro s hs
-  rw [trim_eq _ (h s hs)]
+  rw [trim_eq _ (h hs)]
 
 theorem trim_le_trim_iff {m₁ m₂ : OuterMeasure α} :
     m₁.trim ≤ m₂.trim ↔ ∀ s, MeasurableSet s → m₁ s ≤ m₂ s :=

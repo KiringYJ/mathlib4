@@ -21,8 +21,8 @@ open MeasureTheory ProbabilityTheory
 
 open scoped ENNReal
 
-variable {α β γ δ : Type*} {mα : MeasurableSpace α} {mβ : MeasurableSpace β}
-  {mγ : MeasurableSpace γ} {mδ : MeasurableSpace δ}
+variable {α β γ δ : Type*} {mα : SigmaAlgebra α} {mβ : SigmaAlgebra β}
+  {mγ : SigmaAlgebra γ} {mδ : SigmaAlgebra δ}
   {μ : Measure α} {ν : Measure β} {κ : Kernel α β}
 
 namespace ProbabilityTheory.Kernel
@@ -36,7 +36,7 @@ If `κ` was deterministic, this would be true even if `η.prodMkLeft β` was a m
 kernel since `κ ×ₖ Kernel.deterministic f hf` would be deterministic and commute with copying.
 Here `κ` is not deterministic, but it is discarded in one branch of the copy. -/
 lemma prod_prodMkLeft_comp_prod_deterministic {β' ε : Type*}
-    {mβ' : MeasurableSpace β'} {mε : MeasurableSpace ε}
+    {mβ' : SigmaAlgebra β'} {mε : SigmaAlgebra ε}
     (κ : Kernel γ β) [IsSFiniteKernel κ] (η : Kernel ε β') [IsSFiniteKernel η]
     (ξ : Kernel (β × ε) δ) [IsSFiniteKernel ξ] {f : γ → ε} (hf : Measurable f) :
     (ξ ×ₖ η.prodMkLeft β) ∘ₖ (κ ×ₖ deterministic f hf)
@@ -59,7 +59,7 @@ If `κ` was deterministic, this would be true even if `η.prodMkRight β` was a 
 kernel since `Kernel.deterministic f hf ×ₖ κ` would be deterministic and commute with copying.
 Here `κ` is not deterministic, but it is discarded in one branch of the copy. -/
 lemma prod_prodMkRight_comp_deterministic_prod {β' ε : Type*}
-    {mβ' : MeasurableSpace β'} {mε : MeasurableSpace ε}
+    {mβ' : SigmaAlgebra β'} {mε : SigmaAlgebra ε}
     (κ : Kernel γ β) [IsSFiniteKernel κ] (η : Kernel ε β') [IsSFiniteKernel η]
     (ξ : Kernel (ε × β) δ) [IsSFiniteKernel ξ] {f : γ → ε} (hf : Measurable f) :
     (ξ ×ₖ η.prodMkRight β) ∘ₖ (deterministic f hf ×ₖ κ)

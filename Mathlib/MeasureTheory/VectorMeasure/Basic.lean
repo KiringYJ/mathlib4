@@ -5,7 +5,7 @@ Authors: Kexing Ying
 -/
 module
 
-public import Mathlib.MeasureTheory.MeasurableSpace.Constructions
+public import Mathlib.MeasureTheory.SigmaAlgebra.Constructions
 public import Mathlib.MeasureTheory.PiSystem
 public import Mathlib.MeasureTheory.VectorMeasure.Defs
 public import Mathlib.Topology.Algebra.InfiniteSum.Module
@@ -35,7 +35,7 @@ open Filter
 open scoped Topology Function -- required for scoped `on` notation
 namespace MeasureTheory
 
-variable {α β : Type*} {m : MeasurableSpace α}
+variable {α β : Type*} {m : SigmaAlgebra α}
 
 open Set
 
@@ -209,18 +209,19 @@ theorem tendsto_vectorMeasure_iInter_atTop_nat
 /-- If two vector measures give the same mass to the whole space and coincide on a
 generating π-system, then they coincide. -/
 theorem ext_of_generateFrom {M : Type*} [AddCommGroup M] [TopologicalSpace M] [T2Space M]
-    {X : Type*} {mX : MeasurableSpace X} {μ ν : VectorMeasure X M}
+    {X : Type*} {mX : SigmaAlgebra X} {μ ν : VectorMeasure X M}
     (C : Set (Set X)) (hμν : ∀ s ∈ C, μ s = ν s)
-    (hA : mX = MeasurableSpace.generateFrom C) (hC : IsPiSystem C)
+    (hA : mX = SigmaAlgebra.generateFrom C) (hC : IsPiSystem C)
     (h_univ : μ Set.univ = ν Set.univ) : μ = ν := by
   ext s hs
-  induction s, hs using MeasurableSpace.induction_on_inter hA hC with
+  induction s, hs using SigmaAlgebra.induction_on_inter hA hC with
   | empty => simp
   | basic t ht => exact hμν t ht
   | compl t htm iht =>
-    simp [of_compl, iht, htm, h_univ]
+    rw [of_compl htm, of_compl htm, iht, h_univ]
   | iUnion f hfd hfm ihf =>
-    simp [of_disjoint_iUnion, hfm, hfd, ihf]
+    rw [of_disjoint_iUnion hfm hfd, of_disjoint_iUnion hfm hfd]
+    exact tsum_congr ihf
 
 end
 
@@ -372,7 +373,7 @@ end Module
 
 section Dirac
 
-variable {M : Type*} [AddCommMonoid M] [TopologicalSpace M] [MeasurableSpace β]
+variable {M : Type*} [AddCommMonoid M] [TopologicalSpace M] [SigmaAlgebra β]
   {x : β} {v : M} {s : Set β}
 
 open scoped Classical in

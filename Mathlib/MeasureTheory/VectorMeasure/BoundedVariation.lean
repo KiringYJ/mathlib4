@@ -36,11 +36,11 @@ control its variation on the different kinds of intervals in terms of the `eVari
 
 @[expose] public section
 
-open Filter Set MeasureTheory MeasurableSpace
+open Filter Set MeasureTheory SigmaAlgebra
 open scoped symmDiff Topology NNReal ENNReal
 
 variable {α : Type*} [LinearOrder α] [DenselyOrdered α] [TopologicalSpace α] [OrderTopology α]
-  [SecondCountableTopology α] [CompactIccSpace α] [hα : MeasurableSpace α] [BorelSpace α]
+  [SecondCountableTopology α] [CompactIccSpace α] [hα : SigmaAlgebra α] [BorelSpace α]
   {E F G : Type*} [NormedAddCommGroup E] [CompleteSpace E]
   [NormedAddCommGroup F] [NormedAddCommGroup G]
   {f : α → E} {a b : α}

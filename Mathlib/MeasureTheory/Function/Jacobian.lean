@@ -245,7 +245,7 @@ theorem exists_closed_cover_approximatesLinearOn_of_hasFDerivWithinAt [SecondCou
   simp -zeta only [K, hq, mem_inter_iff, hp, and_true]
   exact subset_closure hnz
 
-variable [MeasurableSpace E] [BorelSpace E] (μ : Measure E) [IsAddHaarMeasure μ]
+variable [SigmaAlgebra E] [BorelSpace E] (μ : Measure E) [IsAddHaarMeasure μ]
 
 open scoped Function -- required for scoped `on` notation
 

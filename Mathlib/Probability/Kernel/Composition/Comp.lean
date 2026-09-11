@@ -44,7 +44,7 @@ namespace ProbabilityTheory
 
 namespace Kernel
 
-variable {α β γ : Type*} {mα : MeasurableSpace α} {mβ : MeasurableSpace β} {mγ : MeasurableSpace γ}
+variable {α β γ : Type*} {mα : SigmaAlgebra α} {mβ : SigmaAlgebra β} {mγ : SigmaAlgebra γ}
 
 /-- Composition of two kernels. -/
 noncomputable def comp (η : Kernel β γ) (κ : Kernel α β) : Kernel α γ where
@@ -141,7 +141,7 @@ theorem lintegral_comp (η : Kernel β γ) (κ : Kernel α β) (a : α) {g : γ 
   rw [comp_apply, Measure.lintegral_bind (Kernel.aemeasurable _) hg.aemeasurable]
 
 /-- Composition of kernels is associative. -/
-theorem comp_assoc {δ : Type*} {mδ : MeasurableSpace δ} (ξ : Kernel γ δ)
+theorem comp_assoc {δ : Type*} {mδ : SigmaAlgebra δ} (ξ : Kernel γ δ)
     (η : Kernel β γ) (κ : Kernel α β) : ξ ∘ₖ η ∘ₖ κ = ξ ∘ₖ (η ∘ₖ κ) := by
   refine ext_fun fun a f hf => ?_
   simp_rw [lintegral_comp _ _ _ hf, lintegral_comp _ _ _ hf.lintegral_kernel]

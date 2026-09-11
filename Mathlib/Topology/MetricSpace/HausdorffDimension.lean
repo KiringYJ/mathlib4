@@ -72,9 +72,9 @@ We use the following notation localized in `MeasureTheory`. It is defined in
 
 * The definition of `dimH` explicitly uses `borel X` as a measurable space structure. This way we
   can formulate lemmas about Hausdorff dimension without assuming that the environment has a
-  `[MeasurableSpace X]` instance that is equal but possibly not defeq to `borel X`.
+  `[SigmaAlgebra X]` instance that is equal but possibly not defeq to `borel X`.
 
-  Lemma `dimH_def` unfolds this definition using whatever `[MeasurableSpace X]` instance we have in
+  Lemma `dimH_def` unfolds this definition using whatever `[SigmaAlgebra X]` instance we have in
   the environment (as long as it is equal to `borel X`).
 
 * The definition `dimH` is irreducible; use API lemmas or `dimH_def` instead.
@@ -104,9 +104,9 @@ variable {ι X Y : Type*} [EMetricSpace X] [EMetricSpace Y]
 
 section Measurable
 
-variable [MeasurableSpace X] [BorelSpace X]
+variable [SigmaAlgebra X] [BorelSpace X]
 
-/-- Unfold the definition of `dimH` using `[MeasurableSpace X] [BorelSpace X]` from the
+/-- Unfold the definition of `dimH` using `[SigmaAlgebra X] [BorelSpace X]` from the
 environment. -/
 theorem dimH_def (s : Set X) : dimH s = ⨆ (d : ℝ≥0) (_ : μH[d] s = ∞), (d : ℝ≥0∞) := by
   borelize X; rw [dimH]
@@ -505,7 +505,7 @@ theorem dimH_lt_top (s : Set E) : dimH s < ⊤ := by calc
 
 theorem dimH_ne_top (s : Set E) : dimH s ≠ ⊤ := (dimH_lt_top s).ne
 
-lemma hausdorffMeasure_of_finrank_lt [MeasurableSpace E] [BorelSpace E] {d : ℝ}
+lemma hausdorffMeasure_of_finrank_lt [SigmaAlgebra E] [BorelSpace E] {d : ℝ}
     (hd : finrank ℝ E < d) : (μH[d] : Measure E) = 0 := by
   lift d to ℝ≥0 using (Nat.cast_nonneg _).trans hd.le
   rw [← measure_univ_eq_zero]
@@ -546,8 +546,8 @@ variable {𝕜 E F : Type*} [NontriviallyNormedField 𝕜] [NormedAddCommGroup E
 
 /-- If `f` is differentiable on a set `t` with `μH[d] t = 0` for some `0 ≤ d`, then
 `μH[d] (f '' t) = 0`. -/
-theorem DifferentiableOn.hausdorffMeasure_image_eq_zero [MeasurableSpace E] [BorelSpace E]
-    [MeasurableSpace F] [BorelSpace F] (hf : DifferentiableOn 𝕜 f t) {d : ℝ} (hd : 0 ≤ d)
+theorem DifferentiableOn.hausdorffMeasure_image_eq_zero [SigmaAlgebra E] [BorelSpace E]
+    [SigmaAlgebra F] [BorelSpace F] (hf : DifferentiableOn 𝕜 f t) {d : ℝ} (hd : 0 ≤ d)
     (ht : μH[d] t = 0) : μH[d] (f '' t) = 0 := by
   obtain ⟨c, hcc, htc⟩ := isSeparable_of_hausdorffMeasure_ne_top (ht.trans_ne ENNReal.zero_ne_top)
   let P (n : ℕ) (y : E) : Set E :=

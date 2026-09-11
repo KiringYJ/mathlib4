@@ -130,7 +130,7 @@ namespace ProbabilityTheory
 
 section Kernel
 
-variable {Ω Ω' : Type*} {mΩ : MeasurableSpace Ω} {mΩ' : MeasurableSpace Ω'}
+variable {Ω Ω' : Type*} {mΩ : SigmaAlgebra Ω} {mΩ' : SigmaAlgebra Ω'}
   {ν : Measure Ω'} {κ : Kernel Ω' Ω} {X : Ω → ℝ} {c : ℝ≥0}
 
 /-! ### Sub-Gaussian with respect to a kernel and a measure -/
@@ -280,7 +280,7 @@ lemma _root_.ProbabilityTheory.Kernel.HasSubgaussianMGF_congr {Y : Ω → ℝ} (
     HasSubgaussianMGF X c κ ν ↔ HasSubgaussianMGF Y c κ ν :=
   ⟨fun hX ↦ congr hX h, fun hY ↦ congr hY (ae_eq_symm h)⟩
 
-lemma of_map {Ω'' : Type*} {mΩ'' : MeasurableSpace Ω''} {κ : Kernel Ω' Ω''}
+lemma of_map {Ω'' : Type*} {mΩ'' : SigmaAlgebra Ω''} {κ : Kernel Ω' Ω''}
     {Y : Ω'' → Ω} {X : Ω → ℝ} (hY : Measurable Y) (h : HasSubgaussianMGF X c (κ.map Y) ν) :
     HasSubgaussianMGF (X ∘ Y) c κ ν where
   integrable_exp_mul t := by
@@ -449,7 +449,7 @@ lemma add {Y : Ω → ℝ} {cX cY : ℝ≥0} (hX : HasSubgaussianMGF X cX κ ν)
         linear_combination t ^ 2 * (-√↑cY * Real.sq_sqrt cX.coe_nonneg
             -√↑cX * Real.sq_sqrt cY.coe_nonneg) }
 
-variable {Ω'' : Type*} {mΩ'' : MeasurableSpace Ω''} {Y : Ω'' → ℝ} {cY : ℝ≥0}
+variable {Ω'' : Type*} {mΩ'' : SigmaAlgebra Ω''} {Y : Ω'' → ℝ} {cY : ℝ≥0}
 
 lemma prodMkLeft_compProd {η : Kernel Ω Ω''} (h : HasSubgaussianMGF Y cY η (κ ∘ₘ ν)) :
     HasSubgaussianMGF Y cY (prodMkLeft Ω' η) (ν ⊗ₘ κ) := by
@@ -533,7 +533,7 @@ section Conditional
 
 /-! ### Conditionally sub-Gaussian moment-generating function -/
 
-variable {Ω : Type*} {m mΩ : MeasurableSpace Ω} {hm : m ≤ mΩ} [StandardBorelSpace Ω]
+variable {Ω : Type*} {m mΩ : SigmaAlgebra Ω} {hm : m ≤ mΩ} [StandardBorelSpace Ω]
   {μ : Measure Ω} [IsFiniteMeasure μ] {X : Ω → ℝ} {c : ℝ≥0}
 
 variable (m) (hm) in
@@ -592,7 +592,7 @@ end Conditional
 
 /-! ### Sub-Gaussian moment-generating function -/
 
-variable {Ω : Type*} {m mΩ : MeasurableSpace Ω} {μ : Measure Ω} {X : Ω → ℝ} {c : ℝ≥0}
+variable {Ω : Type*} {m mΩ : SigmaAlgebra Ω} {μ : Measure Ω} {X : Ω → ℝ} {c : ℝ≥0}
 
 /-- A random variable `X` has a sub-Gaussian moment-generating function with parameter `c`
 with respect to a measure `μ` if for all `t : ℝ`, `exp (t * X)` is `μ`-integrable and
@@ -646,7 +646,7 @@ lemma zero [IsZeroOrProbabilityMeasure μ] : HasSubgaussianMGF 0 0 μ := fun_zer
 lemma neg {c : ℝ≥0} (h : HasSubgaussianMGF X c μ) : HasSubgaussianMGF (-X) c μ := by
   simpa [HasSubgaussianMGF_iff_kernel] using (HasSubgaussianMGF_iff_kernel.1 h).neg
 
-lemma of_map {Ω' : Type*} {mΩ' : MeasurableSpace Ω'} {μ : Measure Ω'}
+lemma of_map {Ω' : Type*} {mΩ' : SigmaAlgebra Ω'} {μ : Measure Ω'}
     {Y : Ω' → Ω} {X : Ω → ℝ} (hY : AEMeasurable Y μ) (h : HasSubgaussianMGF X c (μ.map Y)) :
     HasSubgaussianMGF (X ∘ Y) c μ where
   integrable_exp_mul t := by
@@ -666,7 +666,7 @@ lemma id_map_iff (hX : AEMeasurable X μ) :
   · rw [mgf_id_map hX]
     exact h.mgf_le t
 
-lemma congr_identDistrib {Ω' : Type*} {mΩ' : MeasurableSpace Ω'} {μ' : Measure Ω'}
+lemma congr_identDistrib {Ω' : Type*} {mΩ' : SigmaAlgebra Ω'} {μ' : Measure Ω'}
     {Y : Ω' → ℝ} (hX : HasSubgaussianMGF X c μ) (hXY : IdentDistrib X Y μ μ') :
     HasSubgaussianMGF Y c μ' := by
   rw [← id_map_iff hXY.aemeasurable_fst] at hX

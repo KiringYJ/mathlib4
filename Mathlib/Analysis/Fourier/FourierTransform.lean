@@ -70,7 +70,7 @@ open scoped Topology
 
 namespace VectorFourier
 
-variable {𝕜 : Type*} [CommRing 𝕜] {V : Type*} [AddCommGroup V] [Module 𝕜 V] [MeasurableSpace V]
+variable {𝕜 : Type*} [CommRing 𝕜] {V : Type*} [AddCommGroup V] [Module 𝕜 V] [SigmaAlgebra V]
   {W : Type*} [AddCommGroup W] [Module 𝕜 W]
   {E F G : Type*} [NormedAddCommGroup E] [NormedSpace ℂ E] [NormedAddCommGroup F] [NormedSpace ℂ F]
   [NormedAddCommGroup G] [NormedSpace ℂ G]
@@ -175,7 +175,7 @@ end Continuous
 section Fubini
 
 variable [TopologicalSpace 𝕜] [IsTopologicalRing 𝕜] [TopologicalSpace V] [BorelSpace V]
-  [TopologicalSpace W] [MeasurableSpace W] [BorelSpace W]
+  [TopologicalSpace W] [SigmaAlgebra W] [BorelSpace W]
   {e : AddChar 𝕜 𝕊} {μ : Measure V} {L : V →ₗ[𝕜] W →ₗ[𝕜] 𝕜}
   {ν : Measure W} [SigmaFinite μ] [SigmaFinite ν] [SecondCountableTopologyEither W V]
 
@@ -284,7 +284,7 @@ theorem integral_sesq_fourierIntegral_eq_neg_flip
 
 end Fubini
 
-lemma fourierIntegral_probChar {V W : Type*} {_ : MeasurableSpace V}
+lemma fourierIntegral_probChar {V W : Type*} {_ : SigmaAlgebra V}
     [AddCommGroup V] [Module ℝ V] [AddCommGroup W] [Module ℝ W]
     (L : V →ₗ[ℝ] W →ₗ[ℝ] ℝ) (μ : Measure V) (f : V → E) (w : W) :
     fourierIntegral Real.probChar μ L f w =
@@ -296,7 +296,7 @@ end VectorFourier
 namespace VectorFourier
 
 variable {𝕜 ι E F V W : Type*} [Fintype ι] [NontriviallyNormedField 𝕜]
-  [NormedAddCommGroup V] [NormedSpace 𝕜 V] [MeasurableSpace V] [BorelSpace V]
+  [NormedAddCommGroup V] [NormedSpace 𝕜 V] [SigmaAlgebra V] [BorelSpace V]
   [NormedAddCommGroup W] [NormedSpace 𝕜 W]
   {e : AddChar 𝕜 𝕊} {μ : Measure V} {L : V →L[𝕜] W →L[𝕜] 𝕜}
   [NormedAddCommGroup F] [NormedSpace ℝ F]
@@ -330,7 +330,7 @@ end VectorFourier
 
 namespace Fourier
 
-variable {𝕜 : Type*} [CommRing 𝕜] [MeasurableSpace 𝕜] {E : Type*} [NormedAddCommGroup E]
+variable {𝕜 : Type*} [CommRing 𝕜] [SigmaAlgebra 𝕜] {E : Type*} [NormedAddCommGroup E]
   [NormedSpace ℂ E]
 
 section Defs
@@ -373,7 +373,7 @@ open FourierTransform
 variable {V W E : Type*} [NormedAddCommGroup E] [NormedSpace ℂ E]
 
 theorem vector_fourierIntegral_eq_integral_exp_smul {V : Type*} [AddCommGroup V] [Module ℝ V]
-    [MeasurableSpace V] {W : Type*} [AddCommGroup W] [Module ℝ W] (L : V →ₗ[ℝ] W →ₗ[ℝ] ℝ)
+    [SigmaAlgebra V] {W : Type*} [AddCommGroup W] [Module ℝ W] (L : V →ₗ[ℝ] W →ₗ[ℝ] ℝ)
     (μ : Measure V) (f : V → E) (w : W) :
     VectorFourier.fourierIntegral fourierChar μ L f w =
       ∫ v : V, Complex.exp (↑(-2 * π * L v w) * Complex.I) • f v ∂μ := by
@@ -385,7 +385,7 @@ continuous bilinear function `L`. For the specialization to the inner product in
 space, see `Real.fourierIntegral_convergent_iff`. -/
 @[simp]
 theorem fourierIntegral_convergent_iff' {V W : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
-    [NormedAddCommGroup W] [NormedSpace ℝ W] [MeasurableSpace V] [BorelSpace V] {μ : Measure V}
+    [NormedAddCommGroup W] [NormedSpace ℝ W] [SigmaAlgebra V] [BorelSpace V] {μ : Measure V}
     {f : V → E} (L : V →L[ℝ] W →L[ℝ] ℝ) (w : W) :
     Integrable (fun v : V ↦ 𝐞 (- L v w) • f v) μ ↔ Integrable f μ :=
   VectorFourier.fourierIntegral_convergent_iff (E := E) (L := L.toLinearMap₁₂)
@@ -394,7 +394,7 @@ theorem fourierIntegral_convergent_iff' {V W : Type*} [NormedAddCommGroup V] [No
 section Apply
 
 variable {ι F V W : Type*} [Fintype ι]
-  [NormedAddCommGroup V] [NormedSpace ℝ V] [MeasurableSpace V] [BorelSpace V]
+  [NormedAddCommGroup V] [NormedSpace ℝ V] [SigmaAlgebra V] [BorelSpace V]
   [NormedAddCommGroup W] [NormedSpace ℝ W]
   {μ : Measure V} {L : V →L[ℝ] W →L[ℝ] ℝ}
   [NormedAddCommGroup F] [NormedSpace ℝ F]
@@ -414,8 +414,8 @@ theorem fourierIntegral_continuousMultilinearMap_apply'
 
 end Apply
 
-variable [NormedAddCommGroup V] [InnerProductSpace ℝ V] [MeasurableSpace V] [BorelSpace V]
-  [NormedAddCommGroup W] [InnerProductSpace ℝ W] [MeasurableSpace W] [BorelSpace W]
+variable [NormedAddCommGroup V] [InnerProductSpace ℝ V] [SigmaAlgebra V] [BorelSpace V]
+  [NormedAddCommGroup W] [InnerProductSpace ℝ W] [SigmaAlgebra W] [BorelSpace W]
   [FiniteDimensional ℝ W]
 
 open scoped RealInnerProductSpace

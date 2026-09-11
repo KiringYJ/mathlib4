@@ -27,7 +27,7 @@ open MeasureTheory
 
 namespace ContinuousMapZero
 
-variable {X Y : Type*} [MeasurableSpace X] {μ : Measure X} [TopologicalSpace Y]
+variable {X Y : Type*} [SigmaAlgebra X] {μ : Measure X} [TopologicalSpace Y]
 variable {E : Type*} [NormedAddCommGroup E]
 
 /-- A natural criterion for `HasFiniteIntegral` of a `C(Y, E)₀`-valued function is the existence
@@ -72,7 +72,7 @@ lemma hasFiniteIntegral_mkD_restrict_of_bound {s : Set Y} [CompactSpace s] [Zero
   · simpa
 
 lemma aeStronglyMeasurable_mkD_of_uncurry [CompactSpace Y] [Zero Y] [TopologicalSpace X]
-    [OpensMeasurableSpace X] [SecondCountableTopologyEither X (C(Y, E))]
+    [OpensSigmaAlgebra X] [SecondCountableTopologyEither X (C(Y, E))]
     (f : X → Y → E) (g : C(Y, E)₀) (f_cont : Continuous (Function.uncurry f))
     (f_zero : ∀ᵐ x ∂μ, f x 0 = 0) :
     AEStronglyMeasurable (fun x ↦ mkD (f x) g) μ := by
@@ -84,7 +84,7 @@ lemma aeStronglyMeasurable_mkD_of_uncurry [CompactSpace Y] [Zero Y] [Topological
 
 open Set in
 lemma aeStronglyMeasurable_restrict_mkD_of_uncurry [CompactSpace Y] [Zero Y] {s : Set X}
-    [TopologicalSpace X] [OpensMeasurableSpace X] [SecondCountableTopologyEither X (C(Y, E))]
+    [TopologicalSpace X] [OpensSigmaAlgebra X] [SecondCountableTopologyEither X (C(Y, E))]
     (hs : MeasurableSet s) (f : X → Y → E) (g : C(Y, E)₀)
     (f_cont : ContinuousOn (Function.uncurry f) (s ×ˢ univ))
     (f_zero : ∀ᵐ x ∂(μ.restrict s), f x 0 = 0) :
@@ -97,7 +97,7 @@ lemma aeStronglyMeasurable_restrict_mkD_of_uncurry [CompactSpace Y] [Zero Y] {s 
 
 open Set in
 lemma aeStronglyMeasurable_mkD_restrict_of_uncurry {t : Set Y} [CompactSpace t] [Zero t]
-    [TopologicalSpace X] [OpensMeasurableSpace X] [SecondCountableTopologyEither X (C(t, E))]
+    [TopologicalSpace X] [OpensSigmaAlgebra X] [SecondCountableTopologyEither X (C(t, E))]
     (f : X → Y → E) (g : C(t, E)₀) (f_cont : ContinuousOn (Function.uncurry f) (univ ×ˢ t))
     (f_zero : ∀ᵐ x ∂μ, f x (0 : t) = 0) :
     AEStronglyMeasurable (fun x ↦ mkD (t.domRestrict (f x)) g) μ := by
@@ -109,7 +109,7 @@ lemma aeStronglyMeasurable_mkD_restrict_of_uncurry {t : Set Y} [CompactSpace t] 
 
 open Set in
 lemma aeStronglyMeasurable_restrict_mkD_restrict_of_uncurry {s : Set X} {t : Set Y}
-    [CompactSpace t] [Zero t] [TopologicalSpace X] [OpensMeasurableSpace X]
+    [CompactSpace t] [Zero t] [TopologicalSpace X] [OpensSigmaAlgebra X]
     [SecondCountableTopologyEither X (C(t, E))]
     (hs : MeasurableSet s) (f : X → Y → E) (g : C(t, E)₀)
     (f_cont : ContinuousOn (Function.uncurry f) (s ×ˢ t))

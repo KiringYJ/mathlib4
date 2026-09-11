@@ -39,10 +39,10 @@ disintegrating kernels.
 
 @[expose] public section
 
-open MeasureTheory Set Filter MeasurableSpace ProbabilityTheory
+open MeasureTheory Set Filter SigmaAlgebra ProbabilityTheory
 open scoped ENNReal MeasureTheory Topology
 
-variable {α β Ω : Type*} {mα : MeasurableSpace α} {mβ : MeasurableSpace β} {mΩ : MeasurableSpace Ω}
+variable {α β Ω : Type*} {mα : SigmaAlgebra α} {mβ : SigmaAlgebra β} {mΩ : SigmaAlgebra Ω}
 
 /-!
 ### Disintegration of measures
@@ -194,25 +194,30 @@ variable [Countable α] (κCond : α → Kernel β Ω)
 
 A conditional kernel for `κ : Kernel α (β × Ω)` where `α` is countable and `Ω` is a measurable
 space. -/
-noncomputable def condKernelCountable (h_atom : ∀ x y, x ∈ measurableAtom y → κCond x = κCond y) :
+noncomputable def condKernelCountable
+    (h_class : ∀ x y, x ∈ (inferInstance : SigmaAlgebra α).indistinguishabilityClass y →
+      κCond x = κCond y) :
     Kernel (α × β) Ω where
   toFun p := κCond p.1 p.2
   measurable' := by
     refine measurable_from_prod_countable_right' (fun a ↦ (κCond a).measurable) fun x y hx hy ↦ ?_
-    simpa using DFunLike.congr (h_atom _ _ hy) rfl
+    simpa using DFunLike.congr (h_class _ _ hy) rfl
 
-lemma condKernelCountable_apply (h_atom : ∀ x y, x ∈ measurableAtom y → κCond x = κCond y)
-    (p : α × β) : condKernelCountable κCond h_atom p = κCond p.1 p.2 := rfl
+lemma condKernelCountable_apply
+    (h_class : ∀ x y, x ∈ (inferInstance : SigmaAlgebra α).indistinguishabilityClass y →
+      κCond x = κCond y) (p : α × β) :
+    condKernelCountable κCond h_class p = κCond p.1 p.2 := rfl
 
 instance condKernelCountable.instIsMarkovKernel [∀ a, IsMarkovKernel (κCond a)]
-     (h_atom : ∀ x y, x ∈ measurableAtom y → κCond x = κCond y) :
-    IsMarkovKernel (condKernelCountable κCond h_atom) where
+    (h_class : ∀ x y, x ∈ (inferInstance : SigmaAlgebra α).indistinguishabilityClass y →
+      κCond x = κCond y) : IsMarkovKernel (condKernelCountable κCond h_class) where
   isProbabilityMeasure p := (‹∀ a, IsMarkovKernel (κCond a)› p.1).isProbabilityMeasure p.2
 
 instance condKernelCountable.instIsCondKernel [∀ a, IsMarkovKernel (κCond a)]
-    (h_atom : ∀ x y, x ∈ measurableAtom y → κCond x = κCond y) (κ : Kernel α (β × Ω))
+    (h_class : ∀ x y, x ∈ (inferInstance : SigmaAlgebra α).indistinguishabilityClass y →
+      κCond x = κCond y) (κ : Kernel α (β × Ω))
     [IsSFiniteKernel κ] [∀ a, (κ a).IsCondKernel (κCond a)] :
-    κ.IsCondKernel (condKernelCountable κCond h_atom) := by
+    κ.IsCondKernel (condKernelCountable κCond h_class) := by
   constructor
   ext a s hs
   conv_rhs => rw [← (κ a).disintegrate (κCond a)]

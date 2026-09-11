@@ -33,7 +33,7 @@ noncomputable section
 
 open ENNReal Filter MeasureTheory Set
 
-variable {α β ε ε' : Type*} {m : MeasurableSpace α} {μ : Measure α}
+variable {α β ε ε' : Type*} {m : SigmaAlgebra α} {μ : Measure α}
 variable [NormedAddCommGroup β] [TopologicalSpace ε] [ContinuousENorm ε]
   [TopologicalSpace ε'] [ESeminormedAddMonoid ε']
 
@@ -113,7 +113,7 @@ theorem stronglyMeasurable_coeFn (f : α →₁[μ] β) : StronglyMeasurable f :
   Lp.stronglyMeasurable f
 
 @[fun_prop]
-theorem measurable_coeFn [MeasurableSpace β] [BorelSpace β] (f : α →₁[μ] β) : Measurable f :=
+theorem measurable_coeFn [SigmaAlgebra β] [BorelSpace β] (f : α →₁[μ] β) : Measurable f :=
   (Lp.stronglyMeasurable f).measurable
 
 @[fun_prop]
@@ -121,7 +121,7 @@ theorem aestronglyMeasurable_coeFn (f : α →₁[μ] β) : AEStronglyMeasurable
   Lp.aestronglyMeasurable f
 
 @[fun_prop]
-theorem aemeasurable_coeFn [MeasurableSpace β] [BorelSpace β] (f : α →₁[μ] β) : AEMeasurable f μ :=
+theorem aemeasurable_coeFn [SigmaAlgebra β] [BorelSpace β] (f : α →₁[μ] β) : AEMeasurable f μ :=
   (Lp.stronglyMeasurable f).measurable.aemeasurable
 
 theorem edist_def (f g : α →₁[μ] β) : edist f g = ∫⁻ a, edist (f a) (g a) ∂μ := by

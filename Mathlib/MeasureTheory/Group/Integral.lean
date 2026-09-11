@@ -24,7 +24,7 @@ open Measure TopologicalSpace
 
 open scoped ENNReal
 
-variable {α G E F : Type*} [MeasurableSpace G]
+variable {α G E F : Type*} [SigmaAlgebra G]
 variable [NormedAddCommGroup E] [NormedSpace ℝ E] [NormedAddCommGroup F]
 variable {μ : Measure G} {f : G → E} {g : G}
 
@@ -170,7 +170,7 @@ end MeasurableMul
 
 section SMul
 
-variable {G : Type*} [Group G] [MeasurableSpace α] [MulAction G α] [MeasurableConstSMul G α]
+variable {G : Type*} [Group G] [SigmaAlgebra α] [MulAction G α] [MeasurableConstSMul G α]
 
 @[to_additive]
 theorem integral_smul_eq_self {μ : Measure α} [SMulInvariantMeasure G α μ] (f : α → E) {g : G} :

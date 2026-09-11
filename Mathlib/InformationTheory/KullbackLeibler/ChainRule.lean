@@ -85,7 +85,7 @@ open scoped ENNReal
 
 namespace InformationTheory
 
-variable {𝓧 𝓨 : Type*} {m𝓧 : MeasurableSpace 𝓧} {m𝓨 : MeasurableSpace 𝓨}
+variable {𝓧 𝓨 : Type*} {m𝓧 : SigmaAlgebra 𝓧} {m𝓨 : SigmaAlgebra 𝓨}
   {μ ν : Measure 𝓧} {κ η : Kernel 𝓧 𝓨}
   [IsFiniteMeasure μ] [IsFiniteMeasure ν] [IsMarkovKernel κ] [IsMarkovKernel η]
 

@@ -64,7 +64,7 @@ noncomputable section
 open MeasureTheory Filter
 open scoped NNReal ENNReal
 
-variable {α 𝕜 𝕜' E F : Type*} {m : MeasurableSpace α} {p : ℝ≥0∞} {μ : Measure α}
+variable {α 𝕜 𝕜' E F : Type*} {m : SigmaAlgebra α} {p : ℝ≥0∞} {μ : Measure α}
   [NormedAddCommGroup E] [NormedAddCommGroup F]
 
 namespace MeasureTheory
@@ -76,17 +76,17 @@ The space of equivalence classes of measurable functions for which `eLpNorm f p 
 -/
 
 @[simp]
-theorem eLpNorm_aeeqFun {α E : Type*} [MeasurableSpace α] {μ : Measure α} [NormedAddCommGroup E]
+theorem eLpNorm_aeeqFun {α E : Type*} [SigmaAlgebra α] {μ : Measure α} [NormedAddCommGroup E]
     {p : ℝ≥0∞} {f : α → E} (hf : AEStronglyMeasurable f μ) :
     eLpNorm (AEEqFun.mk f hf) p μ = eLpNorm f p μ :=
   eLpNorm_congr_ae (AEEqFun.coeFn_mk _ _)
 
-theorem MemLp.eLpNorm_mk_lt_top {α E : Type*} [MeasurableSpace α] {μ : Measure α}
+theorem MemLp.eLpNorm_mk_lt_top {α E : Type*} [SigmaAlgebra α] {μ : Measure α}
     [NormedAddCommGroup E] {p : ℝ≥0∞} {f : α → E} (hfp : MemLp f p μ) :
     eLpNorm (AEEqFun.mk f hfp.1) p μ < ∞ := by simp [hfp.2]
 
 /-- Lp space -/
-def Lp {α} (E : Type*) {m : MeasurableSpace α} [NormedAddCommGroup E] (p : ℝ≥0∞)
+def Lp {α} (E : Type*) {m : SigmaAlgebra α} [NormedAddCommGroup E] (p : ℝ≥0∞)
     (μ : Measure α := by volume_tac) : AddSubgroup (α →ₘ[μ] E) where
   carrier := { f | eLpNorm f p μ < ∞ }
   zero_mem' := by simp [eLpNorm_congr_ae AEEqFun.coeFn_zero, eLpNorm_zero]
@@ -210,7 +210,7 @@ theorem coeFn_fun_finsetSum {ι : Type*} (s : Finset ι) (f : ι → Lp E p μ) 
   grw [coeFn_finsetSum]
   filter_upwards with x using by simp
 
-theorem const_mem_Lp (α) {_ : MeasurableSpace α} (μ : Measure α) (c : E) [IsFiniteMeasure μ] :
+theorem const_mem_Lp (α) {_ : SigmaAlgebra α} (μ : Measure α) (c : E) [IsFiniteMeasure μ] :
     @AEEqFun.const α _ _ μ _ c ∈ Lp E p μ :=
   (memLp_const c).eLpNorm_mk_lt_top
 
@@ -548,7 +548,7 @@ theorem MemLp.norm_rpow {f : α → E} (hf : MemLp f p μ) (hp_ne_zero : p ≠ 0
   convert! hf.norm_rpow_div p
   rw [div_eq_mul_inv, ENNReal.mul_inv_cancel hp_ne_zero hp_ne_top]
 
-theorem AEEqFun.compMeasurePreserving_mem_Lp {β : Type*} [MeasurableSpace β]
+theorem AEEqFun.compMeasurePreserving_mem_Lp {β : Type*} [SigmaAlgebra β]
     {μb : MeasureTheory.Measure β} {g : β →ₘ[μb] E} (hg : g ∈ Lp E p μb) {f : α → β}
     (hf : MeasurePreserving f μ μb) :
     g.compMeasurePreserving f hf ∈ Lp E p μ := by
@@ -559,7 +559,7 @@ namespace Lp
 
 /-! ### Composition with a measure-preserving function -/
 
-variable {β : Type*} [MeasurableSpace β] {μb : MeasureTheory.Measure β} {f : α → β}
+variable {β : Type*} [SigmaAlgebra β] {μb : MeasureTheory.Measure β} {f : α → β}
 
 /-- Composition of an `L^p` function with a measure-preserving function is an `L^p` function. -/
 def compMeasurePreserving (f : α → β) (hf : MeasurePreserving f μ μb) :
@@ -598,14 +598,14 @@ theorem compMeasurePreserving_id :
 theorem compMeasurePreserving_id_apply (g : Lp E p μb) :
     compMeasurePreserving id (MeasurePreserving.id μb) g = g := by simp
 
-theorem compMeasurePreserving_comp {γ : Type*} {mγ : MeasurableSpace γ} {μc : Measure γ}
+theorem compMeasurePreserving_comp {γ : Type*} {mγ : SigmaAlgebra γ} {μc : Measure γ}
     {f : β → γ} (hf : MeasurePreserving f μb μc) {f' : α → β} (hf' : MeasurePreserving f' μ μb) :
     compMeasurePreserving (E := E) (p := p) (f ∘ f') (hf.comp hf') =
     (compMeasurePreserving f' hf').comp (compMeasurePreserving f hf) := by
   ext g
   simp [AEEqFun.compMeasurePreserving_comp _ hf hf']
 
-theorem compMeasurePreserving_comp_apply {γ : Type*} {mγ : MeasurableSpace γ} {μc : Measure γ}
+theorem compMeasurePreserving_comp_apply {γ : Type*} {mγ : SigmaAlgebra γ} {μc : Measure γ}
     (g : Lp E p μc) {f : β → γ} (hf : MeasurePreserving f μb μc) {f' : α → β}
     (hf' : MeasurePreserving f' μ μb) :
     (compMeasurePreserving (f ∘ f') (hf.comp hf')) g =
@@ -657,7 +657,7 @@ section Composition
 
 variable {g : E → F} {c : ℝ≥0}
 
-theorem LipschitzWith.comp_memLp {α E F} {K} [MeasurableSpace α] {μ : Measure α}
+theorem LipschitzWith.comp_memLp {α E F} {K} [SigmaAlgebra α] {μ : Measure α}
     [NormedAddCommGroup E] [NormedAddCommGroup F] {f : α → E} {g : E → F} (hg : LipschitzWith K g)
     (g0 : g 0 = 0) (hL : MemLp f p μ) : MemLp (g ∘ f) p μ :=
   have : ∀ x, ‖g (f x)‖ ≤ K * ‖f x‖ := fun x ↦ by
@@ -665,7 +665,7 @@ theorem LipschitzWith.comp_memLp {α E F} {K} [MeasurableSpace α] {μ : Measure
     simpa [g0] using hg.norm_sub_le (f x) 0
   hL.of_le_mul (hg.continuous.comp_aestronglyMeasurable hL.1) (Eventually.of_forall this)
 
-theorem MeasureTheory.MemLp.of_comp_antilipschitzWith {α E F} {K'} [MeasurableSpace α]
+theorem MeasureTheory.MemLp.of_comp_antilipschitzWith {α E F} {K'} [SigmaAlgebra α]
     {μ : Measure α} [NormedAddCommGroup E] [NormedAddCommGroup F] {f : α → E} {g : E → F}
     (hL : MemLp (g ∘ f) p μ) (hg : UniformContinuous g) (hg' : AntilipschitzWith K' g)
     (g0 : g 0 = 0) : MemLp f p μ := by
@@ -686,7 +686,7 @@ lemma MeasureTheory.MemLp.continuousLinearMap_comp [NontriviallyNormedField 𝕜
 
 namespace LipschitzWith
 
-theorem memLp_comp_iff_of_antilipschitz {α E F} {K K'} [MeasurableSpace α] {μ : Measure α}
+theorem memLp_comp_iff_of_antilipschitz {α E F} {K K'} [SigmaAlgebra α] {μ : Measure α}
     [NormedAddCommGroup E] [NormedAddCommGroup F] {f : α → E} {g : E → F} (hg : LipschitzWith K g)
     (hg' : AntilipschitzWith K' g) (g0 : g 0 = 0) : MemLp (g ∘ f) p μ ↔ MemLp f p μ :=
   ⟨fun h => h.of_comp_antilipschitzWith hg.uniformContinuous hg' g0, fun h => hg.comp_memLp g0 h⟩

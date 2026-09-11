@@ -160,7 +160,7 @@ theorem finset_iUnion_of_pairwise_separated (hm : IsMetric μ) {I : Finset ι} {
 `μ (s ∩ t) + μ (s \ t) = μ s`. -/
 theorem borel_le_caratheodory (hm : IsMetric μ) : borel X ≤ μ.caratheodory := by
   rw [borel_eq_generateFrom_isClosed]
-  refine MeasurableSpace.generateFrom_le fun t ht => μ.isCaratheodory_iff_le.2 fun s => ?_
+  refine SigmaAlgebra.generateFrom_le fun t ht => μ.isCaratheodory_iff_le.2 fun s => ?_
   set S : ℕ → Set X := fun n => {x ∈ s | (↑n)⁻¹ ≤ infEDist x t}
   have Ssep (n) : Metric.AreSeparated (S n) t :=
     ⟨n⁻¹, ENNReal.inv_ne_zero.2 (ENNReal.natCast_ne_top _),
@@ -226,9 +226,9 @@ theorem borel_le_caratheodory (hm : IsMetric μ) : borel X ≤ μ.caratheodory :
   refine (add_le_add le_rfl hyz.le).trans (Eq.trans_le ?_ hxz)
   rw [tsub_add_cancel_of_le A.le]
 
-theorem le_caratheodory [MeasurableSpace X] [BorelSpace X] (hm : IsMetric μ) :
-    ‹MeasurableSpace X› ≤ μ.caratheodory := by
-  rw [BorelSpace.measurable_eq (α := X)]
+theorem le_caratheodory [SigmaAlgebra X] [BorelSpace X] (hm : IsMetric μ) :
+    ‹SigmaAlgebra X› ≤ μ.caratheodory := by
+  rw [BorelSpace.sigmaAlgebra_eq (α := X)]
   exact hm.borel_le_caratheodory
 
 end IsMetric
@@ -295,7 +295,7 @@ theorem eq_iSup_nat (m : Set X → ℝ≥0∞) : mkMetric' m = ⨆ n : ℕ, mkMe
 
 /-- `MeasureTheory.OuterMeasure.mkMetric'.pre m r` is a trimmed measure provided that
 `m (closure s) = m s` for any set `s`. -/
-theorem trim_pre [MeasurableSpace X] [OpensMeasurableSpace X] (m : Set X → ℝ≥0∞)
+theorem trim_pre [SigmaAlgebra X] [OpensSigmaAlgebra X] (m : Set X → ℝ≥0∞)
     (hcl : ∀ s, m (closure s) = m s) (r : ℝ≥0∞) : (pre m r).trim = pre m r := by
   refine le_antisymm (le_pre.2 fun s hs => ?_) (le_trim _)
   rw [trim_eq_iInf]
@@ -383,7 +383,7 @@ theorem isometryEquiv_map_mkMetric (m : ℝ≥0∞ → ℝ≥0∞) (f : X ≃ᵢ
     map f (mkMetric m) = mkMetric m := by
   rw [← isometryEquiv_comap_mkMetric _ f, map_comap_of_surjective f.surjective]
 
-theorem trim_mkMetric [MeasurableSpace X] [BorelSpace X] (m : ℝ≥0∞ → ℝ≥0∞) :
+theorem trim_mkMetric [SigmaAlgebra X] [BorelSpace X] (m : ℝ≥0∞ → ℝ≥0∞) :
     (mkMetric m : OuterMeasure X).trim = mkMetric m := by
   simp only [mkMetric, mkMetric'.eq_iSup_nat, trim_iSup]
   congr 1 with n : 1
@@ -408,7 +408,7 @@ about metric outer measures for metric measures.
 
 namespace Measure
 
-variable [MeasurableSpace X] [BorelSpace X]
+variable [SigmaAlgebra X] [BorelSpace X]
 
 /-- Given a function `m : Set X → ℝ≥0∞`, `mkMetric' m` is the supremum of `μ r`
 over `r > 0`, where `μ r` is the maximal outer measure `μ` such that `μ s ≤ m s`
@@ -434,13 +434,13 @@ theorem mkMetric_toOuterMeasure (m : ℝ≥0∞ → ℝ≥0∞) :
 
 end Measure
 
-theorem OuterMeasure.coe_mkMetric [MeasurableSpace X] [BorelSpace X] (m : ℝ≥0∞ → ℝ≥0∞) :
+theorem OuterMeasure.coe_mkMetric [SigmaAlgebra X] [BorelSpace X] (m : ℝ≥0∞ → ℝ≥0∞) :
     ⇑(OuterMeasure.mkMetric m : OuterMeasure X) = Measure.mkMetric m := by
   rw [← Measure.mkMetric_toOuterMeasure, Measure.coe_toOuterMeasure]
 
 namespace Measure
 
-variable [MeasurableSpace X] [BorelSpace X]
+variable [SigmaAlgebra X] [BorelSpace X]
 
 /-- If `c ∉ {0, ∞}` and `m₁ d ≤ c * m₂ d` for `d < ε` for some `ε > 0`
 (we use `≤ᶠ[𝓝[≥] 0]` to state this), then `mkMetric m₁ hm₁ ≤ c • mkMetric m₂ hm₂`. -/
@@ -677,7 +677,7 @@ open scoped MeasureTheory
 
 open MeasureTheory MeasureTheory.Measure
 
-variable [MeasurableSpace X] [BorelSpace X] [MeasurableSpace Y] [BorelSpace Y]
+variable [SigmaAlgebra X] [BorelSpace X] [SigmaAlgebra Y] [BorelSpace Y]
 
 namespace HolderOnWith
 
@@ -751,7 +751,7 @@ end LipschitzWith
 open scoped Pointwise
 
 theorem MeasureTheory.Measure.hausdorffMeasure_smul₀ {𝕜 E : Type*} [NormedAddCommGroup E]
-    [NormedDivisionRing 𝕜] [Module 𝕜 E] [NormSMulClass 𝕜 E] [MeasurableSpace E] [BorelSpace E]
+    [NormedDivisionRing 𝕜] [Module 𝕜 E] [NormSMulClass 𝕜 E] [SigmaAlgebra E] [BorelSpace E]
     {d : ℝ} (hd : 0 ≤ d) {r : 𝕜} (hr : r ≠ 0) (s : Set E) :
     μH[d] (r • s) = ‖r‖₊ ^ d • μH[d] s := by
   have {r : 𝕜} (s : Set E) : μH[d] (r • s) ≤ ‖r‖₊ ^ d • μH[d] s := by
@@ -977,7 +977,7 @@ theorem hausdorffMeasure_pi_real {ι : Type*} [Fintype ι] :
 
 instance isAddHaarMeasure_hausdorffMeasure {E : Type*}
     [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
-    [MeasurableSpace E] [BorelSpace E] :
+    [SigmaAlgebra E] [BorelSpace E] :
     IsAddHaarMeasure (G := E) μH[finrank ℝ E] where
   lt_top_of_isCompact K hK := by
     set e : E ≃L[ℝ] Fin (finrank ℝ E) → ℝ := ContinuousLinearEquiv.ofFinrankEq (by simp)
@@ -1006,7 +1006,7 @@ theorem hausdorffMeasure_measurePreserving_funUnique [Unique ι] (d : ℝ) :
   (IsometryEquiv.funUnique ι X).measurePreserving_hausdorffMeasure _
 
 theorem hausdorffMeasure_measurePreserving_piFinTwo (α : Fin 2 → Type*)
-    [∀ i, MeasurableSpace (α i)] [∀ i, EMetricSpace (α i)] [∀ i, BorelSpace (α i)]
+    [∀ i, SigmaAlgebra (α i)] [∀ i, EMetricSpace (α i)] [∀ i, BorelSpace (α i)]
     [∀ i, SecondCountableTopology (α i)] (d : ℝ) :
     MeasurePreserving (MeasurableEquiv.piFinTwo α) μH[d] μH[d] :=
   (IsometryEquiv.piFinTwo α).measurePreserving_hausdorffMeasure _
@@ -1032,7 +1032,7 @@ section Geometric
 variable {𝕜 E P : Type*}
 
 theorem hausdorffMeasure_smul_right_image [NormedAddCommGroup E] [NormedSpace ℝ E]
-    [MeasurableSpace E] [BorelSpace E] (v : E) (s : Set ℝ) :
+    [SigmaAlgebra E] [BorelSpace E] (v : E) (s : Set ℝ) :
     μH[1] ((fun r => r • v) '' s) = ‖v‖₊ • μH[1] s := by
   obtain rfl | hv := eq_or_ne v 0
   · have := nullSingletonClass_hausdorff E one_pos
@@ -1053,7 +1053,7 @@ theorem hausdorffMeasure_smul_right_image [NormedAddCommGroup E] [NormedSpace �
 
 section NormedFieldAffine
 
-variable [NormedField 𝕜] [NormedAddCommGroup E] [NormedSpace 𝕜 E] [MeasurableSpace P]
+variable [NormedField 𝕜] [NormedAddCommGroup E] [NormedSpace 𝕜 E] [SigmaAlgebra P]
 variable [MetricSpace P] [NormedAddTorsor E P] [BorelSpace P]
 
 /-- Scaling by `c` around `x` scales the measure by `‖c‖₊ ^ d`. -/
@@ -1084,7 +1084,7 @@ end NormedFieldAffine
 
 section RealAffine
 
-variable [NormedAddCommGroup E] [NormedSpace ℝ E] [MeasurableSpace P]
+variable [NormedAddCommGroup E] [NormedSpace ℝ E] [SigmaAlgebra P]
 variable [MetricSpace P] [NormedAddTorsor E P] [BorelSpace P]
 
 /-- Mapping a set of reals along a line segment scales the measure by the length of a segment.
@@ -1110,7 +1110,7 @@ end RealAffine
 /-- The measure of a segment is the distance between its endpoints. -/
 @[simp]
 theorem hausdorffMeasure_segment {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-    [MeasurableSpace E] [BorelSpace E] (x y : E) : μH[1] (segment ℝ x y) = edist x y := by
+    [SigmaAlgebra E] [BorelSpace E] (x y : E) : μH[1] (segment ℝ x y) = edist x y := by
   rw [← affineSegment_eq_segment, hausdorffMeasure_affineSegment]
 
 /--
@@ -1119,7 +1119,7 @@ Hausdorff measure of the orthogonal projection of `s` onto `K` is less than or e
 `d`-dimensional Hausdorff measure of `s`.
 -/
 theorem hausdorffMeasure_orthogonalProjectionOnto_le [RCLike 𝕜]
-    [NormedAddCommGroup E] [InnerProductSpace 𝕜 E] [MeasurableSpace E] [BorelSpace E]
+    [NormedAddCommGroup E] [InnerProductSpace 𝕜 E] [SigmaAlgebra E] [BorelSpace E]
     (K : Submodule 𝕜 E) [K.HasOrthogonalProjection]
     (d : ℝ) (s : Set E) (hs : 0 ≤ d) :
     μH[d] (K.orthogonalProjectionOnto '' s) ≤ μH[d] s := by

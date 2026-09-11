@@ -32,7 +32,7 @@ of a ball of radius `ε > 0` on the unit sphere.
 
 @[expose] public section
 
-open Set Function Metric MeasurableSpace intervalIntegral
+open Set Function Metric SigmaAlgebra intervalIntegral
 open scoped Pointwise ENNReal NNReal
 
 local notation "dim" => Module.finrank ℝ
@@ -41,7 +41,7 @@ noncomputable section
 namespace MeasureTheory
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [MeasurableSpace E]
+  [SigmaAlgebra E]
 
 namespace Measure
 
@@ -144,9 +144,9 @@ theorem measurePreserving_homeomorphUnitSphereProd :
       (μ.toSphere.prod (volumeIoiPow (dim E - 1))) := by
   nontriviality E
   refine ⟨(homeomorphUnitSphereProd E).measurable, .symm ?_⟩
-  refine prod_eq_generateFrom generateFrom_measurableSet
-    ((borel_eq_generateFrom_Iio _).symm.trans BorelSpace.measurable_eq.symm)
-    isPiSystem_measurableSet isPiSystem_Iio
+  refine prod_eq_generateFrom (SigmaAlgebra.generateFrom_self _)
+    ((borel_eq_generateFrom_Iio _).symm.trans BorelSpace.sigmaAlgebra_eq.symm)
+    (SigmaAlgebra.isPiSystem _) isPiSystem_Iio
     μ.toSphere.toFiniteSpanningSetsIn (finiteSpanningSetsIn_volumeIoiPow_range_Iio _)
     fun s hs ↦ forall_mem_range.2 fun r ↦ ?_
   have : Ioo (0 : ℝ) r = r.1 • Ioo (0 : ℝ) 1 := by simp [LinearOrderedField.smul_Ioo r.2.out]

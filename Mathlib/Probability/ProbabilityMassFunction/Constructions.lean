@@ -89,7 +89,7 @@ theorem toOuterMeasure_map_apply : (p.map f).toOuterMeasure s = p.toOuterMeasure
   simp [map, Set.indicator, toOuterMeasure_apply p (f ⁻¹' s)]
   rfl
 
-variable {mα : MeasurableSpace α} {mβ : MeasurableSpace β}
+variable {mα : SigmaAlgebra α} {mβ : SigmaAlgebra β}
 
 @[simp]
 theorem toMeasure_map_apply (hf : Measurable f)
@@ -190,7 +190,7 @@ theorem toOuterMeasure_ofFinset_apply :
   toOuterMeasure_apply (ofFinset f s h h') t
 
 @[simp]
-theorem toMeasure_ofFinset_apply [MeasurableSpace α] (ht : MeasurableSet t) :
+theorem toMeasure_ofFinset_apply [SigmaAlgebra α] (ht : MeasurableSet t) :
     (ofFinset f s h h').toMeasure t = ∑' x, t.indicator f x :=
   (toMeasure_apply_eq_toOuterMeasure_apply _ ht).trans (toOuterMeasure_ofFinset_apply h h' t)
 
@@ -232,7 +232,7 @@ theorem toOuterMeasure_ofFintype_apply : (ofFintype f h).toOuterMeasure s = ∑'
   toOuterMeasure_apply (ofFintype f h) s
 
 @[simp]
-theorem toMeasure_ofFintype_apply [MeasurableSpace α] (hs : MeasurableSet s) :
+theorem toMeasure_ofFintype_apply [SigmaAlgebra α] (hs : MeasurableSet s) :
     (ofFintype f h).toMeasure s = ∑' x, s.indicator f x :=
   (toMeasure_apply_eq_toOuterMeasure_apply _ hs).trans (toOuterMeasure_ofFintype_apply h s)
 

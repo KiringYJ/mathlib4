@@ -316,7 +316,7 @@ end RieszContentRegular
 
 namespace NNRealRMK
 
-variable [T2Space X] [LocallyCompactSpace X] [MeasurableSpace X] [BorelSpace X]
+variable [T2Space X] [LocallyCompactSpace X] [SigmaAlgebra X] [BorelSpace X]
 
 /-- `rieszContent` gives a `Content` from `Λ : C_c(X, ℝ≥0) →ₗ[ℝ≥0] ℝ≥0`. Here `rieszContent Λ` is
 promoted to a measure. It will be later shown that

@@ -520,7 +520,7 @@ theorem exist_disjoint_covering_families {N : ℕ} {τ : ℝ} (hτ : 1 < τ)
 
 open scoped NNReal
 
-variable [SecondCountableTopology α] [MeasurableSpace α] [OpensMeasurableSpace α]
+variable [SecondCountableTopology α] [SigmaAlgebra α] [OpensSigmaAlgebra α]
 
 /-- Consider, for each `x` in a set `s`, a radius `r x ∈ (0, 1]`. Then one can find finitely
 many disjoint balls of the form `closedBall x (r x)` covering a proportion `1/(N+1)` of `s`, if
@@ -1070,7 +1070,7 @@ theorem tendsto_filterAt (μ : Measure α) [SFinite μ] (x : α) :
   · exact mem_image_of_mem _ hr.1
   · exact closedBall_subset_closedBall hr.2
 
-variable [MetricSpace β] [MeasurableSpace β] [BorelSpace β] [SecondCountableTopology β]
+variable [MetricSpace β] [SigmaAlgebra β] [BorelSpace β] [SecondCountableTopology β]
   [HasBesicovitchCovering β]
 
 /-- In a space with the Besicovitch covering property, the ratio of the measure of balls converges

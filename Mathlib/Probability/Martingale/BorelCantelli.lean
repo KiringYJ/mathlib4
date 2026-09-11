@@ -43,7 +43,7 @@ open scoped NNReal ENNReal MeasureTheory ProbabilityTheory Topology
 
 namespace MeasureTheory
 
-variable {ι Ω β : Type*} {m0 : MeasurableSpace Ω} {μ : Measure Ω}
+variable {ι Ω β : Type*} {m0 : SigmaAlgebra Ω} {μ : Measure Ω}
 /-!
 ### One-sided martingale bound
 -/
@@ -56,7 +56,7 @@ noncomputable def leastGE [Preorder ι] [OrderBot ι] [InfSet ι] [Preorder β]
 theorem StronglyAdapted.isStoppingTime_leastGE [ConditionallyCompleteLinearOrderBot ι]
     {ℱ : Filtration ι m0} [WellFoundedLT ι] [Countable ι] [TopologicalSpace β]
     [Preorder β] [ClosedIciTopology β] [TopologicalSpace.PseudoMetrizableSpace β]
-    [MeasurableSpace β] [BorelSpace β]
+    [SigmaAlgebra β] [BorelSpace β]
     {f : ι → Ω → β} (r : β) (hf : StronglyAdapted ℱ f) :
     IsStoppingTime ℱ (leastGE f r) :=
   hf.adapted.isStoppingTime_hittingAfter measurableSet_Ici
@@ -243,7 +243,7 @@ theorem process_zero : process s 0 = 0 := by rw [process, Finset.range_zero, Fin
 theorem stronglyAdapted_process (hs : ∀ n, MeasurableSet[ℱ n] (s n)) :
     StronglyAdapted ℱ (process s) :=
   fun _ => Finset.stronglyMeasurable_sum _ fun _ hk =>
-    stronglyMeasurable_one.indicator <| ℱ.mono (Finset.mem_range.1 hk) _ <| hs _
+    stronglyMeasurable_one.indicator <| ℱ.mono (Finset.mem_range.1 hk) <| hs _
 
 theorem martingalePart_process_ae_eq (ℱ : Filtration ℕ m0) (μ : Measure Ω) (s : ℕ → Set Ω) (n : ℕ) :
     martingalePart (process s) ℱ μ n =
@@ -270,7 +270,7 @@ theorem process_difference_le (s : ℕ → Set Ω) (ω : Ω) (n : ℕ) :
 theorem integrable_process (μ : Measure Ω) [IsFiniteMeasure μ] (hs : ∀ n, MeasurableSet[ℱ n] (s n))
     (n : ℕ) : Integrable (process s n) μ :=
   integrable_finsetSum' _ fun _ _ =>
-    IntegrableOn.integrable_indicator (integrable_const 1) <| ℱ.le _ _ <| hs _
+    IntegrableOn.integrable_indicator (integrable_const 1) <| ℱ.le _ <| hs _
 
 end BorelCantelli
 

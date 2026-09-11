@@ -31,7 +31,7 @@ variable [NormedCommRing 𝕜]
 /-- On a finite product space in `n` variables, for a natural number `n`, a product of integrable
 functions depending on each coordinate is integrable. -/
 theorem fin_nat_prod {n : ℕ} {E : Fin n → Type*}
-    {mE : ∀ i, MeasurableSpace (E i)} {μ : (i : Fin n) → Measure (E i)} [∀ i, SigmaFinite (μ i)]
+    {mE : ∀ i, SigmaAlgebra (E i)} {μ : (i : Fin n) → Measure (E i)} [∀ i, SigmaFinite (μ i)]
     {f : (i : Fin n) → E i → 𝕜} (hf : ∀ i, Integrable (f i) (μ i)) :
     Integrable (fun (x : (i : Fin n) → E i) ↦ ∏ i, f i (x i)) (Measure.pi μ) := by
   induction n with
@@ -51,7 +51,7 @@ theorem fin_nat_prod {n : ℕ} {E : Fin n → Type*}
 /-- On a finite product space, a product of integrable functions depending on each coordinate is
 integrable. Version with dependent target. -/
 theorem fintype_prod_dep {E : ι → Type*}
-    {f : (i : ι) → E i → 𝕜} {mE : ∀ i, MeasurableSpace (E i)} {μ : (i : ι) → Measure (E i)}
+    {f : (i : ι) → E i → 𝕜} {mE : ∀ i, SigmaAlgebra (E i)} {μ : (i : ι) → Measure (E i)}
     [∀ i, SigmaFinite (μ i)]
     (hf : ∀ i, Integrable (f i) (μ i)) :
     Integrable (fun (x : (i : ι) → E i) ↦ ∏ i, f i (x i)) (Measure.pi μ) := by
@@ -65,7 +65,7 @@ theorem fintype_prod_dep {E : ι → Type*}
 /-- On a finite product space, a product of integrable functions depending on each coordinate is
 integrable. -/
 theorem fintype_prod {E : Type*}
-    {f : ι → E → 𝕜} {mE : MeasurableSpace E} {μ : ι → Measure E} [∀ i, SigmaFinite (μ i)]
+    {f : ι → E → 𝕜} {mE : SigmaAlgebra E} {μ : ι → Measure E} [∀ i, SigmaFinite (μ i)]
     (hf : ∀ i, Integrable (f i) (μ i)) :
     Integrable (fun (x : ι → E) ↦ ∏ i, f i (x i)) (Measure.pi μ) :=
   Integrable.fintype_prod_dep hf
@@ -77,7 +77,7 @@ variable [RCLike 𝕜]
 set_option backward.isDefEq.respectTransparency false in
 /-- A version of **Fubini's theorem** in `n` variables, for a natural number `n`. -/
 theorem integral_fin_nat_prod_eq_prod {n : ℕ} {E : Fin n → Type*}
-    {mE : ∀ i, MeasurableSpace (E i)} {μ : (i : Fin n) → Measure (E i)} [∀ i, SigmaFinite (μ i)]
+    {mE : ∀ i, SigmaAlgebra (E i)} {μ : (i : Fin n) → Measure (E i)} [∀ i, SigmaFinite (μ i)]
     (f : (i : Fin n) → E i → 𝕜) :
     ∫ x : (i : Fin n) → E i, ∏ i, f i (x i) ∂(Measure.pi μ) = ∏ i, ∫ x, f i x ∂(μ i) := by
   induction n with
@@ -104,7 +104,7 @@ theorem integral_fin_nat_prod_volume_eq_prod {n : ℕ} {E : Fin n → Type*}
 
 /-- A version of **Fubini's theorem** with the variables indexed by a general finite type. -/
 theorem integral_fintype_prod_eq_prod {E : ι → Type*} (f : (i : ι) → E i → 𝕜)
-    {mE : ∀ i, MeasurableSpace (E i)} {μ : (i : ι) → Measure (E i)} [∀ i, SigmaFinite (μ i)] :
+    {mE : ∀ i, SigmaAlgebra (E i)} {μ : (i : ι) → Measure (E i)} [∀ i, SigmaFinite (μ i)] :
     ∫ x : (i : ι) → E i, ∏ i, f i (x i) ∂(Measure.pi μ) = ∏ i, ∫ x, f i x ∂(μ i) := by
   let e := (equivFin ι).symm
   rw [← (measurePreserving_piCongrLeft _ e).integral_comp']
@@ -116,7 +116,7 @@ theorem integral_fintype_prod_volume_eq_prod {E : ι → Type*} (f : (i : ι) �
     [∀ i, MeasureSpace (E i)] [∀ i, SigmaFinite (volume : Measure (E i))] :
     ∫ x : (i : ι) → E i, ∏ i, f i (x i) = ∏ i, ∫ x, f i x := integral_fintype_prod_eq_prod _
 
-theorem integral_fintype_prod_eq_pow {E : Type*} (f : E → 𝕜) {mE : MeasurableSpace E}
+theorem integral_fintype_prod_eq_pow {E : Type*} (f : E → 𝕜) {mE : SigmaAlgebra E}
     {μ : Measure E} [SigmaFinite μ] :
     ∫ x : ι → E, ∏ i, f (x i) ∂(Measure.pi (fun _ ↦ μ)) = (∫ x, f x ∂μ) ^ (card ι) := by
   rw [integral_fintype_prod_eq_prod, Finset.prod_const, card]
@@ -125,7 +125,7 @@ theorem integral_fintype_prod_volume_eq_pow {E : Type*} (f : E → 𝕜)
     [MeasureSpace E] [SigmaFinite (volume : Measure E)] :
     ∫ x : ι → E, ∏ i, f (x i) = (∫ x, f x) ^ (card ι) := integral_fintype_prod_eq_pow _
 
-variable {X : ι → Type*} {mX : ∀ i, MeasurableSpace (X i)} {μ : (i : ι) → Measure (X i)}
+variable {X : ι → Type*} {mX : ∀ i, SigmaAlgebra (X i)} {μ : (i : ι) → Measure (X i)}
     {E : Type*} [NormedAddCommGroup E]
 
 lemma integrable_comp_eval [∀ i, IsFiniteMeasure (μ i)] {i : ι} {f : X i → E}
@@ -149,7 +149,7 @@ lemma integral_comp_eval [NormedSpace ℝ E] [∀ i, IsProbabilityMeasure (μ i)
   · rwa [(measurePreserving_eval μ i).map_eq]
 
 lemma integral_eval [∀ i, NormedAddCommGroup (X i)] [∀ i, NormedSpace ℝ (X i)]
-    [∀ i, IsProbabilityMeasure (μ i)] {i : ι} [OpensMeasurableSpace (X i)]
+    [∀ i, IsProbabilityMeasure (μ i)] {i : ι} [OpensSigmaAlgebra (X i)]
     [SecondCountableTopology (X i)] :
     ∫ x, x i ∂Measure.pi μ = ∫ x, x ∂μ i :=
   integral_comp_eval aestronglyMeasurable_id

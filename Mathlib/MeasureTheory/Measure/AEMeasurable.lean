@@ -6,7 +6,7 @@ Authors: Sébastien Gouëzel
 module
 
 public import Mathlib.MeasureTheory.Measure.Trim
-public import Mathlib.MeasureTheory.MeasurableSpace.CountablyGenerated
+public import Mathlib.MeasureTheory.SigmaAlgebra.CountablyGenerated
 
 /-!
 # Almost everywhere measurable functions
@@ -20,8 +20,8 @@ public section
 
 open MeasureTheory MeasureTheory.Measure Filter Set Function ENNReal
 
-variable {ι α β γ δ R : Type*} {m0 : MeasurableSpace α} [MeasurableSpace β] [MeasurableSpace γ]
-  [MeasurableSpace δ] {f g : α → β} {μ ν : Measure α}
+variable {ι α β γ δ R : Type*} {m0 : SigmaAlgebra α} [SigmaAlgebra β] [SigmaAlgebra γ]
+  [SigmaAlgebra δ] {f g : α → β} {μ ν : Measure α}
 
 section
 
@@ -38,7 +38,7 @@ theorem aemeasurable_zero_measure : AEMeasurable f (0 : Measure α) := by
   nontriviality α; inhabit α
   exact ⟨fun _ => f default, measurable_const, rfl⟩
 
-theorem aemeasurable_id'' (μ : Measure α) {m : MeasurableSpace α} (hm : m ≤ m0) :
+theorem aemeasurable_id'' (μ : Measure α) {m : SigmaAlgebra α} (hm : m ≤ m0) :
     @AEMeasurable α α m m0 id μ :=
   @Measurable.aemeasurable α α m0 m id μ (measurable_id'' hm)
 
@@ -86,7 +86,8 @@ theorem sum_measure [Countable ι] {μ : ι → Measure α} (h : ∀ i, AEMeasur
   · rw [domRestrict_piecewise_compl, compl_iInter]
     intro t ht
     refine ⟨⋃ i, (h i).mk f ⁻¹' t ∩ (s i)ᶜ, MeasurableSet.iUnion fun i ↦
-      (measurable_mk _ ht).inter (measurableSet_toMeasurable _ _).compl, ?_⟩
+      MeasurableSet.inter (measurable_mk _ ht)
+        (MeasurableSet.compl (measurableSet_toMeasurable _ _)), ?_⟩
     ext ⟨x, hx⟩
     simp only [mem_preimage, mem_iUnion, Set.domRestrict, mem_inter_iff,
       mem_compl_iff] at hx ⊢
@@ -214,7 +215,7 @@ theorem exists_ae_eq_range_subset (H : AEMeasurable f μ) {t : Set β} (ht : ∀
     apply subset_toMeasurable
     simp only [hx, mem_compl_iff, mem_ofPred_eq, false_and, not_false_iff]
 
-theorem exists_measurable_nonneg {β} [Preorder β] [Zero β] {mβ : MeasurableSpace β} {f : α → β}
+theorem exists_measurable_nonneg {β} [Preorder β] [Zero β] {mβ : SigmaAlgebra β} {f : α → β}
     (hf : AEMeasurable f μ) (f_nn : ∀ᵐ t ∂μ, 0 ≤ f t) : ∃ g, Measurable g ∧ 0 ≤ g ∧ f =ᵐ[μ] g := by
   obtain ⟨G, hG_meas, hG_mem, hG_ae_eq⟩ := hf.exists_ae_eq_range_subset f_nn ⟨0, le_rfl⟩
   exact ⟨G, hG_meas, fun x => hG_mem (mem_range_self x), hG_ae_eq⟩
@@ -274,7 +275,7 @@ theorem aemeasurable_smul_measure_iff {c : ℝ≥0∞} (hc : c ≠ 0) :
   ⟨fun h => ⟨h.mk f, h.measurable_mk, (ae_ennreal_smul_measure_iff hc).1 h.ae_eq_mk⟩, fun h =>
     ⟨h.mk f, h.measurable_mk, (ae_ennreal_smul_measure_iff hc).2 h.ae_eq_mk⟩⟩
 
-theorem aemeasurable_of_aemeasurable_trim {α} {m m0 : MeasurableSpace α} {μ : Measure α}
+theorem aemeasurable_of_aemeasurable_trim {α} {m m0 : SigmaAlgebra α} {μ : Measure α}
     (hm : m ≤ m0) {f : α → β} (hf : AEMeasurable f (μ.trim hm)) : AEMeasurable f μ :=
   ⟨hf.mk f, Measurable.mono hf.measurable_mk hm le_rfl, ae_eq_of_ae_eq_trim hf.ae_eq_mk⟩
 
@@ -292,7 +293,7 @@ end
 theorem AEMeasurable.restrict (hfm : AEMeasurable f μ) {s} : AEMeasurable f (μ.restrict s) :=
   ⟨AEMeasurable.mk f hfm, hfm.measurable_mk, ae_restrict_of_ae hfm.ae_eq_mk⟩
 
-theorem aemeasurable_Ioi_of_forall_Ioc {β} {mβ : MeasurableSpace β} [LinearOrder α]
+theorem aemeasurable_Ioi_of_forall_Ioc {β} {mβ : SigmaAlgebra β} [LinearOrder α]
     [(atTop : Filter α).IsCountablyGenerated] {x : α} {g : α → β}
     (g_meas : ∀ t > x, AEMeasurable g (μ.restrict (Ioc x t))) :
     AEMeasurable g (μ.restrict (Ioi x)) := by
@@ -375,7 +376,7 @@ theorem MeasureTheory.Measure.map_mono_of_aemeasurable {f : α → δ} (h : μ �
 /-- If the `σ`-algebra of the codomain of a null measurable function is countably generated,
 then the function is a.e.-measurable. -/
 lemma MeasureTheory.NullMeasurable.aemeasurable {f : α → β}
-    [hc : MeasurableSpace.CountablyGenerated β] (h : NullMeasurable f μ) : AEMeasurable f μ := by
+    [hc : SigmaAlgebra.CountablyGenerated β] (h : NullMeasurable f μ) : AEMeasurable f μ := by
   classical
   nontriviality β; inhabit β
   rcases hc.1 with ⟨S, hSc, rfl⟩
@@ -403,7 +404,7 @@ such that a.e. all values of `f` belong to a set `t`
 such that the restriction of the `σ`-algebra in the codomain to `t` is countably generated,
 then `f` is a.e.-measurable. -/
 lemma MeasureTheory.NullMeasurable.aemeasurable_of_aerange {f : α → β} {t : Set β}
-    [MeasurableSpace.CountablyGenerated t] (h : NullMeasurable f μ) (hft : ∀ᵐ x ∂μ, f x ∈ t) :
+    [SigmaAlgebra.CountablyGenerated t] (h : NullMeasurable f μ) (hft : ∀ᵐ x ∂μ, f x ∈ t) :
     AEMeasurable f μ := by
   rcases eq_empty_or_nonempty t with rfl | hne
   · obtain rfl : μ = 0 := by simpa using hft
@@ -427,13 +428,13 @@ lemma map_sum {ι : Type*} {m : ι → Measure α} {f : α → β} (hf : AEMeasu
   have M i : AEMeasurable f (m i) := hf.mono_measure (le_sum m i)
   simp_rw [map_apply_of_aemeasurable (M _) hs]
 
-lemma map_finset_sum {ι β : Type*} {mβ : MeasurableSpace β} {m : ι → Measure α}
+lemma map_finset_sum {ι β : Type*} {mβ : SigmaAlgebra β} {m : ι → Measure α}
     {f : α → β} {s : Finset ι} (hf : AEMeasurable f (∑ i ∈ s, m i)) :
     map f (∑ i ∈ s, m i) = ∑ i ∈ s, (m i).map f := by
   rw [← sum_coe_finset, ← sum_coe_finset, Measure.map_sum]
   rwa [sum_coe_finset]
 
-lemma map_finset_sum' {ι β : Type*} [Fintype ι] {mβ : MeasurableSpace β} {m : ι → Measure α}
+lemma map_finset_sum' {ι β : Type*} [Fintype ι] {mβ : SigmaAlgebra β} {m : ι → Measure α}
     {f : α → β} (hf : AEMeasurable f (∑ i, m i)) :
     map f (∑ i, m i) = ∑ i, (m i).map f := map_finset_sum hf
 

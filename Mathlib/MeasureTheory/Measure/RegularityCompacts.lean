@@ -31,7 +31,7 @@ open scoped ENNReal Uniformity
 
 namespace MeasureTheory
 
-variable {α : Type*} [MeasurableSpace α] {μ : Measure α}
+variable {α : Type*} [SigmaAlgebra α] {μ : Measure α}
 
 theorem innerRegularWRT_isCompact_closure_iff [TopologicalSpace α] [R1Space α] :
     μ.InnerRegularWRT (IsCompact ∘ closure) IsClosed ↔ μ.InnerRegularWRT IsCompact IsClosed := by
@@ -93,7 +93,7 @@ theorem innerRegularWRT_isCompact_closure_of_univ [TopologicalSpace α]
 
 theorem exists_isCompact_closure_measure_compl_lt [TopologicalSpace α]
     [SecondCountableTopology α] [IsCompletelyPseudoMetrizableSpace α]
-    [OpensMeasurableSpace α] (P : Measure α) [IsFiniteMeasure P] (ε : ℝ≥0∞) (hε : 0 < ε) :
+    [OpensSigmaAlgebra α] (P : Measure α) [IsFiniteMeasure P] (ε : ℝ≥0∞) (hε : 0 < ε) :
     ∃ K, IsCompact (closure K) ∧ P Kᶜ < ε := by
   /-
   If α is empty, the result is trivial.
@@ -119,7 +119,8 @@ theorem exists_isCompact_closure_measure_compl_lt [TopologicalSpace α]
     have h_univ n : (⋃ m, f n m) = univ := hseq_dense.iUnion_uniformity_ball (htu n)
     have h3 n (ε : ℝ≥0∞) (hε : 0 < ε) : ∃ m, P (⋂ m' ≤ m, (f n m')ᶜ) < ε := by
       refine exists_measure_iInter_lt (fun m ↦ ?_) hε ⟨0, measure_ne_top P _⟩ ?_
-      · exact (measurable_prodMk_left (hto n).measurableSet).compl.nullMeasurableSet
+      · exact MeasurableSet.nullMeasurableSet
+          (MeasurableSet.compl (measurable_prodMk_left (hto n).measurableSet))
       · rw [← compl_iUnion, h_univ, compl_univ]
     choose! s' s'bound using h3
     rcases ENNReal.exists_pos_sum_of_countable' (ne_of_gt hε) ℕ with ⟨δ, hδ1, hδ2⟩
@@ -134,35 +135,35 @@ theorem exists_isCompact_closure_measure_compl_lt [TopologicalSpace α]
 
 theorem innerRegularWRT_isCompact_closure [TopologicalSpace α]
     [SecondCountableTopology α] [IsCompletelyPseudoMetrizableSpace α]
-    [OpensMeasurableSpace α] (P : Measure α) [IsFiniteMeasure P] :
+    [OpensSigmaAlgebra α] (P : Measure α) [IsFiniteMeasure P] :
     P.InnerRegularWRT (IsCompact ∘ closure) IsClosed :=
   innerRegularWRT_isCompact_closure_of_univ
     (exists_isCompact_closure_measure_compl_lt P)
 
 theorem innerRegularWRT_isCompact_isClosed [TopologicalSpace α]
     [SecondCountableTopology α] [IsCompletelyPseudoMetrizableSpace α]
-    [OpensMeasurableSpace α] (P : Measure α) [IsFiniteMeasure P] :
+    [OpensSigmaAlgebra α] (P : Measure α) [IsFiniteMeasure P] :
     P.InnerRegularWRT (fun s ↦ IsCompact s ∧ IsClosed s) IsClosed := by
   rw [innerRegularWRT_isCompact_isClosed_iff_innerRegularWRT_isCompact_closure]
   exact innerRegularWRT_isCompact_closure P
 
 theorem innerRegularWRT_isCompact [TopologicalSpace α]
     [SecondCountableTopology α] [IsCompletelyPseudoMetrizableSpace α]
-    [OpensMeasurableSpace α] (P : Measure α) [IsFiniteMeasure P] :
+    [OpensSigmaAlgebra α] (P : Measure α) [IsFiniteMeasure P] :
     P.InnerRegularWRT IsCompact IsClosed := by
   rw [← innerRegularWRT_isCompact_closure_iff]
   exact innerRegularWRT_isCompact_closure P
 
 theorem innerRegularWRT_isCompact_isClosed_isOpen [TopologicalSpace α]
     [SecondCountableTopology α] [IsCompletelyPseudoMetrizableSpace α]
-    [OpensMeasurableSpace α] (P : Measure α) [IsFiniteMeasure P] :
+    [OpensSigmaAlgebra α] (P : Measure α) [IsFiniteMeasure P] :
     P.InnerRegularWRT (fun s ↦ IsCompact s ∧ IsClosed s) IsOpen :=
   (innerRegularWRT_isCompact_isClosed P).trans
     (Measure.InnerRegularWRT.of_pseudoMetrizableSpace P)
 
 theorem innerRegularWRT_isCompact_isOpen [TopologicalSpace α]
     [SecondCountableTopology α] [IsCompletelyPseudoMetrizableSpace α]
-    [OpensMeasurableSpace α] (P : Measure α) [IsFiniteMeasure P] :
+    [OpensSigmaAlgebra α] (P : Measure α) [IsFiniteMeasure P] :
     P.InnerRegularWRT IsCompact IsOpen :=
   (innerRegularWRT_isCompact P).trans
     (Measure.InnerRegularWRT.of_pseudoMetrizableSpace P)

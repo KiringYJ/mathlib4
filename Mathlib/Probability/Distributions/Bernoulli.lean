@@ -38,7 +38,7 @@ open scoped ENNReal
 
 namespace ProbabilityTheory
 
-variable {X Y : Type*} [MeasurableSpace X] [MeasurableSpace Y] {x y : X} {p : I}
+variable {X Y : Type*} [SigmaAlgebra X] [SigmaAlgebra Y] {x y : X} {p : I}
 
 /-- The **Bernoulli distribution** over an arbitrary measurable space `X`.
 Given `x y : X` and `p : I` (`I` is the `unitInterval`),
@@ -194,11 +194,11 @@ section HasLaw
 
 /-! ### Bernoulli random variables -/
 
-variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω}
+variable {Ω : Type*} {mΩ : SigmaAlgebra Ω} {P : Measure Ω}
 
 /-- The constant indicator of a set follows a Bernoulli distribution. -/
 theorem hasLaw_indicator_bernoulliMeasure [IsProbabilityMeasure P] {M : Type*} [Zero M]
-    [MeasurableSpace M] (c : M) {s : Set Ω} (hs : NullMeasurableSet s P) :
+    [SigmaAlgebra M] (c : M) {s : Set Ω} (hs : NullMeasurableSet s P) :
     HasLaw (s.indicator (fun _ ↦ c)) Ber(c, 0, ⟨P.real s, by simp⟩) P := by
   classical
   have h : AEMeasurable (s.indicator fun _ ↦ c) P := aemeasurable_const.indicator₀ hs
@@ -210,7 +210,7 @@ theorem hasLaw_indicator_bernoulliMeasure [IsProbabilityMeasure P] {M : Type*} [
 
 /-- The constant indicator of a set follows a Bernoulli distribution. -/
 theorem hasLaw_indicator_one_bernoulliMeasure [IsProbabilityMeasure P] {M : Type*} [Zero M] [One M]
-    [MeasurableSpace M] {s : Set Ω} (hs : NullMeasurableSet s P) :
+    [SigmaAlgebra M] {s : Set Ω} (hs : NullMeasurableSet s P) :
     HasLaw (s.indicator (1 : Ω → M)) Ber(1, 0, ⟨P.real s, by simp⟩) P :=
   hasLaw_indicator_bernoulliMeasure 1 hs
 

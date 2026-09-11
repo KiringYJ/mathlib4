@@ -7,7 +7,7 @@ module
 
 public import Mathlib.MeasureTheory.Measure.AbsolutelyContinuous
 public import Mathlib.MeasureTheory.OuterMeasure.BorelCantelli
-public import Mathlib.MeasureTheory.MeasurableSpace.MeasurablyGenerated
+public import Mathlib.MeasureTheory.SigmaAlgebra.MeasurablyGenerated
 
 /-!
 # Quasi-Measure-Preserving Functions
@@ -33,7 +33,7 @@ namespace MeasureTheory
 open Set Function ENNReal
 open Filter hiding map
 
-variable {mα : MeasurableSpace α} {mβ : MeasurableSpace β} {mγ : MeasurableSpace γ}
+variable {mα : SigmaAlgebra α} {mβ : SigmaAlgebra β} {mγ : SigmaAlgebra γ}
   {μ ν : Measure α} {s : Set α}
 
 namespace Measure
@@ -41,7 +41,7 @@ namespace Measure
 /-- A map `f : α → β` is said to be *quasi-measure-preserving* (a.k.a. non-singular) w.r.t. measures
 `μa` and `μb` if it is measurable and `μb s = 0` implies `μa (f ⁻¹' s) = 0`. -/
 @[fun_prop]
-structure QuasiMeasurePreserving {m0 : MeasurableSpace α} (f : α → β)
+structure QuasiMeasurePreserving {m0 : SigmaAlgebra α} (f : α → β)
   (μa : Measure α := by volume_tac)
   (μb : Measure β := by volume_tac) : Prop where
   protected measurable : Measurable f
@@ -52,13 +52,13 @@ attribute [fun_prop] QuasiMeasurePreserving.measurable
 namespace QuasiMeasurePreserving
 
 @[fun_prop]
-protected theorem id {_m0 : MeasurableSpace α} (μ : Measure α) : QuasiMeasurePreserving id μ μ :=
+protected theorem id {_m0 : SigmaAlgebra α} (μ : Measure α) : QuasiMeasurePreserving id μ μ :=
   ⟨measurable_id, map_id.absolutelyContinuous⟩
 
 variable {μa μa' : Measure α} {μb μb' : Measure β} {μc : Measure γ} {f : α → β}
 
 protected theorem _root_.Measurable.quasiMeasurePreserving
-    {_m0 : MeasurableSpace α} (hf : Measurable f) (μ : Measure α) :
+    {_m0 : SigmaAlgebra α} (hf : Measurable f) (μ : Measure α) :
     QuasiMeasurePreserving f μ (μ.map f) :=
   ⟨hf, AbsolutelyContinuous.rfl⟩
 
@@ -189,7 +189,7 @@ theorem exists_preimage_eq_of_preimage_ae {f : α → α} (h : QuasiMeasurePrese
 open scoped Pointwise
 
 @[to_additive]
-theorem smul_ae_eq_of_ae_eq {G α : Type*} [Group G] [MulAction G α] {_ : MeasurableSpace α}
+theorem smul_ae_eq_of_ae_eq {G α : Type*} [Group G] [MulAction G α] {_ : SigmaAlgebra α}
     {s t : Set α} {μ : Measure α} (g : G)
     (h_qmp : QuasiMeasurePreserving (g⁻¹ • · : α → α) μ μ)
     (h_ae_eq : s =ᵐ[μ] t) : (g • s : Set α) =ᵐ[μ] (g • t : Set α) := by
@@ -203,7 +203,7 @@ open scoped Pointwise
 
 @[to_additive]
 theorem pairwise_aedisjoint_of_aedisjoint_forall_ne_one {G α : Type*} [Group G] [MulAction G α]
-    {_ : MeasurableSpace α} {μ : Measure α} {s : Set α}
+    {_ : SigmaAlgebra α} {μ : Measure α} {s : Set α}
     (h_ae_disjoint : ∀ g ≠ (1 : G), AEDisjoint μ (g • s) s)
     (h_qmp : ∀ g : G, QuasiMeasurePreserving (g • ·) μ μ) :
     Pairwise (AEDisjoint μ on fun g : G => g • s) := by
@@ -238,7 +238,7 @@ open MeasureTheory
 
 namespace MeasurableEquiv
 
-variable {_ : MeasurableSpace α} [MeasurableSpace β] {μ : Measure α}
+variable {_ : SigmaAlgebra α} [SigmaAlgebra β] {μ : Measure α}
 
 theorem quasiMeasurePreserving_symm (μ : Measure α) (e : α ≃ᵐ β) :
     Measure.QuasiMeasurePreserving e.symm (μ.map e) μ :=

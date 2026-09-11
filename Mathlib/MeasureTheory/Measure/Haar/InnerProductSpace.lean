@@ -8,7 +8,7 @@ module
 public import Mathlib.Analysis.InnerProductSpace.Orientation
 public import Mathlib.Analysis.InnerProductSpace.ProdL2
 public import Mathlib.MeasureTheory.Measure.Lebesgue.EqHaar
-public import Mathlib.Analysis.Normed.Lp.MeasurableSpace
+public import Mathlib.Analysis.Normed.Lp.SigmaAlgebra
 
 /-!
 # Volume forms and measures on inner product spaces
@@ -28,7 +28,7 @@ variable {ι E F : Type*}
 
 variable [NormedAddCommGroup F] [InnerProductSpace ℝ F]
   [NormedAddCommGroup E] [InnerProductSpace ℝ E]
-  [MeasurableSpace E] [BorelSpace E] [MeasurableSpace F] [BorelSpace F]
+  [SigmaAlgebra E] [BorelSpace E] [SigmaAlgebra F] [BorelSpace F]
 
 namespace LinearIsometryEquiv
 
@@ -89,7 +89,7 @@ theorem OrthonormalBasis.volume_parallelepiped (b : OrthonormalBasis ι ℝ F) :
 /-- The Haar measure defined by any orthonormal basis of a finite-dimensional inner product space
 is equal to its volume measure. -/
 theorem OrthonormalBasis.addHaar_eq_volume {ι F : Type*} [Fintype ι] [NormedAddCommGroup F]
-    [InnerProductSpace ℝ F] [FiniteDimensional ℝ F] [MeasurableSpace F] [BorelSpace F]
+    [InnerProductSpace ℝ F] [FiniteDimensional ℝ F] [SigmaAlgebra F] [BorelSpace F]
     (b : OrthonormalBasis ι ℝ F) :
     b.toBasis.addHaar = volume := by
   rw [Basis.addHaar_eq_iff]
@@ -161,9 +161,9 @@ end LinearIsometryEquiv
 section Prod
 
 variable (U V : Type*)
-variable [NormedAddCommGroup U] [InnerProductSpace ℝ U] [MeasurableSpace U] [BorelSpace U]
+variable [NormedAddCommGroup U] [InnerProductSpace ℝ U] [SigmaAlgebra U] [BorelSpace U]
 variable [FiniteDimensional ℝ U]
-variable [NormedAddCommGroup V] [InnerProductSpace ℝ V] [MeasurableSpace V] [BorelSpace V]
+variable [NormedAddCommGroup V] [InnerProductSpace ℝ V] [SigmaAlgebra V] [BorelSpace V]
 variable [FiniteDimensional ℝ V]
 
 /-- Decompose `WithLp 2 (U × V) ≃ᵐ U × V` into a series of known measure-preserving equivalences -/

@@ -36,13 +36,13 @@ open MeasureTheory
 
 /-- We say that a type has `MeasurableSup` if `(c ⊔ ·)` and `(· ⊔ c)` are measurable functions.
 For a typeclass assuming measurability of `uncurry (· ⊔ ·)` see `MeasurableSup₂`. -/
-class MeasurableSup (M : Type*) [MeasurableSpace M] [Max M] : Prop where
+class MeasurableSup (M : Type*) [SigmaAlgebra M] [Max M] : Prop where
   measurable_const_sup : ∀ c : M, Measurable (c ⊔ ·) := by intro c; fun_prop
   measurable_sup_const : ∀ c : M, Measurable (· ⊔ c) := by intro c; fun_prop
 
 /-- We say that a type has `MeasurableSup₂` if `uncurry (· ⊔ ·)` is a measurable functions.
 For a typeclass assuming measurability of `(c ⊔ ·)` and `(· ⊔ c)` see `MeasurableSup`. -/
-class MeasurableSup₂ (M : Type*) [MeasurableSpace M] [Max M] : Prop where
+class MeasurableSup₂ (M : Type*) [SigmaAlgebra M] [Max M] : Prop where
   measurable_sup : Measurable fun p : M × M => p.1 ⊔ p.2 := by intro p; fun_prop
 
 export MeasurableSup₂ (measurable_sup)
@@ -51,20 +51,20 @@ export MeasurableSup (measurable_const_sup measurable_sup_const)
 
 /-- We say that a type has `MeasurableInf` if `(c ⊓ ·)` and `(· ⊓ c)` are measurable functions.
 For a typeclass assuming measurability of `uncurry (· ⊓ ·)` see `MeasurableInf₂`. -/
-class MeasurableInf (M : Type*) [MeasurableSpace M] [Min M] : Prop where
+class MeasurableInf (M : Type*) [SigmaAlgebra M] [Min M] : Prop where
   measurable_const_inf : ∀ c : M, Measurable (c ⊓ ·) := by intro c; fun_prop
   measurable_inf_const : ∀ c : M, Measurable (· ⊓ c) := by intro c; fun_prop
 
 /-- We say that a type has `MeasurableInf₂` if `uncurry (· ⊓ ·)` is a measurable functions.
 For a typeclass assuming measurability of `(c ⊓ ·)` and `(· ⊓ c)` see `MeasurableInf`. -/
-class MeasurableInf₂ (M : Type*) [MeasurableSpace M] [Min M] : Prop where
+class MeasurableInf₂ (M : Type*) [SigmaAlgebra M] [Min M] : Prop where
   measurable_inf : Measurable fun p : M × M => p.1 ⊓ p.2 := by intro p; fun_prop
 
 export MeasurableInf₂ (measurable_inf)
 
 export MeasurableInf (measurable_const_inf measurable_inf_const)
 
-variable {M : Type*} [MeasurableSpace M]
+variable {M : Type*} [SigmaAlgebra M]
 
 section OrderDual
 
@@ -86,7 +86,7 @@ instance (priority := 100) OrderDual.instMeasurableInf₂ [Max M] [MeasurableSup
 
 end OrderDual
 
-variable {α : Type*} {m : MeasurableSpace α} {μ : Measure α} {f g : α → M}
+variable {α : Type*} {m : SigmaAlgebra α} {μ : Measure α} {f g : α → M}
 
 section Sup
 
@@ -194,7 +194,7 @@ section SemilatticeSup
 
 open Finset
 
-variable {δ : Type*} [MeasurableSpace δ] [SemilatticeSup α] [MeasurableSup₂ α]
+variable {δ : Type*} [SigmaAlgebra δ] [SemilatticeSup α] [MeasurableSup₂ α]
 
 @[fun_prop]
 theorem Finset.measurable_sup' {ι : Type*} {s : Finset ι} (hs : s.Nonempty) {f : ι → δ → α}

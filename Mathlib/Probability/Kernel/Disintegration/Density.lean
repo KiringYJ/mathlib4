@@ -79,13 +79,13 @@ generated hypothesis instead of specializing to `ℝ`.
 
 @[expose] public section
 
-open ENNReal Filter MeasurableSpace MeasureTheory Set
+open ENNReal Filter SigmaAlgebra MeasureTheory Set
 
 open scoped NNReal Topology
 
 namespace ProbabilityTheory.Kernel
 
-variable {α β γ : Type*} {mα : MeasurableSpace α} {mβ : MeasurableSpace β} {mγ : MeasurableSpace γ}
+variable {α β γ : Type*} {mα : SigmaAlgebra α} {mβ : SigmaAlgebra β} {mγ : SigmaAlgebra γ}
     [CountablyGenerated γ] {κ : Kernel α (γ × β)} {ν : Kernel α γ}
 
 section DensityProcess
@@ -243,7 +243,7 @@ lemma setIntegral_densityProcess_of_mem (hκν : fst κ ≤ ν) [hν : IsFiniteK
 open scoped Function in -- required for scoped `on` notation
 lemma setIntegral_densityProcess (hκν : fst κ ≤ ν) [IsFiniteKernel ν]
     (n : ℕ) (a : α) {s : Set β} (hs : MeasurableSet s) {A : Set γ}
-    (hA : MeasurableSet[countableFiltration γ n] A) :
+    (hA : A ∈ countableFiltration γ n) :
     ∫ x in A, densityProcess κ ν n a x s ∂(ν a) = (κ a).real (A ×ˢ s) := by
   have : IsFiniteKernel κ := isFiniteKernel_of_isFiniteKernel_fst (h := isFiniteKernel_of_le hκν)
   obtain ⟨S, hS_subset, rfl⟩ := (measurableSet_generateFrom_countablePartition_iff _ _).mp hA
@@ -273,9 +273,9 @@ lemma integral_densityProcess (hκν : fst κ ≤ ν) [IsFiniteKernel ν]
 
 lemma setIntegral_densityProcess_of_le (hκν : fst κ ≤ ν)
     [IsFiniteKernel ν] {n m : ℕ} (hnm : n ≤ m) (a : α) {s : Set β} (hs : MeasurableSet s)
-    {A : Set γ} (hA : MeasurableSet[countableFiltration γ n] A) :
+    {A : Set γ} (hA : A ∈ countableFiltration γ n) :
     ∫ x in A, densityProcess κ ν m a x s ∂(ν a) = (κ a).real (A ×ˢ s) :=
-  setIntegral_densityProcess hκν m a hs ((countableFiltration γ).mono hnm A hA)
+  setIntegral_densityProcess hκν m a hs ((countableFiltration γ).mono hnm hA)
 
 lemma condExp_densityProcess (hκν : fst κ ≤ ν) [IsFiniteKernel ν]
     {i j : ℕ} (hij : i ≤ j) (a : α) {s : Set β} (hs : MeasurableSet s) :
@@ -507,7 +507,7 @@ lemma tendsto_setIntegral_densityProcess (hκν : fst κ ≤ ν)
 /-- Auxiliary lemma for `setIntegral_density`. -/
 lemma setIntegral_density_of_measurableSet (hκν : fst κ ≤ ν)
     [IsFiniteKernel ν] (n : ℕ) (a : α) {s : Set β} (hs : MeasurableSet s) {A : Set γ}
-    (hA : MeasurableSet[countableFiltration γ n] A) :
+    (hA : A ∈ countableFiltration γ n) :
     ∫ x in A, density κ ν a x s ∂(ν a) = (κ a).real (A ×ˢ s) := by
   suffices ∫ x in A, density κ ν a x s ∂(ν a) = ∫ x in A, densityProcess κ ν n a x s ∂(ν a) by
     exact this ▸ setIntegral_densityProcess hκν _ _ hs hA
@@ -532,19 +532,19 @@ lemma setIntegral_density (hκν : fst κ ≤ ν) [IsFiniteKernel ν]
     (a : α) {s : Set β} (hs : MeasurableSet s) {A : Set γ} (hA : MeasurableSet A) :
     ∫ x in A, density κ ν a x s ∂(ν a) = (κ a).real (A ×ˢ s) := by
   have : IsFiniteKernel κ := isFiniteKernel_of_isFiniteKernel_fst (h := isFiniteKernel_of_le hκν)
-  have hgen : ‹MeasurableSpace γ› =
-      .generateFrom {s | ∃ n, MeasurableSet[countableFiltration γ n] s} := by
-    rw [ofPred_exists, generateFrom_iUnion_measurableSet (countableFiltration γ),
+  have hgen : ‹SigmaAlgebra γ› =
+      .generateFrom (⋃ n, ((countableFiltration γ n : SigmaAlgebra γ) : Set (Set γ))) := by
+    rw [← SigmaAlgebra.iSup_eq_generateFrom (countableFiltration γ),
       iSup_countableFiltration]
-  have hpi : IsPiSystem {s | ∃ n, MeasurableSet[countableFiltration γ n] s} := by
-    rw [ofPred_exists]
-    exact isPiSystem_iUnion_of_monotone _
-      (fun n ↦ @isPiSystem_measurableSet _ (countableFiltration γ n))
+  have hpi : IsPiSystem
+      (⋃ n, ((countableFiltration γ n : SigmaAlgebra γ) : Set (Set γ))) :=
+    isPiSystem_iUnion_of_monotone _
+      (fun n ↦ SigmaAlgebra.isPiSystem (countableFiltration γ n))
       fun _ _ ↦ (countableFiltration γ).mono
   induction A, hA using induction_on_inter hgen hpi with
   | empty => simp
-  | basic s hs =>
-    rcases hs with ⟨n, hn⟩
+  | basic A hA =>
+    rcases Set.mem_iUnion.mp hA with ⟨n, hn⟩
     exact setIntegral_density_of_measurableSet hκν n a hs hn
   | compl A hA hA_eq =>
     have h := integral_add_compl hA (integrable_density hκν a hs)
@@ -553,7 +553,8 @@ lemma setIntegral_density (hκν : fst κ ≤ ν) [IsFiniteKernel ν]
       rw [prod_sdiff_prod, compl_eq_univ_sdiff]
       simp
     rw [this, measureReal_def,
-      measure_sdiff (by intro; simp) (hA.prod hs).nullMeasurableSet (measure_ne_top (κ a) _),
+      measure_sdiff (by intro; simp)
+        (MeasurableSet.nullMeasurableSet (MeasurableSet.prod hA hs)) (measure_ne_top (κ a) _),
       toReal_sub_of_le (measure_mono (by intro x; simp)) (measure_ne_top _ _)]
     rw [eq_tsub_iff_add_eq_of_le, add_comm]
     · exact h
@@ -565,7 +566,7 @@ lemma setIntegral_density (hκν : fst κ ≤ ν) [IsFiniteKernel ν]
     congr
     rw [iUnion_prod_const, measure_iUnion]
     · exact hf_disj.mono fun _ _ h ↦ h.set_prod_left _ _
-    · exact fun i ↦ (hf i).prod hs
+    · exact fun i ↦ MeasurableSet.prod (hf i) hs
 
 lemma setLIntegral_density (hκν : fst κ ≤ ν) [IsFiniteKernel ν]
     (a : α) {s : Set β} (hs : MeasurableSet s) {A : Set γ} (hA : MeasurableSet A) :

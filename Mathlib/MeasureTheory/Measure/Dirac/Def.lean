@@ -21,7 +21,7 @@ open scoped ENNReal NNReal
 
 noncomputable section
 
-variable {α : Type*} [MeasurableSpace α] {s : Set α} {a : α}
+variable {α : Type*} [SigmaAlgebra α] {s : Set α} {a : α}
 
 namespace MeasureTheory.Measure
 

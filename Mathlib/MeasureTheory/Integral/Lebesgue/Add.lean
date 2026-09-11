@@ -26,7 +26,7 @@ open Set Filter ENNReal NNReal SimpleFunc
 
 open scoped Topology
 
-variable {α β : Type*} {m : MeasurableSpace α} {μ : Measure α}
+variable {α β : Type*} {m : SigmaAlgebra α} {μ : Measure α}
 
 local infixr:25 " →ₛ " => SimpleFunc
 
@@ -445,12 +445,12 @@ theorem lintegral_mul_const' (r : ℝ≥0∞) (f : α → ℝ≥0∞) (hr : r �
 
 /-- A double integral of a product where each factor contains only one variable
 is a product of integrals -/
-theorem lintegral_lintegral_mul {β} [MeasurableSpace β] {ν : Measure β} {f : α → ℝ≥0∞}
+theorem lintegral_lintegral_mul {β} [SigmaAlgebra β] {ν : Measure β} {f : α → ℝ≥0∞}
     {g : β → ℝ≥0∞} (hf : AEMeasurable f μ) (hg : AEMeasurable g ν) :
     ∫⁻ x, ∫⁻ y, f x * g y ∂ν ∂μ = (∫⁻ x, f x ∂μ) * ∫⁻ y, g y ∂ν := by
   simp [lintegral_const_mul'' _ hg, lintegral_mul_const'' _ hf]
 
-theorem lintegral_lintegral_mul_le {β} [MeasurableSpace β] {ν : Measure β} (f : α → ℝ≥0∞)
+theorem lintegral_lintegral_mul_le {β} [SigmaAlgebra β] {ν : Measure β} (f : α → ℝ≥0∞)
     (g : β → ℝ≥0∞) :
     (∫⁻ x, f x ∂μ) * ∫⁻ y, g y ∂ν ≤ ∫⁻ x, ∫⁻ y, f x * g y ∂ν ∂μ := by
   grw [lintegral_mul_const_le]
@@ -461,14 +461,14 @@ end Mul
 
 section Trim
 
-variable {m m0 : MeasurableSpace α}
+variable {m m0 : SigmaAlgebra α}
 
 theorem lintegral_trim {μ : Measure α} (hm : m ≤ m0) {f : α → ℝ≥0∞} (hf : Measurable[m] f) :
     ∫⁻ a, f a ∂μ.trim hm = ∫⁻ a, f a ∂μ := by
   refine
     @Measurable.ennreal_induction α m (fun f => ∫⁻ a, f a ∂μ.trim hm = ∫⁻ a, f a ∂μ) ?_ ?_ ?_ f hf
   · intro c s hs
-    rw [lintegral_indicator hs, lintegral_indicator (hm s hs), setLIntegral_const,
+    rw [lintegral_indicator hs, lintegral_indicator (hm hs), setLIntegral_const,
       setLIntegral_const]
     suffices h_trim_s : μ.trim hm s = μ s by rw [h_trim_s]
     exact trim_measurableSet_eq hm hs

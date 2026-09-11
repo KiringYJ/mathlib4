@@ -48,7 +48,7 @@ open scoped Matrix NNReal Real RealInnerProductSpace ProbabilityTheory
 namespace ProbabilityTheory
 
 variable {E : Type*} [NormedAddCommGroup E] [SecondCountableTopology E]
-  [CompleteSpace E] [MeasurableSpace E] [BorelSpace E] {μ ν : Measure E}
+  [CompleteSpace E] [SigmaAlgebra E] [BorelSpace E] {μ ν : Measure E}
 
 section NormedSpace
 

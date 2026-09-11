@@ -6,7 +6,7 @@ Authors: Rémy Degenne
 module
 
 public import Mathlib.Probability.Independence.Kernel.Indep
-public import Mathlib.MeasureTheory.MeasurableSpace.Pi
+public import Mathlib.MeasureTheory.SigmaAlgebra.Pi
 public import Mathlib.Probability.ConditionalProbability
 public import Mathlib.Probability.Kernel.Composition.MeasureComp
 
@@ -31,11 +31,11 @@ measure is the Dirac measure on `Unit`.
 
 @[expose] public section
 
-open Set MeasureTheory MeasurableSpace
+open Set MeasureTheory SigmaAlgebra
 
 namespace ProbabilityTheory.Kernel
 
-variable {α Ω ι β β' γ γ' : Type*} {mα : MeasurableSpace α} {mΩ : MeasurableSpace Ω}
+variable {α Ω ι β β' γ γ' : Type*} {mα : SigmaAlgebra α} {mΩ : SigmaAlgebra Ω}
   {κ η : Kernel α Ω} {μ : Measure α} {f : Ω → β} {g : Ω → β'}
 
 section Definitions
@@ -43,53 +43,53 @@ section Definitions
 /-- A family of functions defined on the same space `Ω` and taking values in possibly different
 spaces, each with a measurable space structure, is independent if the family of measurable space
 structures they generate on `Ω` is independent. For a function `g` with codomain having measurable
-space structure `m`, the generated measurable space structure is `MeasurableSpace.comap g m`. -/
-def iIndepFun {β : ι → Type*} [m : ∀ x : ι, MeasurableSpace (β x)]
+space structure `m`, the generated measurable space structure is `SigmaAlgebra.comap g m`. -/
+def iIndepFun {β : ι → Type*} [m : ∀ x : ι, SigmaAlgebra (β x)]
     (f : ∀ x : ι, Ω → β x) (κ : Kernel α Ω)
     (μ : Measure α := by volume_tac) : Prop :=
-  iIndep (m := fun x ↦ MeasurableSpace.comap (f x) (m x)) κ μ
+  iIndep (m := fun x ↦ SigmaAlgebra.comap (f x) (m x)) κ μ
 
 /-- Two functions are independent if the two measurable space structures they generate are
 independent. For a function `f` with codomain having measurable space structure `m`, the generated
-measurable space structure is `MeasurableSpace.comap f m`. -/
-def IndepFun [mβ : MeasurableSpace β] [mγ : MeasurableSpace γ]
+measurable space structure is `SigmaAlgebra.comap f m`. -/
+def IndepFun [mβ : SigmaAlgebra β] [mγ : SigmaAlgebra γ]
     (f : Ω → β) (g : Ω → γ) (κ : Kernel α Ω)
     (μ : Measure α := by volume_tac) : Prop :=
-  Indep (MeasurableSpace.comap f mβ) (MeasurableSpace.comap g mγ) κ μ
+  Indep (SigmaAlgebra.comap f mβ) (SigmaAlgebra.comap g mγ) κ μ
 
 end Definitions
 
 section ByDefinition
 
-variable {β : ι → Type*} {mβ : ∀ i, MeasurableSpace (β i)}
-  {_mα : MeasurableSpace α} {m : ι → MeasurableSpace Ω} {_mΩ : MeasurableSpace Ω}
+variable {β : ι → Type*} {mβ : ∀ i, SigmaAlgebra (β i)}
+  {_mα : SigmaAlgebra α} {m : ι → SigmaAlgebra Ω} {_mΩ : SigmaAlgebra Ω}
   {κ η : Kernel α Ω} {μ : Measure α}
   {π : ι → Set (Set Ω)} {s : ι → Set Ω} {S : Finset ι} {f : ∀ x : ι, Ω → β x}
   {s1 s2 : Set (Set Ω)} {ι' : Type*} {g : ι' → ι}
 
-@[simp] lemma iIndepFun_zero_right {β : ι → Type*} {m : ∀ x : ι, MeasurableSpace (β x)}
+@[simp] lemma iIndepFun_zero_right {β : ι → Type*} {m : ∀ x : ι, SigmaAlgebra (β x)}
     {f : ∀ x : ι, Ω → β x} : iIndepFun f κ 0 := by simp [iIndepFun]
 
-@[simp] lemma indepFun_zero_right {β} [MeasurableSpace β] [MeasurableSpace γ]
+@[simp] lemma indepFun_zero_right {β} [SigmaAlgebra β] [SigmaAlgebra γ]
     {f : Ω → β} {g : Ω → γ} : IndepFun f g κ 0 := by simp [IndepFun]
 
-@[simp] lemma indepFun_zero_left {β} [MeasurableSpace β] [MeasurableSpace γ]
+@[simp] lemma indepFun_zero_left {β} [SigmaAlgebra β] [SigmaAlgebra γ]
     {f : Ω → β} {g : Ω → γ} : IndepFun f g (0 : Kernel α Ω) μ := by simp [IndepFun]
 
-lemma iIndepFun_congr {β : ι → Type*} {m : ∀ x : ι, MeasurableSpace (β x)}
+lemma iIndepFun_congr {β : ι → Type*} {m : ∀ x : ι, SigmaAlgebra (β x)}
     {f : ∀ x : ι, Ω → β x} (h : κ =ᵐ[μ] η) : iIndepFun f κ μ ↔ iIndepFun f η μ :=
   iIndep_congr h
 
 alias ⟨iIndepFun.congr, _⟩ := iIndepFun_congr
 
-lemma indepFun_congr {β} [MeasurableSpace β] [MeasurableSpace γ]
+lemma indepFun_congr {β} [SigmaAlgebra β] [SigmaAlgebra γ]
     {f : Ω → β} {g : Ω → γ} (h : κ =ᵐ[μ] η) : IndepFun f g κ μ ↔ IndepFun f g η μ :=
   indep_congr h
 
 alias ⟨IndepFun.congr, _⟩ := indepFun_congr
 
 @[nontriviality, simp]
-lemma iIndepFun.of_subsingleton [Subsingleton ι] {β : ι → Type*} {m : ∀ i, MeasurableSpace (β i)}
+lemma iIndepFun.of_subsingleton [Subsingleton ι] {β : ι → Type*} {m : ∀ i, SigmaAlgebra (β i)}
     {f : ∀ i, Ω → β i} [IsMarkovKernel κ] : iIndepFun f κ μ := by
   simp [iIndepFun]
 
@@ -108,7 +108,7 @@ lemma iIndepFun.meas_iInter [Fintype ι] (hf : iIndepFun f κ μ)
     (hs : ∀ i, MeasurableSet[(mβ i).comap (f i)] (s i)) :
     ∀ᵐ a ∂μ, κ a (⋂ i, s i) = ∏ i, κ a (s i) := hf.iIndep.meas_iInter hs
 
-lemma IndepFun.meas_inter {β} [mβ : MeasurableSpace β] [mγ : MeasurableSpace γ]
+lemma IndepFun.meas_inter {β} [mβ : SigmaAlgebra β] [mγ : SigmaAlgebra γ]
     {f : Ω → β} {g : Ω → γ} (hfg : IndepFun f g κ μ)
     {s t : Set Ω} (hs : MeasurableSet[mβ.comap f] s) (ht : MeasurableSet[mγ.comap g] t) :
     ∀ᵐ a ∂μ, κ a (s ∩ t) = κ a s * κ a t := hfg _ _ hs ht
@@ -127,12 +127,12 @@ lemma iIndepFun_precomp_of_bijective (hg : Function.Bijective g) :
 
 end ByDefinition
 
-theorem iIndepFun.indepFun {β : ι → Type*} {m : ∀ x, MeasurableSpace (β x)} {f : ∀ i, Ω → β i}
+theorem iIndepFun.indepFun {β : ι → Type*} {m : ∀ x, SigmaAlgebra (β x)} {f : ∀ i, Ω → β i}
     (hf_Indep : iIndepFun f κ μ) {i j : ι} (hij : i ≠ j) : IndepFun (f i) (f j) κ μ :=
   hf_Indep.indep hij
 
-theorem indepFun_iff_measure_inter_preimage_eq_mul {mβ : MeasurableSpace β}
-    {mβ' : MeasurableSpace β'} :
+theorem indepFun_iff_measure_inter_preimage_eq_mul {mβ : SigmaAlgebra β}
+    {mβ' : SigmaAlgebra β'} :
     IndepFun f g κ μ ↔
       ∀ s t, MeasurableSet s → MeasurableSet t
         → ∀ᵐ a ∂μ, κ a (f ⁻¹' s ∩ g ⁻¹' t) = κ a (f ⁻¹' s) * κ a (g ⁻¹' t) := by
@@ -143,7 +143,7 @@ theorem indepFun_iff_measure_inter_preimage_eq_mul {mβ : MeasurableSpace β}
 alias ⟨IndepFun.measure_inter_preimage_eq_mul, _⟩ := indepFun_iff_measure_inter_preimage_eq_mul
 
 theorem iIndepFun_iff_measure_inter_preimage_eq_mul {ι : Type*} {β : ι → Type*}
-    (m : ∀ x, MeasurableSpace (β x)) (f : ∀ i, Ω → β i) :
+    (m : ∀ x, SigmaAlgebra (β x)) (f : ∀ i, Ω → β i) :
     iIndepFun f κ μ ↔
       ∀ (S : Finset ι) {sets : ∀ i : ι, Set (β i)} (_H : ∀ i, i ∈ S → MeasurableSet[m i] (sets i)),
         ∀ᵐ a ∂μ, κ a (⋂ i ∈ S, (f i) ⁻¹' (sets i)) = ∏ i ∈ S, κ a ((f i) ⁻¹' (sets i)) := by
@@ -164,7 +164,7 @@ theorem iIndepFun_iff_measure_inter_preimage_eq_mul {ι : Type*} {β : ι → Ty
 
 alias ⟨iIndepFun.measure_inter_preimage_eq_mul, _⟩ := iIndepFun_iff_measure_inter_preimage_eq_mul
 
-theorem iIndepFun.congr' {β : ι → Type*} {mβ : ∀ i, MeasurableSpace (β i)}
+theorem iIndepFun.congr' {β : ι → Type*} {mβ : ∀ i, SigmaAlgebra (β i)}
     {f g : Π i, Ω → β i} (hf : iIndepFun f κ μ)
     (h : ∀ i, ∀ᵐ a ∂μ, f i =ᵐ[κ a] g i) :
     iIndepFun g κ μ := by
@@ -186,7 +186,7 @@ theorem iIndepFun.congr' {β : ι → Type*} {mβ : ∀ i, MeasurableSpace (β i
   convert! h'a using 2 with i hi
   exact A i hi
 
-theorem iIndepFun_congr' {β : ι → Type*} {mβ : ∀ i, MeasurableSpace (β i)}
+theorem iIndepFun_congr' {β : ι → Type*} {mβ : ∀ i, SigmaAlgebra (β i)}
     {f g : Π i, Ω → β i} (h : ∀ i, ∀ᵐ a ∂μ, f i =ᵐ[κ a] g i) :
     iIndepFun f κ μ ↔ iIndepFun g κ μ where
   mp h' := h'.congr' h
@@ -194,8 +194,8 @@ theorem iIndepFun_congr' {β : ι → Type*} {mβ : ∀ i, MeasurableSpace (β i
     refine h'.congr' fun i ↦ ?_
     filter_upwards [h i] with a ha using ha.symm
 
-lemma iIndepFun.comp {β γ : ι → Type*} {mβ : ∀ i, MeasurableSpace (β i)}
-    {mγ : ∀ i, MeasurableSpace (γ i)} {f : ∀ i, Ω → β i}
+lemma iIndepFun.comp {β γ : ι → Type*} {mβ : ∀ i, SigmaAlgebra (β i)}
+    {mγ : ∀ i, SigmaAlgebra (γ i)} {f : ∀ i, Ω → β i}
     (h : iIndepFun f κ μ) (g : ∀ i, β i → γ i) (hg : ∀ i, Measurable (g i)) :
     iIndepFun (fun i ↦ g i ∘ f i) κ μ := by
   rw [iIndepFun_iff_measure_inter_preimage_eq_mul] at h ⊢
@@ -205,8 +205,8 @@ lemma iIndepFun.comp {β γ : ι → Type*} {mβ : ∀ i, MeasurableSpace (β i)
   simp_rw [Set.preimage_comp]
   exact ha
 
-lemma iIndepFun.comp₀ {β γ : ι → Type*} {mβ : ∀ i, MeasurableSpace (β i)}
-    {mγ : ∀ i, MeasurableSpace (γ i)} {f : ∀ i, Ω → β i}
+lemma iIndepFun.comp₀ {β γ : ι → Type*} {mβ : ∀ i, SigmaAlgebra (β i)}
+    {mγ : ∀ i, SigmaAlgebra (γ i)} {f : ∀ i, Ω → β i}
     (h : iIndepFun f κ μ) (g : ∀ i, β i → γ i)
     (hf : ∀ i, AEMeasurable (f i) (κ ∘ₘ μ)) (hg : ∀ i, AEMeasurable (g i) ((κ ∘ₘ μ).map (f i))) :
     iIndepFun (fun i ↦ g i ∘ f i) κ μ := by
@@ -215,7 +215,7 @@ lemma iIndepFun.comp₀ {β γ : ι → Type*} {mβ : ∀ i, MeasurableSpace (β
   have h_ae i := ae_of_ae_map (hf i) (hg i).ae_eq_mk.symm
   exact iIndepFun.congr' h fun i ↦ Measure.ae_ae_of_ae_comp (h_ae i)
 
-theorem indepFun_iff_indepSet_preimage {mβ : MeasurableSpace β} {mβ' : MeasurableSpace β'}
+theorem indepFun_iff_indepSet_preimage {mβ : SigmaAlgebra β} {mβ' : SigmaAlgebra β'}
     [IsZeroOrMarkovKernel κ] (hf : Measurable f) (hg : Measurable g) :
     IndepFun f g κ μ ↔
       ∀ s t, MeasurableSet s → MeasurableSet t → IndepSet (f ⁻¹' s) (g ⁻¹' t) κ μ := by
@@ -225,10 +225,10 @@ theorem indepFun_iff_indepSet_preimage {mβ : MeasurableSpace β} {mβ' : Measur
   · rwa [← indepSet_iff_measure_inter_eq_mul (hf hs) (hg ht) κ μ]
 
 @[symm]
-nonrec theorem IndepFun.symm {_ : MeasurableSpace β} {_ : MeasurableSpace β'}
+nonrec theorem IndepFun.symm {_ : SigmaAlgebra β} {_ : SigmaAlgebra β'}
     (hfg : IndepFun f g κ μ) : IndepFun g f κ μ := hfg.symm
 
-theorem IndepFun.congr' {mβ : MeasurableSpace β} {mβ' : MeasurableSpace β'}
+theorem IndepFun.congr' {mβ : SigmaAlgebra β} {mβ' : SigmaAlgebra β'}
     {f' : Ω → β} {g' : Ω → β'} (hfg : IndepFun f g κ μ)
     (hf : ∀ᵐ a ∂μ, f =ᵐ[κ a] f') (hg : ∀ᵐ a ∂μ, g =ᵐ[κ a] g') :
     IndepFun f' g' κ μ := by
@@ -238,8 +238,8 @@ theorem IndepFun.congr' {mβ : MeasurableSpace β} {mβ' : MeasurableSpace β'}
   have h2 : g ⁻¹' B =ᵐ[κ a] g' ⁻¹' B := hg'.fun_comp (· ∈ B)
   rwa [← measure_congr h1, ← measure_congr h2, ← measure_congr (h1.inter h2)]
 
-theorem IndepFun.comp {mβ : MeasurableSpace β} {mβ' : MeasurableSpace β'}
-    {mγ : MeasurableSpace γ} {mγ' : MeasurableSpace γ'} {φ : β → γ} {ψ : β' → γ'}
+theorem IndepFun.comp {mβ : SigmaAlgebra β} {mβ' : SigmaAlgebra β'}
+    {mγ : SigmaAlgebra γ} {mγ' : SigmaAlgebra γ'} {φ : β → γ} {ψ : β' → γ'}
     (hfg : IndepFun f g κ μ) (hφ : Measurable φ) (hψ : Measurable ψ) :
     IndepFun (φ ∘ f) (ψ ∘ g) κ μ := by
   rintro _ _ ⟨A, hA, rfl⟩ ⟨B, hB, rfl⟩
@@ -247,8 +247,8 @@ theorem IndepFun.comp {mβ : MeasurableSpace β} {mβ' : MeasurableSpace β'}
   · exact ⟨φ ⁻¹' A, hφ hA, Set.preimage_comp.symm⟩
   · exact ⟨ψ ⁻¹' B, hψ hB, Set.preimage_comp.symm⟩
 
-theorem IndepFun.comp₀ {mβ : MeasurableSpace β} {mβ' : MeasurableSpace β'}
-    {mγ : MeasurableSpace γ} {mγ' : MeasurableSpace γ'} {φ : β → γ} {ψ : β' → γ'}
+theorem IndepFun.comp₀ {mβ : SigmaAlgebra β} {mβ' : SigmaAlgebra β'}
+    {mγ : SigmaAlgebra γ} {mγ' : SigmaAlgebra γ'} {φ : β → γ} {ψ : β' → γ'}
     (hfg : IndepFun f g κ μ)
     (hf : AEMeasurable f (κ ∘ₘ μ)) (hg : AEMeasurable g (κ ∘ₘ μ))
     (hφ : AEMeasurable φ ((κ ∘ₘ μ).map f)) (hψ : AEMeasurable ψ ((κ ∘ₘ μ).map g)) :
@@ -265,29 +265,29 @@ theorem IndepFun.comp₀ {mβ : MeasurableSpace β} {mβ' : MeasurableSpace β'}
     filter_upwards [haψ] with ω hωψ
     simp [hωψ]
 
-lemma indepFun_const_left {mβ : MeasurableSpace β} {mβ' : MeasurableSpace β'}
+lemma indepFun_const_left {mβ : SigmaAlgebra β} {mβ' : SigmaAlgebra β'}
     [IsZeroOrMarkovKernel κ] (c : β') (X : Ω → β) :
     IndepFun (fun _ ↦ c) X κ μ := by
-  rw [IndepFun, MeasurableSpace.comap_const]
+  rw [IndepFun, SigmaAlgebra.comap_const]
   exact indep_bot_left _
 
-lemma indepFun_const_right {mβ : MeasurableSpace β} {mβ' : MeasurableSpace β'}
+lemma indepFun_const_right {mβ : SigmaAlgebra β} {mβ' : SigmaAlgebra β'}
     [IsZeroOrMarkovKernel κ] (X : Ω → β) (c : β') :
     IndepFun X (fun _ ↦ c) κ μ :=
   (indepFun_const_left c X).symm
 
-theorem IndepFun.neg_right {_mβ : MeasurableSpace β} {_mβ' : MeasurableSpace β'} [Neg β']
+theorem IndepFun.neg_right {_mβ : SigmaAlgebra β} {_mβ' : SigmaAlgebra β'} [Neg β']
     [MeasurableNeg β'] (hfg : IndepFun f g κ μ) :
     IndepFun f (-g) κ μ := hfg.comp measurable_id measurable_neg
 
-theorem IndepFun.neg_left {_mβ : MeasurableSpace β} {_mβ' : MeasurableSpace β'} [Neg β]
+theorem IndepFun.neg_left {_mβ : SigmaAlgebra β} {_mβ' : SigmaAlgebra β'} [Neg β]
     [MeasurableNeg β] (hfg : IndepFun f g κ μ) :
     IndepFun (-f) g κ μ := hfg.comp measurable_neg measurable_id
 
 /-- Two random variables `f, g` are independent given a kernel `κ` and a measure `μ` iff
 `μ ⊗ₘ κ.map (fun ω ↦ (f ω, g ω)) = μ ⊗ₘ (κ.map f ×ₖ κ.map g)`. -/
 theorem indepFun_iff_compProd_map_prod_eq_compProd_prod_map_map
-    {mβ : MeasurableSpace β} {mγ : MeasurableSpace γ}
+    {mβ : SigmaAlgebra β} {mγ : SigmaAlgebra γ}
     [IsFiniteMeasure μ] [IsFiniteKernel κ] {f : Ω → β} {g : Ω → γ}
     (hf : Measurable f) (hg : Measurable g) :
     IndepFun f g κ μ ↔ μ ⊗ₘ κ.map (fun ω ↦ (f ω, g ω)) = μ ⊗ₘ (κ.map f ×ₖ κ.map g) := by
@@ -311,7 +311,7 @@ theorem indepFun_iff_compProd_map_prod_eq_compProd_prod_map_map
   · intro s t hs ht
     rw [Measure.ext_prod₃_iff] at h
     refine ae_eq_of_forall_setLIntegral_eq_of_sigmaFinite ?_ ?_ ?_
-    · exact Kernel.measurable_coe _ ((hf hs).inter (hg ht))
+    · exact Kernel.measurable_coe _ (mΩ.inter_mem (hf hs) (hg ht))
     · exact (Kernel.measurable_coe _ (hf hs)).mul (Kernel.measurable_coe _ (hg ht))
     intro u hu hμu
     specialize h hu hs ht
@@ -322,7 +322,7 @@ theorem indepFun_iff_compProd_map_prod_eq_compProd_prod_map_map
     · rw [prod_apply_prod, map_apply' _ (by fun_prop) _ hs, map_apply' _ (by fun_prop) _ ht]
 
 section iIndepFun
-variable {β : ι → Type*} {m : ∀ i, MeasurableSpace (β i)} {f : ∀ i, Ω → β i}
+variable {β : ι → Type*} {m : ∀ i, SigmaAlgebra (β i)} {f : ∀ i, Ω → β i}
 
 
 /-- If `f` is a family of mutually independent random variables (`iIndepFun m f μ`) and `S, T` are
@@ -336,19 +336,19 @@ theorem iIndepFun.indepFun_finset (S T : Finset ι) (hST : Disjoint S T)
   obtain ⟨η, η_eq, hη⟩ : ∃ (η : Kernel α Ω), κ =ᵐ[μ] η ∧ IsMarkovKernel η :=
     exists_ae_eq_isMarkovKernel hf_Indep.ae_isProbabilityMeasure hμ
   apply IndepFun.congr (Filter.EventuallyEq.symm η_eq)
-  -- We introduce π-systems, built from the π-system of boxes which generates `MeasurableSpace.pi`.
+  -- We introduce π-systems, built from the π-system of boxes which generates `SigmaAlgebra.pi`.
   let πSβ := Set.pi (Set.univ : Set S) ''
     Set.pi (Set.univ : Set S) fun i => { s : Set (β i) | MeasurableSet[m i] s }
   let πS := { s : Set Ω | ∃ t ∈ πSβ, (fun a (i : S) => f i a) ⁻¹' t = s }
   have hπS_pi : IsPiSystem πS := by exact IsPiSystem.comap (@isPiSystem_pi _ _ ?_) _
-  have hπS_gen : (MeasurableSpace.pi.comap fun a (i : S) => f i a) = generateFrom πS := by
+  have hπS_gen : (SigmaAlgebra.pi.comap fun a (i : S) => f i a) = generateFrom πS := by
     rw [generateFrom_pi.symm, comap_generateFrom]
     congr
   let πTβ := Set.pi (Set.univ : Set T) ''
       Set.pi (Set.univ : Set T) fun i => { s : Set (β i) | MeasurableSet[m i] s }
   let πT := { s : Set Ω | ∃ t ∈ πTβ, (fun a (i : T) => f i a) ⁻¹' t = s }
   have hπT_pi : IsPiSystem πT := by exact IsPiSystem.comap (@isPiSystem_pi _ _ ?_) _
-  have hπT_gen : (MeasurableSpace.pi.comap fun a (i : T) => f i a) = generateFrom πT := by
+  have hπT_gen : (SigmaAlgebra.pi.comap fun a (i : T) => f i a) = generateFrom πT := by
     rw [generateFrom_pi.symm, comap_generateFrom]
     congr
   -- To prove independence, we prove independence of the generating π-systems.
@@ -512,7 +512,7 @@ theorem iIndepFun.indepFun_prodMk_prodMk₀ (hf_indep : iIndepFun f κ μ)
 end iIndepFun
 
 section Mul
-variable {β : Type*} {m : MeasurableSpace β} [Mul β] [MeasurableMul₂ β] {f : ι → Ω → β}
+variable {β : Type*} {m : SigmaAlgebra β} [Mul β] [MeasurableMul₂ β] {f : ι → Ω → β}
 
 @[to_additive]
 lemma iIndepFun.indepFun_mul_left (hf_indep : iIndepFun f κ μ)
@@ -561,7 +561,7 @@ lemma iIndepFun.indepFun_mul_mul₀ (hf_indep : iIndepFun f κ μ)
 end Mul
 
 section Div
-variable {β : Type*} {m : MeasurableSpace β} [Div β] [MeasurableDiv₂ β] {f : ι → Ω → β}
+variable {β : Type*} {m : SigmaAlgebra β} [Div β] [MeasurableDiv₂ β] {f : ι → Ω → β}
 
 @[to_additive]
 lemma iIndepFun.indepFun_div_left (hf_indep : iIndepFun f κ μ)
@@ -610,7 +610,7 @@ lemma iIndepFun.indepFun_div_div₀ (hf_indep : iIndepFun f κ μ)
 end Div
 
 section CommMonoid
-variable {β : Type*} {m : MeasurableSpace β} [CommMonoid β] [MeasurableMul₂ β] {f : ι → Ω → β}
+variable {β : Type*} {m : SigmaAlgebra β} [CommMonoid β] [MeasurableMul₂ β] {f : ι → Ω → β}
 
 @[to_additive]
 theorem iIndepFun.indepFun_finsetProd_of_notMem (hf_Indep : iIndepFun f κ μ)
@@ -677,7 +677,7 @@ theorem iIndepFun.indepFun_prod_range_succ₀ {f : ℕ → Ω → β}
 
 end CommMonoid
 
-theorem iIndepSet.iIndepFun_indicator [Zero β] [One β] {m : MeasurableSpace β} {s : ι → Set Ω}
+theorem iIndepSet.iIndepFun_indicator [Zero β] [One β] {m : SigmaAlgebra β} {s : ι → Set Ω}
     (hs : iIndepSet s κ μ) :
     iIndepFun (fun n => (s n).indicator fun _ω => (1 : β)) κ μ := by
   classical
@@ -686,20 +686,20 @@ theorem iIndepSet.iIndepFun_indicator [Zero β] [One β] {m : MeasurableSpace β
   simp_rw [Set.indicator_const_preimage_eq_union]
   apply hs _ fun i _hi ↦ ?_
   have hsi : MeasurableSet[generateFrom {s i}] (s i) :=
-    measurableSet_generateFrom (Set.mem_singleton _)
+    SigmaAlgebra.mem_generateFrom (Set.mem_singleton _)
   refine
     MeasurableSet.union (MeasurableSet.ite' (fun _ => hsi) fun _ => ?_)
-      (MeasurableSet.ite' (fun _ => hsi.compl) fun _ => ?_)
+      (MeasurableSet.ite' (fun _ => MeasurableSet.compl hsi) fun _ => ?_)
   · exact @MeasurableSet.empty _ (generateFrom {s i})
   · exact @MeasurableSet.empty _ (generateFrom {s i})
 
-lemma Indep.indicator_const_indepFun {m : MeasurableSpace Ω} {M 𝓧 : Type*}
-    [Zero M] [MeasurableSpace M] (c : M) {m𝓧 : MeasurableSpace 𝓧} {A : Set Ω}
+lemma Indep.indicator_const_indepFun {m : SigmaAlgebra Ω} {M 𝓧 : Type*}
+    [Zero M] [SigmaAlgebra M] (c : M) {m𝓧 : SigmaAlgebra 𝓧} {A : Set Ω}
     {X : Ω → 𝓧} (hA : MeasurableSet[m] A) (h : Indep m (m𝓧.comap X) κ μ) :
     IndepFun (A.indicator (fun _ ↦ c)) X κ μ :=
   indep_of_indep_of_le_left h (measurable_const.indicator hA).comap_le
 
-variable {mβ : MeasurableSpace β} {X : ι → Ω → α} {Y : ι → Ω → β}
+variable {mβ : SigmaAlgebra β} {X : ι → Ω → α} {Y : ι → Ω → β}
   {f : _ → Set Ω} {t : ι → Set β} {s : Finset ι}
 
 /-- The probability of an intersection of preimages conditioning on another intersection factors
@@ -712,12 +712,18 @@ lemma iIndepFun.cond_iInter [Finite ι] (hY : ∀ i, Measurable (Y i))
   classical
   cases nonempty_fintype ι
   let g (i' : ι) := if i' ∈ s then Y i' ⁻¹' t i' ∩ f i' else Y i' ⁻¹' t i'
-  have hYt i : MeasurableSet[(mα.prod mβ).comap fun ω ↦ (X i ω, Y i ω)] (Y i ⁻¹' t i) :=
-    ⟨.univ ×ˢ t i, .prod .univ (ht _), by ext; simp⟩
+  have hYt i : MeasurableSet[(mα.prod mβ).comap fun ω ↦ (X i ω, Y i ω)] (Y i ⁻¹' t i) := by
+    have hprod : MeasurableSet[mα.prod mβ] (.univ ×ˢ t i) :=
+      MeasurableSet.prod (show MeasurableSet[mα] .univ from mα.univ_mem) (ht _)
+    exact ⟨.univ ×ˢ t i, hprod, by ext; simp⟩
   have hg i : MeasurableSet[(mα.prod mβ).comap fun ω ↦ (X i ω, Y i ω)] (g i) := by
     by_cases hi : i ∈ s <;> simp only [hi, ↓reduceIte, g]
     · obtain ⟨A, hA, hA'⟩ := hf i hi
-      exact (hYt _).inter ⟨A ×ˢ .univ, hA.prod .univ, by ext; simp [← hA']⟩
+      have hprod : MeasurableSet[mα.prod mβ] (A ×ˢ .univ) :=
+        MeasurableSet.prod (show MeasurableSet[mα] A from hA)
+          (show MeasurableSet[mβ] .univ from mβ.univ_mem)
+      exact ((mα.prod mβ).comap fun ω ↦ (X i ω, Y i ω)).inter_mem (hYt _)
+        ⟨A ×ˢ .univ, hprod, by ext; simp [← hA']⟩
     · exact hYt _
   filter_upwards [hy, hindep.ae_isProbabilityMeasure, hindep.meas_iInter hYt, hindep.meas_iInter hg]
     with a hy _ hYt hg

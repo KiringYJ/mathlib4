@@ -3,7 +3,7 @@ import Mathlib.MeasureTheory.Constructions.BorelSpace.Basic
 
 set_option autoImplicit true
 
-example [TopologicalSpace α] [inst : MeasurableSpace α] [BorelSpace α] :
+example [TopologicalSpace α] [inst : SigmaAlgebra α] [BorelSpace α] :
     MeasurableSet (∅ : Set α) := by
   guard_target = @MeasurableSet α inst ∅
   borelize α
@@ -32,7 +32,7 @@ example : True := by
 
 example : True := by
   have h1 : MeasurableSet (∅ : Set ℕ) := MeasurableSet.empty
-  guard_hyp h1 : @MeasurableSet ℕ Nat.instMeasurableSpace ∅
+  guard_hyp h1 : @MeasurableSet ℕ Nat.instSigmaAlgebra ∅
   borelize ℕ
   have h2 : MeasurableSet (∅ : Set ℕ) := MeasurableSet.empty
   guard_hyp h2 : @MeasurableSet ℕ (borel ℕ) ∅

@@ -23,7 +23,7 @@ namespace MeasureTheory
 
 open Set Measure Filter Function ENNReal
 
-variable {α β : Type*} {m0 : MeasurableSpace α} [MeasurableSpace β] {μ : Measure α} {s : Set α}
+variable {α β : Type*} {m0 : SigmaAlgebra α} [SigmaAlgebra β] {μ : Measure α} {s : Set α}
 
 section IsZeroOrProbabilityMeasure
 

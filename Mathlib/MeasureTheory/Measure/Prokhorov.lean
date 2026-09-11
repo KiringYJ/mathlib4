@@ -62,7 +62,7 @@ section Forward
 
 open FiniteMeasure
 
-variable {E : Type*} [MeasurableSpace E] [TopologicalSpace E] [T2Space E] [BorelSpace E]
+variable {E : Type*} [SigmaAlgebra E] [TopologicalSpace E] [T2Space E] [BorelSpace E]
 
 set_option backward.isDefEq.respectTransparency.types false in
 variable (E) in
@@ -567,8 +567,8 @@ open ProbabilityMeasure
 
 namespace MeasureTheory
 
-variable {𝓧 : Type*} {m𝓧 : MeasurableSpace 𝓧} {μ : Measure 𝓧} [PseudoMetricSpace 𝓧]
-  [OpensMeasurableSpace 𝓧] [SecondCountableTopology 𝓧] {S : Set (ProbabilityMeasure 𝓧)}
+variable {𝓧 : Type*} {m𝓧 : SigmaAlgebra 𝓧} {μ : Measure 𝓧} [PseudoMetricSpace 𝓧]
+  [OpensSigmaAlgebra 𝓧] [SecondCountableTopology 𝓧] {S : Set (ProbabilityMeasure 𝓧)}
 
 lemma exists_measure_iUnion_gt_of_isCompact_closure
     (U : ℕ → Set 𝓧) (O : ∀ i, IsOpen (U i)) (Cov : ⋃ i, U i = univ) (hcomp : IsCompact (closure S))

@@ -247,7 +247,7 @@ theorem prod_parallelepiped (v : Basis ι ℝ E) (w : Basis ι' ℝ F) :
   · simp [ht2, Prod.fst_sum]
   · simp [hs2, Prod.snd_sum]
 
-variable [MeasurableSpace E] [BorelSpace E]
+variable [SigmaAlgebra E] [BorelSpace E]
 
 /-- The Lebesgue measure associated to a basis, giving measure `1` to the parallelepiped spanned
 by the basis. -/
@@ -277,7 +277,7 @@ theorem addHaar_reindex (b : Basis ι ℝ E) (e : ι ≃ ι') :
 theorem addHaar_self (b : Basis ι ℝ E) : b.addHaar (_root_.parallelepiped b) = 1 := by
   rw [Basis.addHaar]; exact addHaarMeasure_self
 
-variable [MeasurableSpace F] [BorelSpace F] [SecondCountableTopologyEither E F]
+variable [SigmaAlgebra F] [BorelSpace F] [SecondCountableTopologyEither E F]
 
 theorem prod_addHaar (v : Basis ι ℝ E) (w : Basis ι' ℝ F) :
     (v.prod w).addHaar = v.addHaar.prod w.addHaar := by
@@ -307,11 +307,11 @@ However, we've decided not to refactor until one of these diamonds starts creati
 https://leanprover.zulipchat.com/#narrow/stream/287929-mathlib4/topic/Hausdorff.20measure.20normalisation
 -/
 instance (priority := 100) measureSpaceOfInnerProductSpace [NormedAddCommGroup E]
-    [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [MeasurableSpace E] [BorelSpace E] :
+    [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [SigmaAlgebra E] [BorelSpace E] :
     MeasureSpace E where volume := (stdOrthonormalBasis ℝ E).toBasis.addHaar
 
 instance [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
-    [MeasurableSpace E] [BorelSpace E] : IsAddHaarMeasure (volume : Measure E) :=
+    [SigmaAlgebra E] [BorelSpace E] : IsAddHaarMeasure (volume : Measure E) :=
   isAddHaarMeasure_basis_addHaar _
 
 /- This instance should not be necessary, but Lean has difficulties to find it in product

@@ -19,7 +19,7 @@ open MeasureTheory
 
 namespace ProbabilityTheory
 
-variable {α β : Type*} {mα : MeasurableSpace α} {mβ : MeasurableSpace β} {κ : Kernel α β}
+variable {α β : Type*} {mα : SigmaAlgebra α} {mβ : SigmaAlgebra β} {κ : Kernel α β}
   {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] {f : β → E} {a : α}
 
 namespace Kernel

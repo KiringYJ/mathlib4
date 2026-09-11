@@ -57,12 +57,12 @@ namespace MeasureTheory
 
 section resolvent
 
-variable [NontriviallyNormedField 𝕜] [MeasurableSpace 𝕜]
+variable [NontriviallyNormedField 𝕜] [SigmaAlgebra 𝕜]
 
 set_option backward.isDefEq.respectTransparency.types false in
 @[fun_prop]
-theorem measurable_resolvent {a : A} [OpensMeasurableSpace 𝕜] [NormedRing A] [NormedAlgebra 𝕜 A]
-    [CompleteSpace A] [MeasurableSpace A] [BorelSpace A] :
+theorem measurable_resolvent {a : A} [OpensSigmaAlgebra 𝕜] [NormedRing A] [NormedAlgebra 𝕜 A]
+    [CompleteSpace A] [SigmaAlgebra A] [BorelSpace A] :
     Measurable (resolvent (R := 𝕜) a) := by
   classical
   have h1 : ContinuousOn (resolvent (R := 𝕜) a) (resolventSet 𝕜 a) :=
@@ -88,8 +88,8 @@ theorem norm_resolvent_le_inv_infDist_support {μ : Measure 𝕜} {a : A}
     simp [hx]
   grw [resolvent, Ring.inverse_eq_inv', norm_inv, inv_le_inv₀ (by linarith) (by positivity), this]
 
-theorem integrable_resolvent [HereditarilyLindelofSpace 𝕜] [OpensMeasurableSpace 𝕜]
-    [CompleteSpace A] [SecondCountableTopology A] [MeasurableSpace A] [BorelSpace A]
+theorem integrable_resolvent [HereditarilyLindelofSpace 𝕜] [OpensSigmaAlgebra 𝕜]
+    [CompleteSpace A] [SecondCountableTopology A] [SigmaAlgebra A] [BorelSpace A]
     {μ : Measure 𝕜} [IsFiniteMeasure μ] {a : A} (hz : a ∉ algebraMap 𝕜 A '' μ.support) :
     Integrable (resolvent a) μ := by
   refine ⟨by fun_prop, ?_⟩
@@ -101,7 +101,7 @@ end resolvent
 section Definition
 
 variable [NormedField 𝕜] [NormedRing A] [NormedAlgebra ℝ A] [NormedAlgebra 𝕜 A]
-  {m𝕜 : MeasurableSpace 𝕜}
+  {m𝕜 : SigmaAlgebra 𝕜}
 
 /-- The resolvent transform of a measure. -/
 noncomputable
@@ -129,7 +129,7 @@ end Definition
 section Deriv
 
 variable [NontriviallyNormedField 𝕜] [HereditarilyLindelofSpace 𝕜] [CompleteSpace 𝕜]
-  [MeasurableSpace 𝕜] [BorelSpace 𝕜]
+  [SigmaAlgebra 𝕜] [BorelSpace 𝕜]
 
 theorem hasDerivAt_resolventTransform [RCLike A] [NormedAlgebra 𝕜 A] {μ : Measure 𝕜}
     [IsFiniteMeasure μ] (a : A) (ha : a ∉ algebraMap 𝕜 A '' μ.support) :

@@ -28,7 +28,7 @@ variable {E 𝕜 : Type*} [RCLike 𝕜]
 
 namespace MeasureTheory
 
-variable [MeasurableSpace E]
+variable [SigmaAlgebra E]
 
 /-- If the integrals of all elements of a subalgebra `A` of continuous and bounded functions with
 respect to two finite measures `P, P'` coincide, then the measures coincide. In other words: If a

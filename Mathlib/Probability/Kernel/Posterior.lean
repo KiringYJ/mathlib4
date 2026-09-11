@@ -60,7 +60,7 @@ open MeasureTheory
 namespace ProbabilityTheory
 
 variable {Ω 𝓧 𝓨 : Type*}
-  {mΩ : MeasurableSpace Ω} {m𝓧 : MeasurableSpace 𝓧} {m𝓨 : MeasurableSpace 𝓨}
+  {mΩ : SigmaAlgebra Ω} {m𝓧 : SigmaAlgebra 𝓧} {m𝓨 : SigmaAlgebra 𝓨}
   {κ : Kernel Ω 𝓧} {μ : Measure Ω} [IsFiniteMeasure μ] [IsFiniteKernel κ]
 
 variable [StandardBorelSpace Ω] [Nonempty Ω]
@@ -135,7 +135,7 @@ lemma posterior_id (μ : Measure Ω) [IsFiniteMeasure μ] : Kernel.id†μ =ᵐ[
   rw [Measure.id_comp, Measure.compProd_id_eq_copy_comp, Measure.comp_assoc, Kernel.swap_copy]
 
 /-- For a deterministic kernel `κ`, `κ ∘ₖ κ†μ` is `μ.map f`-a.e. equal to the identity kernel. -/
-lemma deterministic_comp_posterior [MeasurableSpace.CountablyGenerated 𝓧]
+lemma deterministic_comp_posterior [SigmaAlgebra.CountablyGenerated 𝓧]
     {f : Ω → 𝓧} (hf : Measurable f) :
     Kernel.deterministic f hf ∘ₖ (Kernel.deterministic f hf)†μ =ᵐ[μ.map f] Kernel.id := by
   refine Kernel.ae_eq_of_compProd_eq ?_
@@ -207,7 +207,7 @@ end StandardBorelSpace
 
 section CountableOrCountablyGenerated
 
-variable [MeasurableSpace.CountableOrCountablyGenerated Ω 𝓧]
+variable [SigmaAlgebra.CountableOrCountablyGenerated Ω 𝓧]
 
 lemma absolutelyContinuous_of_posterior (h_ac : ∀ᵐ b ∂(κ ∘ₘ μ), (κ†μ) b ≪ μ) :
     ∀ᵐ ω ∂μ, κ ω ≪ κ ∘ₘ μ := by
@@ -294,7 +294,7 @@ lemma posterior_eq_withDensity (h_ac : ∀ᵐ ω ∂μ, κ ω ≪ κ ∘ₘ μ) 
     with ω h h_eq hωs
   rw [← h, h_eq, Kernel.const_apply]
 
-lemma posterior_eq_withDensity_of_countable {Ω : Type*} [Countable Ω] [MeasurableSpace Ω]
+lemma posterior_eq_withDensity_of_countable {Ω : Type*} [Countable Ω] [SigmaAlgebra Ω]
     [Nonempty Ω] [StandardBorelSpace Ω] (κ : Kernel Ω 𝓧) [IsFiniteKernel κ]
     (μ : Measure Ω) [IsFiniteMeasure μ] :
     ∀ᵐ x ∂(κ ∘ₘ μ), (κ†μ) x = μ.withDensity (fun ω ↦ (κ ω).rnDeriv (κ ∘ₘ μ) x) := by

@@ -29,7 +29,7 @@ open Set Filter ENNReal
 namespace MeasureTheory
 
 variable {α E F 𝕜 : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [NormedAddCommGroup F] [NormedSpace ℝ F] {m : MeasurableSpace α} {μ : Measure α}
+  [NormedAddCommGroup F] [NormedSpace ℝ F] {m : SigmaAlgebra α} {μ : Measure α}
 
 section Function
 

@@ -56,13 +56,13 @@ noncomputable section
 
 namespace MeasureTheory
 
-variable {Ω E : Type*} [MeasurableSpace E]
+variable {Ω E : Type*} [SigmaAlgebra E]
 
 /-- A random variable `X : Ω → E` is said to have a probability density function (`HasPDF`)
 with respect to the measure `ℙ` on `Ω` and `μ` on `E`
 if the push-forward measure of `ℙ` along `X` is absolutely continuous with respect to `μ`
 and they have a Lebesgue decomposition (`HaveLebesgueDecomposition`). -/
-class HasPDF {m : MeasurableSpace Ω} (X : Ω → E) (ℙ : Measure Ω) (μ : Measure E := by volume_tac) :
+class HasPDF {m : SigmaAlgebra Ω} (X : Ω → E) (ℙ : Measure Ω) (μ : Measure E := by volume_tac) :
     Prop where
   protected aemeasurable' : AEMeasurable X ℙ
   protected haveLebesgueDecomposition' : (map X ℙ).HaveLebesgueDecomposition μ
@@ -70,7 +70,7 @@ class HasPDF {m : MeasurableSpace Ω} (X : Ω → E) (ℙ : Measure Ω) (μ : Me
 
 section HasPDF
 
-variable {_ : MeasurableSpace Ω} {X Y : Ω → E} {ℙ : Measure Ω} {μ : Measure E}
+variable {_ : SigmaAlgebra Ω} {X Y : Ω → E} {ℙ : Measure Ω} {μ : Measure E}
 
 theorem hasPDF_iff :
     HasPDF X ℙ μ ↔ AEMeasurable X ℙ ∧ (map X ℙ).HaveLebesgueDecomposition μ ∧ map X ℙ ≪ μ :=
@@ -114,45 +114,45 @@ end HasPDF
 
 /-- If `X` is a random variable, then `pdf X ℙ μ`
 is the Radon–Nikodym derivative of the push-forward measure of `ℙ` along `X` with respect to `μ`. -/
-def pdf {_ : MeasurableSpace Ω} (X : Ω → E) (ℙ : Measure Ω) (μ : Measure E := by volume_tac) :
+def pdf {_ : SigmaAlgebra Ω} (X : Ω → E) (ℙ : Measure Ω) (μ : Measure E := by volume_tac) :
     E → ℝ≥0∞ :=
   (map X ℙ).rnDeriv μ
 
-theorem pdf_def {_ : MeasurableSpace Ω} {ℙ : Measure Ω} {μ : Measure E} {X : Ω → E} :
+theorem pdf_def {_ : SigmaAlgebra Ω} {ℙ : Measure Ω} {μ : Measure E} {X : Ω → E} :
     pdf X ℙ μ = (map X ℙ).rnDeriv μ := rfl
 
-theorem pdf_of_not_haveLebesgueDecomposition {_ : MeasurableSpace Ω} {ℙ : Measure Ω}
+theorem pdf_of_not_haveLebesgueDecomposition {_ : SigmaAlgebra Ω} {ℙ : Measure Ω}
     {μ : Measure E} {X : Ω → E} (h : ¬(map X ℙ).HaveLebesgueDecomposition μ) : pdf X ℙ μ = 0 :=
   rnDeriv_of_not_haveLebesgueDecomposition h
 
 @[fun_prop]
-theorem measurable_pdf {m : MeasurableSpace Ω} (X : Ω → E) (ℙ : Measure Ω)
+theorem measurable_pdf {m : SigmaAlgebra Ω} (X : Ω → E) (ℙ : Measure Ω)
     (μ : Measure E := by volume_tac) : Measurable (pdf X ℙ μ) := by
   exact measurable_rnDeriv _ _
 
-theorem withDensity_pdf_le_map {_ : MeasurableSpace Ω} (X : Ω → E) (ℙ : Measure Ω)
+theorem withDensity_pdf_le_map {_ : SigmaAlgebra Ω} (X : Ω → E) (ℙ : Measure Ω)
     (μ : Measure E := by volume_tac) : μ.withDensity (pdf X ℙ μ) ≤ map X ℙ :=
   withDensity_rnDeriv_le _ _
 
-theorem setLIntegral_pdf_le_map {m : MeasurableSpace Ω} (X : Ω → E) (ℙ : Measure Ω)
+theorem setLIntegral_pdf_le_map {m : SigmaAlgebra Ω} (X : Ω → E) (ℙ : Measure Ω)
     (μ : Measure E := by volume_tac) (s : Set E) :
     ∫⁻ x in s, pdf X ℙ μ x ∂μ ≤ map X ℙ s := by
   apply (withDensity_apply_le _ s).trans
   exact withDensity_pdf_le_map _ _ _ s
 
-theorem map_eq_withDensity_pdf {m : MeasurableSpace Ω} (X : Ω → E) (ℙ : Measure Ω)
+theorem map_eq_withDensity_pdf {m : SigmaAlgebra Ω} (X : Ω → E) (ℙ : Measure Ω)
     (μ : Measure E := by volume_tac) [hX : HasPDF X ℙ μ] :
     map X ℙ = μ.withDensity (pdf X ℙ μ) := by
   rw [pdf_def, withDensity_rnDeriv_eq _ _ hX.absolutelyContinuous]
 
-theorem map_eq_setLIntegral_pdf {m : MeasurableSpace Ω} (X : Ω → E) (ℙ : Measure Ω)
+theorem map_eq_setLIntegral_pdf {m : SigmaAlgebra Ω} (X : Ω → E) (ℙ : Measure Ω)
     (μ : Measure E := by volume_tac) [hX : HasPDF X ℙ μ] {s : Set E}
     (hs : MeasurableSet s) : map X ℙ s = ∫⁻ x in s, pdf X ℙ μ x ∂μ := by
   rw [← withDensity_apply _ hs, map_eq_withDensity_pdf X ℙ μ]
 
 namespace pdf
 
-variable {m : MeasurableSpace Ω} {ℙ : Measure Ω} {μ : Measure E}
+variable {m : SigmaAlgebra Ω} {ℙ : Measure Ω} {μ : Measure E}
 
 protected theorem congr {X Y : Ω → E} (hXY : X =ᵐ[ℙ] Y) : pdf X ℙ μ = pdf Y ℙ μ := by
   rw [pdf_def, pdf_def, map_congr hXY]
@@ -214,7 +214,7 @@ end IntegralPDFMul
 
 section
 
-variable {F : Type*} [MeasurableSpace F] {ν : Measure F} (X : Ω → E) [HasPDF X ℙ μ] {g : E → F}
+variable {F : Type*} [SigmaAlgebra F] {ν : Measure F} (X : Ω → E) [HasPDF X ℙ μ] {g : E → F}
 
 /-- A random variable that `HasPDF` transformed under a `QuasiMeasurePreserving`
 map also `HasPDF` if `(map g (map X ℙ)).HaveLebesgueDecomposition μ`.
@@ -272,7 +272,7 @@ end Real
 
 section TwoVariables
 
-variable {F : Type*} [MeasurableSpace F] {ν : Measure F} {X : Ω → E} {Y : Ω → F}
+variable {F : Type*} [SigmaAlgebra F] {ν : Measure F} {X : Ω → E} {Y : Ω → F}
 
 /-- Random variables are independent iff their joint density is a product of marginal densities. -/
 theorem indepFun_iff_pdf_prod_eq_pdf_mul_pdf
@@ -303,7 +303,7 @@ section Group
 
 namespace ProbabilityTheory
 
-variable {Ω G : Type*} {mΩ : MeasurableSpace Ω} {ℙ : Measure Ω} [Group G] {mG : MeasurableSpace G}
+variable {Ω G : Type*} {mΩ : SigmaAlgebra Ω} {ℙ : Measure Ω} [Group G] {mG : SigmaAlgebra G}
   [MeasurableMul₂ G] [MeasurableInv G] {μ : Measure G} [IsMulLeftInvariant μ] {X Y : Ω → G}
 
 @[to_additive]

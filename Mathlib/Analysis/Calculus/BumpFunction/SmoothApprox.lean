@@ -30,7 +30,7 @@ open scoped ContDiff unitInterval Topology
 open Set Metric MeasureTheory
 
 theorem MeasureTheory.LocallyIntegrable.exists_contDiff_dist_le_of_forall_mem_ball_dist_le
-    [MeasurableSpace E] [BorelSpace E] {μ : Measure E} [μ.IsAddHaarMeasure]
+    [SigmaAlgebra E] [BorelSpace E] {μ : Measure E} [μ.IsAddHaarMeasure]
     (hf : LocallyIntegrable f μ) (hε : 0 < ε) :
     ∃ g : E → F, ContDiff ℝ ∞ g ∧ ∀ a, ∀ δ, (∀ x ∈ ball a ε, dist (f x) (f a) ≤ δ) →
       dist (g a) (f a) ≤ δ := by

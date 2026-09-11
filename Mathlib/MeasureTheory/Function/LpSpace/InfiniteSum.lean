@@ -23,7 +23,7 @@ open scoped Topology ENNReal
 
 namespace MeasureTheory
 
-variable {X E : Type*} {_ : MeasurableSpace X} {μ : Measure X} [NormedAddCommGroup E]
+variable {X E : Type*} {_ : SigmaAlgebra X} {μ : Measure X} [NormedAddCommGroup E]
 
 /-- If a series of functions has summable `L^p` norms for some `1 ≤ p`, then the norms are ae
 pointwise summable. -/

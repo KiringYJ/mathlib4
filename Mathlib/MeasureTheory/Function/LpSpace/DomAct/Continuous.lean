@@ -41,8 +41,8 @@ open DomMulAct
 namespace MeasureTheory
 
 variable {X M E : Type*}
-  [TopologicalSpace X] [R1Space X] [MeasurableSpace X] [BorelSpace X]
-  [Monoid M] [TopologicalSpace M] [MeasurableSpace M] [OpensMeasurableSpace M]
+  [TopologicalSpace X] [R1Space X] [SigmaAlgebra X] [BorelSpace X]
+  [Monoid M] [TopologicalSpace M] [SigmaAlgebra M] [OpensSigmaAlgebra M]
   [SMul M X] [ContinuousSMul M X]
   [NormedAddCommGroup E]
   {μ : Measure X} [IsLocallyFiniteMeasure μ] [μ.InnerRegularCompactLTTop]

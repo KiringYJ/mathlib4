@@ -30,7 +30,7 @@ noncomputable section
 
 open scoped MeasureTheory NNReal ENNReal
 
-variable {α : Type*} {m : MeasurableSpace α}
+variable {α : Type*} {m : SigmaAlgebra α}
 
 namespace MeasureTheory
 
@@ -42,7 +42,7 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 open scoped Classical in
 /-- Given a measure `μ` and an integrable function `f`, `μ.withDensityᵥ f` is
 the vector measure which maps the set `s` to `∫ₛ f ∂μ`. -/
-def Measure.withDensityᵥ {m : MeasurableSpace α} (μ : Measure α) (f : α → E) : VectorMeasure α E :=
+def Measure.withDensityᵥ {m : SigmaAlgebra α} (μ : Measure α) (f : α → E) : VectorMeasure α E :=
   if hf : Integrable f μ then
     { measureOf' := fun s => if MeasurableSet s then ∫ x in s, f x ∂μ else 0
       empty' := by simp
@@ -201,17 +201,17 @@ theorem withDensityᵥ_eq_withDensity_pos_part_sub_withDensity_neg_part {f : α 
     toSignedMeasure_apply_measurable hi, measureReal_def, measureReal_def,
     withDensity_apply _ hi, withDensity_apply _ hi]
 
-theorem Integrable.withDensityᵥ_trim_eq_integral {m m0 : MeasurableSpace α} {μ : Measure α}
+theorem Integrable.withDensityᵥ_trim_eq_integral {m m0 : SigmaAlgebra α} {μ : Measure α}
     (hm : m ≤ m0) {f : α → ℝ} (hf : Integrable f μ) {i : Set α} (hi : MeasurableSet[m] i) :
     (μ.withDensityᵥ f).trim hm i = ∫ x in i, f x ∂μ := by
-  rw [VectorMeasure.trim_measurableSet_eq hm hi, withDensityᵥ_apply hf (hm _ hi)]
+  rw [VectorMeasure.trim_measurableSet_eq hm hi, withDensityᵥ_apply hf (hm hi)]
 
-theorem Integrable.withDensityᵥ_trim_absolutelyContinuous {m m0 : MeasurableSpace α} {μ : Measure α}
+theorem Integrable.withDensityᵥ_trim_absolutelyContinuous {m m0 : SigmaAlgebra α} {μ : Measure α}
     (hm : m ≤ m0) (hfi : Integrable f μ) :
     (μ.withDensityᵥ f).trim hm ≪ᵥ (μ.trim hm).toENNRealVectorMeasure := by
   refine VectorMeasure.AbsolutelyContinuous.mk fun j hj₁ hj₂ => ?_
   rw [Measure.toENNRealVectorMeasure_apply_measurable hj₁, trim_measurableSet_eq hm hj₁] at hj₂
-  rw [VectorMeasure.trim_measurableSet_eq hm hj₁, withDensityᵥ_apply hfi (hm _ hj₁)]
+  rw [VectorMeasure.trim_measurableSet_eq hm hj₁, withDensityᵥ_apply hfi (hm hj₁)]
   simp only [Measure.restrict_eq_zero.mpr hj₂, integral_zero_measure]
 
 end SignedMeasure

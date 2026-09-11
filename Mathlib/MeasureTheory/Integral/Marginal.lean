@@ -67,7 +67,7 @@ namespace MeasureTheory
 
 section LMarginal
 
-variable {δ δ' : Type*} {X : δ → Type*} [∀ i, MeasurableSpace (X i)]
+variable {δ δ' : Type*} {X : δ → Type*} [∀ i, SigmaAlgebra (X i)]
 variable {μ : ∀ i, Measure (X i)} [DecidableEq δ]
 variable {s t : Finset δ} {f : (∀ i, X i) → ℝ≥0∞} {x : ∀ i, X i}
 

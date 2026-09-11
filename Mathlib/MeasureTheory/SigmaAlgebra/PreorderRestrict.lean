@@ -5,7 +5,7 @@ Authors: Etienne Marion
 -/
 module
 
-public import Mathlib.MeasureTheory.MeasurableSpace.Constructions
+public import Mathlib.MeasureTheory.SigmaAlgebra.Constructions
 public import Mathlib.Order.Restriction
 
 /-!
@@ -19,7 +19,7 @@ public section
 
 namespace Preorder
 
-variable {α : Type*} [Preorder α] {X : α → Type*} [∀ a, MeasurableSpace (X a)]
+variable {α : Type*} [Preorder α] {X : α → Type*} [∀ a, SigmaAlgebra (X a)]
 
 @[fun_prop]
 theorem measurable_restrictLe (a : α) : Measurable (restrictLe (π := X) a) :=

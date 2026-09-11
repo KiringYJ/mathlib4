@@ -5,7 +5,7 @@ Authors: Johannes Hölzl, Mario Carneiro
 -/
 module
 
-public import Mathlib.MeasureTheory.MeasurableSpace.Embedding
+public import Mathlib.MeasureTheory.SigmaAlgebra.Embedding
 public import Mathlib.MeasureTheory.Measure.Dirac.Def
 public import Mathlib.MeasureTheory.Measure.CompleteLattice
 
@@ -36,7 +36,7 @@ open Filter hiding map
 
 namespace MeasureTheory
 
-variable {mα : MeasurableSpace α} {mβ : MeasurableSpace β} {mγ : MeasurableSpace γ}
+variable {mα : SigmaAlgebra α} {mβ : SigmaAlgebra β} {mγ : SigmaAlgebra γ}
   {μ ν : Measure α} {s : Set α}
 
 namespace Measure
@@ -44,7 +44,7 @@ namespace Measure
 /-- Lift a linear map between `OuterMeasure` spaces such that for each measure `μ` every measurable
 set is Carathéodory-measurable w.r.t. `f μ` to a linear map between `Measure` spaces. -/
 noncomputable
-def liftLinear [MeasurableSpace β] (f : OuterMeasure α →ₗ[ℝ≥0∞] OuterMeasure β)
+def liftLinear [SigmaAlgebra β] (f : OuterMeasure α →ₗ[ℝ≥0∞] OuterMeasure β)
     (hf : ∀ μ : Measure α, ‹_› ≤ (f μ.toOuterMeasure).caratheodory) :
     Measure α →ₗ[ℝ≥0∞] Measure β where
   toFun μ := (f μ.toOuterMeasure).toMeasure (hf μ)
@@ -72,10 +72,10 @@ open scoped Classical in
 /-- The pushforward of a measure as a linear map. It is defined to be `0` if `f` is not
 a measurable function. -/
 noncomputable
-def mapₗ [MeasurableSpace α] [MeasurableSpace β] (f : α → β) : Measure α →ₗ[ℝ≥0∞] Measure β :=
+def mapₗ [SigmaAlgebra α] [SigmaAlgebra β] (f : α → β) : Measure α →ₗ[ℝ≥0∞] Measure β :=
   if hf : Measurable f then
     liftLinear (OuterMeasure.map f) fun μ _s hs t =>
-      le_toOuterMeasure_caratheodory μ _ (hf hs) (f ⁻¹' t)
+      le_toOuterMeasure_caratheodory μ (hf hs) (f ⁻¹' t)
   else 0
 
 set_option backward.isDefEq.respectTransparency false in
@@ -96,7 +96,7 @@ we define it to be `0` if `μ = 0`, and to be an arbitrary Dirac mass otherwise.
 we always have `map f 0 = 0`, and the push-forward of a probability measure is always a
 probability measure. -/
 noncomputable
-irreducible_def map [MeasurableSpace α] [MeasurableSpace β] (f : α → β) (μ : Measure α) :
+irreducible_def map [SigmaAlgebra α] [SigmaAlgebra β] (f : α → β) (μ : Measure α) :
     Measure β :=
   if hf : AEMeasurable f μ
     then mapₗ (hf.mk f) μ
@@ -207,7 +207,8 @@ theorem map_id' : map (fun x => x) μ = μ :=
 for measurable functions. See `map_map_of_aemeasurable` when they are just ae measurable. -/
 theorem map_map {g : β → γ} {f : α → β} (hg : Measurable g) (hf : Measurable f) :
     (μ.map f).map g = μ.map (g ∘ f) :=
-  ext fun s hs => by simp [hf, hg, hs, hg hs, hg.comp hf, ← preimage_comp]
+  ext fun s hs => by
+    rw [map_apply hg hs, map_apply hf (hg hs), map_apply (hg.comp hf) hs, preimage_comp]
 
 @[gcongr, mono]
 theorem map_mono {f : α → β} (h : μ ≤ ν) (hf : Measurable f) : μ.map f ≤ ν.map f :=
@@ -254,7 +255,7 @@ theorem ae_of_ae_map {f : α → β} (hf : AEMeasurable f μ) {p : β → Prop} 
     ∀ᵐ x ∂μ, p (f x) :=
   mem_ae_of_mem_ae_map hf h
 
-theorem ae_map_mem_range {m0 : MeasurableSpace α} {f : α → β} (hf : MeasurableSet (range f))
+theorem ae_map_mem_range {m0 : SigmaAlgebra α} {f : α → β} (hf : MeasurableSet (range f))
     {μ : Measure α} (h : AEMeasurable f μ) : ∀ᵐ x ∂μ.map f, x ∈ range f := by
   change range f ∈ ae (μ.map f)
   rw [mem_ae_map_iff h hf]
@@ -266,7 +267,7 @@ namespace MeasurableEmbedding
 
 open MeasureTheory Measure
 
-variable {m0 : MeasurableSpace α} {m1 : MeasurableSpace β} {f : α → β} {μ ν : Measure α}
+variable {m0 : SigmaAlgebra α} {m1 : SigmaAlgebra β} {f : α → β} {μ ν : Measure α}
 
 nonrec theorem map_apply (hf : MeasurableEmbedding f) (μ : Measure α) (s : Set β) :
     μ.map f s = μ (f ⁻¹' s) := by
@@ -299,7 +300,7 @@ namespace MeasurableEquiv
 
 open Equiv MeasureTheory MeasureTheory.Measure
 
-variable {_ : MeasurableSpace α} [MeasurableSpace β] {μ : Measure α} {ν : Measure β}
+variable {_ : SigmaAlgebra α} [SigmaAlgebra β] {μ : Measure α} {ν : Measure β}
 
 /-- If we map a measure along a measurable equivalence, we can compute the measure on all sets
   (not just the measurable ones). -/

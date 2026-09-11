@@ -95,7 +95,7 @@ variable {W : Type*} [AddCommGroup W] [Module ℝ W] [TopologicalSpace W]
 
 section ext
 
-variable {V : Type*} [AddCommGroup V] [Module ℝ V] [PseudoEMetricSpace V] [MeasurableSpace V]
+variable {V : Type*} [AddCommGroup V] [Module ℝ V] [PseudoEMetricSpace V] [SigmaAlgebra V]
     [BorelSpace V] [CompleteSpace V] [SecondCountableTopology V] {L : V →ₗ[ℝ] W →ₗ[ℝ] ℝ}
 
 /-- If the integrals of `char` with respect to two finite measures `P` and `P'` coincide, then
@@ -124,7 +124,7 @@ end ext
 
 section InnerProductSpace
 
-variable {E : Type*} {mE : MeasurableSpace E} {μ : Measure E} {t : E}
+variable {E : Type*} {mE : SigmaAlgebra E} {μ : Measure E} {t : E}
 
 /-- The characteristic function of a measure in an inner product space. -/
 noncomputable def charFun [Inner ℝ E] (μ : Measure E) (t : E) : ℂ := ∫ x, exp (⟪x, t⟫ * I) ∂μ
@@ -184,12 +184,12 @@ lemma norm_one_sub_charFun_le_two [IsProbabilityMeasure μ] : ‖1 - charFun μ 
   _ = 2 := by norm_num
 
 @[fun_prop]
-lemma stronglyMeasurable_charFun [OpensMeasurableSpace E] [SecondCountableTopology E] [SFinite μ] :
+lemma stronglyMeasurable_charFun [OpensSigmaAlgebra E] [SecondCountableTopology E] [SFinite μ] :
     StronglyMeasurable (charFun μ) :=
   (Measurable.stronglyMeasurable (by fun_prop)).integral_prod_left
 
 @[fun_prop]
-lemma measurable_charFun [OpensMeasurableSpace E] [SecondCountableTopology E] [SFinite μ] :
+lemma measurable_charFun [OpensSigmaAlgebra E] [SecondCountableTopology E] [SFinite μ] :
     Measurable (charFun μ) :=
   stronglyMeasurable_charFun.measurable
 
@@ -198,7 +198,7 @@ lemma intervalIntegrable_charFun {μ : Measure ℝ} [IsFiniteMeasure μ] {a b : 
   IntervalIntegrable.mono_fun' (g := fun _ ↦ μ.real Set.univ) (by simp)
     stronglyMeasurable_charFun.aestronglyMeasurable (ae_of_all _ norm_charFun_le)
 
-lemma charFun_map_eq_charFun_map_inner_one {α : Type*} {mα : MeasurableSpace α} [BorelSpace E]
+lemma charFun_map_eq_charFun_map_inner_one {α : Type*} {mα : SigmaAlgebra α} [BorelSpace E]
   {μ : Measure α} {Y : α → E} (hY : AEMeasurable Y μ) (t : E) :
   charFun (μ.map Y) t = charFun (μ.map (⟪Y ·, t⟫)) (1 : ℝ) := by
   rw [charFun_apply, charFun_apply_real, integral_map, integral_map]
@@ -211,7 +211,7 @@ lemma charFun_map_smul [BorelSpace E] (r : ℝ) (t : E) :
     integral_map (by fun_prop) (by fun_prop)]
   simp_rw [inner_smul_right, ← real_inner_smul_left]
 
-lemma charFun_map_smul_comp {X : Type*} {mX : MeasurableSpace X} {μ : Measure X} [BorelSpace E]
+lemma charFun_map_smul_comp {X : Type*} {mX : SigmaAlgebra X} {μ : Measure X} [BorelSpace E]
     {f : X → E} (hf : AEMeasurable f μ) (r : ℝ) (t : E) :
     charFun (μ.map (fun x ↦ r • (f x))) t = charFun (μ.map f) (r • t) := by
   rw [show (fun x ↦ r • (f x)) = (r • ·) ∘ f from rfl, ← AEMeasurable.map_map_of_aemeasurable,
@@ -221,16 +221,16 @@ lemma charFun_map_smul_comp {X : Type*} {mX : MeasurableSpace X} {μ : Measure X
 lemma charFun_map_mul {μ : Measure ℝ} (r t : ℝ) :
     charFun (μ.map (r * ·)) t = charFun μ (r * t) := charFun_map_smul r t
 
-lemma charFun_map_mul_comp {X : Type*} {mX : MeasurableSpace X} {μ : Measure X}
+lemma charFun_map_mul_comp {X : Type*} {mX : SigmaAlgebra X} {μ : Measure X}
     {f : X → ℝ} (hf : AEMeasurable f μ) (r t : ℝ) :
     charFun (μ.map (fun x ↦ r * (f x))) t = charFun (μ.map f) (r * t) :=
   charFun_map_smul_comp hf r t
 
-variable {E : Type*} [MeasurableSpace E] {μ ν : Measure E} {t : E}
+variable {E : Type*} [SigmaAlgebra E] {μ ν : Measure E} {t : E}
   [NormedAddCommGroup E] [InnerProductSpace ℝ E]
 
 @[simp]
-lemma charFun_dirac [OpensMeasurableSpace E] {x : E} (t : E) :
+lemma charFun_dirac [OpensSigmaAlgebra E] {x : E} (t : E) :
     charFun (Measure.dirac x) t = cexp (⟪x, t⟫ * I) := by
   rw [charFun_apply, integral_dirac]
 
@@ -273,8 +273,8 @@ lemma charFun_conv [IsFiniteMeasure μ] [IsFiniteMeasure ν] (t : E) :
   · exact (integrable_const (1 : ℝ)).mono (by fun_prop) (by simp)
 
 variable {E F : Type*} [NormedAddCommGroup E] [NormedAddCommGroup F]
-    [InnerProductSpace ℝ E] [InnerProductSpace ℝ F] {mE : MeasurableSpace E}
-    {mF : MeasurableSpace F}
+    [InnerProductSpace ℝ E] [InnerProductSpace ℝ F] {mE : SigmaAlgebra E}
+    {mF : SigmaAlgebra F}
 
 /-- The characteristic function of a product of measures is a product of
 characteristic functions. This is the version for Hilbert spaces, see `charFunDual_prod`
@@ -305,7 +305,7 @@ lemma charFun_eq_prod_iff {μ : Measure E} {ν : Measure F} {ξ : Measure (E × 
   mpr h := by rw [h]; exact charFun_prod
 
 variable {ι : Type*} [Fintype ι] {E : ι → Type*} [∀ i, NormedAddCommGroup (E i)]
-    [∀ i, InnerProductSpace ℝ (E i)] {mE : ∀ i, MeasurableSpace (E i)}
+    [∀ i, InnerProductSpace ℝ (E i)] {mE : ∀ i, SigmaAlgebra (E i)}
 
 /-- The characteristic function of a product of measures is a product of
 characteristic functions. This is the version for Hilbert spaces, see `charFunDual_pi`
@@ -335,8 +335,8 @@ end InnerProductSpace
 
 section NormedSpace
 
-variable {E F : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] {mE : MeasurableSpace E}
-  [NormedAddCommGroup F] [NormedSpace ℝ F] {mF : MeasurableSpace F}
+variable {E F : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] {mE : SigmaAlgebra E}
+  [NormedAddCommGroup F] [NormedSpace ℝ F] {mF : SigmaAlgebra F}
   {μ : Measure E} {ν : Measure F}
 
 /-- The characteristic function of a measure in a normed space, function from `StrongDual ℝ E` to
@@ -346,7 +346,7 @@ def charFunDual (μ : Measure E) (L : StrongDual ℝ E) : ℂ := ∫ v, probChar
 
 lemma charFunDual_apply (L : StrongDual ℝ E) : charFunDual μ L = ∫ v, exp (L v * I) ∂μ := rfl
 
-lemma charFunDual_eq_charFun_map_one [OpensMeasurableSpace E] (L : StrongDual ℝ E) :
+lemma charFunDual_eq_charFun_map_one [OpensSigmaAlgebra E] (L : StrongDual ℝ E) :
     charFunDual μ L = charFun (μ.map L) 1 := by
   rw [charFunDual_apply]
   have : ∫ x, cexp (L x * I) ∂μ = ∫ x, cexp (x * I) ∂(μ.map L) := by
@@ -356,7 +356,7 @@ lemma charFunDual_eq_charFun_map_one [OpensMeasurableSpace E] (L : StrongDual �
   rw [this, charFun_apply]
   simp
 
-lemma charFun_map_eq_charFunDual_smul [OpensMeasurableSpace E] (L : StrongDual ℝ E) (u : ℝ) :
+lemma charFun_map_eq_charFunDual_smul [OpensSigmaAlgebra E] (L : StrongDual ℝ E) (u : ℝ) :
     charFun (μ.map L) u = charFunDual μ (u • L) := by
   rw [charFunDual_apply]
   have : ∫ x, cexp ((u • L) x * I) ∂μ = ∫ x, cexp (u * x * I) ∂(μ.map L) := by
@@ -368,24 +368,24 @@ lemma charFun_map_eq_charFunDual_smul [OpensMeasurableSpace E] (L : StrongDual �
   simp
 
 lemma charFun_eq_charFunDual_toDualMap {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
-    {mE : MeasurableSpace E} {μ : Measure E} (t : E) :
+    {mE : SigmaAlgebra E} {μ : Measure E} (t : E) :
     charFun μ t = charFunDual μ (InnerProductSpace.toDualMap ℝ E t) := by
   simp [charFunDual_apply, charFun_apply, real_inner_comm]
 
 @[simp]
 lemma charFun_toDual_symm_eq_charFunDual {E : Type*} [NormedAddCommGroup E] [CompleteSpace E]
-    [InnerProductSpace ℝ E] {mE : MeasurableSpace E} {μ : Measure E} (L : StrongDual ℝ E) :
+    [InnerProductSpace ℝ E] {mE : SigmaAlgebra E} {μ : Measure E} (L : StrongDual ℝ E) :
     charFun μ ((InnerProductSpace.toDual ℝ E).symm L) = charFunDual μ L := by
   rw [charFun_eq_charFunDual_toDualMap, ← InnerProductSpace.toDual_apply_eq_toDualMap_apply]
   simp
 
-lemma charFunDual_map [OpensMeasurableSpace E] [BorelSpace F] (L : E →L[ℝ] F)
+lemma charFunDual_map [OpensSigmaAlgebra E] [BorelSpace F] (L : E →L[ℝ] F)
     (L' : StrongDual ℝ F) : charFunDual (μ.map L) L' = charFunDual μ (L'.comp L) := by
   rw [charFunDual_eq_charFun_map_one, charFunDual_eq_charFun_map_one,
     Measure.map_map (by fun_prop) (by fun_prop), ContinuousLinearMap.coe_comp]
 
 @[simp]
-lemma charFunDual_dirac [OpensMeasurableSpace E] {x : E} (L : StrongDual ℝ E) :
+lemma charFunDual_dirac [OpensSigmaAlgebra E] {x : E} (L : StrongDual ℝ E) :
     charFunDual (Measure.dirac x) L = cexp (L x * I) := by
   rw [charFunDual_apply, integral_dirac]
 
@@ -434,7 +434,7 @@ lemma charFunDual_prod' (p : ℝ≥0∞) [Fact (1 ≤ p)] [SFinite μ] [SFinite 
 characteristic functions. This is the version for Banach spaces, see `charFunDual_pi`
 for the Hilbert space version. -/
 lemma charFunDual_pi {ι : Type*} [Fintype ι] [DecidableEq ι] {E : ι → Type*}
-    [∀ i, NormedAddCommGroup (E i)] [∀ i, NormedSpace ℝ (E i)] {mE : ∀ i, MeasurableSpace (E i)}
+    [∀ i, NormedAddCommGroup (E i)] [∀ i, NormedSpace ℝ (E i)] {mE : ∀ i, SigmaAlgebra (E i)}
     {μ : (i : ι) → Measure (E i)} [∀ i, SigmaFinite (μ i)] (L : StrongDual ℝ (Π i, E i)) :
     charFunDual (Measure.pi μ) L =
       ∏ i, charFunDual (μ i) (L.comp (.single ℝ E i)) := by
@@ -446,7 +446,7 @@ characteristic functions. This is `charFunDual_pi` for `PiLp`.
 See `charFunDual_pi` for the Banach space version. -/
 lemma charFunDual_pi' (p : ℝ≥0∞) [Fact (1 ≤ p)] {ι : Type*} [Fintype ι] [DecidableEq ι]
     {E : ι → Type*} [∀ i, NormedAddCommGroup (E i)] [∀ i, NormedSpace ℝ (E i)]
-    {mE : ∀ i, MeasurableSpace (E i)} {μ : (i : ι) → Measure (E i)} [∀ i, SigmaFinite (μ i)]
+    {mE : ∀ i, SigmaAlgebra (E i)} {μ : (i : ι) → Measure (E i)} [∀ i, SigmaFinite (μ i)]
     (L : StrongDual ℝ (PiLp p E)) :
     charFunDual ((Measure.pi μ).map (toLp p)) L =
       ∏ i, charFunDual (μ i) (L.comp
@@ -509,7 +509,7 @@ characteristic functions if and only if it is a product measure.
 This is the version for Banach spaces, see `charFun_eq_pi_iff`
 for the Hilbert space version. -/
 lemma charFunDual_eq_pi_iff {ι : Type*} [Fintype ι] [DecidableEq ι] {E : ι → Type*}
-    [∀ i, NormedAddCommGroup (E i)] [∀ i, NormedSpace ℝ (E i)] {mE : ∀ i, MeasurableSpace (E i)}
+    [∀ i, NormedAddCommGroup (E i)] [∀ i, NormedSpace ℝ (E i)] {mE : ∀ i, SigmaAlgebra (E i)}
     [∀ i, BorelSpace (E i)] [∀ i, SecondCountableTopology (E i)] [∀ i, CompleteSpace (E i)]
     {μ : (i : ι) → Measure (E i)} {ν : Measure (Π i, E i)} [∀ i, IsFiniteMeasure (μ i)]
     [IsFiniteMeasure ν] :
@@ -526,7 +526,7 @@ This is `charFunDual_eq_pi_iff` for `PiLp`.
 See `charFun_eq_pi_iff` for the Hilbert space version. -/
 lemma charFunDual_eq_pi_iff' (p : ℝ≥0∞) [Fact (1 ≤ p)] {ι : Type*} [Fintype ι] [DecidableEq ι]
     {E : ι → Type*} [∀ i, NormedAddCommGroup (E i)] [∀ i, NormedSpace ℝ (E i)]
-    {mE : ∀ i, MeasurableSpace (E i)} [∀ i, BorelSpace (E i)] [∀ i, SecondCountableTopology (E i)]
+    {mE : ∀ i, SigmaAlgebra (E i)} [∀ i, BorelSpace (E i)] [∀ i, SecondCountableTopology (E i)]
     [∀ i, CompleteSpace (E i)] {μ : (i : ι) → Measure (E i)} {ν : Measure (Π i, E i)}
     [∀ i, IsFiniteMeasure (μ i)] [IsFiniteMeasure ν] :
     (∀ L, charFunDual (ν.map (toLp p)) L =

@@ -24,7 +24,7 @@ open Function Filter
 
 namespace MeasureTheory.Measure
 
-variable {α ι ι' : Type*} {mα : MeasurableSpace α} {s t : Set α} {μ : ι → Measure α}
+variable {α ι ι' : Type*} {mα : SigmaAlgebra α} {s t : Set α} {μ : ι → Measure α}
 
 /-- Sum of an indexed family of measures. -/
 noncomputable def sum (μ : ι → Measure α) : Measure α :=
