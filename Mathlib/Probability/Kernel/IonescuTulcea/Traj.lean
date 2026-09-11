@@ -101,7 +101,7 @@ private lemma cast_pi {s t : Set ℕ} (h : s = t) (x : (i : s) → X i) (i : t) 
 variable [∀ n, SigmaAlgebra (X n)]
 
 private lemma measure_cast {a b : ℕ} (h : a = b) (μ : (n : ℕ) → Measure (Π i : Iic n, X i)) :
-    (μ a).map (cast (Iic_pi_eq h)) = μ b := by
+    (μ a).map (cast (Iic_pi_eq h)) (by cases h; exact measurable_id.aemeasurable) = μ b := by
   cases h
   exact Measure.map_id
 
@@ -152,8 +152,13 @@ theorem isProjectiveLimit_nat_iff' {μ : (I : Finset ℕ) → Measure (Π i : I,
     IsProjectiveLimit ν μ ↔ ∀ ⦃n⦄, a ≤ n → ν.map (frestrictLe n) = μ (Iic n) := by
   refine ⟨fun h n _ ↦ h (Iic n), fun h I ↦ ?_⟩
   have := (I.subset_Iic_sup_id.trans (Iic_subset_Iic.2 (le_max_left (I.sup id) a)))
-  rw [← restrict₂_comp_restrict this, ← Measure.map_map, ← frestrictLe, h (le_max_right _ _), ← hμ]
-  all_goals fun_prop
+  have hmax : ν.map ((Iic (max (I.sup id) a)).restrict) = μ (Iic (max (I.sup id) a)) := by
+    simpa only [frestrictLe] using h (le_max_right (I.sup id) a)
+  rw [Measure.map_congr
+    (Eventually.of_forall fun x => congrFun (restrict₂_comp_restrict this).symm x) (by fun_prop),
+    ← Measure.map_map]
+  rw [hmax]
+  exact (hμ (Iic (max (I.sup id) a)) I this).symm
 
 /-- To check that a measure `ν` is the projective limit of a projective family of measures indexed
 by `Finset ℕ`, it is enough to check on intervals of the form `Iic n`. -/
@@ -199,11 +204,18 @@ theorem isProjectiveMeasureFamily_inducedFamily
     IsProjectiveMeasureFamily (inducedFamily μ) := by
   intro I J hJI
   have sls : J.sup id ≤ I.sup id := sup_mono hJI
-  simp only [inducedFamily]
-  rw [Measure.map_map, restrict₂_comp_restrict₂,
-    ← restrict₂_comp_restrict₂ J.subset_Iic_sup_id (Iic_subset_Iic.2 sls), ← Measure.map_map,
-    ← frestrictLe₂.eq_def sls, h (J.sup id) (I.sup id) sls]
-  all_goals fun_prop
+  calc
+    inducedFamily μ J = ((μ (I.sup id)).map (frestrictLe₂ sls)).map
+        (restrict₂ J.subset_Iic_sup_id) := by
+      rw [h (J.sup id) (I.sup id) sls, inducedFamily]
+    _ = (μ (I.sup id)).map ((restrict₂ J.subset_Iic_sup_id) ∘ frestrictLe₂ sls) :=
+      Measure.map_map (by fun_prop) (by fun_prop)
+    _ = (μ (I.sup id)).map ((restrict₂ hJI) ∘ restrict₂ I.subset_Iic_sup_id) := by
+      apply Measure.map_congr (Eventually.of_forall fun x => ?_) (by fun_prop)
+      rfl
+    _ = ((μ (I.sup id)).map (restrict₂ I.subset_Iic_sup_id)).map (restrict₂ hJI) :=
+      (Measure.map_map (by fun_prop) (by fun_prop)).symm
+    _ = (inducedFamily μ I).map (restrict₂ hJI) := by rw [inducedFamily]
 
 end MeasureTheory
 
@@ -484,7 +496,8 @@ theorem isProjectiveLimit_trajFun (a : ℕ) (x₀ : Π i : Iic a, X i) :
     IsProjectiveLimit (trajFun κ a x₀) (inducedFamily (fun n ↦ partialTraj κ a n x₀)) := by
   refine isProjectiveLimit_nat_iff (isProjectiveMeasureFamily_partialTraj κ x₀) _ |>.2 fun n ↦ ?_
   ext s ms
-  rw [Measure.map_apply (measurable_frestrictLe n) ms, trajFun, AddContent.measure_eq, trajContent,
+  rw [Measure.map_apply ms (measurable_frestrictLe n).aemeasurable, trajFun,
+    AddContent.measure_eq, trajContent,
     projectiveFamilyContent_congr _ (frestrictLe n ⁻¹' s) rfl ms]
   · exact generateFrom_measurableCylinders.symm
   · exact cylinder_mem_measurableCylinders _ _ ms
@@ -528,13 +541,18 @@ lemma traj_apply (a : ℕ) (x : Π i : Iic a, X i) : traj κ a x = trajFun κ a 
 instance (a : ℕ) : IsMarkovKernel (traj κ a) := ⟨fun _ ↦ isProbabilityMeasure_trajFun ..⟩
 
 lemma traj_map_frestrictLe (a b : ℕ) : (traj κ a).map (frestrictLe b) = partialTraj κ a b := by
-  ext x
-  rw [map_apply, traj_apply, frestrictLe, isProjectiveLimit_trajFun, inducedFamily_Iic]
-  fun_prop
+  ext x s hs
+  rw [Kernel.map_apply' _ _ hs (measurable_frestrictLe b), traj_apply]
+  have hp := isProjectiveLimit_trajFun κ a x (Iic b)
+  change Measure.map (frestrictLe b) (trajFun κ a x) = _ at hp
+  rw [inducedFamily_Iic] at hp
+  have hps := congrArg (fun ρ : Measure (∀ i : Iic b, X i) => ρ s) hp
+  rw [Measure.map_apply hs (measurable_frestrictLe b).aemeasurable] at hps
+  exact hps
 
 lemma traj_map_frestrictLe_apply (a b : ℕ) (x : Π i : Iic a, X i) :
     (traj κ a x).map (frestrictLe b) = partialTraj κ a b x := by
-  rw [← map_apply _ (measurable_frestrictLe b), traj_map_frestrictLe]
+  rw [← map_apply _ _ (measurable_frestrictLe b), traj_map_frestrictLe]
 
 lemma traj_map_frestrictLe_of_le {a b : ℕ} (hab : a ≤ b) :
     (traj κ b).map (frestrictLe a) =
@@ -545,7 +563,7 @@ lemma traj_map_frestrictLe_of_le {a b : ℕ} (hab : a ≤ b) :
 lemma map_traj_succ_self {a : ℕ} : (traj κ a).map (fun x ↦ x (a + 1)) = κ a := by
   have hf : (fun x : Π n, X n ↦ x (a + 1)) =
       (fun x ↦ x ⟨a + 1, mem_Iic.2 le_rfl⟩) ∘ frestrictLe (a + 1) := rfl
-  rw [hf, map_comp_right _ (by fun_prop) (by fun_prop), traj_map_frestrictLe,
+  rw [Kernel.map_congr _ hf, map_comp_right _ (by fun_prop) (by fun_prop), traj_map_frestrictLe,
     map_partialTraj_succ_self]
 
 variable (κ)
@@ -558,7 +576,7 @@ theorem eq_traj' {a : ℕ} (n : ℕ) (η : Kernel (Π i : Iic a, X i) (Π n, X n
   refine ((isProjectiveLimit_trajFun _ _ _).unique ?_).symm
   rw [isProjectiveLimit_nat_iff' _ _ n]
   · intro k hk
-    rw [inducedFamily_Iic, ← map_apply _ (measurable_frestrictLe k), hη k hk]
+    rw [inducedFamily_Iic, ← map_apply _ _ (measurable_frestrictLe k), hη k hk]
   · exact isProjectiveMeasureFamily_partialTraj κ x
 
 /-- To check that `η = traj κ a` it is enough to show that the restriction of `η` to variables `≤ b`
@@ -575,7 +593,7 @@ of the whole trajectory. -/
 theorem traj_comp_partialTraj {a b : ℕ} (hab : a ≤ b) :
     (traj κ b) ∘ₖ (partialTraj κ a b) = traj κ a := by
   refine eq_traj _ _ fun n ↦ ?_
-  rw [map_comp, traj_map_frestrictLe, partialTraj_comp_partialTraj' _ hab]
+  rw [map_comp _ _ _ (by fun_prop), traj_map_frestrictLe, partialTraj_comp_partialTraj' _ hab]
 
 /-- This theorem shows that `traj κ n` is, up to an equivalence, the product of
 a deterministic kernel with another kernel. This is an intermediate result to compute integrals
@@ -587,21 +605,67 @@ theorem traj_eq_prod (a : ℕ) :
   conv_lhs => enter [2]; change (IicProdIoc a b) ∘
     (Prod.map id (fun x i ↦ x ⟨i.1, Set.mem_Ioi.2 (mem_Ioc.1 i.2).1⟩))
   · rw [map_comp_right, ← map_prod_map, ← map_comp_right]
-    · conv_lhs => enter [1, 2, 2]; change (Ioc a b).restrict
-      rw [← restrict₂_comp_restrict Ioc_subset_Iic_self, ← frestrictLe, map_comp_right,
-        traj_map_frestrictLe, map_id, ← partialTraj_eq_prod]
-      all_goals fun_prop
-    all_goals fun_prop
-  all_goals fun_prop
+    · have hr :
+          (fun (x : ∀ i : Set.Ioi a, X i) (i : Ioc a b) =>
+            x ⟨i.1, Set.mem_Ioi.2 (mem_Ioc.1 i.2).1⟩) ∘
+            (Set.Ioi a).domRestrict = (Ioc a b).restrict := rfl
+      have hmap := Kernel.map_congr (traj κ a) hr (by fun_prop)
+      have hprod := congrArg₂ (fun ξ ζ => ξ ×ₖ ζ) (map_id Kernel.id) hmap
+      have hout' := congrArg
+        (fun ξ => ξ.map (IicProdIoc a b) measurable_IicProdIoc) hprod
+      have hcomp : (restrict₂ (π := X) Ioc_subset_Iic_self) ∘ frestrictLe (π := X) b =
+          (Ioc a b).restrict := by
+        simpa only [frestrictLe] using restrict₂_comp_restrict Ioc_subset_Iic_self
+      have hsecond : (traj κ a).map (Ioc a b).restrict =
+          (partialTraj κ a b).map (restrict₂ Ioc_subset_Iic_self) := by
+        calc
+          (traj κ a).map (Ioc a b).restrict =
+              (traj κ a).map ((restrict₂ Ioc_subset_Iic_self) ∘ frestrictLe b) := by
+            exact Kernel.map_congr _ hcomp.symm (by fun_prop)
+          _ = ((traj κ a).map (frestrictLe b)).map (restrict₂ Ioc_subset_Iic_self) :=
+            map_comp_right _ (by fun_prop) (by fun_prop)
+          _ = (partialTraj κ a b).map (restrict₂ Ioc_subset_Iic_self) := by
+            rw [traj_map_frestrictLe]
+      have hprod' := congrArg₂ (fun ξ ζ => ξ ×ₖ ζ) (rfl : Kernel.id = Kernel.id) hsecond
+      have hout'' := congrArg
+        (fun ξ => ξ.map (IicProdIoc a b) measurable_IicProdIoc) hprod'
+      exact hout'.trans (hout''.trans (partialTraj_eq_prod (κ := κ) a b).symm)
+    · have hm : Measurable (IicProdIoc (X := X) a b) := measurable_IicProdIoc
+      fun_prop
+    · fun_prop
 
 theorem traj_map_updateFinset {n : ℕ} (x : Π i : Iic n, X i) :
     (traj κ n x).map (updateFinset · (Iic n) x) = traj κ n x := by
   nth_rw 2 [traj_eq_prod]
   have : (updateFinset · _ x) = IicProdIoi n ∘ (Prod.mk x) ∘ (Set.Ioi n).domRestrict := by
     ext; simp [IicProdIoi, updateFinset]
-  rw [this, ← Function.comp_assoc, ← Measure.map_map, ← Measure.map_map, map_apply, prod_apply,
-    map_apply, id_apply, Measure.dirac_prod]
-  all_goals fun_prop
+  calc
+    (traj κ n x).map (updateFinset · (Iic n) x) =
+        (traj κ n x).map (IicProdIoi n ∘ (Prod.mk x) ∘ (Set.Ioi n).domRestrict) :=
+      Measure.map_congr (Eventually.of_forall fun y => congrFun this y) (by fun_prop)
+    _ = _ := by
+      rw [map_apply _ _ (by fun_prop)]
+      have hp := congrArg
+        (fun ρ => Measure.mapₗ (IicProdIoi n) (IicProdIoi n).measurable ρ)
+        (prod_apply Kernel.id ((traj κ n).map (Set.Ioi n).domRestrict) x)
+      have hp' : Measure.map (IicProdIoi n)
+          ((Kernel.id ×ₖ (traj κ n).map (Set.Ioi n).domRestrict) x) =
+          Measure.map (IicProdIoi n)
+            ((Kernel.id x).prod (((traj κ n).map (Set.Ioi n).domRestrict) x)) := by
+        simpa only [Measure.mapₗ_apply_of_measurable] using hp
+      have hk := map_apply (traj κ n) x (Set.measurable_restrict (Set.Ioi n))
+      have hkl := congrArg
+        (fun ρ => Measure.mapₗ (IicProdIoi n) (IicProdIoi n).measurable
+          (Measure.mapₗ (Prod.mk x) measurable_prodMk_left ρ)) hk
+      have hkl' : Measure.map (IicProdIoi n)
+          (Measure.map (Prod.mk x) (((traj κ n).map (Set.Ioi n).domRestrict) x)) =
+          Measure.map (IicProdIoi n)
+            (Measure.map (Prod.mk x)
+              (Measure.map (Set.Ioi n).domRestrict ((traj κ n) x))) := by
+        simpa only [Measure.mapₗ_apply_of_measurable] using hkl
+      rw [hp', id_apply, Measure.dirac_prod, hkl',
+        Measure.map_map, Measure.map_map]
+      all_goals rfl
 
 end basic
 
@@ -615,7 +679,6 @@ theorem lintegral_traj₀ {a : ℕ} (x₀ : Π i : Iic a, X i) {f : (Π n, X n) 
   nth_rw 1 [← traj_map_updateFinset, MeasureTheory.lintegral_map']
   · convert! mf
     exact traj_map_updateFinset x₀
-  · exact measurable_updateFinset_left.aemeasurable
 
 theorem lintegral_traj {a : ℕ} (x₀ : Π i : Iic a, X i) {f : (Π n, X n) → ℝ≥0∞}
     (mf : Measurable f) :
@@ -628,10 +691,10 @@ theorem integrable_traj {a b : ℕ} (hab : a ≤ b) {f : (Π n, X n) → E}
     (x₀ : Π i : Iic a, X i) (i_f : Integrable f (traj κ a x₀)) :
     ∀ᵐ x ∂traj κ a x₀, Integrable f (traj κ b (frestrictLe b x)) := by
   rw [← traj_comp_partialTraj hab, integrable_comp_iff] at i_f
-  · apply ae_of_ae_map (p := fun x ↦ Integrable f (traj κ b x))
-    · fun_prop
-    · convert! i_f.1
-      rw [← traj_map_frestrictLe, Kernel.map_apply _ (measurable_frestrictLe _)]
+  · apply ae_of_ae_map (measurable_frestrictLe b).aemeasurable
+      (p := fun x ↦ Integrable f (traj κ b x))
+    convert! i_f.1
+    rw [← traj_map_frestrictLe, Kernel.map_apply _ _ (measurable_frestrictLe _)]
   · exact i_f.aestronglyMeasurable
 
 theorem aestronglyMeasurable_traj {a b : ℕ} (hab : a ≤ b) {f : (Π n, X n) → E}
@@ -647,30 +710,31 @@ determined by `x₀` we can replace `x` by `updateFinset x (Iic a) x₀`. -/
 theorem integral_traj {a : ℕ} (x₀ : Π i : Iic a, X i) {f : (Π n, X n) → E}
     (mf : AEStronglyMeasurable f (traj κ a x₀)) :
     ∫ x, f x ∂traj κ a x₀ = ∫ x, f (updateFinset x (Iic a) x₀) ∂traj κ a x₀ := by
-  nth_rw 1 [← traj_map_updateFinset, integral_map]
-  · exact measurable_updateFinset_left.aemeasurable
-  · convert! mf
-    rw [traj_map_updateFinset]
+  nth_rw 1 [← traj_map_updateFinset]
+  rw [integral_map measurable_updateFinset_left.aemeasurable]
+  convert! mf
+  rw [traj_map_updateFinset]
 
 lemma partialTraj_compProd_traj {a b : ℕ} (hab : a ≤ b) (u : Π i : Iic a, X i) :
     (partialTraj κ a b u) ⊗ₘ (traj κ b) = (traj κ a u).map (fun x ↦ (frestrictLe b x, x)) := by
   ext s ms
-  rw [Measure.map_apply, Measure.compProd_apply, ← traj_comp_partialTraj hab, comp_apply']
+  rw [Measure.map_apply ms (by fun_prop), Measure.compProd_apply,
+    ← traj_comp_partialTraj hab, comp_apply']
   · congr 1 with x
-    rw [← traj_map_updateFinset, Measure.map_apply, Measure.map_apply]
+    rw [← traj_map_updateFinset, Measure.map_apply (ms.preimage (by fun_prop)) (by fun_prop),
+      Measure.map_apply (ms.preimage (by fun_prop)) (by fun_prop)]
     · congr 1 with y
       simp only [Set.mem_preimage]
       congrm (fun i ↦ ?_, fun i ↦ ?_) ∈ s <;> simp [updateFinset]
-    any_goals fun_prop
-    all_goals exact ms.preimage (by fun_prop)
-  any_goals exact ms.preimage (by fun_prop)
-  fun_prop
+  · exact ms.preimage (by fun_prop)
+  · exact ms
 
 lemma partialTraj_compProd_eq_map_traj {a b : ℕ} (hab : a ≤ b) {x₀ : Π n : Iic a, X n} :
     (partialTraj κ a b x₀) ⊗ₘ (κ b) = (traj κ a x₀).map (fun x ↦ (frestrictLe b x, x (b + 1))) := by
   have hf : (fun x : Π n, X n ↦ (frestrictLe b x, x (b + 1))) =
       (Prod.map id (fun x ↦ x (b + 1))) ∘ (fun x ↦ (frestrictLe b x, x)) := rfl
-  rw [hf, ← Measure.map_map (by fun_prop) (by fun_prop), ← partialTraj_compProd_traj hab,
+  rw [Measure.map_congr (Eventually.of_forall fun x => congrFun hf x) (by fun_prop),
+    ← Measure.map_map (by fun_prop) (by fun_prop), ← partialTraj_compProd_traj hab,
     ← Measure.compProd_map (by fun_prop), map_traj_succ_self]
 
 theorem integral_traj_partialTraj' {a b : ℕ} (hab : a ≤ b) {x₀ : Π i : Iic a, X i}
@@ -722,7 +786,7 @@ theorem condExp_traj {a b : ℕ} (hab : a ≤ b) {x₀ : Π i : Iic a, X i}
       fun x ↦ ∫ y, f y ∂traj κ b (frestrictLe b x) := by
   have i_f' : Integrable (fun x ↦ ∫ y, f y ∂(traj κ b) x)
       (((traj κ a) x₀).map (frestrictLe b)) := by
-    rw [← map_apply _ (measurable_frestrictLe _), traj_map_frestrictLe _ _]
+    rw [← map_apply _ _ (measurable_frestrictLe _), traj_map_frestrictLe _ _]
     rw [← traj_comp_partialTraj hab] at i_f
     exact i_f.integral_comp
   refine ae_eq_condExp_of_forall_setIntegral_eq (piLE.le _) i_f
@@ -730,9 +794,9 @@ theorem condExp_traj {a b : ℕ} (hab : a ≤ b) {x₀ : Π i : Iic a, X i}
     ?_ ?_ |>.symm <;> rw [piLE_eq_comap_frestrictLe]
   · rintro - ⟨t, mt, rfl⟩ -
     simp_rw [Function.comp_apply]
-    rw [← setIntegral_map mt i_f'.1, ← map_apply, traj_map_frestrictLe,
+    rw [← setIntegral_map mt (measurable_frestrictLe b).aemeasurable i_f'.1,
+      ← map_apply, traj_map_frestrictLe,
       setIntegral_traj_partialTraj hab i_f mt]
-    all_goals fun_prop
   · exact (i_f'.1.comp_ae_measurable' (measurable_frestrictLe b).aemeasurable)
 
 theorem condExp_traj' {a b c : ℕ} (hab : a ≤ b) (hbc : b ≤ c)
@@ -750,7 +814,6 @@ theorem condExp_traj' {a b c : ℕ} (hab : a ≤ b) (hbc : b ≤ c)
     apply stronglyMeasurable_condExp.dependsOn_of_piLE
     simp only [Set.mem_Iic, updateFinset, mem_Iic, frestrictLe_apply, dite_eq_ite]
     exact fun i hi ↦ (ite_eq_left hi).symm
-  any_goals fun_prop
   exact (mcf.comp_measurable measurable_updateFinset).aestronglyMeasurable
 
 end integral
@@ -773,11 +836,37 @@ instance : IsProbabilityMeasure (trajMeasure μ₀ κ) := by
 lemma map_frestrictLe_trajMeasure_compProd_eq_map_trajMeasure {a : ℕ} :
     (trajMeasure μ₀ κ).map (frestrictLe a) ⊗ₘ κ a =
       (trajMeasure μ₀ κ).map (fun x ↦ (frestrictLe a x, x (a + 1))) := by
-  rw [Measure.compProd_eq_comp_prod, trajMeasure, Measure.map_comp _ _ (by fun_prop),
-    traj_map_frestrictLe, Measure.comp_assoc, Measure.map_comp _ _ (by fun_prop)]
-  congr with x₀ : 1
-  rw [comp_apply, ← Measure.compProd_eq_comp_prod, map_apply _ (by fun_prop),
-    partialTraj_compProd_eq_map_traj zero_le]
+  let e : X 0 ≃ᵐ (∀ i : Iic 0, X i) := (MeasurableEquiv.piUnique fun i : Iic 0 ↦ X i).symm
+  let ν : Measure (∀ i : Iic 0, X i) := μ₀.map e e.measurable.aemeasurable
+  change (((traj κ 0) ∘ₘ ν).map (frestrictLe a)) ⊗ₘ κ a =
+    ((traj κ 0) ∘ₘ ν).map (fun x ↦ (frestrictLe a x, x (a + 1)))
+  have hpair : Measurable (fun x : Π n, X n ↦ (frestrictLe a x, x (a + 1))) := by fun_prop
+  have hleft := Measure.map_comp ν (traj κ 0) (measurable_frestrictLe a)
+  have hright := Measure.map_comp ν (traj κ 0) hpair
+  have hrestrict :
+      ((traj κ 0).map (frestrictLe a)) ∘ₘ ν = (partialTraj κ 0 a) ∘ₘ ν :=
+    Measure.comp_congr <| ae_of_all ν fun x ↦
+      congrArg (fun η : Kernel (Π i : Iic 0, X i) (Π i : Iic a, X i) ↦ η x)
+        (traj_map_frestrictLe 0 a)
+  have hk : (Kernel.id ×ₖ κ a) ∘ₖ (partialTraj κ 0 a) =
+      (traj κ 0).map (fun x ↦ (frestrictLe a x, x (a + 1))) := by
+    ext x
+    rw [comp_apply, ← Measure.compProd_eq_comp_prod, map_apply _ _ hpair,
+      partialTraj_compProd_eq_map_traj zero_le]
+  calc
+    (((traj κ 0) ∘ₘ ν).map (frestrictLe a)) ⊗ₘ κ a =
+        (Kernel.id ×ₖ κ a) ∘ₘ (((traj κ 0) ∘ₘ ν).map (frestrictLe a)) :=
+      Measure.compProd_eq_comp_prod _ _
+    _ = (Kernel.id ×ₖ κ a) ∘ₘ (((traj κ 0).map (frestrictLe a)) ∘ₘ ν) :=
+      congrArg (fun ρ ↦ (Kernel.id ×ₖ κ a) ∘ₘ ρ) hleft
+    _ = (Kernel.id ×ₖ κ a) ∘ₘ ((partialTraj κ 0 a) ∘ₘ ν) :=
+      congrArg (fun ρ ↦ (Kernel.id ×ₖ κ a) ∘ₘ ρ) hrestrict
+    _ = ((Kernel.id ×ₖ κ a) ∘ₖ (partialTraj κ 0 a)) ∘ₘ ν := Measure.comp_assoc
+    _ = ((traj κ 0).map (fun x ↦ (frestrictLe a x, x (a + 1)))) ∘ₘ ν :=
+      Measure.comp_congr <| ae_of_all ν fun x ↦
+        congrArg (fun η : Kernel (Π i : Iic 0, X i)
+          ((Π i : Iic a, X i) × X (a + 1)) ↦ η x) hk
+    _ = ((traj κ 0) ∘ₘ ν).map (fun x ↦ (frestrictLe a x, x (a + 1))) := hright.symm
 
 /-- A regular conditional probability distribution of the point at time `a + 1` given the
 trajectory up to time `a` corresponds to the kernel `κ a`. -/

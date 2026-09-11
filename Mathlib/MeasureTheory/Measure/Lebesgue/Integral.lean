@@ -21,7 +21,8 @@ variable [SigmaAlgebra α] {μ : Measure α} {f g : α → ℝ} {s : Set α}
 
 theorem volume_regionBetween_eq_integral' [SigmaFinite μ] (f_int : IntegrableOn f s μ)
     (g_int : IntegrableOn g s μ) (hs : MeasurableSet s) (hfg : f ≤ᵐ[μ.restrict s] g) :
-    μ.prod volume (regionBetween f g s) = ENNReal.ofReal (∫ y in s, (g - f) y ∂μ) := by
+    (μ.prod volume Measurable.map_prodMk_left.aemeasurable) (regionBetween f g s) =
+      ENNReal.ofReal (∫ y in s, (g - f) y ∂μ) := by
   have h : g - f =ᵐ[μ.restrict s] fun x => Real.toNNReal (g x - f x) :=
     hfg.mono fun x hx => (Real.coe_toNNReal _ <| sub_nonneg.2 hx).symm
   rw [volume_regionBetween_eq_lintegral f_int.aemeasurable g_int.aemeasurable hs,
@@ -34,7 +35,8 @@ or equal to the other on that set, then the volume of the region
 between the two functions can be represented as an integral. -/
 theorem volume_regionBetween_eq_integral [SigmaFinite μ] (f_int : IntegrableOn f s μ)
     (g_int : IntegrableOn g s μ) (hs : MeasurableSet s) (hfg : ∀ x ∈ s, f x ≤ g x) :
-    μ.prod volume (regionBetween f g s) = ENNReal.ofReal (∫ y in s, (g - f) y ∂μ) :=
+    (μ.prod volume Measurable.map_prodMk_left.aemeasurable) (regionBetween f g s) =
+      ENNReal.ofReal (∫ y in s, (g - f) y ∂μ) :=
   volume_regionBetween_eq_integral' f_int g_int hs
     ((ae_restrict_iff' hs).mpr (Eventually.of_forall hfg))
 

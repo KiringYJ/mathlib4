@@ -488,7 +488,8 @@ lemma _root_.MeasurableEquiv.withDensity_ofReal_map_symm_apply_eq_integral_abs_d
     (f : ℝ ≃ᵐ ℝ) {s : Set ℝ} (hs : MeasurableSet s)
     {g : ℝ → ℝ} (hg : ∀ᵐ x, x ∈ f '' s → 0 ≤ g x) (hf_int : IntegrableOn g (f '' s))
     {f' : ℝ → ℝ} (hf' : ∀ x ∈ s, HasDerivWithinAt f (f' x) s x) :
-    (volume.withDensity (fun x ↦ ENNReal.ofReal (g x))).map f.symm s
+    ((volume.withDensity (fun x ↦ ENNReal.ofReal (g x))).map f.symm
+      f.symm.measurable.aemeasurable) s
       = ENNReal.ofReal (∫ x in s, |f' x| * g (f x)) := by
   rw [MeasurableEquiv.withDensity_ofReal_map_symm_apply_eq_integral_abs_det_fderiv_mul volume hs
       f hg hf_int hf']
@@ -508,7 +509,8 @@ lemma _root_.MeasurableEquiv.withDensity_ofReal_map_symm_apply_eq_integral_abs_d
     (f : ℝ ≃ᵐ ℝ) {s : Set ℝ} (hs : MeasurableSet s)
     {f' : ℝ → ℝ} (hf' : ∀ x, HasDerivAt f (f' x) x)
     {g : ℝ → ℝ} (hg : 0 ≤ᵐ[volume] g) (hg_int : Integrable g) :
-    (volume.withDensity (fun x ↦ ENNReal.ofReal (g x))).map f.symm s
+    ((volume.withDensity (fun x ↦ ENNReal.ofReal (g x))).map f.symm
+      f.symm.measurable.aemeasurable) s
       = ENNReal.ofReal (∫ x in s, |f' x| * g (f x)) := by
   rw [MeasurableEquiv.withDensity_ofReal_map_symm_apply_eq_integral_abs_det_fderiv_mul volume hs
       f (by filter_upwards [hg] with x hx using fun _ ↦ hx) hg_int.integrableOn

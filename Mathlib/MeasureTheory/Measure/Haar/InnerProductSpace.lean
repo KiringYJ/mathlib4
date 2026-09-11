@@ -105,7 +105,10 @@ theorem OrthonormalBasis.measurePreserving_measurableEquiv (b : OrthonormalBasis
     MeasurePreserving b.measurableEquiv volume volume := by
   convert! (b.measurableEquiv.symm.measurable.measurePreserving _).symm
   rw [← (EuclideanSpace.basisFun ι ℝ).addHaar_eq_volume]
-  erw [MeasurableEquiv.coe_toEquiv_symm, Basis.map_addHaar _ b.repr.symm.toContinuousLinearEquiv]
+  change volume = map b.repr.symm.toContinuousLinearEquiv
+    (EuclideanSpace.basisFun ι ℝ).toBasis.addHaar
+    b.repr.symm.toContinuousLinearEquiv.continuous.measurable.aemeasurable
+  rw [Basis.map_addHaar _ b.repr.symm.toContinuousLinearEquiv]
   exact b.addHaar_eq_volume.symm
 
 theorem OrthonormalBasis.measurePreserving_repr (b : OrthonormalBasis ι ℝ F) :
@@ -125,8 +128,11 @@ theorem EuclideanSpace.volume_preserving_symm_measurableEquiv_toLp :
     MeasurePreserving (MeasurableEquiv.toLp 2 (ι → ℝ)).symm := by
   suffices volume = map (MeasurableEquiv.toLp 2 (ι → ℝ)) volume by
     convert! ((MeasurableEquiv.toLp 2 (ι → ℝ)).measurable.measurePreserving _).symm
-  rw [← addHaarMeasure_eq_volume_pi, ← Basis.parallelepiped_basisFun, ← Basis.addHaar_def,
-    MeasurableEquiv.coe_toLp, ← PiLp.coe_symm_continuousLinearEquiv 2 ℝ, Basis.map_addHaar]
+  rw [← addHaarMeasure_eq_volume_pi, ← Basis.parallelepiped_basisFun, ← Basis.addHaar_def]
+  change volume = map (PiLp.continuousLinearEquiv 2 ℝ (fun _ : ι ↦ ℝ)).symm
+    (Pi.basisFun ℝ ι).addHaar
+    (PiLp.continuousLinearEquiv 2 ℝ (fun _ : ι ↦ ℝ)).symm.continuous.measurable.aemeasurable
+  rw [Basis.map_addHaar]
   exact (EuclideanSpace.basisFun _ _).addHaar_eq_volume.symm
 
 /-- A copy of `EuclideanSpace.volume_preserving_symm_measurableEquiv_toLp`
@@ -141,7 +147,8 @@ theorem PiLp.volume_preserving_toLp : MeasurePreserving (@toLp 2 (ι → ℝ)) :
 
 lemma volume_euclideanSpace_eq_dirac [IsEmpty ι] :
     (volume : Measure (EuclideanSpace ℝ ι)) = Measure.dirac 0 := by
-  rw [← (PiLp.volume_preserving_toLp ι).map_eq, volume_pi_eq_dirac 0, map_dirac, toLp_zero]
+  rw [← (PiLp.volume_preserving_toLp ι).map_eq]
+  simp only [volume_pi_eq_dirac 0, map_dirac, toLp_zero]
 
 end PiLp
 

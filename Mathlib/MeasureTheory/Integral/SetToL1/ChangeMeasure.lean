@@ -57,13 +57,13 @@ theorem setToFun_of_le_map_of_stronglyMeasurable
     (hT : DominatedFinMeasAdditive μ T C) {β : Type*} {_ : SigmaAlgebra β}
     {μ' : Measure β} {φ : α → β} {T' : Set β → E →L[ℝ] F} (hT' : DominatedFinMeasAdditive μ' T' C')
     {f : β → E} (hf : Integrable (f ∘ φ) μ) (hfm : StronglyMeasurable f) (hφ : Measurable φ)
-    (hμ' : μ' ≤ μ.map φ)
+    (hμ' : μ' ≤ μ.map φ hφ.aemeasurable)
     (h : ∀ (s : Set β) (x : E), MeasurableSet s → T' s x = T (φ ⁻¹' s) x) :
     setToFun μ' T' hT' f = setToFun μ T hT (f ∘ φ) := by
   by_cases hF : CompleteSpace F; swap
   · simp [setToFun, hF]
   have hfi' : Integrable f μ' :=
-    ((integrable_map_measure hfm.aestronglyMeasurable hφ.aemeasurable).2 hf).mono_measure hμ'
+    ((integrable_map_measure hφ.aemeasurable hfm.aestronglyMeasurable).2 hf).mono_measure hμ'
   borelize E
   have : SeparableSpace (range f ∪ {0} : Set E) := hfm.separableSpace_range_union_singleton
   refine tendsto_nhds_unique_of_forall
@@ -82,8 +82,9 @@ theorem setToFun_of_le_map_of_stronglyMeasurable
 theorem setToFun_of_le_map
     (hT : DominatedFinMeasAdditive μ T C) {β : Type*} {_ : SigmaAlgebra β}
     {μ' : Measure β} {φ : α → β} {T' : Set β → E →L[ℝ] F} (hT' : DominatedFinMeasAdditive μ' T' C')
-    {f : β → E} (hf : Integrable (f ∘ φ) μ) (hfm : AEStronglyMeasurable f (μ.map φ))
-    (hφ : Measurable φ) (hμ' : μ' ≤ μ.map φ)
+    {f : β → E} (hf : Integrable (f ∘ φ) μ) (hφ : Measurable φ)
+    (hfm : AEStronglyMeasurable f (μ.map φ hφ.aemeasurable))
+    (hμ' : μ' ≤ μ.map φ hφ.aemeasurable)
     (h : ∀ (s : Set β) (x : E), MeasurableSet s → T' s x = T (φ ⁻¹' s) x) :
     setToFun μ' T' hT' f = setToFun μ T hT (f ∘ φ) := by
   let g := hfm.mk

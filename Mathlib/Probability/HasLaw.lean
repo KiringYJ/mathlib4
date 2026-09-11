@@ -12,10 +12,9 @@ public import Mathlib.Probability.Moments.Variance
 # Law of a random variable
 
 We introduce a predicate `HasLaw X μ P` stating that the random variable `X` has law `μ` under
-the measure `P`. This is expressed as `P.map X = μ`. We also require `X` to be `P`-almost-everywhere
-measurable. Indeed, if `X` is not almost-everywhere measurable then `P.map X` is defined to be `0`,
-so that `HasLaw X 0 P` would be true. The measurability hypothesis ensures nice interactions with
-operations on the codomain of `X`.
+the measure `P`. This is expressed as `P.map X = μ`, with the a.e.-measurability proof required to
+form the pushforward. The measurability hypothesis also ensures nice interactions with operations
+on the codomain of `X`.
 See for instance `HasLaw.comp`, `IndepFun.hasLaw_mul` and `IndepFun.hasLaw_add`.
 -/
 
@@ -38,16 +37,16 @@ to allow for nice interactions with operations on the codomain of `X`. See for i
 @[fun_prop]
 structure HasLaw (P : Measure Ω := by volume_tac) : Prop where
   protected aemeasurable : AEMeasurable X P := by fun_prop
-  protected map_eq : P.map X = μ
+  protected map_eq : P.map X aemeasurable = μ
 
 attribute [fun_prop] HasLaw.aemeasurable
 
-lemma hasLaw_map (hX : AEMeasurable X P) : HasLaw X (P.map X) P where
+lemma hasLaw_map (hX : AEMeasurable X P) : HasLaw X (P.map X hX) P where
   map_eq := rfl
 
 lemma HasLaw.measure_eq (hX : HasLaw X μ P) {p : 𝓧 → Prop} (hp : MeasurableSet {x | p x}) :
     P {ω | p (X ω)} = μ {x | p x} := by
-  rw [← hX.map_eq, map_apply_of_aemeasurable hX.aemeasurable hp]
+  rw [← hX.map_eq, map_apply hp hX.aemeasurable]
   simp
 
 lemma HasLaw.measureReal_eq (hX : HasLaw X μ P) {p : 𝓧 → Prop} (hp : MeasurableSet {x | p x}) :
@@ -61,16 +60,30 @@ lemma HasLaw.comp_of_hasLaw_comp {Ω' 𝓨 : Type*} {m' : SigmaAlgebra Ω'} {m�
     {P' : Measure Ω'} {ν : Measure 𝓨} {f : 𝓧 → 𝓨} {Y : Ω' → 𝓧} (hf : AEMeasurable f μ)
     (hX : HasLaw X μ P) (hY : HasLaw Y μ P') (h : HasLaw (fun ω ↦ f (X ω)) ν P) :
     HasLaw (fun ω ↦ f (Y ω)) ν P' where
-  aemeasurable := (hY.map_eq ▸ hf).comp_aemeasurable hY.aemeasurable
+  aemeasurable := by
+    have hf' : AEMeasurable f (P'.map Y hY.aemeasurable) := by
+      simpa only [hY.map_eq] using hf
+    exact hY.aemeasurable.comp_aemeasurable hf'
   map_eq := by
-    rw [← Function.comp_def,
-      ← AEMeasurable.map_map_of_aemeasurable (hY.map_eq ▸ hf) hY.aemeasurable,
-      hY.map_eq, ← hX.map_eq, AEMeasurable.map_map_of_aemeasurable (hX.map_eq ▸ hf) hX.aemeasurable,
-      Function.comp_def, h.map_eq]
+    have hfY : AEMeasurable f (P'.map Y hY.aemeasurable) := by
+      simpa only [hY.map_eq] using hf
+    have hfX : AEMeasurable f (P.map X hX.aemeasurable) := by
+      simpa only [hX.map_eq] using hf
+    have hfun : (fun ω ↦ f (Y ω)) =ᵐ[P'] f ∘ Y := ae_of_all _ fun _ ↦ rfl
+    have hcomp : AEMeasurable (f ∘ Y) P' := hY.aemeasurable.comp_aemeasurable hfY
+    have hlam : AEMeasurable (fun ω ↦ f (Y ω)) P' := hcomp.congr hfun.symm
+    calc
+      P'.map (fun ω ↦ f (Y ω)) = P'.map (f ∘ Y) hcomp :=
+        Measure.map_congr hfun hlam
+      _ = (P'.map Y hY.aemeasurable).map f hfY :=
+        (Measure.map_map hY.aemeasurable hfY).symm
+      _ = (P.map X hX.aemeasurable).map f hfX := by simp only [hY.map_eq, hX.map_eq]
+      _ = P.map (f ∘ X) := Measure.map_map hX.aemeasurable hfX
+      _ = ν := by simpa only [Function.comp_def] using h.map_eq
 
 lemma HasLaw.congr (hX : HasLaw X μ P) (hY : Y =ᵐ[P] X) : HasLaw Y μ P where
   aemeasurable := hX.aemeasurable.congr hY.symm
-  map_eq := by rw [map_congr hY, hX.map_eq]
+  map_eq := by rw [Measure.map_congr hY (hX.aemeasurable.congr hY.symm), hX.map_eq]
 
 lemma hasLaw_congr (hXY : X =ᵐ[P] Y) : HasLaw X μ P ↔ HasLaw Y μ P where
   mp h := h.congr hXY.symm
@@ -111,10 +124,18 @@ lemma HasLaw.isProbabilityMeasure [IsProbabilityMeasure μ] (hX : HasLaw X μ P)
 @[fun_prop]
 lemma HasLaw.comp {𝓨 : Type*} {m𝓨 : SigmaAlgebra 𝓨} {ν : Measure 𝓨} {Y : 𝓧 → 𝓨}
     (hY : HasLaw Y ν μ) (hX : HasLaw X μ P) : HasLaw (Y ∘ X) ν P where
-  aemeasurable := (hX.map_eq ▸ hY.aemeasurable).comp_aemeasurable hX.aemeasurable
+  aemeasurable := by
+    have hY' : AEMeasurable Y (P.map X hX.aemeasurable) := by
+      simpa only [hX.map_eq] using hY.aemeasurable
+    exact hX.aemeasurable.comp_aemeasurable hY'
   map_eq := by
-    rw [← AEMeasurable.map_map_of_aemeasurable _ hX.aemeasurable, hX.map_eq, hY.map_eq]
-    rw [hX.map_eq]; exact hY.aemeasurable
+    have hY' : AEMeasurable Y (P.map X hX.aemeasurable) := by
+      simpa only [hX.map_eq] using hY.aemeasurable
+    calc
+      P.map (Y ∘ X) = (P.map X hX.aemeasurable).map Y hY' :=
+        (Measure.map_map hX.aemeasurable hY').symm
+      _ = μ.map Y hY.aemeasurable := by simp only [hX.map_eq]
+      _ = ν := hY.map_eq
 
 @[fun_prop]
 lemma HasLaw.fun_comp {𝓨 : Type*} {m𝓨 : SigmaAlgebra 𝓨} {ν : Measure 𝓨} {Y : 𝓧 → 𝓨}
@@ -137,9 +158,10 @@ lemma IndepFun.hasLaw_mul {M : Type*} [Monoid M] {mM : SigmaAlgebra M} [Measurab
     (hX : HasLaw X μ P) (hY : HasLaw Y ν P) (hXY : X ⟂ᵢ[P] Y) :
     HasLaw (X * Y) (μ ∗ₘ ν) P where
   map_eq := by
-    rw [hXY.map_mul_eq_map_mconv_map₀' hX.aemeasurable hY.aemeasurable, hX.map_eq, hY.map_eq]
-    · rwa [hX.map_eq]
-    · rwa [hY.map_eq]
+    simpa only [hX.map_eq, hY.map_eq] using
+      hXY.map_mul_eq_map_mconv_map₀' hX.aemeasurable hY.aemeasurable
+        (by simpa only [hX.map_eq] using (inferInstance : SigmaFinite μ))
+        (by simpa only [hY.map_eq] using (inferInstance : SigmaFinite ν))
 
 @[to_additive]
 lemma IndepFun.hasLaw_fun_mul {M : Type*} [Monoid M] {mM : SigmaAlgebra M} [MeasurableMul₂ M]
@@ -152,7 +174,7 @@ lemma HasLaw.memLp_comp {ε : Type*} [TopologicalSpace ε] [ContinuousENorm ε] 
     {f : 𝓧 → ε} {p : ℝ≥0∞} (hf : MemLp f p μ) :
     MemLp (f ∘ X) p P := by
   rw [← hX.map_eq] at hf
-  exact hf.comp_of_map hX.aemeasurable
+  exact MemLp.comp_of_map hX.aemeasurable hf
 
 lemma HasLaw.memLp [TopologicalSpace 𝓧] [ContinuousENorm 𝓧] (hX : HasLaw X μ P) {p : ℝ≥0∞}
     (hμ : MemLp id p μ) :
@@ -176,7 +198,7 @@ lemma HasLaw.integral_comp {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E
 
 lemma HasLaw.lintegral_comp {X : Ω → 𝓧} (hX : HasLaw X μ P) {f : 𝓧 → ℝ≥0∞}
     (hf : AEMeasurable f μ) : ∫⁻ ω, f (X ω) ∂P = ∫⁻ x, f x ∂μ := by
-  rw [← hX.map_eq, lintegral_map' _ hX.aemeasurable]
+  rw [← hX.map_eq, lintegral_map' hX.aemeasurable _]
   rwa [hX.map_eq]
 
 lemma HasLaw.integral_eq {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
@@ -188,12 +210,11 @@ lemma HasLaw.integral_eq {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 lemma HasLaw.covariance_comp (hX : HasLaw X μ P) {f g : 𝓧 → ℝ}
     (hf : AEMeasurable f μ) (hg : AEMeasurable g μ) :
     cov[f ∘ X, g ∘ X; P] = cov[f, g; μ] := by
-  rw [← hX.map_eq, covariance_map]
+  rw [← hX.map_eq, covariance_map hX.aemeasurable]
   · rw [hX.map_eq]
     exact hf.aestronglyMeasurable
   · rw [hX.map_eq]
     exact hg.aestronglyMeasurable
-  · exact hX.aemeasurable
 
 lemma HasLaw.covariance_fun_comp (hX : HasLaw X μ P) {f g : 𝓧 → ℝ}
     (hf : AEMeasurable f μ) (hg : AEMeasurable g μ) :
@@ -202,9 +223,10 @@ lemma HasLaw.covariance_fun_comp (hX : HasLaw X μ P) {f g : 𝓧 → ℝ}
 
 lemma HasLaw.variance_eq {μ : Measure ℝ} {X : Ω → ℝ} (hX : HasLaw X μ P) :
     Var[X; P] = Var[id; μ] := by
-  rw [← hX.map_eq, variance_map aemeasurable_id hX.aemeasurable, Function.id_comp]
+  rw [← hX.map_eq, variance_map hX.aemeasurable aemeasurable_id, Function.id_comp]
 
-lemma HasPDF.hasLaw [h : HasPDF X P μ] : HasLaw X (μ.withDensity (pdf X P μ)) P where
+lemma HasPDF.hasLaw [h : HasPDF X P μ] :
+    HasLaw X (μ.withDensity (pdf X P μ (HasPDF.aemeasurable X P μ))) P where
   aemeasurable := h.aemeasurable
   map_eq := map_eq_withDensity_pdf X P μ
 
@@ -223,7 +245,7 @@ lemma hasLaw_smul_dirac_of_ae_eq {x : 𝓧} (hX : X =ᵐ[P] fun _ ↦ x) :
     HasLaw X ((P Set.univ) • .dirac x) P where
   aemeasurable := aemeasurable_const.congr hX.symm
   map_eq := by
-    rw [map_congr hX]
+    rw [map_congr hX (aemeasurable_const.congr hX.symm)]
     simp
 
 lemma hasLaw_dirac_of_ae_eq [IsProbabilityMeasure P] {x : 𝓧} (hX : X =ᵐ[P] fun _ ↦ x) :
@@ -241,15 +263,16 @@ lemma hasLaw_dirac_iff [IsProbabilityMeasure P] [MeasurableSingletonClass 𝓧] 
   mpr := hasLaw_dirac_of_ae_eq
 
 lemma indepFun_iff_hasLaw_prodMk_prod [IsFiniteMeasure P] {𝓨 : Type*} {m𝓨 : SigmaAlgebra 𝓨}
-    {ν : Measure 𝓨} {Y : Ω → 𝓨} (hX : HasLaw X μ P) (hY : HasLaw Y ν P) :
+    {ν : Measure 𝓨} [SFinite μ] [SFinite ν] {Y : Ω → 𝓨}
+    (hX : HasLaw X μ P) (hY : HasLaw Y ν P) :
     X ⟂ᵢ[P] Y ↔ HasLaw (fun ω ↦ (X ω, Y ω)) (μ.prod ν) P where
   mp h :=
     { map_eq := by
-        rw [h.map_prod_eq_prod_map_map (by fun_prop) (by fun_prop), hX.map_eq,
-          hY.map_eq] }
+        simpa only [hX.map_eq, hY.map_eq] using
+          h.map_prod_eq_prod_map_map hX.aemeasurable hY.aemeasurable }
   mpr h := by
-    rw [indepFun_iff_map_prod_eq_prod_map_map (by fun_prop) (by fun_prop),
-      h.map_eq, hX.map_eq, hY.map_eq]
+    apply (indepFun_iff_map_prod_eq_prod_map_map hX.aemeasurable hY.aemeasurable).2
+    simp only [h.map_eq, hX.map_eq, hY.map_eq]
 
 alias ⟨IndepFun.hasLaw_prod, _⟩ := indepFun_iff_hasLaw_prodMk_prod
 

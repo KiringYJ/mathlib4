@@ -178,11 +178,11 @@ theorem measurePreserving_smul : MeasurePreserving (c • ·) μ μ :=
   { measurable := measurable_const_smul c
     map_eq := by
       ext1 s hs
-      rw [map_apply (measurable_const_smul c) hs]
+      rw [map_apply hs (measurable_const_smul c).aemeasurable]
       exact SMulInvariantMeasure.measure_preimage_smul c hs }
 
 @[to_additive (attr := simp)]
-protected theorem map_smul : map (c • ·) μ = μ :=
+protected theorem map_smul : map (c • ·) μ (measurable_const_smul c).aemeasurable = μ :=
   (measurePreserving_smul c μ).map_eq
 
 end MeasurableConstSMul
@@ -213,21 +213,22 @@ theorem smulInvariantMeasure_map [SMul M α] [SMul M β]
     [MeasurableConstSMul M β]
     (μ : Measure α) [SMulInvariantMeasure M α μ] (f : α → β)
     (hsmul : ∀ (m : M) a, f (m • a) = m • f a) (hf : Measurable f) :
-    SMulInvariantMeasure M β (map f μ) where
+    SMulInvariantMeasure M β (map f μ hf.aemeasurable) where
   measure_preimage_smul m S hS := calc
-    map f μ ((m • ·) ⁻¹' S)
-    _ = μ (f ⁻¹' (m • ·) ⁻¹' S) := map_apply hf <| hS.preimage (measurable_const_smul _)
+    (map f μ hf.aemeasurable) ((m • ·) ⁻¹' S)
+    _ = μ (f ⁻¹' (m • ·) ⁻¹' S) :=
+      map_apply (hS.preimage (measurable_const_smul _)) hf.aemeasurable
     _ = μ ((m • f ·) ⁻¹' S) := by rw [preimage_preimage]
     _ = μ ((f <| m • ·) ⁻¹' S) := by simp_rw [hsmul]
     _ = μ ((m • ·) ⁻¹' f ⁻¹' S) := by rw [← preimage_preimage]
     _ = μ (f ⁻¹' S) := by rw [SMulInvariantMeasure.measure_preimage_smul m (hS.preimage hf)]
-    _ = map f μ S := (map_apply hf hS).symm
+    _ = (map f μ hf.aemeasurable) S := (map_apply hS hf.aemeasurable).symm
 
 @[to_additive]
 instance smulInvariantMeasure_map_smul [SMul M α] [SMul N α] [SMulCommClass N M α]
     [MeasurableConstSMul M α] [MeasurableConstSMul N α]
     (μ : Measure α) [SMulInvariantMeasure M α μ] (n : N) :
-    SMulInvariantMeasure M α (map (n • ·) μ) :=
+    SMulInvariantMeasure M α (map (n • ·) μ (measurable_const_smul n).aemeasurable) :=
   smulInvariantMeasure_map μ _ (smul_comm n) <| measurable_const_smul _
 
 end SMulHomClass
@@ -259,7 +260,7 @@ theorem smulInvariantMeasure_tfae :
         ∀ (c : G) (s), MeasurableSet s → μ (c • s) = μ s,
         ∀ (c : G) (s), μ ((c • ·) ⁻¹' s) = μ s,
         ∀ (c : G) (s), μ (c • s) = μ s,
-        ∀ c : G, Measure.map (c • ·) μ = μ,
+        ∀ c : G, Measure.map (c • ·) μ (measurable_const_smul c).aemeasurable = μ,
         ∀ c : G, MeasurePreserving (c • ·) μ μ] := by
   tfae_have 1 ↔ 2 := ⟨fun h => h.1, fun h => ⟨h⟩⟩
   tfae_have 1 → 6 := fun h c => (measurePreserving_smul c μ).map_eq

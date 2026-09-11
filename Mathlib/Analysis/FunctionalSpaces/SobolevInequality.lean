@@ -360,7 +360,8 @@ irreducible_def lintegralPowLePowLIntegralFDerivConst (p : ℝ) : ℝ≥0 := by
   have : finrank ℝ E = finrank ℝ (ι → ℝ) := by
     rw [finrank_fintype_fun_eq_card, Fintype.card_fin (finrank ℝ E)]
   let e : E ≃L[ℝ] ι → ℝ := ContinuousLinearEquiv.ofFinrankEq this
-  let c := addHaarScalarFactor μ ((volume : Measure (ι → ℝ)).map e.symm)
+  let c := addHaarScalarFactor μ
+    ((volume : Measure (ι → ℝ)).map e.symm e.symm.continuous.measurable.aemeasurable)
   exact (c * ‖(e.symm : (ι → ℝ) →L[ℝ] E)‖₊ ^ p) * (c ^ p)⁻¹
 
 /-- The **Gagliardo-Nirenberg-Sobolev inequality**.  Let `u` be a continuously differentiable
@@ -385,9 +386,11 @@ theorem lintegral_pow_le_pow_lintegral_fderiv {u : E → F}
   let e : E ≃L[ℝ] ι → ℝ := ContinuousLinearEquiv.ofFinrankEq this
   have hp : Real.HolderConjugate #ι p := by rwa [hιcard]
   have h0p : 0 ≤ p := hp.symm.nonneg
-  let c := addHaarScalarFactor μ ((volume : Measure (ι → ℝ)).map e.symm)
+  let c := addHaarScalarFactor μ
+    ((volume : Measure (ι → ℝ)).map e.symm e.symm.continuous.measurable.aemeasurable)
   have hc : 0 < c := addHaarScalarFactor_pos_of_isAddHaarMeasure ..
-  have h2c : μ = c • ((volume : Measure (ι → ℝ)).map e.symm) := isAddLeftInvariant_eq_smul ..
+  have h2c : μ = c • ((volume : Measure (ι → ℝ)).map e.symm
+      e.symm.continuous.measurable.aemeasurable) := isAddLeftInvariant_eq_smul ..
   have h3c : (c : ℝ≥0∞) ≠ 0 := by simp_rw [ne_eq, ENNReal.coe_eq_zero, hc.ne', not_false_eq_true]
   have h0C : C = (c * ‖(e.symm : (ι → ℝ) →L[ℝ] E)‖₊ ^ p) * (c ^ p)⁻¹ := by
     simp_rw [c, ι, C, e, lintegralPowLePowLIntegralFDerivConst]
@@ -399,6 +402,7 @@ theorem lintegral_pow_le_pow_lintegral_fderiv {u : E → F}
   have h2v : HasCompactSupport v := h2u.comp_homeomorph e.symm.toHomeomorph
   have :=
   calc ∫⁻ x, ‖u x‖ₑ ^ p ∂(volume : Measure (ι → ℝ)).map e.symm
+        e.symm.continuous.measurable.aemeasurable
       = ∫⁻ y, ‖v y‖ₑ ^ p := by
         refine lintegral_map ?_ e.symm.continuous.measurable
         borelize F
@@ -418,7 +422,8 @@ theorem lintegral_pow_le_pow_lintegral_fderiv {u : E → F}
     _ = (‖(e.symm : (ι → ℝ) →L[ℝ] E)‖₊ ^ p : ℝ≥0) * (∫⁻ y, ‖fderiv ℝ u (e.symm y)‖ₑ) ^ p := by
         rw [ENNReal.mul_rpow_of_nonneg _ _ h0p, enorm_eq_nnnorm, ← ENNReal.coe_rpow_of_nonneg _ h0p]
     _ = (‖(e.symm : (ι → ℝ) →L[ℝ] E)‖₊ ^ p : ℝ≥0)
-        * (∫⁻ x, ‖fderiv ℝ u x‖ₑ ∂(volume : Measure (ι → ℝ)).map e.symm) ^ p := by
+        * (∫⁻ x, ‖fderiv ℝ u x‖ₑ ∂(volume : Measure (ι → ℝ)).map e.symm
+          e.symm.continuous.measurable.aemeasurable) ^ p := by
         congr
         rw [lintegral_map _ e.symm.continuous.measurable]
         fun_prop

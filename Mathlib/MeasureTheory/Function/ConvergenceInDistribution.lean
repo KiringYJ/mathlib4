@@ -67,7 +67,8 @@ structure TendstoInDistribution [OpensSigmaAlgebra E] (X : (i : ι) → Ω i →
   forall_aemeasurable : ∀ i, AEMeasurable (X i) (μ i)
   aemeasurable_limit : AEMeasurable Z μ' := by fun_prop
   tendsto : Tendsto (β := ProbabilityMeasure E)
-      (fun n ↦ ⟨(μ n).map (X n), inferInstance⟩) l (𝓝 ⟨μ'.map Z, inferInstance⟩)
+      (fun n ↦ ⟨(μ n).map (X n) (forall_aemeasurable n), inferInstance⟩) l
+        (𝓝 ⟨μ'.map Z aemeasurable_limit, inferInstance⟩)
 
 theorem tendstoInDistribution_iff_forall_integral_rclike_tendsto
     (𝕜 : Type*) [RCLike 𝕜] [OpensSigmaAlgebra E]
@@ -75,9 +76,10 @@ theorem tendstoInDistribution_iff_forall_integral_rclike_tendsto
     TendstoInDistribution X l Z μ μ' ↔
       ∀ f : E →ᵇ 𝕜, Tendsto (fun i ↦ ∫ ω, f (X i ω) ∂(μ i)) l (𝓝 (∫ ω, f (Z ω) ∂μ')) := by
   have h_map (i) (f : E →ᵇ 𝕜) :
-      ∫ x, f x ∂(μ i).map (X i) = ∫ ω, f (X i ω) ∂(μ i) := integral_map (hX i) (by fun_prop)
+      ∫ x, f x ∂(μ i).map (X i) (hX i) = ∫ ω, f (X i ω) ∂(μ i) :=
+    integral_map (hX i) (by fun_prop)
   have h_map' (f : E →ᵇ 𝕜) :
-      ∫ x, f x ∂μ'.map Z = ∫ ω, f (Z ω) ∂μ' := integral_map hZ (by fun_prop)
+      ∫ x, f x ∂μ'.map Z hZ = ∫ ω, f (Z ω) ∂μ' := integral_map hZ (by fun_prop)
   refine ⟨fun h f ↦ ?_, fun h ↦ ⟨hX, hZ, ?_⟩⟩
   · have hf := (ProbabilityMeasure.tendsto_iff_forall_integral_rclike_tendsto 𝕜).mp h.tendsto f
     simpa [h_map, h_map'] using hf
@@ -108,8 +110,9 @@ protected lemma TendstoInDistribution.congr [OpensSigmaAlgebra E] {T : Ω' → E
   aemeasurable_limit := h.aemeasurable_limit.congr hZT
   tendsto := by
     convert! h.tendsto using 2 with n
-    · simpa using Measure.map_congr (hXY n).symm
-    · rw! [Measure.map_congr hZT]
+    · simpa using
+        Measure.map_congr (hXY n).symm ((h.forall_aemeasurable n).congr (hXY n))
+    · rw! [Measure.map_congr hZT h.aemeasurable_limit]
       rfl
 
 @[simp]
@@ -125,7 +128,7 @@ set_option backward.isDefEq.respectTransparency false in
 lemma tendstoInDistribution_unique [HasOuterApproxClosed E] [BorelSpace E]
     (X : (i : ι) → Ω i → E) {Z : Ω' → E} {W : Ω'' → E} [l.NeBot]
     (h1 : TendstoInDistribution X l Z μ μ') (h2 : TendstoInDistribution X l W μ μ'') :
-    μ'.map Z = μ''.map W := by
+    μ'.map Z h1.aemeasurable_limit = μ''.map W h2.aemeasurable_limit := by
   have h_eq := tendsto_nhds_unique h1.tendsto h2.tendsto
   rw [Subtype.ext_iff] at h_eq
   simpa using h_eq
@@ -142,10 +145,10 @@ theorem TendstoInDistribution.continuous_comp {F : Type*} [OpensSigmaAlgebra E]
   tendsto := by
     convert! ProbabilityMeasure.tendsto_map_of_tendsto_of_continuous _ _ h.tendsto hg
     · simp only [ProbabilityMeasure.map, ProbabilityMeasure.coe_mk, Subtype.mk.injEq]
-      rw [AEMeasurable.map_map_of_aemeasurable hg.aemeasurable (h.forall_aemeasurable _)]
+      rw [Measure.map_map (h.forall_aemeasurable _) hg.aemeasurable]
     · simp only [ProbabilityMeasure.map, ProbabilityMeasure.coe_mk]
       congr
-      rw [AEMeasurable.map_map_of_aemeasurable hg.aemeasurable h.aemeasurable_limit]
+      rw [Measure.map_map h.aemeasurable_limit hg.aemeasurable]
 
 set_option backward.isDefEq.respectTransparency.types false in
 /-- Almost sure convergence implies convergence in distribution. -/
@@ -159,8 +162,8 @@ theorem tendstoInDistribution_of_ae_tendsto [l.IsCountablyGenerated]
   tendsto := by
     simp_rw [ProbabilityMeasure.tendsto_iff_forall_lintegral_tendsto, ProbabilityMeasure.coe_mk]
     intro f
-    rw [lintegral_map' (by fun_prop) hZ]
-    conv in ∫⁻ _, _ ∂_ => rw [lintegral_map' (by fun_prop) (hX₁ i)]
+    rw [lintegral_map' hZ (by fun_prop)]
+    conv in ∫⁻ _, _ ∂_ => rw [lintegral_map' (hX₁ i) (by fun_prop)]
     apply tendsto_lintegral_filter_of_dominated_convergence' (bound := fun _ ↦ edist 0 f)
     · exact .of_forall (by fun_prop)
     · simp [f.apply_le_edist_zero]
@@ -204,7 +207,8 @@ lemma tendstoInDistribution_of_tendstoInMeasure_sub {X : ι → Ω'' → E}
   -- Lipschitz function `F`
   suffices ∀ (F : E → ℝ) (hF_bounded : ∃ (C : ℝ), ∀ x y, dist (F x) (F y) ≤ C)
       (hF_lip : ∃ L, LipschitzWith L F),
-      Tendsto (fun n ↦ ∫ ω, F ω ∂(μ''.map (Y n))) l (𝓝 (∫ ω, F ω ∂(μ'.map Z))) by
+      Tendsto (fun n ↦ ∫ ω, F ω ∂(μ''.map (Y n) (hY n))) l
+        (𝓝 (∫ ω, F ω ∂(μ'.map Z hZ))) by
     rwa [tendsto_iff_forall_lipschitz_integral_tendsto]
   rintro F ⟨M, hF_bounded⟩ ⟨L, hF_lip⟩
   have hF_cont : Continuous F := hF_lip.continuous
@@ -216,17 +220,18 @@ lemma tendstoInDistribution_of_tendstoInMeasure_sub {X : ι → Ω'' → E}
     simpa using! tendsto_const_nhds
   -- now `F` is `L`-Lipschitz with `L > 0`
   simp_rw [Metric.tendsto_nhds, Real.dist_eq]
-  suffices ∀ ε > 0, ∀ᶠ n in l, |∫ ω, F ω ∂(μ''.map (Y n)) - ∫ ω, F ω ∂(μ'.map Z)| < L * ε by
+  suffices ∀ ε > 0, ∀ᶠ n in l,
+      |∫ ω, F ω ∂(μ''.map (Y n) (hY n)) - ∫ ω, F ω ∂(μ'.map Z hZ)| < L * ε by
     intro ε hε
     convert! this (ε / L) (by positivity)
     field_simp
   intro ε hε
   -- We cut the difference into three pieces, two of which are small by the convergence assumptions
-  have h_le n : |∫ ω, F ω ∂(μ''.map (Y n)) - ∫ ω, F ω ∂(μ'.map Z)|
+  have h_le n : |∫ ω, F ω ∂(μ''.map (Y n) (hY n)) - ∫ ω, F ω ∂(μ'.map Z hZ)|
       ≤ L * (ε / 2) + M * μ''.real {ω | ε / 2 ≤ ‖Y n ω - X n ω‖}
-        + |∫ ω, F ω ∂(μ''.map (X n)) - ∫ ω, F ω ∂(μ'.map Z)| := by
-    refine (abs_sub_le (∫ ω, F ω ∂(μ''.map (Y n))) (∫ ω, F ω ∂(μ''.map (X n)))
-      (∫ ω, F ω ∂(μ'.map Z))).trans ?_
+        + |∫ ω, F ω ∂(μ''.map (X n) (hX n)) - ∫ ω, F ω ∂(μ'.map Z hZ)| := by
+    refine (abs_sub_le (∫ ω, F ω ∂(μ''.map (Y n) (hY n)))
+      (∫ ω, F ω ∂(μ''.map (X n) (hX n))) (∫ ω, F ω ∂(μ'.map Z hZ))).trans ?_
     gcongr
     -- `⊢ |∫ ω, F ω ∂(μ.map (Y n)) - ∫ ω, F ω ∂(μ.map (X n))|`
     -- `    ≤ L * (ε / 2) + M * μ.real {ω | ε / 2 ≤ ‖Y n ω - X n ω‖}`
@@ -284,9 +289,11 @@ lemma tendstoInDistribution_of_tendstoInMeasure_sub {X : ι → Ω'' → E}
   -- We finally show that the right-hand side tends to `L * ε / 2`, which is smaller than `L * ε`
   have h_tendsto :
       Tendsto (fun n ↦ L * (ε / 2) + M * μ''.real {ω | ε / 2 ≤ ‖Y n ω - X n ω‖}
-        + |∫ ω, F ω ∂(μ''.map (X n)) - ∫ ω, F ω ∂(μ'.map Z)|) l (𝓝 (L * ε / 2)) := by
+        + |∫ ω, F ω ∂(μ''.map (X n) (hX n)) - ∫ ω, F ω ∂(μ'.map Z hZ)|) l
+        (𝓝 (L * ε / 2)) := by
     suffices Tendsto (fun n ↦ L * (ε / 2) + M * μ''.real {ω | ε / 2 ≤ ‖Y n ω - X n ω‖}
-        + |∫ ω, F ω ∂(μ''.map (X n)) - ∫ ω, F ω ∂(μ'.map Z)|) l (𝓝 (L * ε / 2 + M * 0 + 0)) by
+        + |∫ ω, F ω ∂(μ''.map (X n) (hX n)) - ∫ ω, F ω ∂(μ'.map Z hZ)|) l
+        (𝓝 (L * ε / 2 + M * 0 + 0)) by
       simpa
     refine (Tendsto.add ?_ (Tendsto.const_mul _ ?_)).add ?_
     · rw [mul_div_assoc]

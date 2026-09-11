@@ -215,12 +215,16 @@ lemma isTightMeasureSet_range_of_tendsto_limsup_inner
   refine isTightMeasureSet_of_inner_tendsto 𝕜 fun z ↦ ?_
   simp_rw [iSup_range]
   refine Nat.tendsto_iSup_of_tendsto_limsup (fun n ↦ ?_) (h z) (fun n u v huv ↦ by gcongr)
-  have h_tight : IsTightMeasureSet {(μ n).map (fun x ↦ ⟪z, x⟫_𝕜)} := isTightMeasureSet_singleton
+  have h_tight : IsTightMeasureSet {
+      (μ n).map (fun x ↦ ⟪z, x⟫_𝕜) (by fun_prop) } := isTightMeasureSet_singleton
   rw [isTightMeasureSet_iff_tendsto_measure_norm_gt] at h_tight
-  have h_map r : (μ n).map (fun x ↦ ⟪z, x⟫_𝕜) {x | r < ‖x‖} = μ n {x | r < ‖⟪z, x⟫_𝕜‖} := by
-    rw [Measure.map_apply (by fun_prop)]
-    · simp
-    · exact MeasurableSet.preimage measurableSet_Ioi (by fun_prop)
+  have h_map r :
+      ((μ n).map (fun x ↦ ⟪z, x⟫_𝕜) (by fun_prop)) {x | r < ‖x‖} =
+        μ n {x | r < ‖⟪z, x⟫_𝕜‖} := by
+    have hs : MeasurableSet {x : 𝕜 | r < ‖x‖} :=
+      measurableSet_Ioi.preimage (measurable_norm : Measurable fun x : 𝕜 ↦ ‖x‖)
+    rw [Measure.map_apply (f := fun x ↦ ⟪z, x⟫_𝕜) (μ := μ n) hs]
+    simp
   simpa [h_map] using h_tight
 
 /-- In a finite-dimensional inner product space, the range of a sequence of measures

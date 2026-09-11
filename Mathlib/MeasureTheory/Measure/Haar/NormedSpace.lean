@@ -41,7 +41,8 @@ variable {𝕜 G H : Type*} [SigmaAlgebra G] [SigmaAlgebra H] [NontriviallyNorme
   [CompleteSpace 𝕜] [T2Space G] [FiniteDimensional 𝕜 G] [ContinuousSMul 𝕜 G]
   [ContinuousSMul 𝕜 H] [T2Space H]
 
-instance MapLinearEquiv.isAddHaarMeasure (e : G ≃ₗ[𝕜] H) : IsAddHaarMeasure (μ.map e) :=
+instance MapLinearEquiv.isAddHaarMeasure (e : G ≃ₗ[𝕜] H) :
+    IsAddHaarMeasure (μ.map e e.toContinuousLinearEquiv.continuous.measurable.aemeasurable) :=
   e.toContinuousLinearEquiv.isAddHaarMeasure_map _
 
 end LinearEquiv

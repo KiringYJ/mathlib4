@@ -41,6 +41,13 @@ open scoped ENNReal MeasureTheory ProbabilityTheory
 
 namespace ProbabilityTheory
 
+theorem aemeasurable_diag_of_le {T : Type*} {m mT : SigmaAlgebra T}
+    (μ : @Measure T mT) (hm : m ≤ mT) :
+    @AEMeasurable T (T × T) (m.prod mT) mT Function.diag μ :=
+  @Measurable.aemeasurable T (T × T) mT (m.prod mT) Function.diag μ
+    (@Measurable.prodMk T mT T T m mT id id
+      (@measurable_id'' T m mT hm) (@measurable_id T mT))
+
 section AuxLemmas
 
 variable {Ω F : Type*} {m mΩ : SigmaAlgebra Ω} {μ : Measure Ω} {f : Ω → F}
@@ -48,12 +55,14 @@ variable {Ω F : Type*} {m mΩ : SigmaAlgebra Ω} {μ : Measure Ω} {f : Ω → 
 theorem _root_.MeasureTheory.AEStronglyMeasurable.comp_snd_map_prod_id (hm : m ≤ mΩ)
     [TopologicalSpace F] (hf : AEStronglyMeasurable f μ) :
     AEStronglyMeasurable[m.prod mΩ] (fun x : Ω × Ω => f x.2)
-      (@Measure.map Ω (Ω × Ω) mΩ (m.prod mΩ) Function.diag μ) :=
+      (@Measure.map Ω (Ω × Ω) mΩ (m.prod mΩ) Function.diag μ
+        (aemeasurable_diag_of_le μ hm)) :=
   hf.comp_snd_map_prodMk (@Measurable.aemeasurable Ω Ω mΩ m id μ (measurable_id'' hm))
 
 theorem _root_.MeasureTheory.Integrable.comp_snd_map_prod_id (hm : m ≤ mΩ) [NormedAddCommGroup F]
     (hf : Integrable f μ) : Integrable (fun x : Ω × Ω => f x.2)
-      (@Measure.map Ω (Ω × Ω) mΩ (m.prod mΩ) Function.diag μ) :=
+      (@Measure.map Ω (Ω × Ω) mΩ (m.prod mΩ) Function.diag μ
+        (aemeasurable_diag_of_le μ hm)) :=
   hf.comp_snd_map_prodMk (@Measurable.aemeasurable Ω Ω mΩ m id μ (measurable_id'' hm))
 
 end AuxLemmas
@@ -71,28 +80,41 @@ We use `m ⊓ mΩ` instead of `m` to ensure that it is a sub-σ-algebra of `mΩ`
 noncomputable irreducible_def condExpKernel (μ : Measure Ω) [IsFiniteMeasure μ]
     (m : SigmaAlgebra Ω) : @Kernel Ω Ω m mΩ :=
   if _h : Nonempty Ω then
-    Kernel.comap (@condDistrib Ω Ω Ω mΩ _ _ mΩ (m ⊓ mΩ) id id μ _) id
+    Kernel.comap (@condDistrib Ω Ω Ω mΩ _ _ mΩ (m ⊓ mΩ) id id μ _
+      (aemeasurable_diag_of_le μ inf_le_right)) id
       (measurable_id'' (inf_le_left : m ⊓ mΩ ≤ m))
   else 0
 
 lemma condExpKernel_eq (μ : Measure Ω) [IsFiniteMeasure μ] [h : Nonempty Ω]
     (m : SigmaAlgebra Ω) :
-    condExpKernel (mΩ := mΩ) μ m = Kernel.comap (@condDistrib Ω Ω Ω mΩ _ _ mΩ (m ⊓ mΩ) id id μ _) id
+    condExpKernel (mΩ := mΩ) μ m = Kernel.comap
+      (@condDistrib Ω Ω Ω mΩ _ _ mΩ (m ⊓ mΩ) id id μ _
+        (aemeasurable_diag_of_le μ inf_le_right)) id
       (measurable_id'' (inf_le_left : m ⊓ mΩ ≤ m)) := by
   simp [condExpKernel, h]
 
 lemma condExpKernel_apply_eq_condDistrib [Nonempty Ω] {ω : Ω} :
-    condExpKernel μ m ω = @condDistrib Ω Ω Ω mΩ _ _ mΩ (m ⊓ mΩ) id id μ _ (id ω) := by
+    condExpKernel μ m ω =
+      @condDistrib Ω Ω Ω mΩ _ _ mΩ (m ⊓ mΩ) id id μ _
+        (aemeasurable_diag_of_le μ inf_le_right)
+        (id ω) := by
   simp [condExpKernel_eq, Kernel.comap_apply]
 
 instance : IsMarkovKernel (condExpKernel μ m) := by
   rcases isEmpty_or_nonempty Ω with h | h
   · exact ⟨fun a ↦ (IsEmpty.false a).elim⟩
-  · simpa [condExpKernel, h] using by infer_instance
+  · let hdiag := aemeasurable_diag_of_le μ (inf_le_right : m ⊓ mΩ ≤ mΩ)
+    have hmarkov : IsMarkovKernel
+        (@condDistrib Ω Ω Ω mΩ _ h mΩ (m ⊓ mΩ) id id μ _ hdiag) :=
+      @instIsMarkovKernelCondDistrib Ω Ω Ω mΩ _ h mΩ μ _ id id (m ⊓ mΩ) hdiag
+    rw [condExpKernel_eq]
+    exact @Kernel.IsMarkovKernel.comap Ω Ω (m ⊓ mΩ) mΩ Ω m id _ hmarkov
+      (measurable_id'' (inf_le_left : m ⊓ mΩ ≤ m))
 
 lemma compProd_trim_condExpKernel (hm : m ≤ mΩ) :
     (μ.trim hm) ⊗ₘ condExpKernel μ m
-      = @Measure.map Ω (Ω × Ω) mΩ (m.prod mΩ) Function.diag μ := by
+      = @Measure.map Ω (Ω × Ω) mΩ (m.prod mΩ) Function.diag μ
+        (aemeasurable_diag_of_le μ hm) := by
   rcases isEmpty_or_nonempty Ω with h | h
   · simp [Measure.eq_zero_of_isEmpty μ]
   rw [condExpKernel_eq, trim_eq_map hm]
@@ -102,6 +124,8 @@ lemma compProd_trim_condExpKernel (hm : m ≤ mΩ) :
       aemeasurable_id)
   simp only [Kernel.coe_comap, Function.comp_apply, id_eq]
   congr
+  · apply proof_irrel_heq
+  · exact inf_le_right
 
 lemma condExpKernel_comp_trim (hm : m ≤ mΩ) : condExpKernel μ m ∘ₘ μ.trim hm = μ := by
   rw [← Measure.snd_compProd, compProd_trim_condExpKernel]
@@ -125,7 +149,11 @@ theorem _root_.MeasureTheory.StronglyMeasurable.integral_condExpKernel' [NormedS
     StronglyMeasurable[m ⊓ mΩ] (fun ω ↦ ∫ y, f y ∂condExpKernel μ m ω) := by
   nontriviality Ω
   simp_rw [condExpKernel_apply_eq_condDistrib]
+  change StronglyMeasurable[m ⊓ mΩ] fun ω =>
+    ∫ y, f y ∂@condDistrib Ω Ω Ω mΩ _ _ mΩ (m ⊓ mΩ) (fun a => a) (fun a => a) μ _
+      (aemeasurable_diag_of_le μ (inf_le_right : m ⊓ mΩ ≤ mΩ)) ω
   exact (hf.comp_measurable measurable_snd).integral_condDistrib
+    (aemeasurable_diag_of_le μ (inf_le_right : m ⊓ mΩ ≤ mΩ))
 
 theorem _root_.MeasureTheory.StronglyMeasurable.integral_condExpKernel [NormedSpace ℝ F]
     (hf : StronglyMeasurable f) :
@@ -202,7 +230,8 @@ theorem integrable_toReal_condExpKernel {s : Set Ω} (hs : MeasurableSet s) :
     Integrable (fun ω => (condExpKernel μ m ω).real s) μ := by
   nontriviality Ω
   rw [condExpKernel_eq]
-  exact integrable_toReal_condDistrib (aemeasurable_id'' μ (inf_le_right : m ⊓ mΩ ≤ mΩ)) hs
+  exact @integrable_toReal_condDistrib Ω Ω Ω mΩ _ _ mΩ μ _ id id (m ⊓ mΩ) s hs
+    (aemeasurable_diag_of_le μ inf_le_right)
 
 end Integrability
 
@@ -233,9 +262,9 @@ lemma condExpKernel_ae_eq_trim_condExp
 lemma condDistrib_apply_ae_eq_condExpKernel_map {β γ : Type*} {mβ : SigmaAlgebra β}
     {mγ : SigmaAlgebra γ} [StandardBorelSpace β] [Nonempty β] {X : Ω → β} {Y : Ω → γ}
     (hX : Measurable X) (hY : Measurable Y) {s : Set β} (hs : MeasurableSet s) :
-    (fun a ↦ condDistrib X Y μ (Y a) s)
-      =ᵐ[μ] fun a ↦ (condExpKernel μ (mγ.comap Y)).map X a s := by
-  simp_rw [Kernel.map_apply' _ hX _ hs]
+    (fun a ↦ condDistrib X Y μ (hY.aemeasurable.prodMk hX.aemeasurable) (Y a) s)
+      =ᵐ[μ] fun a ↦ (condExpKernel μ (mγ.comap Y)).map X hX a s := by
+  simp_rw [Kernel.map_apply' _ _ hs hX]
   filter_upwards [condDistrib_ae_eq_condExp hY hX (μ := μ) hs,
     condExpKernel_ae_eq_condExp hY.comap_le (μ := μ) (hX hs)] with a ha₁ ha₂
   rw [← measureReal_eq_measureReal_iff, ha₁, ha₂]

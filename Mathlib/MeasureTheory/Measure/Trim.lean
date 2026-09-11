@@ -57,24 +57,31 @@ theorem le_trim (hm : m ≤ m0) : μ s ≤ μ.trim hm s := by
   simp_rw [Measure.trim]
   exact @le_toMeasure_apply _ m _ _ _
 
-lemma trim_eq_map (hm : m ≤ m0) : μ.trim hm = @Measure.map _ _ _ m id μ := by
+lemma trim_eq_map (hm : m ≤ m0) :
+    μ.trim hm = @Measure.map _ _ _ m id μ
+      (@Measurable.aemeasurable α α m0 m id μ (@measurable_id'' α m m0 hm)) := by
   refine @Measure.ext α m _ _ (fun s hs ↦ ?_)
-  rw [Measure.map_apply (measurable_id'' hm) hs, trim_measurableSet_eq hm hs, Set.preimage_id]
+  rw [Measure.map_apply hs
+      (@Measurable.aemeasurable α α m0 m id μ (@measurable_id'' α m m0 hm)),
+    trim_measurableSet_eq hm hs, Set.preimage_id]
 
 lemma map_trim_comap {f : α → β} (hf : Measurable f) :
-    @Measure.map _ _ (mβ.comap f) _ f (μ.trim hf.comap_le) = μ.map f := by
+    @Measure.map _ _ (mβ.comap f) _ f (μ.trim hf.comap_le)
+        (Measurable.of_comap_le le_rfl).aemeasurable = μ.map f hf.aemeasurable := by
   ext s hs
-  rw [Measure.map_apply hf hs, Measure.map_apply _ hs, trim_measurableSet_eq]
+  rw [Measure.map_apply hs hf.aemeasurable,
+    Measure.map_apply hs (Measurable.of_comap_le le_rfl).aemeasurable,
+    trim_measurableSet_eq]
   · exact ⟨s, hs, rfl⟩
-  · exact Measurable.of_comap_le le_rfl
 
 lemma trim_comap_apply {f : α → β} (hf : Measurable f) {s : Set β} (hs : MeasurableSet s) :
-    μ.trim hf.comap_le (f ⁻¹' s) = μ.map f s := by
-  rw [← map_trim_comap hf, Measure.map_apply (Measurable.of_comap_le le_rfl) hs]
+    μ.trim hf.comap_le (f ⁻¹' s) = (μ.map f hf.aemeasurable) s := by
+  rw [← map_trim_comap hf,
+    Measure.map_apply hs (Measurable.of_comap_le le_rfl).aemeasurable]
 
 lemma ae_map_iff_ae_trim {f : α → β} (hf : Measurable f)
     {p : β → Prop} (hp : MeasurableSet { x | p x }) :
-    (∀ᵐ y ∂μ.map f, p y) ↔ ∀ᵐ x ∂(μ.trim hf.comap_le), p (f x) := by
+    (∀ᵐ y ∂μ.map f hf.aemeasurable, p y) ↔ ∀ᵐ x ∂(μ.trim hf.comap_le), p (f x) := by
   rw [← map_trim_comap hf, ae_map_iff (Measurable.of_comap_le le_rfl).aemeasurable hp]
 
 lemma trim_add {ν : Measure α} (hm : m ≤ m0) : (μ + ν).trim hm = μ.trim hm + ν.trim hm :=

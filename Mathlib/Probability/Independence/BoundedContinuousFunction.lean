@@ -103,11 +103,12 @@ lemma pi_indepFun_pi_of_prod_bcf (mX : ∀ s, AEMeasurable (X s) P)
     (h : ∀ (f : (s : S) → E s →ᵇ ℝ) (g : (t : T) → F t →ᵇ ℝ),
       P[(∏ s, f s ∘ (X s)) * (∏ t, g t ∘ (Y t))] = P[∏ s, f s ∘ (X s)] * P[∏ t, g t ∘ (Y t)]) :
     IndepFun (fun ω s ↦ X s ω) (fun ω t ↦ Y t ω) P := by
-  rw [indepFun_iff_map_prod_eq_prod_map_map (.of_eval mX) (.of_eval mY)]
+  have mX' : AEMeasurable (fun ω s ↦ X s ω) P := .of_eval mX
+  have mY' : AEMeasurable (fun ω t ↦ Y t ω) P := .of_eval mY
+  rw [indepFun_iff_map_prod_eq_prod_map_map mX' mY']
   refine eq_prod_of_integral_prod_mul_prod_boundedContinuousFunction fun f g ↦ ?_
-  rw [integral_map, integral_map, integral_map]
+  rw [integral_map (mX'.prodMk mY'), integral_map mX', integral_map mY']
   · convert! h f g <;> simp
-  any_goals fun_prop
   all_goals exact Measurable.aestronglyMeasurable (by fun_prop)
 
 omit [Fintype S] [Fintype T] in variable [Finite S] [Finite T] in
@@ -130,11 +131,11 @@ lemma indepFun_pi_of_prod_bcf (mZ : AEMeasurable Z P)
     (h : ∀ (f : G →ᵇ ℝ) (g : (t : T) → F t →ᵇ ℝ),
       P[f ∘ Z * (∏ t, g t ∘ (Y t))] = P[f ∘ Z] * P[∏ t, g t ∘ (Y t)]) :
     IndepFun Z (fun ω t ↦ Y t ω) P := by
-  rw [indepFun_iff_map_prod_eq_prod_map_map mZ (.of_eval mY)]
+  have mY' : AEMeasurable (fun ω t ↦ Y t ω) P := .of_eval mY
+  rw [indepFun_iff_map_prod_eq_prod_map_map mZ mY']
   refine eq_prod_of_integral_mul_prod_boundedContinuousFunction fun f g ↦ ?_
-  rw [integral_map, integral_map, integral_map]
+  rw [integral_map (mZ.prodMk mY'), integral_map mZ, integral_map mY']
   · convert! h f g <;> simp
-  any_goals fun_prop
   all_goals exact Measurable.aestronglyMeasurable (by fun_prop)
 
 omit [Fintype T] in variable [Finite T] in
@@ -152,11 +153,11 @@ lemma pi_indepFun_of_prod_bcf (mX : ∀ s, AEMeasurable (X s) P)
     (h : ∀ (f : (s : S) → E s →ᵇ ℝ) (g : H →ᵇ ℝ),
       P[(∏ s, f s ∘ (X s)) * g ∘ U] = P[∏ s, f s ∘ (X s)] * P[g ∘ U]) :
     IndepFun (fun ω s ↦ X s ω) U P := by
-  rw [indepFun_iff_map_prod_eq_prod_map_map (.of_eval mX) mU]
+  have mX' : AEMeasurable (fun ω s ↦ X s ω) P := .of_eval mX
+  rw [indepFun_iff_map_prod_eq_prod_map_map mX' mU]
   refine eq_prod_of_integral_prod_mul_boundedContinuousFunction fun f g ↦ ?_
-  rw [integral_map, integral_map, integral_map]
+  rw [integral_map (mX'.prodMk mU), integral_map mX', integral_map mU]
   · convert! h f g <;> simp
-  any_goals fun_prop
   all_goals exact Measurable.aestronglyMeasurable (by fun_prop)
 
 omit [Fintype S] in variable [Finite S] in
@@ -177,10 +178,9 @@ lemma indepFun_of_bcf (mZ : AEMeasurable Z P) (mU : AEMeasurable U P)
     IndepFun Z U P := by
   rw [indepFun_iff_map_prod_eq_prod_map_map mZ mU]
   refine eq_prod_of_integral_mul_boundedContinuousFunction fun f g ↦ ?_
-  rw [integral_map, integral_map, integral_map]
+  rw [integral_map (mZ.prodMk mU), integral_map mZ, integral_map mU]
   · exact h f g
-  any_goals fun_prop
-  exact Measurable.aestronglyMeasurable (by fun_prop)
+  all_goals exact Measurable.aestronglyMeasurable (by fun_prop)
 
 end IndepFun
 
@@ -209,7 +209,7 @@ lemma indicator_indepFun_pi_of_prod_bcf
   have hg {c : ℝ} : Integrable (fun ω ↦ c * ∏ s, g s (X s ω)) P := by
     refine Integrable.of_bound ?_ (‖c‖ * ∏ s, ‖g s‖) (ae_of_all _ fun ω ↦ ?_)
     · exact (Finset.aestronglyMeasurable_fun_prod _ fun s _ ↦
-        (g s).continuous.aestronglyMeasurable.comp_aemeasurable (mX s)).const_mul _
+        ((mX s).comp_aemeasurable (g s).continuous.aemeasurable).aestronglyMeasurable).const_mul _
     · rw [norm_mul, norm_prod]
       gcongr with s
       exact (g s).norm_coe_le_norm _

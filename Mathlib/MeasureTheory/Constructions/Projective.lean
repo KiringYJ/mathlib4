@@ -44,7 +44,7 @@ variable {ι : Type*} {α : ι → Type*} [∀ i, SigmaAlgebra (α i)]
 the projection from `∀ i : I, α i` to `∀ i : J, α i` maps `P I` to `P J`. -/
 def IsProjectiveMeasureFamily (P : ∀ J : Finset ι, Measure (∀ j : J, α j)) : Prop :=
   ∀ (I J : Finset ι) (hJI : J ⊆ I),
-    P J = (P I).map (Finset.restrict₂ hJI)
+    P J = (P I).map (Finset.restrict₂ hJI) (Finset.measurable_restrict₂ hJI).aemeasurable
 
 namespace IsProjectiveMeasureFamily
 
@@ -57,8 +57,8 @@ lemma eq_zero_of_isEmpty [h : IsEmpty (Π i, α i)]
   obtain ⟨i, hi⟩ := isEmpty_pi.mp h
   rw [hP (insert i I) I (I.subset_insert i)]
   have : IsEmpty (Π j : ↑(insert i I), α j) := by simp [hi]
-  rw [(P (insert i I)).eq_zero_of_isEmpty]
-  simp
+  exact (Measure.map_eq_zero_iff (Finset.measurable_restrict₂ (I.subset_insert i)).aemeasurable).2
+    (P (insert i I)).eq_zero_of_isEmpty
 
 /-- Auxiliary lemma for `measure_univ_eq`. -/
 lemma measure_univ_eq_of_subset (hP : IsProjectiveMeasureFamily P) (hJI : J ⊆ I) :
@@ -66,9 +66,9 @@ lemma measure_univ_eq_of_subset (hP : IsProjectiveMeasureFamily P) (hJI : J ⊆ 
   have : (univ : Set (∀ i : I, α i)) =
       Finset.restrict₂ hJI ⁻¹' (univ : Set (∀ i : J, α i)) := by
     rw [preimage_univ]
-  rw [this, ← Measure.map_apply _ MeasurableSet.univ]
+  rw [this, ← Measure.map_apply MeasurableSet.univ
+    (Finset.measurable_restrict₂ hJI).aemeasurable]
   · rw [hP I J hJI]
-  · exact .of_eval (fun _ ↦ measurable_pi_apply _)
 
 lemma measure_univ_eq (hP : IsProjectiveMeasureFamily P) (I J : Finset ι) :
     P I univ = P J univ := by
@@ -89,8 +89,8 @@ lemma congr_cylinder_of_subset (hP : IsProjectiveMeasureFamily P)
   | inr h =>
     have : S = Finset.restrict₂ hJI ⁻¹' T :=
       eq_of_cylinder_eq_of_subset h_eq hJI
-    rw [hP I J hJI, Measure.map_apply _ hT, this]
-    exact .of_eval (fun _ ↦ measurable_pi_apply _)
+    rw [hP I J hJI,
+      Measure.map_apply hT (Finset.measurable_restrict₂ hJI).aemeasurable, this]
 
 lemma congr_cylinder (hP : IsProjectiveMeasureFamily P)
     {S : Set (∀ i : I, α i)} {T : Set (∀ i : J, α i)} (hS : MeasurableSet S) (hT : MeasurableSet T)
@@ -114,7 +114,7 @@ end IsProjectiveMeasureFamily
 for all `I : Finset ι`, the projection from `∀ i, α i` to `∀ i : I, α i` maps `μ` to `P I`. -/
 def IsProjectiveLimit (μ : Measure (∀ i, α i))
     (P : ∀ J : Finset ι, Measure (∀ j : J, α j)) : Prop :=
-  ∀ I : Finset ι, (μ.map I.restrict) = P I
+  ∀ I : Finset ι, μ.map I.restrict (Finset.measurable_restrict I).aemeasurable = P I
 
 namespace IsProjectiveLimit
 
@@ -123,8 +123,7 @@ variable {μ ν : Measure (∀ i, α i)}
 lemma measure_cylinder (h : IsProjectiveLimit μ P)
     (I : Finset ι) {s : Set (∀ i : I, α i)} (hs : MeasurableSet s) :
     μ (cylinder I s) = P I s := by
-  rw [cylinder, ← Measure.map_apply _ hs, h I]
-  exact .of_eval (fun _ ↦ measurable_pi_apply _)
+  rw [cylinder, ← Measure.map_apply hs (Finset.measurable_restrict I).aemeasurable, h I]
 
 lemma measure_univ_eq (hμ : IsProjectiveLimit μ P) (I : Finset ι) :
     μ univ = P I univ := by

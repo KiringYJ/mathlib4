@@ -79,13 +79,15 @@ instance : IsMarkovKernel κ†μ := by rw [posterior]; infer_instance
 
 /-- The main property of the posterior. -/
 lemma compProd_posterior_eq_map_swap : (κ ∘ₘ μ) ⊗ₘ κ†μ = (μ ⊗ₘ κ).map Prod.swap := by
-  simpa using! ((μ ⊗ₘ κ).map Prod.swap).disintegrate ((μ ⊗ₘ κ).map Prod.swap).condKernel
+  simpa using! ((μ ⊗ₘ κ).map Prod.swap measurable_swap.aemeasurable).disintegrate
+    ((μ ⊗ₘ κ).map Prod.swap measurable_swap.aemeasurable).condKernel
 
 lemma compProd_posterior_eq_swap_comp : (κ ∘ₘ μ) ⊗ₘ κ†μ = Kernel.swap Ω 𝓧 ∘ₘ μ ⊗ₘ κ := by
   rw [compProd_posterior_eq_map_swap, Measure.swap_comp]
 
 lemma swap_compProd_posterior : Kernel.swap 𝓧 Ω ∘ₘ (κ ∘ₘ μ) ⊗ₘ κ†μ = μ ⊗ₘ κ := by
-  rw [compProd_posterior_eq_swap_comp, Measure.comp_assoc, Kernel.swap_swap, Measure.id_comp]
+  simp only [compProd_posterior_eq_swap_comp, Measure.comp_assoc, Kernel.swap_swap,
+    Measure.id_comp]
 
 /-- The main property of the posterior, as equality of the following diagrams:
 ```
@@ -102,12 +104,32 @@ lemma parallelProd_posterior_comp_copy_comp :
   _ = Kernel.swap _ _ ∘ₘ (Kernel.id ∥ₖ κ) ∘ₘ Kernel.copy Ω ∘ₘ μ := by
     rw [Measure.compProd_eq_parallelComp_comp_copy_comp]
   _ = (κ ∥ₖ Kernel.id) ∘ₘ Kernel.copy Ω ∘ₘ μ := by
-    rw [Measure.comp_assoc, Kernel.swap_parallelComp, Measure.comp_assoc, Kernel.comp_assoc,
-      Kernel.swap_copy, Measure.comp_assoc]
+    have hkernel :
+        (Kernel.swap Ω 𝓧 ∘ₖ (Kernel.id ∥ₖ κ)) ∘ₖ Kernel.copy Ω =
+          (κ ∥ₖ Kernel.id) ∘ₖ Kernel.copy Ω := by
+      rw [Kernel.swap_parallelComp, Kernel.comp_assoc, Kernel.swap_copy]
+    calc
+      Kernel.swap Ω 𝓧 ∘ₘ (Kernel.id ∥ₖ κ) ∘ₘ Kernel.copy Ω ∘ₘ μ =
+          ((Kernel.swap Ω 𝓧 ∘ₖ (Kernel.id ∥ₖ κ)) ∘ₖ Kernel.copy Ω) ∘ₘ μ :=
+        Measure.comp_assoc.trans Measure.comp_assoc
+      _ = ((κ ∥ₖ Kernel.id) ∘ₖ Kernel.copy Ω) ∘ₘ μ :=
+        Measure.comp_congr <| ae_of_all _ fun a ↦ DFunLike.congr_fun hkernel a
+      _ = (κ ∥ₖ Kernel.id) ∘ₘ Kernel.copy Ω ∘ₘ μ := Measure.comp_assoc.symm
 
 lemma posterior_prod_id_comp : (κ†μ ×ₖ Kernel.id) ∘ₘ κ ∘ₘ μ = μ ⊗ₘ κ := by
-  rw [← Kernel.swap_prod, ← Measure.comp_assoc, ← Measure.compProd_eq_comp_prod,
-    compProd_posterior_eq_swap_comp, Measure.comp_assoc, Kernel.swap_swap, Measure.id_comp]
+  calc
+    (κ†μ ×ₖ Kernel.id) ∘ₘ κ ∘ₘ μ =
+        Kernel.swap 𝓧 Ω ∘ₘ (Kernel.id ×ₖ κ†μ) ∘ₘ κ ∘ₘ μ := by
+      simp only [Measure.comp_assoc]
+      apply Measure.comp_congr
+      filter_upwards [] with a
+      rw [← Kernel.comp_assoc, Kernel.swap_prod]
+    _ = Kernel.swap 𝓧 Ω ∘ₘ ((κ ∘ₘ μ) ⊗ₘ κ†μ) := by
+      simp only [Measure.compProd_eq_comp_prod]
+    _ = Kernel.swap 𝓧 Ω ∘ₘ Kernel.swap Ω 𝓧 ∘ₘ (μ ⊗ₘ κ) := by
+      simp only [compProd_posterior_eq_swap_comp]
+    _ = μ ⊗ₘ κ := by
+      simp only [Measure.comp_assoc, Kernel.swap_swap, Measure.id_comp]
 
 /-- The posterior is unique up to a `κ ∘ₘ μ`-null set. -/
 lemma ae_eq_posterior_of_compProd_eq {η : Kernel 𝓧 Ω} [IsFiniteKernel η]
@@ -132,7 +154,8 @@ lemma posterior_id (μ : Measure Ω) [IsFiniteMeasure μ] : Kernel.id†μ =ᵐ[
     rw [Measure.id_comp] at this
     filter_upwards [this] with a ha using ha.symm
   refine ae_eq_posterior_of_compProd_eq_swap_comp Kernel.id ?_
-  rw [Measure.id_comp, Measure.compProd_id_eq_copy_comp, Measure.comp_assoc, Kernel.swap_copy]
+  simp only [Measure.id_comp, Measure.compProd_id_eq_copy_comp, Measure.comp_assoc,
+    Kernel.swap_copy]
 
 /-- For a deterministic kernel `κ`, `κ ∘ₖ κ†μ` is `μ.map f`-a.e. equal to the identity kernel. -/
 lemma deterministic_comp_posterior [SigmaAlgebra.CountablyGenerated 𝓧]
@@ -145,17 +168,43 @@ lemma deterministic_comp_posterior [SigmaAlgebra.CountablyGenerated 𝓧]
     rw [Measure.deterministic_comp_eq_map]
   _ = (Kernel.id ∥ₖ Kernel.deterministic f hf) ∘ₘ (Kernel.id ∥ₖ (Kernel.deterministic f hf)†μ) ∘ₘ
       Kernel.copy 𝓧 ∘ₘ Kernel.deterministic f hf ∘ₘ μ := by
-    rw [Measure.compProd_eq_parallelComp_comp_copy_comp,
+    simp only [Measure.compProd_eq_parallelComp_comp_copy_comp,
       ← Kernel.parallelComp_id_left_comp_parallelComp, ← Measure.comp_assoc]
   _ = (Kernel.id ∥ₖ Kernel.deterministic f hf) ∘ₘ (Kernel.deterministic f hf ∥ₖ Kernel.id) ∘ₘ
       Kernel.copy Ω ∘ₘ μ := by rw [parallelProd_posterior_comp_copy_comp]
   _ = (Kernel.deterministic f hf ∥ₖ Kernel.deterministic f hf) ∘ₘ Kernel.copy Ω ∘ₘ μ := by
-    rw [Measure.comp_assoc, Kernel.parallelComp_comp_parallelComp, Kernel.id_comp, Kernel.comp_id]
+    have hkernel :
+        (Kernel.id ∥ₖ Kernel.deterministic f hf) ∘ₖ
+            (Kernel.deterministic f hf ∥ₖ Kernel.id) =
+          Kernel.deterministic f hf ∥ₖ Kernel.deterministic f hf := by
+      rw [Kernel.parallelComp_comp_parallelComp, Kernel.id_comp, Kernel.comp_id]
+    calc
+      (Kernel.id ∥ₖ Kernel.deterministic f hf) ∘ₘ
+          (Kernel.deterministic f hf ∥ₖ Kernel.id) ∘ₘ Kernel.copy Ω ∘ₘ μ =
+          (((Kernel.id ∥ₖ Kernel.deterministic f hf) ∘ₖ
+            (Kernel.deterministic f hf ∥ₖ Kernel.id)) ∘ₖ Kernel.copy Ω) ∘ₘ μ :=
+        Measure.comp_assoc.trans Measure.comp_assoc
+      _ = ((Kernel.deterministic f hf ∥ₖ Kernel.deterministic f hf) ∘ₖ
+          Kernel.copy Ω) ∘ₘ μ :=
+        Measure.comp_congr <| ae_of_all _ fun a ↦ DFunLike.congr_fun
+          (congrArg (fun k ↦ k ∘ₖ Kernel.copy Ω) hkernel) a
+      _ = (Kernel.deterministic f hf ∥ₖ Kernel.deterministic f hf) ∘ₘ
+          Kernel.copy Ω ∘ₘ μ := Measure.comp_assoc.symm
   _ = (Kernel.copy 𝓧 ∘ₖ Kernel.deterministic f hf) ∘ₘ μ := by -- `deterministic` is used here
-    rw [Measure.comp_assoc, Kernel.parallelComp_self_comp_copy]
+    calc
+      (Kernel.deterministic f hf ∥ₖ Kernel.deterministic f hf) ∘ₘ Kernel.copy Ω ∘ₘ μ =
+          ((Kernel.deterministic f hf ∥ₖ Kernel.deterministic f hf) ∘ₖ
+            Kernel.copy Ω) ∘ₘ μ := Measure.comp_assoc
+      _ = (Kernel.copy 𝓧 ∘ₖ Kernel.deterministic f hf) ∘ₘ μ :=
+        Measure.comp_congr <| ae_of_all _ fun a ↦ DFunLike.congr_fun
+          Kernel.parallelComp_self_comp_copy a
   _ = μ.map f ⊗ₘ Kernel.id := by
-    rw [Measure.compProd_id_eq_copy_comp, ← Measure.comp_assoc,
-      Measure.deterministic_comp_eq_map]
+    calc
+      (Kernel.copy 𝓧 ∘ₖ Kernel.deterministic f hf) ∘ₘ μ =
+          Kernel.copy 𝓧 ∘ₘ Kernel.deterministic f hf ∘ₘ μ := Measure.comp_assoc.symm
+      _ = Kernel.copy 𝓧 ∘ₘ μ.map f := by
+        simp only [Measure.deterministic_comp_eq_map]
+      _ = μ.map f ⊗ₘ Kernel.id := Measure.compProd_id_eq_copy_comp.symm
 
 lemma absolutelyContinuous_posterior {ν : Measure 𝓧} [SFinite ν] (h_ac : ∀ᵐ ω ∂μ, κ ω ≪ ν) :
     ∀ᵐ b ∂(κ ∘ₘ μ), (κ†μ) b ≪ μ := by
@@ -174,33 +223,83 @@ section StandardBorelSpace
 variable [StandardBorelSpace 𝓧] [Nonempty 𝓧]
 
 /-- The posterior is involutive (up to `μ`-a.e. equality). -/
-lemma posterior_posterior [IsMarkovKernel κ] : (κ†μ)†(κ ∘ₘ μ) =ᵐ[μ] κ := by
-  suffices κ =ᵐ[κ†μ ∘ₘ κ ∘ₘ μ] (κ†μ)†(κ ∘ₘ μ) by
+lemma posterior_posterior [IsMarkovKernel κ] :
+    (κ†μ)†(Measure.bind μ κ κ.aemeasurable) =ᵐ[μ] κ := by
+  suffices κ =ᵐ[κ†μ ∘ₘ κ ∘ₘ μ]
+      (κ†μ)†(Measure.bind μ κ κ.aemeasurable) by
     rw [posterior_comp_self] at this
     filter_upwards [this] with a h using h.symm
   refine ae_eq_posterior_of_compProd_eq_swap_comp κ ?_
-  rw [posterior_comp_self, compProd_posterior_eq_swap_comp, Measure.comp_assoc,
-    Kernel.swap_swap, Measure.id_comp]
+  simp only [posterior_comp_self]
+  simp only [compProd_posterior_eq_swap_comp, Measure.comp_assoc, Kernel.swap_swap,
+    Measure.id_comp]
 
 /-- The posterior is contravariant. -/
 lemma posterior_comp {η : Kernel 𝓧 𝓨} [IsFiniteKernel η] :
-    (η ∘ₖ κ)†μ =ᵐ[η ∘ₘ κ ∘ₘ μ] κ†μ ∘ₖ η†(κ ∘ₘ μ) := by
+    (η ∘ₖ κ)†μ =ᵐ[η ∘ₘ κ ∘ₘ μ]
+      κ†μ ∘ₖ η†(Measure.bind μ κ κ.aemeasurable) := by
   rw [Measure.comp_assoc]
-  refine (ae_eq_posterior_of_compProd_eq_swap_comp ((κ†μ) ∘ₖ η†(κ ∘ₘ μ)) ?_).symm
+  refine (ae_eq_posterior_of_compProd_eq_swap_comp
+    ((κ†μ) ∘ₖ η†(Measure.bind μ κ κ.aemeasurable)) ?_).symm
   simp_rw [Measure.compProd_eq_comp_prod, ← Kernel.parallelComp_comp_copy,
     ← Kernel.parallelComp_id_left_comp_parallelComp, ← Measure.comp_assoc]
-  calc (Kernel.id ∥ₖ κ†μ) ∘ₘ (Kernel.id ∥ₖ η†(κ ∘ₘ μ)) ∘ₘ (Kernel.copy 𝓨) ∘ₘ η ∘ₘ κ ∘ₘ μ
+  calc (Kernel.id ∥ₖ κ†μ) ∘ₘ
+      (Kernel.id ∥ₖ η†(Measure.bind μ κ κ.aemeasurable)) ∘ₘ
+      (Kernel.copy 𝓨) ∘ₘ η ∘ₘ κ ∘ₘ μ
   _ = (Kernel.id ∥ₖ κ†μ) ∘ₘ (η ∥ₖ Kernel.id) ∘ₘ Kernel.copy 𝓧 ∘ₘ κ ∘ₘ μ := by
     rw [parallelProd_posterior_comp_copy_comp]
   _ = (η ∥ₖ Kernel.id) ∘ₘ (Kernel.id ∥ₖ κ†μ) ∘ₘ Kernel.copy 𝓧 ∘ₘ κ ∘ₘ μ := by
-    rw [Measure.comp_assoc, Kernel.parallelComp_comm, ← Measure.comp_assoc]
+    calc
+      (Kernel.id ∥ₖ κ†μ) ∘ₘ (η ∥ₖ Kernel.id) ∘ₘ Kernel.copy 𝓧 ∘ₘ κ ∘ₘ μ =
+          ((Kernel.id ∥ₖ κ†μ) ∘ₖ (η ∥ₖ Kernel.id)) ∘ₘ
+            Kernel.copy 𝓧 ∘ₘ κ ∘ₘ μ := Measure.comp_assoc
+      _ = ((η ∥ₖ Kernel.id) ∘ₖ (Kernel.id ∥ₖ κ†μ)) ∘ₘ
+          Kernel.copy 𝓧 ∘ₘ κ ∘ₘ μ :=
+        Measure.comp_congr <| ae_of_all _ fun a ↦ DFunLike.congr_fun
+          Kernel.parallelComp_comm a
+      _ = (η ∥ₖ Kernel.id) ∘ₘ (Kernel.id ∥ₖ κ†μ) ∘ₘ
+          Kernel.copy 𝓧 ∘ₘ κ ∘ₘ μ := Measure.comp_assoc.symm
   _ = (η ∥ₖ Kernel.id) ∘ₘ (κ ∥ₖ Kernel.id) ∘ₘ Kernel.copy Ω ∘ₘ μ := by
     rw [parallelProd_posterior_comp_copy_comp]
   _ = (Kernel.swap _ _) ∘ₘ (Kernel.id ∥ₖ η) ∘ₘ (Kernel.id ∥ₖ κ) ∘ₘ Kernel.copy Ω ∘ₘ μ := by
-    simp_rw [Measure.comp_assoc]
-    conv_rhs => rw [← Kernel.comp_assoc]
-    rw [Kernel.swap_parallelComp, Kernel.comp_assoc, ← Kernel.comp_assoc (Kernel.swap Ω 𝓧),
-      Kernel.swap_parallelComp, Kernel.comp_assoc, Kernel.swap_copy]
+    have hleft :
+        (η ∥ₖ (Kernel.id : Kernel Ω Ω)) ∘ₖ
+            (κ ∥ₖ (Kernel.id : Kernel Ω Ω)) =
+          (η ∘ₖ κ) ∥ₖ (Kernel.id : Kernel Ω Ω) := by
+      rw [Kernel.parallelComp_comp_parallelComp, Kernel.id_comp]
+    have hright :
+        ((Kernel.id : Kernel Ω Ω) ∥ₖ η) ∘ₖ
+            ((Kernel.id : Kernel Ω Ω) ∥ₖ κ) =
+          (Kernel.id : Kernel Ω Ω) ∥ₖ (η ∘ₖ κ) := by
+      rw [Kernel.parallelComp_comp_parallelComp, Kernel.id_comp]
+    have hkernel :
+        (η ∥ₖ Kernel.id) ∘ₖ ((κ ∥ₖ Kernel.id) ∘ₖ Kernel.copy Ω) =
+          Kernel.swap Ω 𝓨 ∘ₖ ((Kernel.id ∥ₖ η) ∘ₖ
+            ((Kernel.id ∥ₖ κ) ∘ₖ Kernel.copy Ω)) := by
+      calc
+        (η ∥ₖ Kernel.id) ∘ₖ ((κ ∥ₖ Kernel.id) ∘ₖ Kernel.copy Ω) =
+            ((η ∥ₖ Kernel.id) ∘ₖ (κ ∥ₖ Kernel.id)) ∘ₖ Kernel.copy Ω :=
+          (Kernel.comp_assoc _ _ _).symm
+        _ = ((η ∘ₖ κ) ∥ₖ Kernel.id) ∘ₖ Kernel.copy Ω :=
+          congrArg (fun q ↦ q ∘ₖ Kernel.copy Ω) hleft
+        _ = ((η ∘ₖ κ) ∥ₖ Kernel.id) ∘ₖ
+            (Kernel.swap Ω Ω ∘ₖ Kernel.copy Ω) :=
+          congrArg (((η ∘ₖ κ) ∥ₖ Kernel.id) ∘ₖ ·) Kernel.swap_copy.symm
+        _ = (((η ∘ₖ κ) ∥ₖ Kernel.id) ∘ₖ Kernel.swap Ω Ω) ∘ₖ
+            Kernel.copy Ω := (Kernel.comp_assoc _ _ _).symm
+        _ = (Kernel.swap Ω 𝓨 ∘ₖ (Kernel.id ∥ₖ (η ∘ₖ κ))) ∘ₖ
+            Kernel.copy Ω :=
+          congrArg (fun q ↦ q ∘ₖ Kernel.copy Ω) Kernel.swap_parallelComp.symm
+        _ = Kernel.swap Ω 𝓨 ∘ₖ ((Kernel.id ∥ₖ (η ∘ₖ κ)) ∘ₖ
+            Kernel.copy Ω) := Kernel.comp_assoc _ _ _
+        _ = Kernel.swap Ω 𝓨 ∘ₖ (((Kernel.id ∥ₖ η) ∘ₖ
+            (Kernel.id ∥ₖ κ)) ∘ₖ Kernel.copy Ω) :=
+          congrArg (fun q ↦ Kernel.swap Ω 𝓨 ∘ₖ (q ∘ₖ Kernel.copy Ω)) hright.symm
+        _ = Kernel.swap Ω 𝓨 ∘ₖ ((Kernel.id ∥ₖ η) ∘ₖ
+            ((Kernel.id ∥ₖ κ) ∘ₖ Kernel.copy Ω)) :=
+          congrArg (Kernel.swap Ω 𝓨 ∘ₖ ·) (Kernel.comp_assoc _ _ _)
+    simp only [Measure.comp_assoc]
+    exact Measure.comp_congr <| ae_of_all _ fun a ↦ DFunLike.congr_fun hkernel a
 
 end StandardBorelSpace
 
@@ -211,7 +310,7 @@ variable [SigmaAlgebra.CountableOrCountablyGenerated Ω 𝓧]
 
 lemma absolutelyContinuous_of_posterior (h_ac : ∀ᵐ b ∂(κ ∘ₘ μ), (κ†μ) b ≪ μ) :
     ∀ᵐ ω ∂μ, κ ω ≪ κ ∘ₘ μ := by
-  suffices μ ⊗ₘ κ ≪ μ.prod (κ ∘ₘ μ) by
+  suffices μ ⊗ₘ κ ≪ μ.prod (Measure.bind μ κ κ.aemeasurable) by
     rw [← Measure.compProd_const] at this
     simpa using this.kernel_of_compProd
   suffices (κ ∘ₘ μ) ⊗ₘ κ†μ ≪ (κ ∘ₘ μ).prod μ by
@@ -231,17 +330,18 @@ lemma Kernel.absolutelyContinuous_comp_of_absolutelyContinuous {ν : Measure �
   exact absolutelyContinuous_posterior h_ac
 
 lemma rnDeriv_posterior_ae_prod (h_ac : ∀ᵐ ω ∂μ, κ ω ≪ κ ∘ₘ μ) :
-    ∀ᵐ p ∂(μ.prod (κ ∘ₘ μ)),
+    ∀ᵐ p ∂(μ.prod (Measure.bind μ κ κ.aemeasurable)),
       (κ†μ).rnDeriv (Kernel.const _ μ) p.2 p.1 = κ.rnDeriv (Kernel.const _ (κ ∘ₘ μ)) p.1 p.2 := by
   -- We prove the a.e. equality by showing that integrals on the π-system of rectangles are equal.
   -- First, the integral of the left-hand side on `s ×ˢ t` is `(μ ⊗ₘ κ) (s ×ˢ t)`, which we prove
   -- by showing that it's equal to `((κ ∘ₘ μ) ⊗ κ†μ) (t ×ˢ s)` and using the main property of the
   -- posterior.
   have h1 {s : Set Ω} {t : Set 𝓧} (hs : MeasurableSet s) (ht : MeasurableSet t) :
-      ∫⁻ x in s ×ˢ t, (κ†μ).rnDeriv (Kernel.const _ μ) x.2 x.1 ∂μ.prod (⇑κ ∘ₘ μ)
+      ∫⁻ x in s ×ˢ t, (κ†μ).rnDeriv (Kernel.const _ μ) x.2 x.1
+        ∂μ.prod (Measure.bind μ κ κ.aemeasurable)
         = (μ ⊗ₘ κ) (s ×ˢ t) := by
     rw [setLIntegral_prod_symm _ (by fun_prop), ← swap_compProd_posterior, Measure.swap_comp,
-      Measure.map_apply measurable_swap (hs.prod ht), Set.preimage_swap_prod,
+      Measure.map_apply (hs.prod ht) measurable_swap.aemeasurable, Set.preimage_swap_prod,
       Measure.compProd_apply_prod ht hs]
     refine lintegral_congr_ae <| ae_restrict_of_ae ?_
     filter_upwards [absolutelyContinuous_posterior h_ac] with x h_ac'
@@ -249,7 +349,8 @@ lemma rnDeriv_posterior_ae_prod (h_ac : ∀ᵐ ω ∂μ, κ ω ≪ κ ∘ₘ μ)
     rw [Kernel.setLIntegral_rnDeriv h_ac' hs]
   have h2 {s : Set Ω} {t : Set 𝓧} (hs : MeasurableSet s) (ht : MeasurableSet t) :
   -- Second, the integral of the right-hand side on `s ×ˢ t` is `(μ ⊗ₘ κ) (s ×ˢ t)`.
-      ∫⁻ x in s ×ˢ t, κ.rnDeriv (Kernel.const _ (κ ∘ₘ μ)) x.1 x.2 ∂μ.prod (⇑κ ∘ₘ μ)
+      ∫⁻ x in s ×ˢ t, κ.rnDeriv (Kernel.const _ (κ ∘ₘ μ)) x.1 x.2
+        ∂μ.prod (Measure.bind μ κ κ.aemeasurable)
         = (μ ⊗ₘ κ) (s ×ˢ t) := by
     rw [setLIntegral_prod _ (by fun_prop), Measure.compProd_apply_prod hs ht]
     refine lintegral_congr_ae <| ae_restrict_of_ae ?_
@@ -259,7 +360,8 @@ lemma rnDeriv_posterior_ae_prod (h_ac : ∀ᵐ ω ∂μ, κ ω ≪ κ ∘ₘ μ)
   -- We extend from the π-system to the σ-algebra.
   refine ae_eq_of_setLIntegral_prod_eq (by fun_prop) (by fun_prop) ?_ ?_
   · refine ne_of_lt ?_
-    calc ∫⁻ x, (κ†μ).rnDeriv (Kernel.const _ μ) x.2 x.1 ∂μ.prod (κ ∘ₘ μ)
+    calc ∫⁻ x, (κ†μ).rnDeriv (Kernel.const _ μ) x.2 x.1
+        ∂μ.prod (Measure.bind μ κ κ.aemeasurable)
     _ = (μ ⊗ₘ κ) Set.univ := by rw [← setLIntegral_univ, ← Set.univ_prod_univ, h1 .univ .univ]
     _ < ⊤ := measure_lt_top _ _
   · intro s hs t ht

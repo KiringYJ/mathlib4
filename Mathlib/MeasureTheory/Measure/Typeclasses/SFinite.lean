@@ -658,15 +658,15 @@ instance [SigmaFinite (μ.restrict t)] : SigmaFinite (μ.restrict (s ∩ t)) :=
   sigmaFinite_of_le (μ.restrict t) (restrict_mono_ae (ae_of_all _ Set.inter_subset_right))
 
 theorem SigmaFinite.of_map (μ : Measure α) {f : α → β} (hf : AEMeasurable f μ)
-    (h : SigmaFinite (μ.map f)) : SigmaFinite μ :=
-  ⟨⟨⟨fun n => f ⁻¹' spanningSets (μ.map f) n, fun _ => trivial, fun n => by
-        simp only [← map_apply_of_aemeasurable hf, measurableSet_spanningSets,
+    (h : SigmaFinite (μ.map f hf)) : SigmaFinite μ :=
+  ⟨⟨⟨fun n => f ⁻¹' spanningSets (μ.map f hf) n, fun _ => trivial, fun n => by
+        simp only [← map_apply (measurableSet_spanningSets (μ.map f hf) n) hf,
           measure_spanningSets_lt_top],
         by rw [← preimage_iUnion, iUnion_spanningSets, preimage_univ]⟩⟩⟩
 
 lemma _root_.MeasurableEmbedding.sigmaFinite_map {f : α → β} (hf : MeasurableEmbedding f)
     [SigmaFinite μ] :
-    SigmaFinite (μ.map f) := by
+    SigmaFinite (μ.map f hf.measurable.aemeasurable) := by
   refine ⟨fun n ↦ f '' (spanningSets μ n) ∪ (Set.range f)ᶜ, by simp, fun n ↦ ?_, ?_⟩
   · rw [hf.map_apply, Set.preimage_union]
     simp only [Set.preimage_compl, Set.preimage_range, Set.compl_univ, Set.union_empty,
@@ -676,7 +676,7 @@ lemma _root_.MeasurableEmbedding.sigmaFinite_map {f : α → β} (hf : Measurabl
       Set.image_univ, Set.union_compl_self]
 
 theorem _root_.MeasurableEquiv.sigmaFinite_map (f : α ≃ᵐ β) [SigmaFinite μ] :
-    SigmaFinite (μ.map f) := f.measurableEmbedding.sigmaFinite_map
+    SigmaFinite (μ.map f f.measurable.aemeasurable) := f.measurableEmbedding.sigmaFinite_map
 
 /-- Similar to `ae_of_forall_measure_lt_top_ae_restrict`, but where you additionally get the
   hypothesis that another σ-finite measure has finite values on `s`. -/

@@ -300,9 +300,9 @@ theorem IndepFun.mgf_add' {X Y : Ω → ℝ} (h_indep : X ⟂ᵢ[μ] Y) (hX : AE
     (hY : AEStronglyMeasurable Y μ) : mgf (X + Y) μ t = mgf X μ t * mgf Y μ t := by
   have A : Continuous fun x : ℝ => exp (t * x) := by fun_prop
   have h'X : AEStronglyMeasurable (fun ω => exp (t * X ω)) μ :=
-    A.aestronglyMeasurable.comp_aemeasurable hX.aemeasurable
+    AEStronglyMeasurable.comp_aemeasurable (f := X) hX.aemeasurable A.aestronglyMeasurable
   have h'Y : AEStronglyMeasurable (fun ω => exp (t * Y ω)) μ :=
-    A.aestronglyMeasurable.comp_aemeasurable hY.aemeasurable
+    AEStronglyMeasurable.comp_aemeasurable (f := Y) hY.aemeasurable A.aestronglyMeasurable
   exact h_indep.mgf_add h'X h'Y
 
 theorem IndepFun.cgf_add {X Y : Ω → ℝ} (h_indep : X ⟂ᵢ[μ] Y)
@@ -553,7 +553,8 @@ variable [BorelSpace E] [SigmaAlgebra F] [BorelSpace F]
 
 lemma integral_id_map (L : E ≃L[𝕜] F) :
     ∫ x, x ∂(μ.map L) = L (∫ x, x ∂μ) := by
-  rw [show ⇑L = ⇑L.toHomeomorph.toMeasurableEquiv from rfl, integral_map_equiv]
-  simp [L.integral_comp_id_comm]
+  change ∫ x, x ∂(μ.map (L.toHomeomorph.toMeasurableEquiv : E → F)) = _
+  rw [integral_map_equiv]
+  simpa using L.integral_comp_id_comm
 
 end ContinuousLinearEquiv

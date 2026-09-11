@@ -38,7 +38,7 @@ variable {γ δ : Type*} {mγ : SigmaAlgebra γ} {mδ : SigmaAlgebra δ} {f : β
 theorem deterministic_comp_eq_map (hf : Measurable f) (κ : Kernel α β) :
     deterministic f hf ∘ₖ κ = map κ f := by
   ext a s hs
-  simp_rw [map_apply' _ hf _ hs, comp_apply' _ _ _ hs, deterministic_apply' hf _ hs,
+  simp_rw [map_apply' _ _ hs hf, comp_apply' _ _ _ hs, deterministic_apply' hf _ hs,
     lintegral_indicator_const_comp hf hs, one_mul]
 
 theorem comp_deterministic_eq_comap (κ : Kernel α β) (hg : Measurable g) :
@@ -58,14 +58,13 @@ lemma swap_swap : (swap α β) ∘ₖ (swap β α) = Kernel.id := by
 lemma swap_comp_eq_map {κ : Kernel α (β × γ)} : (swap β γ) ∘ₖ κ = κ.map Prod.swap := by
   rw [swap, deterministic_comp_eq_map]
 
-lemma map_comp (κ : Kernel α β) (η : Kernel β γ) (f : γ → δ) :
+lemma map_comp (κ : Kernel α β) (η : Kernel β γ) (f : γ → δ)
+    (hf : Measurable f := by fun_prop) :
     (η ∘ₖ κ).map f = (η.map f) ∘ₖ κ := by
-  by_cases hf : Measurable f
-  · ext a s hs
-    rw [map_apply' _ hf _ hs, comp_apply', comp_apply' _ _ _ hs]
-    · simp_rw [map_apply' _ hf _ hs]
-    · exact hf hs
-  · simp [map_of_not_measurable _ hf]
+  ext a s hs
+  rw [map_apply' _ _ hs hf, comp_apply', comp_apply' _ _ _ hs]
+  · simp_rw [map_apply' _ _ hs hf]
+  · exact hf hs
 
 lemma comp_map (κ : Kernel α β) (η : Kernel γ δ) {f : β → γ} (hf : Measurable f) :
     η ∘ₖ (κ.map f) = (η.comap f hf) ∘ₖ κ := by
@@ -74,10 +73,10 @@ lemma comp_map (κ : Kernel α β) (η : Kernel γ δ) {f : β → γ} (hf : Mea
   simp_rw [comap_apply']
 
 lemma fst_comp (κ : Kernel α β) (η : Kernel β (γ × δ)) : (η ∘ₖ κ).fst = η.fst ∘ₖ κ := by
-  simp [fst_eq, map_comp κ η _]
+  simp [fst_eq, map_comp κ η Prod.fst measurable_fst]
 
 lemma snd_comp (κ : Kernel α β) (η : Kernel β (γ × δ)) : (η ∘ₖ κ).snd = η.snd ∘ₖ κ := by
-  simp_rw [snd_eq, map_comp κ η _]
+  simp_rw [snd_eq, map_comp κ η Prod.snd measurable_snd]
 
 end Kernel
 end ProbabilityTheory

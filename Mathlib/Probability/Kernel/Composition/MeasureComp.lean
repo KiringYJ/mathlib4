@@ -27,13 +27,17 @@ namespace MeasureTheory.Measure
 variable {α β γ : Type*} {mα : SigmaAlgebra α} {mβ : SigmaAlgebra β} {mγ : SigmaAlgebra γ}
   {μ ν : Measure α} {κ η : Kernel α β}
 
-lemma comp_assoc {η : Kernel β γ} : η ∘ₘ (κ ∘ₘ μ) = (η ∘ₖ κ) ∘ₘ μ :=
-  Measure.bind_bind κ.aemeasurable η.aemeasurable
+lemma comp_assoc {η : Kernel β γ} : η ∘ₘ (κ ∘ₘ μ) = (η ∘ₖ κ) ∘ₘ μ := by
+  ext s hs
+  rw [Measure.bind_apply hs η.aemeasurable,
+    Measure.lintegral_bind κ.aemeasurable (η.measurable_coe hs).aemeasurable,
+    Measure.bind_apply hs (Kernel.aemeasurable _)]
+  simp_rw [Kernel.comp_apply' _ _ _ hs]
 
 /-- This lemma allows to rewrite the composition of a measure and a kernel as the composition
 of two kernels, which allows to transfer properties of `∘ₖ` to `∘ₘ`. -/
 lemma comp_eq_comp_const_apply : κ ∘ₘ μ = (κ ∘ₖ (Kernel.const Unit μ)) () := by
-  rw [Kernel.comp_apply, Kernel.const_apply]
+  rfl
 
 lemma comp_eq_sum_of_countable [Countable α] [MeasurableSingletonClass α] :
     κ ∘ₘ μ = Measure.sum (fun ω ↦ μ {ω} • κ ω) := by
@@ -85,18 +89,18 @@ lemma _root_.ProbabilityTheory.Kernel.comp_const (κ : Kernel β γ) (μ : Measu
 lemma map_comp (μ : Measure α) (κ : Kernel α β) {f : β → γ} (hf : Measurable f) :
     (κ ∘ₘ μ).map f = (κ.map f) ∘ₘ μ := by
   ext s hs
-  rw [Measure.map_apply hf hs, Measure.bind_apply (hf hs) κ.aemeasurable,
+  rw [Measure.map_apply hs hf.aemeasurable, Measure.bind_apply (hf hs) κ.aemeasurable,
     Measure.bind_apply hs (Kernel.aemeasurable _)]
-  simp_rw [Kernel.map_apply' _ hf _ hs]
+  simp_rw [Kernel.map_apply' _ _ hs hf]
 
 @[simp]
 lemma discard_comp (μ : Measure α) : Kernel.discard α ∘ₘ μ = μ .univ • Measure.dirac () := by
   ext s hs; simp [Measure.bind_apply hs (Kernel.aemeasurable _), mul_comm]
 
 lemma copy_comp_map {f : α → β} (hf : AEMeasurable f μ) :
-    Kernel.copy β ∘ₘ (μ.map f) = μ.map (Function.prod f f) := by
-  rw [Kernel.copy, deterministic_comp_eq_map]
-  exact (aemeasurable_id.prodMk aemeasurable_id).map_map_of_aemeasurable hf
+    Kernel.copy β ∘ₘ (μ.map f) = μ.map (Function.prod f f) (hf.prodMk hf) := by
+  simpa only [Kernel.copy, deterministic_comp_eq_map, Function.diag_comp] using
+    Measure.map_map hf measurable_diag.aemeasurable
 
 section CompProd
 
@@ -106,7 +110,8 @@ lemma compProd_eq_comp_prod (μ : Measure α) [SFinite μ] (κ : Kernel α β) [
   rfl
 
 lemma compProd_id_eq_copy_comp [SFinite μ] : μ ⊗ₘ Kernel.id = Kernel.copy α ∘ₘ μ := by
-  rw [compProd_id, Kernel.copy, deterministic_comp_eq_map]
+  simpa only [Kernel.copy] using
+    (compProd_id (μ := μ)).trans (deterministic_comp_eq_map measurable_diag).symm
 
 lemma comp_compProd_comm {η : Kernel (α × β) γ} [SFinite μ] [IsSFiniteKernel η] :
     η ∘ₘ (μ ⊗ₘ κ) = ((κ ⊗ₖ η) ∘ₘ μ).snd := by
@@ -125,13 +130,15 @@ lemma comp_compProd_comm {η : Kernel (α × β) γ} [SFinite μ] [IsSFiniteKern
 @[simp]
 lemma prodMkLeft_comp_compProd {η : Kernel β γ} [SFinite μ] [IsSFiniteKernel κ] :
     (η.prodMkLeft α) ∘ₘ μ ⊗ₘ κ = η ∘ₘ κ ∘ₘ μ := by
-  rw [← snd_compProd μ κ, Kernel.prodMkLeft, snd, ← deterministic_comp_eq_map measurable_snd,
-    comp_assoc, Kernel.comp_deterministic_eq_comap]
+  simp only [← snd_compProd μ κ, Kernel.prodMkLeft, snd,
+    ← deterministic_comp_eq_map measurable_snd, comp_assoc,
+    Kernel.comp_deterministic_eq_comap]
 
 lemma compProd_deterministic [SFinite μ] {f : α → β} (hf : Measurable f) :
     μ ⊗ₘ Kernel.deterministic f hf = μ.map (fun a ↦ (a, f a)) := by
-  rw [compProd_eq_comp_prod, Kernel.id, Kernel.deterministic_prod_deterministic,
-    deterministic_comp_eq_map]
+  rw [compProd_eq_comp_prod]
+  change (Kernel.deterministic id measurable_id ×ₖ Kernel.deterministic f hf) ∘ₘ μ = _
+  rw [Kernel.deterministic_prod_deterministic, deterministic_comp_eq_map]
   rfl
 
 end CompProd
@@ -148,7 +155,8 @@ lemma add_comp : (κ + η) ∘ₘ μ = κ ∘ₘ μ + η ∘ₘ μ := by
 /-- Same as `add_comp` except that it uses `⇑κ + ⇑η` instead of `⇑(κ + η)` in order to have
 a simp-normal form on the left of the equality. -/
 @[simp]
-lemma add_comp' : (⇑κ + ⇑η) ∘ₘ μ = κ ∘ₘ μ + η ∘ₘ μ := by rw [← FunLike.coe_add, add_comp]
+lemma add_comp' : (⇑κ + ⇑η) ∘ₘ μ = κ ∘ₘ μ + η ∘ₘ μ := by
+  simpa only [FunLike.coe_add] using (add_comp (κ := κ) (η := η) (μ := μ))
 
 @[simp]
 lemma comp_smul (a : ℝ≥0∞) : κ ∘ₘ (a • μ) = a • (κ ∘ₘ μ) := by

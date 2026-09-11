@@ -72,9 +72,10 @@ the restriction of `Measure` to (sub-)probability spaces.)
 -/
 def Measure : Meas ⥤ Meas where
   obj X := MeasurableSpace.of (@MeasureTheory.Measure X.carrier X.sigmaAlgebra)
-  map f := ⟨Measure.map (⇑f), Measure.measurable_map f.1 f.2⟩
+  map f := ⟨fun μ ↦ Measure.map (⇑f) μ f.2.aemeasurable, Measure.measurable_map f.1 f.2⟩
   map_id X := Subtype.ext <| funext fun μ => @Measure.map_id X.carrier X.sigmaAlgebra μ
-  map_comp := fun ⟨_, hf⟩ ⟨_, hg⟩ => Subtype.ext <| funext fun _ => (Measure.map_map hg hf).symm
+  map_comp := fun ⟨_, hf⟩ ⟨_, hg⟩ => Subtype.ext <| funext fun _ =>
+    (Measure.map_map hf.aemeasurable hg.aemeasurable).symm
 
 /-- The Giry monad, i.e. the monadic structure associated with `Measure`. -/
 def Giry : CategoryTheory.Monad Meas where
@@ -97,7 +98,9 @@ def Integral : Giry.Algebra where
   a := ⟨fun m : MeasureTheory.Measure ℝ≥0∞ ↦ ∫⁻ x, x ∂m, Measure.measurable_lintegral measurable_id⟩
   unit := Subtype.ext <| funext fun _ : ℝ≥0∞ => lintegral_dirac' _ measurable_id
   assoc := Subtype.ext <| funext fun μ : MeasureTheory.Measure (MeasureTheory.Measure ℝ≥0∞) ↦
-    show ∫⁻ x, x ∂μ.join = ∫⁻ x, x ∂Measure.map (fun m => ∫⁻ x, x ∂m) μ by
+    show ∫⁻ x, x ∂μ.join =
+        ∫⁻ x, x ∂Measure.map (fun m => ∫⁻ x, x ∂m) μ
+          (Measure.measurable_lintegral measurable_id).aemeasurable by
       rw [Measure.lintegral_join, lintegral_map] <;>
         apply_rules [Measurable.aemeasurable, measurable_id, Measure.measurable_lintegral]
 

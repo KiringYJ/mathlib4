@@ -145,9 +145,9 @@ theorem _root_.Continuous.ae_eq_iff_eq {f g : X → Y} (hf : Continuous f) (hg :
 theorem _root_.Continuous.isOpenPosMeasure_map [OpensSigmaAlgebra X]
     {Z : Type*} [TopologicalSpace Z] [SigmaAlgebra Z] [BorelSpace Z]
     {f : X → Z} (hf : Continuous f) (hf_surj : Function.Surjective f) :
-    (Measure.map f μ).IsOpenPosMeasure := by
+    (Measure.map f μ hf.measurable.aemeasurable).IsOpenPosMeasure := by
   refine ⟨fun U hUo hUne => ?_⟩
-  rw [Measure.map_apply hf.measurable hUo.measurableSet]
+  rw [Measure.map_apply hUo.measurableSet hf.measurable.aemeasurable]
   exact (hUo.preimage hf).measure_ne_zero μ (hf_surj.nonempty_preimage.mpr hUne)
 
 protected theorem IsOpenPosMeasure.comap [BorelSpace X]

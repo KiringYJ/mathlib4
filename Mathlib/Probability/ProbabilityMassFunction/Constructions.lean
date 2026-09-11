@@ -99,8 +99,10 @@ theorem toMeasure_map_apply (hf : Measurable f)
   exact toOuterMeasure_map_apply f p s
 
 @[simp]
-lemma toMeasure_map (p : PMF α) (hf : Measurable f) : p.toMeasure.map f = (p.map f).toMeasure := by
-  ext s hs : 1; rw [PMF.toMeasure_map_apply _ _ _ hf hs, Measure.map_apply hf hs]
+lemma toMeasure_map (p : PMF α) (hf : Measurable f) :
+    p.toMeasure.map f hf.aemeasurable = (p.map f).toMeasure := by
+  ext s hs : 1
+  rw [PMF.toMeasure_map_apply _ _ _ hf hs, Measure.map_apply hs hf.aemeasurable]
 
 end Measure
 

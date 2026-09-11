@@ -134,36 +134,47 @@ theorem IsGaussianProcess.isPreBrownianReal_of_covariance (h1 : IsGaussianProces
   hasLaw I := by
     refine ⟨.of_eval fun _ ↦ h1.aemeasurable _, ?_⟩
     apply (MeasurableEquiv.toLp 2 (_ → ℝ)).map_measurableEquiv_injective
-    rw [MeasurableEquiv.coe_toLp, ← PiLp.coe_symm_continuousLinearEquiv 2 ℝ]
-    have := (h1.hasGaussianLaw I).isGaussian_map
-    apply IsGaussian.ext
-    · rw [integral_map, integral_map, integral_map]
-      · simp only [id_eq]
-        rw [ContinuousLinearEquiv.integral_comp_id_comm,
-          ContinuousLinearEquiv.integral_comp_comm]
-        simp only [PiLp.continuousLinearEquiv_symm_apply, integral_id_projectiveFamily,
-          WithLp.toLp_zero, WithLp.toLp_eq_zero]
-        congr with i
-        rw [eval_integral]
-        · simpa using h2 _
-        · exact fun _ ↦ (h1.hasGaussianLaw_eval _).integrable
-      any_goals fun_prop
-      exact .of_eval fun _ ↦ h1.aemeasurable _
-    · rw [← ContinuousLinearMap.toBilinForm_inj]
-      refine LinearMap.BilinForm.ext_of_isSymm isPosSemidef_covarianceBilin.isSymm
-        isPosSemidef_covarianceBilin.isSymm fun x ↦ ?_
-      simp only [ContinuousLinearMap.toBilinForm_apply]
-      rw [PiLp.coe_symm_continuousLinearEquiv, covarianceBilin_apply_pi, covarianceBilin_apply_pi]
-      · congrm ∑ i, ∑ j, _ * ?_
-        rw [covariance_eval_projectiveFamily, covariance_map]
-        · wlog hij : i.1 ≤ j.1 generalizing i j
-          · rw [covariance_comm, this j i (by grind), min_comm]
-          rw [min_eq_left hij]
-          exact h3 i j hij
-        any_goals exact Measurable.aestronglyMeasurable (by fun_prop)
-        exact .of_eval (fun _ ↦ h1.aemeasurable _)
-      · exact fun i ↦ (IsGaussian.hasGaussianLaw_id.eval i).memLp_two
-      · exact fun i ↦ ((h1.hasGaussianLaw I).isGaussian_map.hasGaussianLaw_id.eval i).memLp_two
+    have hfun : ⇑(MeasurableEquiv.toLp 2 (I → ℝ)) =
+        ⇑(PiLp.continuousLinearEquiv 2 ℝ (fun _ : I ↦ ℝ)).symm := by
+      rw [MeasurableEquiv.coe_toLp, PiLp.coe_symm_continuousLinearEquiv]
+    have hmap (ν : Measure (I → ℝ)) :
+        ν.map ⇑(MeasurableEquiv.toLp 2 (I → ℝ)) =
+          ν.map ⇑(PiLp.continuousLinearEquiv 2 ℝ (fun _ : I ↦ ℝ)).symm := by
+      simpa using Measure.map_congr (ae_of_all ν fun x ↦ congrFun hfun x)
+        (MeasurableEquiv.toLp 2 (I → ℝ)).measurable.aemeasurable
+    calc
+      _ = _ := hmap _
+      _ = _ := by
+        have := (h1.hasGaussianLaw I).isGaussian_map
+        apply IsGaussian.ext
+        · rw [integral_map, integral_map, integral_map]
+          · simp only [id_eq]
+            rw [ContinuousLinearEquiv.integral_comp_id_comm,
+              ContinuousLinearEquiv.integral_comp_comm]
+            simp only [PiLp.continuousLinearEquiv_symm_apply, integral_id_projectiveFamily,
+              WithLp.toLp_zero, WithLp.toLp_eq_zero]
+            congr with i
+            rw [eval_integral]
+            · simpa using h2 _
+            · exact fun _ ↦ (h1.hasGaussianLaw_eval _).integrable
+          any_goals fun_prop
+        · rw [← ContinuousLinearMap.toBilinForm_inj]
+          refine LinearMap.BilinForm.ext_of_isSymm isPosSemidef_covarianceBilin.isSymm
+            isPosSemidef_covarianceBilin.isSymm fun x ↦ ?_
+          simp only [ContinuousLinearMap.toBilinForm_apply]
+          rw [← hmap, ← hmap, covarianceBilin_apply_pi (hmap := by fun_prop),
+            covarianceBilin_apply_pi (hmap := by fun_prop)]
+          · congrm ∑ i, ∑ j, _ * ?_
+            simp only [MeasurableEquiv.coe_toLp, WithLp.ofLp_toLp]
+            rw [covariance_eval_projectiveFamily, covariance_map]
+            · wlog hij : i.1 ≤ j.1 generalizing i j
+              · rw [covariance_comm, this j i (by grind), min_comm]
+              rw [min_eq_left hij]
+              exact h3 i j hij
+            any_goals exact Measurable.aestronglyMeasurable (by fun_prop)
+          · exact fun i ↦ (IsGaussian.hasGaussianLaw_id.eval i).memLp_two
+          · exact fun i ↦ ((h1.hasGaussianLaw I).isGaussian_map.hasGaussianLaw_id.eval i).memLp_two
+      _ = _ := (hmap _).symm
 
 /-- A pre-Brownian motion has independent increments. -/
 lemma IsPreBrownianReal.hasIndepIncrements (hB : IsPreBrownianReal B P) :

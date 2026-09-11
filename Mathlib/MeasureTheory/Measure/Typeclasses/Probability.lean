@@ -121,23 +121,19 @@ lemma isProbabilityMeasure_iff_real {μ : Measure α} :
     IsProbabilityMeasure μ ↔ μ.real univ = 1 := by
   refine ⟨fun h ↦ probReal_univ, fun h ↦ ⟨(ENNReal.toReal_eq_one_iff (μ univ)).mp h⟩⟩
 
-instance {f : α → β} : IsProbabilityMeasure (map f μ) where
+instance {f : α → β} (hf : AEMeasurable f μ := by fun_prop) :
+    IsProbabilityMeasure (map f μ hf) where
   measure_univ := by
-    rw [Measure.map]
-    split_ifs with hf hμ
-    · simp [mapₗ_mk_apply_of_aemeasurable, hf]
-    · have := measure_univ (μ := μ)
-      simp [hμ] at this
-    · exact dirac_apply_of_mem <| mem_univ _
+    rw [Measure.map_apply .univ hf, preimage_univ, measure_univ]
 
 theorem Measure.isProbabilityMeasure_of_map {μ : Measure α} {f : α → β}
-    [IsProbabilityMeasure (μ.map f)] (hf : AEMeasurable f μ) : IsProbabilityMeasure μ where
+    (hf : AEMeasurable f μ) [IsProbabilityMeasure (μ.map f hf)] : IsProbabilityMeasure μ where
   measure_univ := by
-    rw [← Set.preimage_univ (f := f), ← map_apply_of_aemeasurable hf .univ]
+    rw [← Set.preimage_univ (f := f), ← map_apply .univ hf]
     exact IsProbabilityMeasure.measure_univ
 
 theorem Measure.isProbabilityMeasure_map_iff {μ : Measure α} {f : α → β}
-    (hf : AEMeasurable f μ) : IsProbabilityMeasure (μ.map f) ↔ IsProbabilityMeasure μ :=
+    (hf : AEMeasurable f μ) : IsProbabilityMeasure (μ.map f hf) ↔ IsProbabilityMeasure μ :=
   ⟨fun _ ↦ isProbabilityMeasure_of_map hf, fun _ ↦ inferInstance⟩
 
 instance IsProbabilityMeasure_comap_equiv (f : β ≃ᵐ α) : IsProbabilityMeasure (μ.comap f) := by
@@ -217,7 +213,8 @@ lemma eq_zero_or_isProbabilityMeasure : μ = 0 ∨ IsProbabilityMeasure μ := by
   · apply Or.inl (measure_univ_eq_zero.mp h)
   · exact Or.inr ⟨h⟩
 
-instance {f : α → β} : IsZeroOrProbabilityMeasure (map f μ) := by
+instance {f : α → β} (hf : AEMeasurable f μ := by fun_prop) :
+    IsZeroOrProbabilityMeasure (map f μ hf) := by
   obtain rfl | _ := eq_zero_or_isProbabilityMeasure (μ := μ)
   · rw [Measure.map_zero]
     infer_instance

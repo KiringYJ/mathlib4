@@ -42,31 +42,64 @@ variable {T Ω : Type*} {𝓧 : T → Type*} {mΩ : SigmaAlgebra Ω} {mα : ∀ 
 
 /-- The finite-dimensional distributions of a stochastic process are a projective measure family. -/
 lemma isProjectiveMeasureFamily_map_restrict (hX : ∀ t, AEMeasurable (X t) P) :
-    IsProjectiveMeasureFamily (fun I ↦ P.map (fun ω ↦ I.restrict (X · ω))) := by
+    IsProjectiveMeasureFamily (fun I ↦
+      P.map (fun ω ↦ I.restrict (X · ω)) (.of_eval fun i ↦ by
+        simpa [Finset.restrict_def] using hX (i : T))) := by
   intro I J hJI
-  rw [AEMeasurable.map_map_of_aemeasurable (Finset.measurable_restrict₂ _).aemeasurable]
-  · simp [Finset.restrict_def, Finset.restrict₂_def, Function.comp_def]
-  · exact .of_eval fun _ ↦ hX _
+  let hXI : AEMeasurable (fun ω ↦ I.restrict (X · ω)) P := .of_eval fun i ↦ by
+    simpa [Finset.restrict_def] using hX (i : T)
+  let hXJ : AEMeasurable (fun ω ↦ J.restrict (X · ω)) P := .of_eval fun j ↦ by
+    simpa [Finset.restrict_def] using hX (j : T)
+  change P.map (fun ω ↦ J.restrict (X · ω)) hXJ =
+    (P.map (fun ω ↦ I.restrict (X · ω)) hXI).map (Finset.restrict₂ hJI)
+      (Finset.measurable_restrict₂ hJI).aemeasurable
+  rw [Measure.map_map hXI (Finset.measurable_restrict₂ _).aemeasurable]
+  apply Measure.map_congr (hf := hXJ)
+  filter_upwards with ω
+  simp [Finset.restrict_def, Finset.restrict₂_def]
 
 /-- The projective limit of the finite-dimensional distributions of a stochastic process is the law
 of the process. -/
 lemma isProjectiveLimit_map (hX : AEMeasurable (fun ω ↦ (X · ω)) P) :
-    IsProjectiveLimit (P.map (fun ω ↦ (X · ω))) (fun I ↦ P.map (fun ω ↦ I.restrict (X · ω))) := by
+    IsProjectiveLimit (P.map (fun ω ↦ (X · ω)) hX) (fun I ↦
+      P.map (fun ω ↦ I.restrict (X · ω))
+        (hX.comp_aemeasurable (Finset.measurable_restrict I).aemeasurable)) := by
   intro I
-  rw [AEMeasurable.map_map_of_aemeasurable (Finset.measurable_restrict _).aemeasurable hX,
-    Function.comp_def]
+  rw [Measure.map_map hX (Finset.measurable_restrict _).aemeasurable]
+  apply Measure.map_congr (hf := hX.comp_aemeasurable
+    (Finset.measurable_restrict I).aemeasurable)
+  filter_upwards with ω
+  rfl
 
 /-- Two stochastic processes have same law iff they have the same
 finite-dimensional distributions. -/
 lemma map_eq_iff_forall_finset_map_restrict_eq [IsFiniteMeasure P]
     (hX : AEMeasurable (fun ω ↦ (X · ω)) P) (hY : AEMeasurable (fun ω ↦ (Y · ω)) P) :
-    P.map (fun ω ↦ (X · ω)) = P.map (fun ω ↦ (Y · ω))
-    ↔ ∀ I : Finset T, P.map (fun ω ↦ I.restrict (X · ω)) = P.map (fun ω ↦ I.restrict (Y · ω)) := by
+    P.map (fun ω ↦ (X · ω)) hX = P.map (fun ω ↦ (Y · ω)) hY
+    ↔ ∀ I : Finset T,
+      P.map (fun ω ↦ I.restrict (X · ω))
+          (hX.comp_aemeasurable (Finset.measurable_restrict I).aemeasurable) =
+        P.map (fun ω ↦ I.restrict (Y · ω))
+          (hY.comp_aemeasurable (Finset.measurable_restrict I).aemeasurable) := by
   refine ⟨fun h I ↦ ?_, fun h ↦ ?_⟩
-  · have hX' : P.map (fun ω ↦ I.restrict (X · ω)) = (P.map (fun ω ↦ (X · ω))).map I.restrict := by
-      rw [AEMeasurable.map_map_of_aemeasurable (by fun_prop) hX, Function.comp_def]
-    have hY' : P.map (fun ω ↦ I.restrict (Y · ω)) = (P.map (fun ω ↦ (Y · ω))).map I.restrict := by
-      rw [AEMeasurable.map_map_of_aemeasurable (by fun_prop) hY, Function.comp_def]
+  · have hX' : P.map (fun ω ↦ I.restrict (X · ω))
+        (hX.comp_aemeasurable (Finset.measurable_restrict I).aemeasurable) =
+        (P.map (fun ω ↦ (X · ω)) hX).map I.restrict
+          (Finset.measurable_restrict I).aemeasurable := by
+      rw [Measure.map_map hX (Finset.measurable_restrict I).aemeasurable]
+      apply Measure.map_congr (hf := hX.comp_aemeasurable
+        (Finset.measurable_restrict I).aemeasurable)
+      filter_upwards with ω
+      rfl
+    have hY' : P.map (fun ω ↦ I.restrict (Y · ω))
+        (hY.comp_aemeasurable (Finset.measurable_restrict I).aemeasurable) =
+        (P.map (fun ω ↦ (Y · ω)) hY).map I.restrict
+          (Finset.measurable_restrict I).aemeasurable := by
+      rw [Measure.map_map hY (Finset.measurable_restrict I).aemeasurable]
+      apply Measure.map_congr (hf := hY.comp_aemeasurable
+        (Finset.measurable_restrict I).aemeasurable)
+      filter_upwards with ω
+      rfl
     rw [hX', hY', h]
   · have hX' := isProjectiveLimit_map hX
     simp_rw [h] at hX'
@@ -87,20 +120,25 @@ lemma identDistrib_iff_forall_finset_identDistrib [IsFiniteMeasure P]
 
 /-- If two processes are modifications of each other, then they have the same finite-dimensional
 distributions. -/
-lemma map_restrict_eq_of_forall_ae_eq (h : ∀ t, X t =ᵐ[P] Y t) (I : Finset T) :
-    P.map (fun ω ↦ I.restrict (X · ω)) = P.map (fun ω ↦ I.restrict (Y · ω)) := by
+lemma map_restrict_eq_of_forall_ae_eq (h : ∀ t, X t =ᵐ[P] Y t) (I : Finset T)
+    (hXI : AEMeasurable (fun ω ↦ I.restrict (X · ω)) P := by fun_prop)
+    (hYI : AEMeasurable (fun ω ↦ I.restrict (Y · ω)) P := by fun_prop) :
+    P.map (fun ω ↦ I.restrict (X · ω)) hXI =
+      P.map (fun ω ↦ I.restrict (Y · ω)) hYI := by
   have h' : ∀ᵐ ω ∂P, ∀ (i : I), X i ω = Y i ω := by
     rw [MeasureTheory.ae_all_iff]
     exact fun i ↦ h i
-  refine Measure.map_congr ?_
+  refine Measure.map_congr ?_ hXI
   filter_upwards [h'] with ω h using funext h
 
 /-- If two processes are modifications of each other, then they have the same distribution. -/
 lemma map_eq_of_forall_ae_eq [IsFiniteMeasure P]
     (hX : AEMeasurable (fun ω ↦ (X · ω)) P) (hY : AEMeasurable (fun ω ↦ (Y · ω)) P)
     (h : ∀ t, X t =ᵐ[P] Y t) :
-    P.map (fun ω ↦ (X · ω)) = P.map (fun ω ↦ (Y · ω)) := by
+    P.map (fun ω ↦ (X · ω)) hX = P.map (fun ω ↦ (Y · ω)) hY := by
   rw [map_eq_iff_forall_finset_map_restrict_eq hX hY]
   exact fun I ↦ map_restrict_eq_of_forall_ae_eq h I
+    (hX.comp_aemeasurable (Finset.measurable_restrict I).aemeasurable)
+    (hY.comp_aemeasurable (Finset.measurable_restrict I).aemeasurable)
 
 end ProbabilityTheory

@@ -354,28 +354,29 @@ section
 variable {α' : Type*} [SigmaAlgebra α']
 
 theorem integrable_map_measure {f : α → α'} {g : α' → ε}
-    (hg : AEStronglyMeasurable g (Measure.map f μ)) (hf : AEMeasurable f μ) :
-    Integrable g (Measure.map f μ) ↔ Integrable (g ∘ f) μ := by
+    (hf : AEMeasurable f μ) (hg : AEStronglyMeasurable g (Measure.map f μ hf)) :
+    Integrable g (Measure.map f μ hf) ↔ Integrable (g ∘ f) μ := by
   simp_rw [← memLp_one_iff_integrable]
-  exact memLp_map_measure_iff hg hf
+  exact memLp_map_measure_iff hf hg
 
 theorem Integrable.comp_aemeasurable {f : α → α'} {g : α' → ε}
-    (hg : Integrable g (Measure.map f μ)) (hf : AEMeasurable f μ) : Integrable (g ∘ f) μ :=
-  (integrable_map_measure hg.aestronglyMeasurable hf).mp hg
+    (hf : AEMeasurable f μ) (hg : Integrable g (Measure.map f μ hf)) : Integrable (g ∘ f) μ :=
+  (integrable_map_measure hf hg.aestronglyMeasurable).mp hg
 
-theorem Integrable.comp_measurable {f : α → α'} {g : α' → ε} (hg : Integrable g (Measure.map f μ))
-    (hf : Measurable f) : Integrable (g ∘ f) μ :=
+theorem Integrable.comp_measurable {f : α → α'} {g : α' → ε} (hf : Measurable f)
+    (hg : Integrable g (Measure.map f μ hf.aemeasurable)) : Integrable (g ∘ f) μ :=
   hg.comp_aemeasurable hf.aemeasurable
 
 end
 
 theorem _root_.MeasurableEmbedding.integrable_map_iff {f : α → δ} (hf : MeasurableEmbedding f)
-    {g : δ → ε} : Integrable g (Measure.map f μ) ↔ Integrable (g ∘ f) μ := by
+    {g : δ → ε} :
+    Integrable g (Measure.map f μ hf.measurable.aemeasurable) ↔ Integrable (g ∘ f) μ := by
   simp_rw [← memLp_one_iff_integrable]
   exact hf.memLp_map_measure_iff
 
 theorem integrable_map_equiv (f : α ≃ᵐ δ) (g : δ → ε) :
-    Integrable g (Measure.map f μ) ↔ Integrable (g ∘ f) μ := by
+    Integrable g (Measure.map f μ f.measurable.aemeasurable) ↔ Integrable (g ∘ f) μ := by
   simp_rw [← memLp_one_iff_integrable]
   exact f.memLp_map_measure_iff
 
@@ -383,7 +384,7 @@ theorem MeasurePreserving.integrable_comp {ν : Measure δ} {g : δ → ε} {f :
     (hf : MeasurePreserving f μ ν) (hg : AEStronglyMeasurable g ν) :
     Integrable (g ∘ f) μ ↔ Integrable g ν := by
   rw [← hf.map_eq] at hg ⊢
-  exact (integrable_map_measure hg hf.measurable.aemeasurable).symm
+  exact (integrable_map_measure hf.measurable.aemeasurable hg).symm
 
 theorem MeasurePreserving.integrable_comp_of_integrable {ν : Measure δ} {g : δ → ε} {f : α → δ}
     (hf : MeasurePreserving f μ ν) (hg : Integrable g ν) :

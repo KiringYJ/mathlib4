@@ -8,6 +8,7 @@ module
 public import Mathlib.Algebra.BigOperators.Fin
 public import Mathlib.Logic.Encodable.Pi
 public import Mathlib.MeasureTheory.Group.Measure
+public import Mathlib.MeasureTheory.Measure.Dirac.Basic
 public import Mathlib.MeasureTheory.SigmaAlgebra.Pi
 
 /-!
@@ -131,28 +132,38 @@ open List
 
 variable {δ : Type*} {X : δ → Type*} [∀ i, SigmaAlgebra (X i)]
 
--- for some reason the equation compiler doesn't like this definition
-/-- A product of measures in `tprod α l`. -/
-protected def tprod (l : List δ) (μ : ∀ i, Measure (X i)) : Measure (TProd X l) := by
+/-- The iterated product bundled with its sigma-finiteness proof. -/
+noncomputable def tprodBundled (l : List δ) (μ : ∀ i, Measure (X i))
+    [∀ i, SigmaFinite (μ i)] : {ν : Measure (TProd X l) // SigmaFinite ν} := by
   induction l with
-  | nil => exact dirac PUnit.unit
-  | cons i l ih => exact (μ i).prod (α := X i) ih
+  | nil =>
+    refine ⟨(dirac PUnit.unit : Measure (TProd X [])), ?_⟩
+    exact @Measure.dirac.instSigmaFinite (TProd X []) _ PUnit.unit
+  | cons i l ih =>
+    letI : SigmaFinite ih.1 := ih.2
+    refine ⟨(μ i).prod (α := X i) ih.1, ?_⟩
+    exact @prod.instSigmaFinite (X i) (TProd X l) _ (μ i) (inferInstance) _ ih.1 ih.2
 
-@[simp]
-theorem tprod_nil (μ : ∀ i, Measure (X i)) : Measure.tprod [] μ = dirac PUnit.unit :=
-  rfl
-
-@[simp]
-theorem tprod_cons (i : δ) (l : List δ) (μ : ∀ i, Measure (X i)) :
-    Measure.tprod (i :: l) μ = (μ i).prod (Measure.tprod l μ) :=
-  rfl
+/-- A product of sigma-finite measures in `tprod α l`. -/
+protected def tprod (l : List δ) (μ : ∀ i, Measure (X i)) [∀ i, SigmaFinite (μ i)] :
+    Measure (TProd X l) :=
+  (tprodBundled l μ).1
 
 set_option backward.isDefEq.respectTransparency false in
 instance sigmaFinite_tprod (l : List δ) (μ : ∀ i, Measure (X i)) [∀ i, SigmaFinite (μ i)] :
-    SigmaFinite (Measure.tprod l μ) := by
-  induction l with
-  | nil => rw [tprod_nil]; infer_instance
-  | cons i l ih => rw [tprod_cons]; exact @prod.instSigmaFinite _ _ _ _ _ _ _ ih
+    SigmaFinite (Measure.tprod l μ) :=
+  (tprodBundled l μ).2
+
+@[simp]
+theorem tprod_nil (μ : ∀ i, Measure (X i)) [∀ i, SigmaFinite (μ i)] :
+    Measure.tprod [] μ = dirac PUnit.unit :=
+  rfl
+
+@[simp]
+theorem tprod_cons (i : δ) (l : List δ) (μ : ∀ i, Measure (X i))
+    [∀ i, SigmaFinite (μ i)] :
+    Measure.tprod (i :: l) μ = (μ i).prod (Measure.tprod l μ) :=
+  rfl
 
 set_option backward.isDefEq.respectTransparency false in
 theorem tprod_tprod (l : List δ) (μ : ∀ i, Measure (X i)) [∀ i, SigmaFinite (μ i)]
@@ -177,14 +188,22 @@ open scoped Classical in
 /-- The product measure on an encodable finite type, defined by mapping `Measure.tprod` along the
   equivalence `MeasurableEquiv.piMeasurableEquivTProd`.
   The definition `MeasureTheory.Measure.pi` should be used instead of this one. -/
-def pi' : Measure (∀ i, α i) :=
+def pi' [∀ i, SigmaFinite (μ i)] : Measure (∀ i, α i) :=
   Measure.map (TProd.elim' mem_sortedUniv) (Measure.tprod (sortedUniv ι) μ)
+    (MeasurableEquiv.piMeasurableEquivTProd (sortedUniv_nodup ι)
+      (fun i ↦ mem_sortedUniv i)).symm.measurable.aemeasurable
 
 theorem pi'_pi [∀ i, SigmaFinite (μ i)] (s : ∀ i, Set (α i)) :
     pi' μ (pi univ s) = ∏ i, μ i (s i) := by
   classical
   rw [pi']
-  rw [← MeasurableEquiv.piMeasurableEquivTProd_symm_apply, MeasurableEquiv.map_apply,
+  change (Measure.map
+    (MeasurableEquiv.piMeasurableEquivTProd (sortedUniv_nodup ι)
+      (fun i ↦ mem_sortedUniv i)).symm
+    (Measure.tprod (sortedUniv ι) μ)
+    (MeasurableEquiv.piMeasurableEquivTProd (sortedUniv_nodup ι)
+      (fun i ↦ mem_sortedUniv i)).symm.measurable.aemeasurable) (pi univ s) = _
+  rw [MeasurableEquiv.map_apply,
     MeasurableEquiv.piMeasurableEquivTProd_symm_apply, elim_preimage_pi, tprod_tprod _ μ, ←
     List.prod_toFinset, sortedUniv_toFinset] <;>
   exact sortedUniv_nodup ι
@@ -371,32 +390,42 @@ theorem pi_eval_preimage_null {i : ι} {s : Set (α i)} (hs : μ i s = 0) :
 theorem quasiMeasurePreserving_eval (i : ι) :
     QuasiMeasurePreserving (Function.eval i) (Measure.pi μ) (μ i) := by
   refine ⟨by fun_prop, AbsolutelyContinuous.mk fun s hs h2s => ?_⟩
-  rw [map_apply (by fun_prop) hs, pi_eval_preimage_null μ h2s]
+  rw [map_apply hs (measurable_pi_apply i).aemeasurable, pi_eval_preimage_null μ h2s]
 
 lemma pi_map_eval [DecidableEq ι] (i : ι) :
-     (Measure.pi μ).map (Function.eval i) = (∏ j ∈ Finset.univ.erase i, μ j Set.univ) • (μ i) := by
+    (Measure.pi μ).map (Function.eval i) (measurable_pi_apply i).aemeasurable =
+      (∏ j ∈ Finset.univ.erase i, μ j Set.univ) • (μ i) := by
   ext s hs
-  rw [Measure.map_apply (measurable_pi_apply i) hs, ← Set.univ_pi_update_univ, Measure.pi_pi,
+  rw [Measure.map_apply hs (measurable_pi_apply i).aemeasurable, ← Set.univ_pi_update_univ,
+    Measure.pi_pi,
     Measure.smul_apply, smul_eq_mul, ← Finset.prod_erase_mul _ _ (a := i) (by simp)]
   congrm ?_ * ?_
   swap; · simp
   refine Finset.prod_congr rfl fun j hj ↦ ?_
   simp [Function.update, Finset.ne_of_mem_erase hj]
 
+lemma aemeasurable_pi_map {X Y : ι → Type*} {mX : ∀ i, SigmaAlgebra (X i)}
+    {μ : (i : ι) → Measure (X i)} [∀ i, SigmaAlgebra (Y i)] {f : (i : ι) → X i → Y i}
+    (hf : ∀ i, AEMeasurable (f i) (μ i))
+    (hmap : ∀ i, SigmaFinite ((μ i).map (f i) (hf i))) :
+    AEMeasurable (fun x i ↦ f i (x i)) (Measure.pi μ) := by
+  let (i : ι) : SigmaFinite (μ i) := (hmap i).of_map _ (hf i)
+  exact .of_eval fun i ↦ (hf i).comp_quasiMeasurePreserving (quasiMeasurePreserving_eval _ i)
+
 lemma pi_map_pi {X Y : ι → Type*} {mX : ∀ i, SigmaAlgebra (X i)} {μ : (i : ι) → Measure (X i)}
-    [∀ i, SigmaAlgebra (Y i)] {f : (i : ι) → X i → Y i} [hμ : ∀ i, SigmaFinite ((μ i).map (f i))]
-    (hf : ∀ i, AEMeasurable (f i) (μ i)) :
-    (Measure.pi μ).map (fun x i ↦ (f i (x i))) = Measure.pi (fun i ↦ (μ i).map (f i)) := by
+    [∀ i, SigmaAlgebra (Y i)] {f : (i : ι) → X i → Y i}
+    (hf : ∀ i, AEMeasurable (f i) (μ i))
+    [hμ : ∀ i, SigmaFinite ((μ i).map (f i) (hf i))] :
+    (Measure.pi μ).map (fun x i ↦ f i (x i)) (aemeasurable_pi_map hf hμ) =
+      Measure.pi (fun i ↦ (μ i).map (f i) (hf i)) := by
   have (i : ι) := (hμ i).of_map _ (hf i)
   refine (pi_eq fun s hs ↦ ?_).symm
-  rw [map_apply_of_aemeasurable _ (.univ_pi hs)]
-  swap
-  · exact .of_eval fun i ↦ (hf i).comp_quasiMeasurePreserving (quasiMeasurePreserving_eval _ i)
+  rw [map_apply (.univ_pi hs) (aemeasurable_pi_map hf hμ)]
   have : (fun (x : Π i, X i) i ↦ f i (x i)) ⁻¹' (Set.univ.pi s) =
       Set.univ.pi (fun i ↦ (f i) ⁻¹' (s i)) := by ext x; simp
   rw [this, pi_pi]
   congr with i
-  rw [map_apply_of_aemeasurable (hf i) (hs i)]
+  rw [map_apply (hs i) (hf i)]
 
 omit [∀ i, SigmaFinite (μ i)] in
 lemma _root_.MeasureTheory.measurePreserving_eval [∀ i, IsProbabilityMeasure (μ i)] (i : ι) :
@@ -572,8 +601,8 @@ variable (μ)
 @[to_additive]
 instance pi.isMulLeftInvariant [∀ i, Group (α i)] [∀ i, MeasurableMul (α i)]
     [∀ i, IsMulLeftInvariant (μ i)] : IsMulLeftInvariant (Measure.pi μ) := by
-  refine ⟨fun v => (pi_eq fun s hs => ?_).symm⟩
-  rw [map_apply (measurable_const_mul _) (MeasurableSet.univ_pi hs),
+  refine ⟨fun v _ => (pi_eq fun s hs => ?_).symm⟩
+  rw [map_apply (MeasurableSet.univ_pi hs) (measurable_const_mul _).aemeasurable,
     show (v * ·) ⁻¹' univ.pi s = univ.pi fun i => (v i * ·) ⁻¹' s i by rfl, pi_pi]
   simp_rw [measure_preimage_mul]
 
@@ -586,8 +615,8 @@ instance {G : ι → Type*} [∀ i, Group (G i)] [∀ i, MeasureSpace (G i)] [�
 @[to_additive]
 instance pi.isMulRightInvariant [∀ i, Group (α i)] [∀ i, MeasurableMul (α i)]
     [∀ i, IsMulRightInvariant (μ i)] : IsMulRightInvariant (Measure.pi μ) := by
-  refine ⟨fun v => (pi_eq fun s hs => ?_).symm⟩
-  rw [map_apply (measurable_mul_const _) (MeasurableSet.univ_pi hs),
+  refine ⟨fun v _ => (pi_eq fun s hs => ?_).symm⟩
+  rw [map_apply (MeasurableSet.univ_pi hs) (measurable_mul_const _).aemeasurable,
     show (· * v) ⁻¹' univ.pi s = univ.pi fun i => (· * v i) ⁻¹' s i by rfl, pi_pi]
   simp_rw [measure_preimage_mul_right]
 
@@ -603,7 +632,8 @@ instance pi.isInvInvariant [∀ i, Group (α i)] [∀ i, MeasurableInv (α i)]
     [∀ i, IsInvInvariant (μ i)] : IsInvInvariant (Measure.pi μ) := by
   refine ⟨(Measure.pi_eq fun s hs => ?_).symm⟩
   have A : Inv.inv ⁻¹' pi univ s = Set.pi univ fun i => Inv.inv ⁻¹' s i := by ext; simp
-  simp_rw [Measure.inv, Measure.map_apply measurable_inv (MeasurableSet.univ_pi hs), A, pi_pi,
+  simp_rw [Measure.inv, Measure.map_apply (MeasurableSet.univ_pi hs) measurable_inv.aemeasurable,
+    A, pi_pi,
     measure_preimage_inv]
 
 @[to_additive]
@@ -914,7 +944,9 @@ theorem measurePreserving_pi {ι : Type*} [Fintype ι] {α : ι → Type v} {β 
   measurable :=
     measurable_pi_iff.mpr <| fun i ↦ (hf i).measurable.comp (measurable_pi_apply i)
   map_eq := by
-    have (i : ι) : SigmaFinite ((μ i).map (f i)) := (hf i).map_eq ▸ hν i
+    let (i : ι) : SigmaFinite ((μ i).map (f i) (hf i).aemeasurable) := by
+      rw [(hf i).map_eq]
+      exact hν i
     rw [pi_map_pi (fun i ↦ (hf i).aemeasurable)]
     exact congrArg _ <| funext fun i ↦ (hf i).map_eq
 

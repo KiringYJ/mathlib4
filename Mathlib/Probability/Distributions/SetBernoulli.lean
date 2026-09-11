@@ -100,7 +100,7 @@ lemma setBernoulli_apply_eq_apply_subsets (u : Set ι) (p : I) (S : Set (Set ι)
 
 lemma map_ncard_setBernoulli_apply (u : Set ι) (p : I) (s : Set ℕ) :
     (setBer(u, p).map Set.ncard) s = setBer(u, p) {t ⊆ u | t.ncard ∈ s} := by
-  rw [map_apply (by fun_prop) .of_discrete, setBernoulli_apply_eq_apply_subsets]
+  rw [map_apply .of_discrete measurable_ncard.aemeasurable, setBernoulli_apply_eq_apply_subsets]
   simp [And.comm]
 
 variable (p) in
@@ -144,7 +144,8 @@ lemma map_ncard_setBernoulli_real_singleton {u : Set ι} (hu : u.Finite) (p : I)
 lemma map_ncard_setBernoulli_singleton {u : Set ι} (hu : u.Finite) (p : I) (k : ℕ) :
     (setBer(u, p).map Set.ncard) {k} =
       ENNReal.ofReal ((u.ncard.choose k) * p ^ k * (1 - p) ^ (u.ncard - k)) := by
-  rw [← ENNReal.ofReal_toReal (a := (Measure.map _ _) _) (by simp), ← measureReal_def,
+  rw [← ENNReal.ofReal_toReal (a := (Measure.map _ _ (by fun_prop)) _) (by simp),
+    ← measureReal_def,
     map_ncard_setBernoulli_real_singleton hu]
 
 @[simp]

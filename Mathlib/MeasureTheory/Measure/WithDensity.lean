@@ -719,22 +719,28 @@ theorem prod_withDensity_right {g : β → ℝ≥0∞} (hg : Measurable g) :
 
 theorem prod_withDensity₀ {f : α → ℝ≥0∞} {g : β → ℝ≥0∞}
     (hf : AEMeasurable f μ) (hg : AEMeasurable g ν) :
-    (μ.withDensity f).prod (ν.withDensity g) = (μ.prod ν).withDensity (fun z ↦ f z.1 * g z.2) := by
+    (μ.withDensity f).prod (ν.withDensity g) Measurable.map_prodMk_left.aemeasurable =
+      (μ.prod ν Measurable.map_prodMk_left.aemeasurable).withDensity
+        (fun z ↦ f z.1 * g z.2) := by
   rw [prod_withDensity_left₀ hf, prod_withDensity_right₀ hg, ← withDensity_mul₀, mul_comm]
   · rfl
   all_goals fun_prop (disch := intro _ hs; simp [hs])
 
 theorem prod_withDensity {f : α → ℝ≥0∞} {g : β → ℝ≥0∞} (hf : Measurable f) (hg : Measurable g) :
-    (μ.withDensity f).prod (ν.withDensity g) = (μ.prod ν).withDensity (fun z ↦ f z.1 * g z.2) :=
-  prod_withDensity₀ hf.aemeasurable hg.aemeasurable
+    (μ.withDensity f).prod (ν.withDensity g) Measurable.map_prodMk_left.aemeasurable =
+      (μ.prod ν Measurable.map_prodMk_left.aemeasurable).withDensity
+        (fun z ↦ f z.1 * g z.2) := by
+  simpa using prod_withDensity₀ (μ := μ) (ν := ν) hf.aemeasurable hg.aemeasurable
 
 -- `prod_smul_left` is in the `Prod` file. This lemma is here because this is the file in which
 -- we prove the instance that gives `SFinite (c • ν)`.
 lemma Measure.prod_smul_right {R : Type*} [SMul R ℝ≥0∞] [IsScalarTower R ℝ≥0∞ ℝ≥0∞] (c : R) :
-    μ.prod (c • ν) = c • (μ.prod ν) := by
+    μ.prod (c • ν) Measurable.map_prodMk_left.aemeasurable =
+      c • (μ.prod ν Measurable.map_prodMk_left.aemeasurable) := by
   ext s hs
   have A (s : Set β) : c • ν s = (c • 1) * ν s := by simp
-  simp_rw [Measure.prod_apply hs, Measure.smul_apply, Measure.prod_apply hs, A]
+  simp_rw [Measure.prod_apply hs Measurable.map_prodMk_left.aemeasurable, Measure.smul_apply,
+    Measure.prod_apply hs Measurable.map_prodMk_left.aemeasurable, A]
   rw [lintegral_const_mul, smul_one_mul]
   exact measurable_measure_prodMk_left hs
 
@@ -766,7 +772,14 @@ theorem Measure.mconv_smul_right [MeasurableMul₂ M] (μ : Measure M) (ν : Mea
     (s : ℝ≥0∞) :
     μ ∗ₘ (s • ν) = s • (μ ∗ₘ ν) := by
   unfold mconv
-  rw [Measure.prod_smul_right, Measure.map_smul _ (by fun_prop)]
+  ext t ht
+  rw [Measure.map_apply ht measurable_mul.aemeasurable,
+    Measure.prod_apply (measurable_mul ht) Measurable.map_prodMk_left.aemeasurable,
+    Measure.smul_apply, Measure.map_apply ht measurable_mul.aemeasurable,
+    Measure.prod_apply (measurable_mul ht) Measurable.map_prodMk_left.aemeasurable]
+  simp_rw [Measure.smul_apply, smul_eq_mul]
+  rw [lintegral_const_mul]
+  exact measurable_measure_prodMk_left (measurable_mul ht)
 
 variable {G : Type*} [Group G] {mG : SigmaAlgebra G} [MeasurableMul₂ G] [MeasurableInv G]
   {μ : Measure G} [SFinite μ] [IsMulLeftInvariant μ]

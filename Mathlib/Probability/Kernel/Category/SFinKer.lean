@@ -126,7 +126,7 @@ instance : MonoidalCategory SFinKer.{u} where
     simp only [Kernel.deterministic_comp_eq_map, Kernel.comp_deterministic_eq_comap]
     ext _ _ hs
     have := κ.2
-    rw [Kernel.map_apply' _ (by fun_prop) _ hs, Kernel.comap_apply' _ (by fun_prop),
+    rw [Kernel.map_apply' _ _ hs (by fun_prop), Kernel.comap_apply' _ (by fun_prop),
       Kernel.parallelComp_apply' <| measurable_snd hs]
     simp only [Kernel.id_apply, lintegral_dirac]
     rfl
@@ -136,7 +136,7 @@ instance : MonoidalCategory SFinKer.{u} where
     simp only [Kernel.deterministic_comp_eq_map, Kernel.comp_deterministic_eq_comap]
     ext _ _ hs
     have := κ.2
-    rw [Kernel.map_apply' _ (by fun_prop) _ hs, Kernel.comap_apply' _ (by fun_prop),
+    rw [Kernel.map_apply' _ _ hs (by fun_prop), Kernel.comap_apply' _ (by fun_prop),
       Kernel.parallelComp_apply' <| measurable_fst hs]
     simp only [Kernel.id_apply]
     rw [← lintegral_indicator_one hs]
@@ -153,11 +153,11 @@ instance : MonoidalCategory SFinKer.{u} where
     simp only [Kernel.id_parallelComp_comp_parallelComp_id]
     rw [Kernel.deterministic_comp_eq_map, Kernel.comp_deterministic_eq_comap]
     ext _ _ hs
-    rw [Kernel.map_apply' _ (by fun_prop) _ hs, Kernel.comap_apply' _ (by fun_prop)]
-    repeat rw [Kernel.parallelComp_apply]
+    rw [Kernel.map_apply' _ _ hs (by fun_prop), Kernel.comap_apply' _ (by fun_prop)]
+    simp only [Kernel.parallelComp_apply]
     rw [Measure.prod_apply hs, Measure.prod_apply (by measurability), lintegral_prod]
     · congr with a
-      rw [Measure.prod_apply (by measurability)]
+      rw [Measure.prod_apply (measurable_prodMk_left hs)]
       rfl
     · refine Measurable.aemeasurable ?_
       exact measurable_measure_prodMk_left (by measurability)
@@ -238,7 +238,8 @@ instance : CopyDiscardCategory SFinKer.{u} where
     simp only [Kernel.id_parallelComp_comp_parallelComp_id]
     rw [Kernel.id_map (by fun_prop), Kernel.deterministic_comp_eq_map]
     ext
-    rw [Kernel.map_apply _ (by fun_prop), Kernel.parallelComp_apply]
+    rw [Kernel.map_apply _ _ (by fun_prop)]
+    simp only [Kernel.parallelComp_apply]
     simp [Kernel.discard_apply]
   copy_unit := by
     ext : 1; dsimp

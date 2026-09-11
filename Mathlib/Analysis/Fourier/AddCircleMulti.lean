@@ -170,11 +170,16 @@ lemma measurePreserving_equivPiIoc :
     MeasurePreserving (measurableEquivPiIoc a) volume (Measure.comap Subtype.val volume) := by
   refine (⟨(measurableEquivPiIoc a).symm.measurable, symm ?_⟩ :
     MeasurePreserving (measurableEquivPiIoc a).symm _ _).symm
-  have := Measure.map_map (μ := volume.comap Subtype.val) (.of_eval
-    (f := fun (x : d → ℝ) => (fun i => x i : UnitAddTorus d))
-    (fun i => AddCircle.measurable_mk'.comp (measurable_pi_apply i)))
-    measurable_subtype_coe (α := {x : d → ℝ // ∀ i, x i ∈ Ioc (a i) (a i + 1)})
-  simp only [Function.comp_def] at this
+  have hmk : Measurable (fun (x : d → ℝ) => (fun i => x i : UnitAddTorus d)) :=
+    .of_eval fun i => AddCircle.measurable_mk'.comp (measurable_pi_apply i)
+  let inclusion : {x : d → ℝ // ∀ i, x i ∈ Ioc (a i) (a i + 1)} → d → ℝ := Subtype.val
+  have hinclusion : Measurable inclusion := measurable_subtype_coe
+  have := Measure.map_map
+    (μ := Measure.comap inclusion (volume : Measure (d → ℝ)))
+    (f := inclusion) (g := fun (x : d → ℝ) => (fun i => x i : UnitAddTorus d))
+    (hf := by exact hinclusion.aemeasurable)
+    (hg := by exact hmk.aemeasurable)
+  simp only [Function.comp_def, inclusion] at this
   simp_rw [coe_symm_measurableEquivPiIoc, ← this]
   convert! (measurePreserving_pi _ _ (fun i => AddCircle.measurePreserving_mk 1 (a i))).map_eq.symm
   · simp [volume, AddCircle.haarAddCircle]

@@ -53,10 +53,10 @@ variable {ι : Type*} [Fintype ι]
 inner product space) coincides with the Stieltjes measure coming from the identity function. -/
 theorem volume_eq_stieltjes_id : (volume : Measure ℝ) = StieltjesFunction.id.measure := by
   have : IsAddLeftInvariant StieltjesFunction.id.measure :=
-    ⟨fun a =>
+    ⟨fun a ha =>
       Eq.symm <|
         Real.measure_ext_Ioo_rat fun p q => by
-          simp only [Measure.map_apply (measurable_const_add a) measurableSet_Ioo,
+          simp only [Measure.map_apply measurableSet_Ioo ha.aemeasurable,
             sub_sub_sub_cancel_right, StieltjesFunction.measure_Ioo, StieltjesFunction.id_leftLim,
             StieltjesFunction.id_apply, id, preimage_const_add_Ioo]⟩
   have A : StieltjesFunction.id.measure (stdOrthonormalBasis ℝ ℝ).toBasis.parallelepiped = 1 := by
@@ -308,11 +308,13 @@ theorem smul_map_volume_mul_left {a : ℝ} (h : a ≠ 0) :
   refine (Real.measure_ext_Ioo_rat fun p q => ?_).symm
   rcases lt_or_gt_of_ne h with h | h
   · simp only [Real.volume_Ioo, Measure.smul_apply, ← ENNReal.ofReal_mul (le_of_lt <| neg_pos.2 h),
-      Measure.map_apply (measurable_const_mul a) measurableSet_Ioo, neg_sub_neg, neg_mul,
+      Measure.map_apply measurableSet_Ioo (measurable_const_mul a).aemeasurable, neg_sub_neg,
+      neg_mul,
       preimage_const_mul_Ioo_of_neg _ _ h, abs_of_neg h, mul_sub, smul_eq_mul,
       mul_div_cancel₀ _ (ne_of_lt h)]
   · simp only [Real.volume_Ioo, Measure.smul_apply, ← ENNReal.ofReal_mul (le_of_lt h),
-      Measure.map_apply (measurable_const_mul a) measurableSet_Ioo, preimage_const_mul_Ioo₀ _ _ h,
+      Measure.map_apply measurableSet_Ioo (measurable_const_mul a).aemeasurable,
+      preimage_const_mul_Ioo₀ _ _ h,
       abs_of_pos h, mul_sub, mul_div_cancel₀ _ (ne_of_gt h), smul_eq_mul]
 
 theorem map_volume_mul_left {a : ℝ} (h : a ≠ 0) :
@@ -325,7 +327,8 @@ theorem map_volume_mul_left {a : ℝ} (h : a ≠ 0) :
 theorem volume_preimage_mul_left {a : ℝ} (h : a ≠ 0) (s : Set ℝ) :
     volume ((a * ·) ⁻¹' s) = ENNReal.ofReal (abs a⁻¹) * volume s :=
   calc
-    volume ((a * ·) ⁻¹' s) = Measure.map (a * ·) volume s :=
+    volume ((a * ·) ⁻¹' s) =
+        Measure.map (a * ·) volume (measurable_const_mul a).aemeasurable s :=
       ((Homeomorph.mulLeft₀ a h).toMeasurableEquiv.map_apply s).symm
     _ = ENNReal.ofReal (abs a⁻¹) * volume s := by rw [map_volume_mul_left h]; rfl
 
@@ -341,7 +344,8 @@ theorem map_volume_mul_right {a : ℝ} (h : a ≠ 0) :
 theorem volume_preimage_mul_right {a : ℝ} (h : a ≠ 0) (s : Set ℝ) :
     volume ((· * a) ⁻¹' s) = ENNReal.ofReal (abs a⁻¹) * volume s :=
   calc
-    volume ((· * a) ⁻¹' s) = Measure.map (· * a) volume s :=
+    volume ((· * a) ⁻¹' s) =
+        Measure.map (· * a) volume (measurable_mul_const a).aemeasurable s :=
       ((Homeomorph.mulRight₀ a h).toMeasurableEquiv.map_apply s).symm
     _ = ENNReal.ofReal (abs a⁻¹) * volume s := by rw [map_volume_mul_right h]; rfl
 
@@ -360,8 +364,8 @@ theorem smul_map_diagonal_volume_pi [DecidableEq ι] {D : ι → ℝ} (h : det (
       volume := by
   refine (Measure.pi_eq fun s hs => ?_).symm
   simp only [det_diagonal, Measure.coe_smul, smul_eq_mul, Pi.smul_apply]
-  rw [Measure.map_apply _ (MeasurableSet.univ_pi hs)]
-  swap; · exact Continuous.measurable (LinearMap.continuous_on_pi _)
+  rw [Measure.map_apply (MeasurableSet.univ_pi hs)
+    (Continuous.measurable (LinearMap.continuous_on_pi _)).aemeasurable]
   have :
     (Matrix.toLin' (diagonal D) ⁻¹' Set.pi Set.univ fun i : ι => s i) =
       Set.pi Set.univ fun i : ι => (D i * ·) ⁻¹' s i := by
@@ -415,14 +419,23 @@ theorem map_matrix_volume_pi_eq_smul_volume_pi [DecidableEq ι] {M : Matrix ι �
     simp_rw [Matrix.TransvectionStruct.det, _root_.inv_one, abs_one, ENNReal.ofReal_one, one_smul,
       (volume_preserving_transvectionStruct _).map_eq]
   · intro A B _ _ IHA IHB
-    rw [toLin'_mul, det_mul, LinearMap.coe_comp, ← Measure.map_map, IHB, Measure.map_smul, IHA,
-      smul_smul, ← ENNReal.ofReal_mul (abs_nonneg _), ← abs_mul, mul_comm, mul_inv]
-    · apply Continuous.aemeasurable
-      apply LinearMap.continuous_on_pi
-    · apply Continuous.measurable
-      apply LinearMap.continuous_on_pi
-    · apply Continuous.measurable
-      apply LinearMap.continuous_on_pi
+    have hA : Measurable (toLin' A) := (LinearMap.continuous_on_pi _).measurable
+    have hB : Measurable (toLin' B) := (LinearMap.continuous_on_pi _).measurable
+    calc
+      Measure.map (toLin' (A * B)) volume =
+          (Measure.map (toLin' B) volume hB.aemeasurable).map (toLin' A) hA.aemeasurable := by
+        simpa only [toLin'_mul, LinearMap.coe_comp] using
+          (Measure.map_map (μ := volume) hB.aemeasurable hA.aemeasurable).symm
+      _ = (ENNReal.ofReal (abs (det B)⁻¹) • volume).map (toLin' A) hA.aemeasurable := by
+        simp only [IHB]
+      _ = ENNReal.ofReal (abs (det B)⁻¹) •
+          Measure.map (toLin' A) volume hA.aemeasurable :=
+        Measure.map_smul _ hA.aemeasurable
+      _ = ENNReal.ofReal (abs (det B)⁻¹) •
+          (ENNReal.ofReal (abs (det A)⁻¹) • volume) := by rw [IHA]
+      _ = ENNReal.ofReal (abs (det (A * B))⁻¹) • volume := by
+        rw [det_mul, smul_smul, ← ENNReal.ofReal_mul (abs_nonneg _), ← abs_mul, mul_comm,
+          mul_inv]
 
 /-- Any invertible linear map rescales Lebesgue measure through the absolute value of its
 determinant. -/
@@ -506,7 +519,7 @@ theorem measurableSet_graph (hf : Measurable f) :
 
 theorem volume_regionBetween_eq_lintegral' (hf : Measurable f) (hg : Measurable g)
     (hs : MeasurableSet s) :
-    μ.prod volume (regionBetween f g s) = ∫⁻ y in s, ENNReal.ofReal ((g - f) y) ∂μ := by
+    (μ.prod volume) (regionBetween f g s) = ∫⁻ y in s, ENNReal.ofReal ((g - f) y) ∂μ := by
   classical
     rw [Measure.prod_apply]
     · have h :
@@ -527,14 +540,14 @@ theorem volume_regionBetween_eq_lintegral' (hf : Measurable f) (hg : Measurable 
 can be represented as a Lebesgue integral. -/
 theorem volume_regionBetween_eq_lintegral [SFinite μ] (hf : AEMeasurable f (μ.restrict s))
     (hg : AEMeasurable g (μ.restrict s)) (hs : MeasurableSet s) :
-    μ.prod volume (regionBetween f g s) = ∫⁻ y in s, ENNReal.ofReal ((g - f) y) ∂μ := by
+    (μ.prod volume) (regionBetween f g s) = ∫⁻ y in s, ENNReal.ofReal ((g - f) y) ∂μ := by
   have h₁ :
     (fun y => ENNReal.ofReal ((g - f) y)) =ᵐ[μ.restrict s] fun y =>
       ENNReal.ofReal ((AEMeasurable.mk g hg - AEMeasurable.mk f hf) y) :=
     (hg.ae_eq_mk.sub hf.ae_eq_mk).fun_comp ENNReal.ofReal
   have h₂ :
-    (μ.restrict s).prod volume (regionBetween f g s) =
-      (μ.restrict s).prod volume
+    ((μ.restrict s).prod volume) (regionBetween f g s) =
+      ((μ.restrict s).prod volume)
         (regionBetween (AEMeasurable.mk f hf) (AEMeasurable.mk g hg) s) := by
     apply measure_congr
     apply Filter.Eventually.set_eq

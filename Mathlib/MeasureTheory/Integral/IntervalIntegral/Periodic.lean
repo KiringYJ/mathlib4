@@ -148,10 +148,12 @@ noncomputable def measurableEquivIco (a : ℝ) : AddCircle T ≃ᵐ Ico a (a + T
 lemma measurePreserving_equivIoc {a : ℝ} :
     MeasurePreserving (equivIoc T a) volume (Measure.comap Subtype.val volume) := by
   have h := (measurableEquivIoc T a).measurable
-  refine ⟨h, ?_⟩
+  have he : Measurable (equivIoc T a) := by
+    exact h
+  refine ⟨he, ?_⟩
   ext s hs
   rw [comap_apply _ Subtype.val_injective (fun _ ↦ measurableSet_Ioc.subtype_image) _ hs,
-    map_apply (by measurability) hs, add_projection_respects_measure T a (by exact h hs)]
+    map_apply hs he.aemeasurable, add_projection_respects_measure T a (by exact h hs)]
   congr!
   ext x
   simp only [mem_inter_iff, mem_preimage, mem_image, Subtype.exists, exists_and_right,
@@ -177,8 +179,9 @@ protected theorem lintegral_preimage (t : ℝ) (f : AddCircle T → ℝ≥0∞) 
     have : ((↑) : Ioc t (t + T) → AddCircle T) = ((↑) : ℝ → AddCircle T) ∘ ((↑) : _ → ℝ) := by
       ext1 x; rfl
     simp_rw [this]
-    rw [← map_map AddCircle.measurable_mk' measurable_subtype_coe, ← map_comap_subtype_coe m]
-    rfl
+    rw [← Measure.map_map measurable_subtype_coe.aemeasurable
+      AddCircle.measurable_mk'.aemeasurable]
+    simp only [Subtype.volume_def, map_comap_subtype_coe m]
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 
@@ -195,8 +198,9 @@ protected theorem integral_preimage (t : ℝ) (f : AddCircle T → E) :
   have : ((↑) : Ioc t (t + T) → AddCircle T) = ((↑) : ℝ → AddCircle T) ∘ ((↑) : _ → ℝ) := by
     ext1 x; rfl
   simp_rw [this]
-  rw [← map_map AddCircle.measurable_mk' measurable_subtype_coe, ← map_comap_subtype_coe m]
-  rfl
+  rw [← Measure.map_map measurable_subtype_coe.aemeasurable
+    AddCircle.measurable_mk'.aemeasurable]
+  simp only [Subtype.volume_def, map_comap_subtype_coe m]
 
 /-- The integral of an almost-everywhere strongly measurable function over `AddCircle T` is equal
 to the integral over an interval $(t, t + T]$ in `ℝ` of its lift to `ℝ`. -/

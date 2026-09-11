@@ -93,8 +93,10 @@ theorem map_addHaar {ι E F : Type*} [Fintype ι] [NormedAddCommGroup E] [Normed
     [BorelSpace F] [SecondCountableTopology F] [SigmaCompactSpace F]
     (b : Basis ι ℝ E) (f : E ≃L[ℝ] F) :
     map f b.addHaar = (b.map f.toLinearEquiv).addHaar := by
-  rw [eq_comm, Basis.addHaar_eq_iff, Measure.map_apply f.continuous.measurable
-    (PositiveCompacts.isCompact _).measurableSet, Basis.coe_parallelepiped, Basis.coe_map,
+  rw [eq_comm, Basis.addHaar_eq_iff,
+    Measure.map_apply (PositiveCompacts.isCompact _).measurableSet
+      f.continuous.measurable.aemeasurable,
+    Basis.coe_parallelepiped, Basis.coe_map,
     ← addHaar_self b, ← f.toEquiv.preimage_image (_root_.parallelepiped ⇑b)]
   have := image_parallelepiped f.toLinearMap (⇑b : ι → E)
   simp_all
@@ -248,24 +250,37 @@ theorem map_linearMap_addHaar_eq_smul_addHaar {f : E →ₗ[ℝ] E} (hf : Linear
   have Ce : Continuous e := (e : E →ₗ[ℝ] ι → ℝ).continuous_of_finiteDimensional
   have Cg : Continuous g := LinearMap.continuous_of_finiteDimensional g
   have Cesymm : Continuous e.symm := (e.symm : (ι → ℝ) →ₗ[ℝ] E).continuous_of_finiteDimensional
-  rw [← map_map Cesymm.measurable (Cg.comp Ce).measurable, ← map_map Cg.measurable Ce.measurable]
-  have : IsAddHaarMeasure (map e μ) := (e : E ≃+ (ι → ℝ)).isAddHaarMeasure_map μ Ce Cesymm
+  rw [← map_map (Cg.comp Ce).measurable.aemeasurable Cesymm.measurable.aemeasurable,
+    ← map_map Ce.measurable.aemeasurable Cg.measurable.aemeasurable]
+  have : IsAddHaarMeasure (map e μ Ce.measurable.aemeasurable) :=
+    (e : E ≃+ (ι → ℝ)).isAddHaarMeasure_map μ Ce Cesymm
   have ecomp : e.symm ∘ e = id := by
     ext x; simp only [id, Function.comp_apply, LinearEquiv.symm_apply_apply]
-  rw [map_linearMap_addHaar_pi_eq_smul_addHaar hf (map e μ), Measure.map_smul _ (by fun_prop),
-    map_map Cesymm.measurable Ce.measurable, ecomp, Measure.map_id]
+  rw [map_linearMap_addHaar_pi_eq_smul_addHaar hf (map e μ Ce.measurable.aemeasurable),
+    Measure.map_smul _ Cesymm.measurable.aemeasurable,
+    map_map Ce.measurable.aemeasurable Cesymm.measurable.aemeasurable]
+  have hmap : map (e.symm ∘ e) μ (by fun_prop) = μ := by
+    calc
+      map (e.symm ∘ e) μ (by fun_prop) = map id μ measurable_id.aemeasurable := by
+        apply Measure.map_congr (ae_of_all μ fun x ↦ by simp) (by fun_prop)
+      _ = μ := Measure.map_id
+  rw [hmap]
 
 /-- The preimage of a set `s` under a linear map `f` with nonzero determinant has measure
 equal to `μ s` times the absolute value of the inverse of the determinant of `f`. -/
 @[simp]
 theorem addHaar_preimage_linearMap {f : E →ₗ[ℝ] E} (hf : LinearMap.det f ≠ 0) (s : Set E) :
-    μ (f ⁻¹' s) = ENNReal.ofReal |(LinearMap.det f)⁻¹| * μ s :=
-  calc
-    μ (f ⁻¹' s) = Measure.map f μ s :=
-      ((f.equivOfDetNeZero hf).toContinuousLinearEquiv.toHomeomorph.toMeasurableEquiv.map_apply
-          s).symm
-    _ = ENNReal.ofReal |(LinearMap.det f)⁻¹| * μ s := by
-      rw [map_linearMap_addHaar_eq_smul_addHaar μ hf]; rfl
+    μ (f ⁻¹' s) = ENNReal.ofReal |(LinearMap.det f)⁻¹| * μ s := by
+  have hfm : Measurable (f : E → E) :=
+    (f.equivOfDetNeZero hf).toContinuousLinearEquiv.toHomeomorph.toMeasurableEquiv.measurable
+  exact
+    calc
+      μ (f ⁻¹' s) =
+          (Measure.map f μ hfm.aemeasurable) s :=
+        ((f.equivOfDetNeZero hf).toContinuousLinearEquiv.toHomeomorph.toMeasurableEquiv.map_apply
+            s).symm
+      _ = ENNReal.ofReal |(LinearMap.det f)⁻¹| * μ s := by
+        rw [map_linearMap_addHaar_eq_smul_addHaar μ hf]; rfl
 
 /-- The preimage of a set `s` under a continuous linear map `f` with nonzero determinant has measure
 equal to `μ s` times the absolute value of the inverse of the determinant of `f`. -/
@@ -352,7 +367,9 @@ theorem quasiMeasurePreserving_smul {r : ℝ} (hr : r ≠ 0) :
 theorem addHaar_preimage_smul {r : ℝ} (hr : r ≠ 0) (s : Set E) :
     μ ((r • ·) ⁻¹' s) = ENNReal.ofReal (abs (r ^ finrank ℝ E)⁻¹) * μ s :=
   calc
-    μ ((r • ·) ⁻¹' s) = Measure.map (r • ·) μ s :=
+    μ ((r • ·) ⁻¹' s) =
+        (Measure.map (r • ·) μ
+          (Homeomorph.smul (isUnit_iff_ne_zero.2 hr).unit).measurable.aemeasurable) s :=
       ((Homeomorph.smul (isUnit_iff_ne_zero.2 hr).unit).toMeasurableEquiv.map_apply s).symm
     _ = ENNReal.ofReal (abs (r ^ finrank ℝ E)⁻¹) * μ s := by
       rw [map_addHaar_smul μ hr, coe_smul, Pi.smul_apply, smul_eq_mul]

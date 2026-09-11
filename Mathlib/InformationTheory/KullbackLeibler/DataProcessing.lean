@@ -71,8 +71,8 @@ lemma integrable_comp_rnDeriv_map (hμν : μ ≪ ν) (hg : Measurable g) (hf : 
   have hf_cont : ContinuousOn f (Ici 0) := hf_cvx.continuousOn_Ici hf_cont_at
   obtain ⟨c, c', h⟩ : ∃ c c', ∀ x, 0 ≤ x → c * x + c' ≤ f x :=
     hf_cvx.exists_affine_le_real isClosed_Ici hf_cont.lowerSemicontinuousOn
-  rw [integrable_map_measure (StronglyMeasurable.aestronglyMeasurable (by fun_prop))
-      hg.aemeasurable]
+  rw [integrable_map_measure hg.aemeasurable
+    (StronglyMeasurable.aestronglyMeasurable (by fun_prop))]
   refine integrable_of_le_of_le (f := fun x ↦ f ((∂μ.map g/∂ν.map g) (g x)).toReal)
     (g₁ := fun x ↦ c * ((∂μ.map g/∂ν.map g) (g x)).toReal + c')
     (g₂ := fun x ↦ (ν[fun x ↦ f (μ.rnDeriv ν x).toReal | m𝓨.comap g]) x)

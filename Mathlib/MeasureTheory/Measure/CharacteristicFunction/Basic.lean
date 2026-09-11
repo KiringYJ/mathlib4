@@ -200,7 +200,7 @@ lemma intervalIntegrable_charFun {μ : Measure ℝ} [IsFiniteMeasure μ] {a b : 
 
 lemma charFun_map_eq_charFun_map_inner_one {α : Type*} {mα : SigmaAlgebra α} [BorelSpace E]
   {μ : Measure α} {Y : α → E} (hY : AEMeasurable Y μ) (t : E) :
-  charFun (μ.map Y) t = charFun (μ.map (⟪Y ·, t⟫)) (1 : ℝ) := by
+  charFun (μ.map Y hY) t = charFun (μ.map (⟪Y ·, t⟫) (by fun_prop)) (1 : ℝ) := by
   rw [charFun_apply, charFun_apply_real, integral_map, integral_map]
   · simp
   all_goals fun_prop
@@ -213,17 +213,21 @@ lemma charFun_map_smul [BorelSpace E] (r : ℝ) (t : E) :
 
 lemma charFun_map_smul_comp {X : Type*} {mX : SigmaAlgebra X} {μ : Measure X} [BorelSpace E]
     {f : X → E} (hf : AEMeasurable f μ) (r : ℝ) (t : E) :
-    charFun (μ.map (fun x ↦ r • (f x))) t = charFun (μ.map f) (r • t) := by
-  rw [show (fun x ↦ r • (f x)) = (r • ·) ∘ f from rfl, ← AEMeasurable.map_map_of_aemeasurable,
-    charFun_map_smul]
-  all_goals fun_prop
+    charFun (μ.map (fun x ↦ r • (f x)) (by fun_prop)) t =
+      charFun (μ.map f hf) (r • t) := by
+  have hmap : μ.map (fun x ↦ r • f x) (by fun_prop) =
+      μ.map ((r • ·) ∘ f) (hf.comp_aemeasurable (by fun_prop)) := by
+    apply Measure.map_congr (hf := by fun_prop)
+    filter_upwards with x
+    rfl
+  rw [hmap, ← Measure.map_map hf (by fun_prop), charFun_map_smul]
 
 lemma charFun_map_mul {μ : Measure ℝ} (r t : ℝ) :
     charFun (μ.map (r * ·)) t = charFun μ (r * t) := charFun_map_smul r t
 
 lemma charFun_map_mul_comp {X : Type*} {mX : SigmaAlgebra X} {μ : Measure X}
     {f : X → ℝ} (hf : AEMeasurable f μ) (r t : ℝ) :
-    charFun (μ.map (fun x ↦ r * (f x))) t = charFun (μ.map f) (r * t) :=
+    charFun (μ.map (fun x ↦ r * (f x)) (by fun_prop)) t = charFun (μ.map f hf) (r * t) :=
   charFun_map_smul_comp hf r t
 
 variable {E : Type*} [SigmaAlgebra E] {μ ν : Measure E} {t : E}
@@ -299,9 +303,17 @@ lemma charFun_eq_prod_iff {μ : Measure E} {ν : Measure F} {ξ : Measure (E × 
     (∀ t, charFun (ξ.map (toLp 2)) t = charFun μ (ofLp t).1 * charFun ν (ofLp t).2) ↔
     ξ = μ.prod ν where
   mp h := by
-    refine (MeasurableEquiv.toLp 2 (E × F)).map_measurableEquiv_injective
+    let e := MeasurableEquiv.toLp 2 (E × F)
+    refine e.map_measurableEquiv_injective
       <| Measure.ext_of_charFun <| funext fun t ↦ ?_
-    rw [MeasurableEquiv.coe_toLp, h, charFun_prod]
+    have he (ρ : Measure (E × F)) : ρ.map e e.measurable.aemeasurable =
+        ρ.map (toLp 2) (by fun_prop) := by
+      apply Measure.map_congr (hf := e.measurable.aemeasurable)
+      filter_upwards with x
+      rfl
+    change charFun (ξ.map e e.measurable.aemeasurable) t =
+      charFun ((μ.prod ν).map e e.measurable.aemeasurable) t
+    rw [he ξ, he (μ.prod ν), h, charFun_prod]
   mpr h := by rw [h]; exact charFun_prod
 
 variable {ι : Type*} [Fintype ι] {E : ι → Type*} [∀ i, NormedAddCommGroup (E i)]
@@ -326,9 +338,17 @@ lemma charFun_eq_pi_iff {μ : (i : ι) → Measure (E i)} {ν : Measure (Π i, E
     [∀ i, IsFiniteMeasure (μ i)] [IsFiniteMeasure ν] :
     (∀ t, charFun (ν.map (toLp 2)) t = ∏ i, charFun (μ i) (t i)) ↔ ν = Measure.pi μ where
   mp h := by
-    refine (MeasurableEquiv.toLp 2 (Π i, E i)).map_measurableEquiv_injective
+    let e := MeasurableEquiv.toLp 2 (Π i, E i)
+    refine e.map_measurableEquiv_injective
       <| Measure.ext_of_charFun <| funext fun t ↦ ?_
-    rw [MeasurableEquiv.coe_toLp, h, charFun_pi]
+    have he (ρ : Measure (Π i, E i)) : ρ.map e e.measurable.aemeasurable =
+        ρ.map (toLp 2) (by fun_prop) := by
+      apply Measure.map_congr (hf := e.measurable.aemeasurable)
+      filter_upwards with x
+      rfl
+    change charFun (ν.map e e.measurable.aemeasurable) t =
+      charFun ((Measure.pi μ).map e e.measurable.aemeasurable) t
+    rw [he ν, he (Measure.pi μ), h, charFun_pi]
   mpr h := by rw [h]; exact charFun_pi
 
 end InnerProductSpace
@@ -352,7 +372,6 @@ lemma charFunDual_eq_charFun_map_one [OpensSigmaAlgebra E] (L : StrongDual ℝ E
   have : ∫ x, cexp (L x * I) ∂μ = ∫ x, cexp (x * I) ∂(μ.map L) := by
     rw [integral_map]
     · fun_prop
-    · exact Measurable.aestronglyMeasurable <| by fun_prop
   rw [this, charFun_apply]
   simp
 
@@ -363,7 +382,6 @@ lemma charFun_map_eq_charFunDual_smul [OpensSigmaAlgebra E] (L : StrongDual ℝ 
     rw [integral_map]
     · simp
     · fun_prop
-    · exact Measurable.aestronglyMeasurable <| by fun_prop
   rw [this, charFun_apply]
   simp
 
@@ -382,7 +400,8 @@ lemma charFun_toDual_symm_eq_charFunDual {E : Type*} [NormedAddCommGroup E] [Com
 lemma charFunDual_map [OpensSigmaAlgebra E] [BorelSpace F] (L : E →L[ℝ] F)
     (L' : StrongDual ℝ F) : charFunDual (μ.map L) L' = charFunDual μ (L'.comp L) := by
   rw [charFunDual_eq_charFun_map_one, charFunDual_eq_charFun_map_one,
-    Measure.map_map (by fun_prop) (by fun_prop), ContinuousLinearMap.coe_comp]
+    Measure.map_map (by fun_prop) (by fun_prop)]
+  congr 1
 
 @[simp]
 lemma charFunDual_dirac [OpensSigmaAlgebra E] {x : E} (L : StrongDual ℝ E) :
@@ -427,8 +446,16 @@ lemma charFunDual_prod' (p : ℝ≥0∞) [Fact (1 ≤ p)] [SFinite μ] [SFinite 
           (.inr ℝ E F))) := by
   simp_rw [charFunDual_apply, ← integral_prod_mul, ← Complex.exp_add, ← add_mul, ← ofReal_add,
     L.comp_apply, ← map_add, ContinuousLinearMap.comp_inl_add_comp_inr]
-  rw [← MeasurableEquiv.coe_toLp, integral_map_equiv]
-  simp
+  let e := MeasurableEquiv.toLp p (E × F)
+  have hmap : (μ.prod ν).map (toLp p) (by fun_prop) =
+      (μ.prod ν).map e e.measurable.aemeasurable := by
+    apply Measure.map_congr (hf := by fun_prop)
+    filter_upwards with x
+    rfl
+  rw [hmap, integral_map_equiv]
+  apply integral_congr_ae
+  filter_upwards with x
+  rfl
 
 /-- The characteristic function of a product of measures is a product of
 characteristic functions. This is the version for Banach spaces, see `charFunDual_pi`
@@ -453,8 +480,16 @@ lemma charFunDual_pi' (p : ℝ≥0∞) [Fact (1 ≤ p)] {ι : Type*} [Fintype ι
         ((PiLp.continuousLinearEquiv p ℝ E).symm.toContinuousLinearMap.comp (.single ℝ E i))) := by
   simp_rw [charFunDual_apply, ← integral_fintype_prod_eq_prod, ← Complex.exp_sum, ← Finset.sum_mul,
     ← ofReal_sum, L.comp_apply, ← map_sum, ContinuousLinearMap.sum_comp_single]
-  rw [← MeasurableEquiv.coe_toLp, integral_map_equiv]
-  simp
+  let e := MeasurableEquiv.toLp p (Π i, E i)
+  have hmap : (Measure.pi μ).map (toLp p) (by fun_prop) =
+      (Measure.pi μ).map e e.measurable.aemeasurable := by
+    apply Measure.map_congr (hf := by fun_prop)
+    filter_upwards with x
+    rfl
+  rw [hmap, integral_map_equiv]
+  apply integral_congr_ae
+  filter_upwards with x
+  rfl
 
 variable [BorelSpace E] [SecondCountableTopology E]
 
@@ -499,9 +534,17 @@ lemma charFunDual_eq_prod_iff' (p : ℝ≥0∞) [Fact (1 ≤ p)] [BorelSpace F]
           (.inr ℝ E F)))) ↔
     ξ = μ.prod ν where
   mp h := by
-    refine (MeasurableEquiv.toLp p (E × F)).map_measurableEquiv_injective
+    let e := MeasurableEquiv.toLp p (E × F)
+    refine e.map_measurableEquiv_injective
       <| Measure.ext_of_charFunDual <| funext fun L ↦ ?_
-    rw [MeasurableEquiv.coe_toLp, h, charFunDual_prod']
+    have he (ρ : Measure (E × F)) : ρ.map e e.measurable.aemeasurable =
+        ρ.map (toLp p) (by fun_prop) := by
+      apply Measure.map_congr (hf := e.measurable.aemeasurable)
+      filter_upwards with x
+      rfl
+    change charFunDual (ξ.map e e.measurable.aemeasurable) L =
+      charFunDual ((μ.prod ν).map e e.measurable.aemeasurable) L
+    rw [he ξ, he (μ.prod ν), h, charFunDual_prod']
   mpr h := by rw [h]; exact charFunDual_prod' p
 
 /-- The characteristic function of a measure is a product of
@@ -534,9 +577,17 @@ lemma charFunDual_eq_pi_iff' (p : ℝ≥0∞) [Fact (1 ≤ p)] {ι : Type*} [Fin
         ((PiLp.continuousLinearEquiv p ℝ E).symm.toContinuousLinearMap.comp (.single ℝ E i)))) ↔
     ν = Measure.pi μ where
   mp h := by
-    refine (MeasurableEquiv.toLp p (Π i, E i)).map_measurableEquiv_injective
+    let e := MeasurableEquiv.toLp p (Π i, E i)
+    refine e.map_measurableEquiv_injective
       <| Measure.ext_of_charFunDual <| funext fun L ↦ ?_
-    rw [MeasurableEquiv.coe_toLp, h, charFunDual_pi']
+    have he (ρ : Measure (Π i, E i)) : ρ.map e e.measurable.aemeasurable =
+        ρ.map (toLp p) (by fun_prop) := by
+      apply Measure.map_congr (hf := e.measurable.aemeasurable)
+      filter_upwards with x
+      rfl
+    change charFunDual (ν.map e e.measurable.aemeasurable) L =
+      charFunDual ((Measure.pi μ).map e e.measurable.aemeasurable) L
+    rw [he ν, he (Measure.pi μ), h, charFunDual_pi']
   mpr h := by rw [h]; exact charFunDual_pi' p
 
 /-- The characteristic function of a convolution of measures

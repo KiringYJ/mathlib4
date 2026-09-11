@@ -136,7 +136,7 @@ theorem Isometry.euclideanHausdorffMeasure_preimage {f : X → Y} {d : ℕ} (hf 
   rw [Isometry.hausdorffMeasure_preimage hf (by simp)]
 
 theorem Isometry.map_euclideanHausdorffMeasure {f : X → Y} {d : ℕ} (hf : Isometry f) :
-    μHE[d].map f = μHE[d].restrict (Set.range f) := by
+    μHE[d].map f hf.continuous.aemeasurable = μHE[d].restrict (Set.range f) := by
   simp_rw [euclideanHausdorffMeasure_def]
   rw [Measure.map_smul _ hf.continuous.aemeasurable, map_hausdorffMeasure hf (by simp),
     Measure.restrict_smul]
@@ -187,11 +187,15 @@ theorem EuclideanSpace.euclideanHausdorffMeasure_eq_volume (d : ℕ) :
 
 theorem InnerProductSpace.euclideanHausdorffMeasure_eq_volume :
     (μHE[finrank ℝ V] : Measure V) = volume := by
-  rw [← (stdOrthonormalBasis ℝ V).measurePreserving_repr_symm.map_eq,
-    ← (stdOrthonormalBasis ℝ V).repr.toIsometryEquiv
-      |>.symm.measurePreserving_euclideanHausdorffMeasure _ |>.map_eq,
-    EuclideanSpace.euclideanHausdorffMeasure_eq_volume]
-  simp
+  let e := (stdOrthonormalBasis ℝ V).repr.toIsometryEquiv.symm
+  have he := e.measurePreserving_euclideanHausdorffMeasure (finrank ℝ V)
+  have hvol := (stdOrthonormalBasis ℝ V).measurePreserving_repr_symm
+  calc
+    (μHE[finrank ℝ V] : Measure V) =
+        Measure.map e (μHE[finrank ℝ V]) he.measurable.aemeasurable := he.map_eq.symm
+    _ = Measure.map e volume e.continuous.aemeasurable := by
+      simp only [EuclideanSpace.euclideanHausdorffMeasure_eq_volume]
+    _ = volume := by simpa [e] using hvol.map_eq
 
 /-!
 ### `μHE[d]` on an affine space matches the volume measure on the associated inner product space.
@@ -200,11 +204,12 @@ theorem InnerProductSpace.euclideanHausdorffMeasure_eq_volume :
 associated inner product space. If it is implemented, we can unify this lemma with the previous one.
 -/
 theorem EuclideanGeometry.euclideanHausdorffMeasure_eq (p : P) :
-    μHE[finrank ℝ V] = volume.map (IsometryEquiv.vaddConst p) := by
+    μHE[finrank ℝ V] =
+      volume.map (IsometryEquiv.vaddConst p)
+        (IsometryEquiv.vaddConst p).continuous.aemeasurable := by
   have h := (IsometryEquiv.vaddConst p)
     |>.measurePreserving_euclideanHausdorffMeasure (finrank ℝ V) |>.map_eq
-  rw [InnerProductSpace.euclideanHausdorffMeasure_eq_volume] at h
-  exact h.symm
+  exact (by simpa only [InnerProductSpace.euclideanHausdorffMeasure_eq_volume] using h.symm)
 
 theorem EuclideanGeometry.measurePreserving_vaddConst (p : P) :
     MeasurePreserving (IsometryEquiv.vaddConst p) volume μHE[finrank ℝ V] where
@@ -297,7 +302,7 @@ theorem AffineSubspace.euclideanHausdorffMeasure_eq_lintegral (s : AffineSubspac
   have hrank : finrank ℝ s.directionᗮ = finrank ℝ (mk' (x +ᵥ p).val s.directionᗮ).direction := by
     rw [direction_mk']
   rw [IsometryEquiv.vaddConst_apply, hinter, euclideanHausdorffMeasure_coe_image, hrank,
-    euclideanHausdorffMeasure_eq ⟨x +ᵥ p, hxp⟩, map_apply (by fun_prop) hu]
+    euclideanHausdorffMeasure_eq ⟨x +ᵥ p, hxp⟩, map_apply hu (by fun_prop)]
   /- we have ⊢ volume (a : Set A) = volume (b : Set B). We'd like show a = b, but A and B are
     non-defeq subspaces!
     Lucky we have just developed euclideanHausdorffMeasure, which allows us to move the measure to
@@ -333,13 +338,14 @@ theorem EuclideanGeometry.euclideanHausdorffMeasure_eq_lintegral (p : P) {v : V}
     (IsometryEquiv.vaddConst p').toHomeomorph.measurableEmbedding
   have hg : MeasurableEmbedding g := hadd.comp hf
   have hm : μHE[finrank ℝ (AffineSubspace.mk' p (ℝ ∙ v)).direction] =
-      ‖v‖ₑ • (volume : Measure ℝ).map g := by
+      ‖v‖ₑ • (volume : Measure ℝ).map g hg.measurable.aemeasurable := by
     unfold g
-    rw [euclideanHausdorffMeasure_eq p', ← map_map hadd.measurable hf.measurable,
+    rw [euclideanHausdorffMeasure_eq p', ← map_map hf.measurable.aemeasurable
+      hadd.measurable.aemeasurable,
       ← Measure.map_smul _ (by fun_prop)]
     congr
     let v' : (AffineSubspace.mk' p (ℝ ∙ v)).direction := ⟨v, by simp⟩
-    suffices volume = ‖v'‖ₑ • volume.map f by simpa [v']
+    suffices volume = ‖v'‖ₑ • volume.map f hf.measurable.aemeasurable by simpa [v']
     exact volume_eq_of_finrank_eq_one hrank (by simpa [v'] using hv)
   have hx (x : ℝ) : x • v +ᵥ p = g x := by rfl
   simp_rw [(AffineSubspace.mk' p (ℝ ∙ v)).euclideanHausdorffMeasure_eq_lintegral ht, hx,

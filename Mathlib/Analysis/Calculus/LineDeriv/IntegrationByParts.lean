@@ -94,15 +94,19 @@ lemma integral_bilinear_hasLineDerivAt_right_eq_neg_left_of_integrable_aux2
     (hg : ∀ x ∈ tsupport f, HasLineDerivAt ℝ g (g' x) x (0, 1)) :
     ∫ x, B (f x) (g' x) ∂μ = - ∫ x, B (f' x) (g x) ∂μ := by
   let ν : Measure E := addHaar
-  have A : ν.prod volume = (addHaarScalarFactor (ν.prod volume) μ) • μ :=
+  have hprod : AEMeasurable
+      (fun x : E ↦ Measure.map (Prod.mk x) (volume : Measure ℝ)
+        measurable_prodMk_left.aemeasurable) ν :=
+    Measurable.map_prodMk_left.aemeasurable
+  have A : ν.prod volume hprod = (addHaarScalarFactor (ν.prod volume hprod) μ) • μ :=
     isAddLeftInvariant_eq_smul _ _
-  have Hf'g : Integrable (fun x ↦ B (f' x) (g x)) (ν.prod volume) := by
+  have Hf'g : Integrable (fun x ↦ B (f' x) (g x)) (ν.prod volume hprod) := by
     rw [A]; exact hf'g.smul_measure_nnreal
-  have Hfg' : Integrable (fun x ↦ B (f x) (g' x)) (ν.prod volume) := by
+  have Hfg' : Integrable (fun x ↦ B (f x) (g' x)) (ν.prod volume hprod) := by
     rw [A]; exact hfg'.smul_measure_nnreal
-  have Hfg : Integrable (fun x ↦ B (f x) (g x)) (ν.prod volume) := by
+  have Hfg : Integrable (fun x ↦ B (f x) (g x)) (ν.prod volume hprod) := by
     rw [A]; exact hfg.smul_measure_nnreal
-  rw [isAddLeftInvariant_eq_smul μ (ν.prod volume)]
+  rw [isAddLeftInvariant_eq_smul μ (ν.prod volume hprod)]
   simp [integral_bilinear_hasLineDerivAt_right_eq_neg_left_of_integrable_aux1 Hf'g Hfg' Hfg hf hg]
 
 variable [FiniteDimensional ℝ E] [IsAddHaarMeasure μ]
@@ -141,11 +145,11 @@ theorem integral_bilinear_hasLineDerivAt_right_eq_neg_left_of_integrable
       · simpa using hv
       · simp
     exact ⟨L₀.trans M, by simp [hM]⟩
-  let ν := Measure.map L μ
+  let ν := Measure.map L μ (by fun_prop)
   suffices H : ∫ (x : E' × ℝ), (B (f (L.symm x))) (g' (L.symm x)) ∂ν =
       -∫ (x : E' × ℝ), (B (f' (L.symm x))) (g (L.symm x)) ∂ν by
-    have : μ = Measure.map L.symm ν := by
-      simp [ν, Measure.map_map L.symm.continuous.measurable L.continuous.measurable]
+    have : μ = Measure.map L.symm ν (by fun_prop) := by
+      simp [ν, Measure.map_map L.continuous.aemeasurable L.symm.continuous.aemeasurable]
     have hL : IsClosedEmbedding L.symm := L.symm.toHomeomorph.isClosedEmbedding
     simpa [this, hL.integral_map] using H
   have L_emb : MeasurableEmbedding L := L.toHomeomorph.measurableEmbedding

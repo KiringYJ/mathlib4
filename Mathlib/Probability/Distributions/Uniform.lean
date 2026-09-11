@@ -66,19 +66,21 @@ def IsUniform (X : Ω → E) (s : Set E) (P : Measure Ω) (μ : Measure E := by 
 
 namespace IsUniform
 
-theorem aemeasurable {X : Ω → E} {s : Set E} (hu : IsUniform X s P μ) : AEMeasurable X P :=
+@[fun_prop] theorem aemeasurable {X : Ω → E} {s : Set E} (hu : IsUniform X s P μ) :
+    AEMeasurable X P :=
   ProbabilityTheory.HasLaw.aemeasurable hu
 
 theorem map_eq {X : Ω → E} {s : Set E} (hu : IsUniform X s P μ) :
-    P.map X = ProbabilityTheory.cond μ s := HasLaw.map_eq hu
+    P.map X hu.aemeasurable = ProbabilityTheory.cond μ s := HasLaw.map_eq hu
 
-theorem absolutelyContinuous {X : Ω → E} {s : Set E} (hu : IsUniform X s P μ) : map X P ≪ μ := by
+theorem absolutelyContinuous {X : Ω → E} {s : Set E} (hu : IsUniform X s P μ) :
+    map X P hu.aemeasurable ≪ μ := by
   rw [hu.map_eq]; exact ProbabilityTheory.cond_absolutelyContinuous
 
 theorem measure_preimage {X : Ω → E} {s : Set E} (hu : IsUniform X s P μ) {A : Set E}
     (hA : MeasurableSet A) :
     P (X ⁻¹' A) = μ (s ∩ A) / μ s := by
-  rwa [← map_apply_of_aemeasurable hu.aemeasurable hA, hu.map_eq, ProbabilityTheory.cond_apply',
+  rwa [← map_apply hA hu.aemeasurable, hu.map_eq, ProbabilityTheory.cond_apply',
     ENNReal.div_eq_inv_mul]
 
 theorem isProbabilityMeasure {X : Ω → E} {s : Set E} (hns : μ s ≠ 0) (hnt : μ s ≠ ∞)
@@ -132,14 +134,14 @@ theorem pdf_eq {X : Ω → E} {s : Set E} (hms : MeasurableSet s)
 
 theorem pdf_toReal_ae_eq {X : Ω → E} {s : Set E} (hms : MeasurableSet s)
     (hX : IsUniform X s P μ) :
-    (fun x => (pdf X P μ x).toReal) =ᵐ[μ] fun x =>
+    (fun x => ((pdf X P μ) x).toReal) =ᵐ[μ] fun x =>
       (s.indicator ((μ s)⁻¹ • (1 : E → ℝ≥0∞)) x).toReal :=
   Filter.EventuallyEq.fun_comp (pdf_eq hms hX) ENNReal.toReal
 
 variable {X : Ω → ℝ} {s : Set ℝ}
 
 theorem mul_pdf_integrable (hcs : IsCompact s) (huX : IsUniform X s P) :
-    Integrable fun x : ℝ => x * (pdf X P volume x).toReal := by
+    Integrable fun x : ℝ => x * ((pdf X P volume) x).toReal := by
   by_cases hnt : volume s = 0 ∨ volume s = ∞
   · have I : Integrable (fun x ↦ x * ENNReal.toReal (0)) := by simp
     apply I.congr
@@ -150,7 +152,7 @@ theorem mul_pdf_integrable (hcs : IsCompact s) (huX : IsUniform X s P) :
   constructor
   · exact aestronglyMeasurable_id.mul
       (measurable_pdf X P).aemeasurable.ennreal_toReal.aestronglyMeasurable
-  refine hasFiniteIntegral_mul (pdf_eq hcs.measurableSet huX) ?_
+  refine hasFiniteIntegral_mul huX.aemeasurable (pdf_eq hcs.measurableSet huX) ?_
   set ind := (volume s)⁻¹ • (1 : ℝ → ℝ≥0∞)
   have : ∀ x, ‖x‖ₑ * s.indicator ind x = s.indicator (fun x => ‖x‖ₑ * ind x) x := fun x =>
     (s.indicator_mul_right (fun x => ↑‖x‖₊) ind).symm

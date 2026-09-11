@@ -29,7 +29,7 @@ The main definitions are
 * `MeasureTheory.FiniteMeasure.normalize`: Normalize a finite measure to a probability measure
   (returns junk for the zero measure).
 * `MeasureTheory.ProbabilityMeasure.map`: The push-forward `f* μ` of a probability measure
-  `μ` on `Ω` along a measurable function `f : Ω → Ω'`.
+  `μ` on `Ω` along an almost everywhere measurable function `f : Ω → Ω'`.
 
 ## Main results
 
@@ -623,31 +623,28 @@ variable {Ω Ω' : Type*} [SigmaAlgebra Ω] [SigmaAlgebra Ω']
 
 namespace ProbabilityMeasure
 
-/-- The push-forward of a probability measure by a measurable function. -/
-noncomputable def map (ν : ProbabilityMeasure Ω) (f : Ω → Ω') :
-    ProbabilityMeasure Ω' :=
-  ⟨(ν : Measure Ω).map f, inferInstance⟩
+/-- The push-forward of a probability measure by an almost everywhere measurable function. -/
+noncomputable def map (ν : ProbabilityMeasure Ω) (f : Ω → Ω')
+    (hf : AEMeasurable f ν := by fun_prop) : ProbabilityMeasure Ω' :=
+  ⟨(ν : Measure Ω).map f hf, inferInstance⟩
 
-@[simp] lemma toMeasure_map (ν : ProbabilityMeasure Ω) {f : Ω → Ω'} :
-    (ν.map f).toMeasure = ν.toMeasure.map f := rfl
+@[simp] lemma toMeasure_map (ν : ProbabilityMeasure Ω) {f : Ω → Ω'}
+    (hf : AEMeasurable f ν := by fun_prop) :
+    (ν.map f hf).toMeasure = ν.toMeasure.map f hf := rfl
 
 /-- Note that this is an equality of elements of `ℝ≥0∞`. See also
 `MeasureTheory.ProbabilityMeasure.map_apply` for the corresponding equality as elements of `ℝ≥0`. -/
-lemma map_apply' (ν : ProbabilityMeasure Ω) {f : Ω → Ω'} (f_aemble : AEMeasurable f ν)
-    {A : Set Ω'} (A_mble : MeasurableSet A) :
-    (ν.map f : Measure Ω') A = (ν : Measure Ω) (f ⁻¹' A) :=
-  Measure.map_apply_of_aemeasurable f_aemble A_mble
+lemma map_apply' (ν : ProbabilityMeasure Ω) {f : Ω → Ω'} {A : Set Ω'}
+    (A_mble : MeasurableSet A) (f_aemble : AEMeasurable f ν := by fun_prop) :
+    (ν.map f f_aemble : Measure Ω') A = (ν : Measure Ω) (f ⁻¹' A) :=
+  Measure.map_apply A_mble f_aemble
 
-lemma map_apply_of_aemeasurable (ν : ProbabilityMeasure Ω) {f : Ω → Ω'}
-    (f_aemble : AEMeasurable f ν) {A : Set Ω'} (A_mble : MeasurableSet A) :
-    (ν.map f) A = ν (f ⁻¹' A) := by
+@[simp]
+lemma map_apply (ν : ProbabilityMeasure Ω) {f : Ω → Ω'} {A : Set Ω'}
+    (A_mble : MeasurableSet A) (f_aemble : AEMeasurable f ν := by fun_prop) :
+    (ν.map f f_aemble) A = ν (f ⁻¹' A) := by
   exact (ENNReal.toNNReal_eq_toNNReal_iff' (measure_ne_top _ _) (measure_ne_top _ _)).mpr <|
-    ν.map_apply' f_aemble A_mble
-
-lemma map_apply (ν : ProbabilityMeasure Ω) {f : Ω → Ω'} (f_aemble : AEMeasurable f ν)
-    {A : Set Ω'} (A_mble : MeasurableSet A) :
-    (ν.map f) A = ν (f ⁻¹' A) :=
-  map_apply_of_aemeasurable ν f_aemble A_mble
+    ν.map_apply' A_mble f_aemble
 
 variable [TopologicalSpace Ω] [OpensSigmaAlgebra Ω]
 variable [TopologicalSpace Ω'] [BorelSpace Ω']

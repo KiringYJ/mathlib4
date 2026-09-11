@@ -42,20 +42,25 @@ See `iIndepFun.map_fun_eq_infinitePi_map₀'` for a version which only assumes t
 each `Xᵢ` is almost everywhere measurable and that `ι` is countable. -/
 lemma iIndepFun.map_fun_eq_infinitePi_map₀ (mX : AEMeasurable (fun ω i ↦ X i ω) P)
     (h : iIndepFun X P) :
-    P.map (fun ω i ↦ X i ω) = infinitePi (fun i ↦ P.map (X i)) := by
+    P.map (fun ω i ↦ X i ω) mX = infinitePi (fun i ↦ P.map (X i) (mX.eval i)) := by
   have := h.isProbabilityMeasure
   refine eq_infinitePi _ fun s t ht ↦ ?_
   rw [iIndepFun_iff_finset] at h
   have : (s : Set ι).pi t = s.restrict ⁻¹' (Set.univ.pi fun i ↦ t i) := by ext; simp
-  rw [this, ← map_apply, AEMeasurable.map_map_of_aemeasurable]
-  · have : s.restrict ∘ (fun ω i ↦ X i ω) = fun ω i ↦ s.restrict X i ω := by ext; simp
-    rw [this, (h s).map_fun_eq_pi_map, pi_pi]
-    · simp only [Finset.restrict]
-      rw [s.prod_coe_sort fun i ↦ P.map (X i) (t i)]
-    exact fun i ↦ mX.eval i
-  any_goals fun_prop
-  · exact mX
-  · exact .univ_pi fun i ↦ ht i
+  have hrestrict : Measurable (s.restrict : (∀ i, 𝓧 i) → ∀ i : s, 𝓧 i) := by
+    fun_prop
+  have hrestrict' : AEMeasurable s.restrict (P.map (fun ω i ↦ X i ω) mX) :=
+    hrestrict.aemeasurable
+  have hcomp := mX.comp_aemeasurable hrestrict'
+  rw [this, ← Measure.map_apply (.univ_pi fun (i : s) ↦ ht i) hrestrict',
+    Measure.map_map mX hrestrict']
+  have hfun : s.restrict ∘ (fun ω i ↦ X i ω) = fun ω i ↦ s.restrict X i ω := by
+    ext
+    simp
+  rw [Measure.map_congr (ae_of_all _ fun ω ↦ congrFun hfun ω) hcomp,
+    iIndepFun.map_fun_eq_pi_map (f := s.restrict X) (fun i ↦ mX.eval i) (h s), pi_pi]
+  simp only [Finset.restrict]
+  rw [s.prod_coe_sort fun i ↦ (P.map (X i) (mX.eval i)) (t i)]
 
 /-- Random variables are independent iff their joint distribution is the product measure. This
 is a version where the random variable `ω ↦ (Xᵢ(ω))ᵢ` is almost everywhere measurable.
@@ -63,25 +68,43 @@ See `iIndepFun_iff_map_fun_eq_infinitePi_map₀'` for a version which only assum
 each `Xᵢ` is almost everywhere measurable and that `ι` is countable. -/
 lemma iIndepFun_iff_map_fun_eq_infinitePi_map₀ [IsProbabilityMeasure P]
     (mX : AEMeasurable (fun ω i ↦ X i ω) P) :
-    iIndepFun X P ↔ P.map (fun ω i ↦ X i ω) = infinitePi (fun i ↦ P.map (X i)) where
+    iIndepFun X P ↔
+      P.map (fun ω i ↦ X i ω) mX = infinitePi (fun i ↦ P.map (X i) (mX.eval i)) where
   mp h := h.map_fun_eq_infinitePi_map₀ mX
   mpr h := by
     rw [iIndepFun_iff_finset]
     intro s
-    rw [iIndepFun_iff_map_fun_eq_pi_map]
-    · have : s.restrict ∘ (fun ω i ↦ X i ω) = fun ω i ↦ s.restrict X i ω := by ext; simp
-      rw [← this, ← AEMeasurable.map_map_of_aemeasurable, h, infinitePi_map_restrict]
-      · simp
-      · fun_prop
-      exact mX
-    exact fun i ↦ mX.eval i
+    rw [iIndepFun_iff_map_fun_eq_pi_map (f := s.restrict X)
+      (fun (i : s) ↦ mX.eval i)]
+    have hrestrict : Measurable (s.restrict : (∀ i, 𝓧 i) → ∀ i : s, 𝓧 i) := by
+      fun_prop
+    have hrestrict' : AEMeasurable s.restrict (P.map (fun ω i ↦ X i ω) mX) :=
+      hrestrict.aemeasurable
+    have hcomp := mX.comp_aemeasurable hrestrict'
+    have hfun : s.restrict ∘ (fun ω i ↦ X i ω) = fun ω i ↦ s.restrict X i ω := by
+      ext
+      simp
+    have hfun' := ae_of_all P fun ω ↦ congrFun hfun ω
+    calc
+      P.map (fun ω i ↦ s.restrict X i ω) (hcomp.congr hfun') =
+          P.map (s.restrict ∘ fun ω i ↦ X i ω) hcomp :=
+        (Measure.map_congr hfun' hcomp).symm
+      _ = (P.map (fun ω i ↦ X i ω) mX).map s.restrict hrestrict' :=
+        (Measure.map_map mX hrestrict').symm
+      _ = (infinitePi fun i ↦ P.map (X i) (mX.eval i)).map s.restrict
+          hrestrict.aemeasurable := by
+        simpa only using congrArg
+          (fun ν : Measure (∀ i, 𝓧 i) ↦ ν.map s.restrict hrestrict.aemeasurable) h
+      _ = Measure.pi (fun i : s ↦ P.map (X i) (mX.eval i)) := by
+        rw [infinitePi_map_restrict]
 
 /-- If random variables are independent then their joint distribution is the product measure. This
 is an `AEMeasurable` version of `iIndepFun.map_fun_eq_infinitePi_map`, which is why it requires
 `ι` to be countable. -/
 lemma iIndepFun.map_fun_eq_infinitePi_map₀' [Countable ι] (mX : ∀ i, AEMeasurable (X i) P)
     (h : iIndepFun X P) :
-    P.map (fun ω i ↦ X i ω) = infinitePi (fun i ↦ P.map (X i)) :=
+    P.map (fun ω i ↦ X i ω) (aemeasurable_pi_iff.2 mX) =
+      infinitePi (fun i ↦ P.map (X i) (mX i)) :=
   h.map_fun_eq_infinitePi_map₀ <| aemeasurable_pi_iff.2 mX
 
 /-- Random variables are independent iff their joint distribution is the product measure. This is
@@ -89,18 +112,23 @@ an `AEMeasurable` version of `iIndepFun_iff_map_fun_eq_infinitePi_map`, which is
 `ι` to be countable. -/
 lemma iIndepFun_iff_map_fun_eq_infinitePi_map₀' [IsProbabilityMeasure P] [Countable ι]
     (mX : ∀ i, AEMeasurable (X i) P) :
-    iIndepFun X P ↔ P.map (fun ω i ↦ X i ω) = infinitePi (fun i ↦ P.map (X i)) :=
+    iIndepFun X P ↔
+      P.map (fun ω i ↦ X i ω) (aemeasurable_pi_iff.2 mX) =
+        infinitePi (fun i ↦ P.map (X i) (mX i)) :=
   iIndepFun_iff_map_fun_eq_infinitePi_map₀ <| aemeasurable_pi_iff.2 mX
 
 /-- If random variables are independent then their joint distribution is the product measure. -/
 lemma iIndepFun.map_fun_eq_infinitePi_map (mX : ∀ i, Measurable (X i)) (h : iIndepFun X P) :
-    P.map (fun ω i ↦ X i ω) = infinitePi (fun i ↦ P.map (X i)) :=
+    P.map (fun ω i ↦ X i ω) (measurable_pi_iff.2 mX).aemeasurable =
+      infinitePi (fun i ↦ P.map (X i) (mX i).aemeasurable) :=
   h.map_fun_eq_infinitePi_map₀ <| measurable_pi_iff.2 mX |>.aemeasurable
 
 /-- Random variables are independent iff their joint distribution is the product measure. -/
 lemma iIndepFun_iff_map_fun_eq_infinitePi_map [IsProbabilityMeasure P]
     (mX : ∀ i, Measurable (X i)) :
-    iIndepFun X P ↔ P.map (fun ω i ↦ X i ω) = infinitePi (fun i ↦ P.map (X i)) :=
+    iIndepFun X P ↔
+      P.map (fun ω i ↦ X i ω) (measurable_pi_iff.2 mX).aemeasurable =
+        infinitePi (fun i ↦ P.map (X i) (mX i).aemeasurable) :=
   iIndepFun_iff_map_fun_eq_infinitePi_map₀ <| measurable_pi_iff.2 mX |>.aemeasurable
 
 lemma iIndepFun.hasLaw_infinitePi {μ : (i : ι) → Measure (𝓧 i)} (hX : ∀ i, HasLaw (X i) (μ i) P)
@@ -128,7 +156,20 @@ lemma iIndepFun_infinitePi {Ω : ι → Type*} {mΩ : ∀ i, SigmaAlgebra (Ω i)
     iIndepFun (fun i ω ↦ X i (ω i)) (infinitePi P) := by
   rw [iIndepFun_iff_map_fun_eq_infinitePi_map (by fun_prop), infinitePi_map_pi _ mX]
   congrm infinitePi fun i ↦ ?_
-  rw [← infinitePi_map_eval P i, map_map (mX i) (by fun_prop), Function.comp_def]
+  have heval : AEMeasurable (fun ω ↦ ω i) (infinitePi P) :=
+    (measurable_pi_apply i).aemeasurable
+  have hXi : AEMeasurable (X i) ((infinitePi P).map (fun ω ↦ ω i) heval) := by
+    simpa only [infinitePi_map_eval] using (mX i).aemeasurable
+  have hcomp := heval.comp_aemeasurable hXi
+  calc
+    (P i).map (X i) (mX i).aemeasurable =
+        ((infinitePi P).map (fun ω ↦ ω i) heval).map (X i) hXi := by
+      simp only [infinitePi_map_eval]
+    _ = (infinitePi P).map (X i ∘ fun ω ↦ ω i) hcomp :=
+      Measure.map_map heval hXi
+    _ = (infinitePi P).map (fun ω ↦ X i (ω i))
+        (hcomp.congr (ae_of_all _ fun _ ↦ rfl)) :=
+      Measure.map_congr (ae_of_all _ fun _ ↦ rfl) hcomp
 
 lemma _root_.MeasureTheory.Measure.infinitePi_map_eval_prod {Ω : ι → Type*}
     {mΩ : ∀ i, SigmaAlgebra (Ω i)} {P : ∀ i, Measure (Ω i)}
@@ -142,8 +183,11 @@ lemma _root_.MeasureTheory.Measure.infinitePi_map_eval_prod {Ω : ι → Type*}
 lemma _root_.MeasureTheory.Measure.map_infinitePi_infinitePi_of_inj {α : Type*} {Ω : ι → Type*}
     {mΩ : ∀ i, SigmaAlgebra (Ω i)} {P : ∀ i, Measure (Ω i)}
     [∀ i, IsProbabilityMeasure (P i)] {f : α → ι} (hf : Function.Injective f) :
-    (infinitePi P).map (fun ω i ↦ ω (f i)) = infinitePi (fun i ↦ P (f i)) := by
-  rw [(iIndepFun_iff_map_fun_eq_infinitePi_map <| by fun_prop).mp ?_]
+    (infinitePi P).map (fun ω i ↦ ω (f i))
+      (measurable_pi_iff.2 fun i ↦ measurable_pi_apply (f i)).aemeasurable =
+        infinitePi (fun i ↦ P (f i)) := by
+  rw [(iIndepFun_iff_map_fun_eq_infinitePi_map
+    (fun i ↦ measurable_pi_apply (f i))).mp ?_]
   · simp [infinitePi_map_eval]
   exact .precomp hf <| iIndepFun_infinitePi (X := fun x ω ↦ ω) <| by fun_prop
 
@@ -163,15 +207,28 @@ lemma iIndepFun_uncurry {X : (i : ι) → (j : κ i) → Ω → 𝓧 i j} (mX : 
     (h1 : iIndepFun (fun i ω ↦ (X i · ω)) P) (h2 : ∀ i, iIndepFun (X i) P) :
     iIndepFun (fun (p : (i : ι) × (κ i)) ω ↦ X p.1 p.2 ω) P := by
   have := h1.isProbabilityMeasure
-  have : (MeasurableEquiv.piCurry 𝓧) ∘ (fun ω p ↦ X p.1 p.2 ω) = fun ω i j ↦ X i j ω := by
+  have mZ : ∀ p : (i : ι) × κ i, Measurable (fun ω ↦ X p.1 p.2 ω) :=
+    fun p ↦ mX p.1 p.2
+  have mZjoint := measurable_pi_iff.2 mZ
+  have mY : ∀ i, Measurable (fun ω j ↦ X i j ω) :=
+    fun i ↦ measurable_pi_iff.2 (mX i)
+  have mZae : AEMeasurable (fun ω (p : (i : ι) × κ i) ↦ X p.1 p.2 ω) P :=
+    mZjoint.aemeasurable
+  have hCurry : AEMeasurable (MeasurableEquiv.piCurry 𝓧)
+      (P.map (fun ω p ↦ X p.1 p.2 ω) mZae) :=
+    (MeasurableEquiv.piCurry 𝓧).measurable.aemeasurable
+  have hcomp := mZae.comp_aemeasurable hCurry
+  have hfun : (MeasurableEquiv.piCurry 𝓧) ∘ (fun ω p ↦ X p.1 p.2 ω) =
+      fun ω i j ↦ X i j ω := by
     ext; simp [Sigma.curry]
-  rw [iIndepFun_iff_map_fun_eq_infinitePi_map (by fun_prop),
+  rw [iIndepFun_iff_map_fun_eq_infinitePi_map mZ,
     ← (MeasurableEquiv.piCurry 𝓧).map_measurableEquiv_injective.eq_iff,
-    map_map (by fun_prop) (by fun_prop), this,
-    (iIndepFun_iff_map_fun_eq_infinitePi_map (by fun_prop)).1 h1,
-    infinitePi_map_piCurry (fun i j ↦ P.map (X i j))]
+    Measure.map_map mZae hCurry,
+    Measure.map_congr (ae_of_all _ fun ω ↦ congrFun hfun ω) hcomp,
+    (iIndepFun_iff_map_fun_eq_infinitePi_map mY).1 h1,
+    infinitePi_map_piCurry (fun i j ↦ P.map (X i j) (mX i j).aemeasurable)]
   congrm infinitePi fun i ↦ ?_
-  rw [(iIndepFun_iff_map_fun_eq_infinitePi_map (by fun_prop)).1 (h2 i)]
+  rw [(iIndepFun_iff_map_fun_eq_infinitePi_map (mX i)).1 (h2 i)]
 
 /-- Given random variables `X i j : Ω i j → 𝓧 i j`, they are independent when viewed as random
 variables defined on the product space `Π i, Π j, Ω i j`. -/
@@ -185,21 +242,31 @@ lemma iIndepFun_uncurry_infinitePi {Ω : (i : ι) → κ i → Type*} {mΩ : ∀
     (X := fun i j ω ↦ X i j (ω i j)) (by fun_prop) ?_ fun i ↦ ?_
   · exact iIndepFun_infinitePi (P := fun i ↦ infinitePi (μ i))
       (X := fun i u j ↦ X i j (u j)) (by fun_prop)
-  rw [iIndepFun_iff_map_fun_eq_infinitePi_map (by fun_prop)]
-  change map ((fun f ↦ f i) ∘ (fun ω i j ↦ X i j (ω i j)))
-    (infinitePi fun i ↦ infinitePi (μ i)) = _
-  rw [← map_map (by fun_prop) (by fun_prop),
-    infinitePi_map_pi (X := fun i ↦ (j : κ i) → Ω i j) (μ := fun i ↦ infinitePi (μ i))
-      (f := fun i f j ↦ X i j (f j)), infinitePi_map_eval, infinitePi_map_pi]
-  · congrm infinitePi fun j ↦ ?_
-    change _ = map (((fun f ↦ f j) ∘ (fun f ↦ f i)) ∘ (fun ω i j ↦ X i j (ω i j)))
-      (infinitePi fun i ↦ infinitePi (μ i))
-    rw [← map_map (by fun_prop) (by fun_prop), infinitePi_map_pi (X := fun i ↦ (j : κ i) → Ω i j)
-        (μ := fun i ↦ infinitePi (μ i)) (f := fun i f j ↦ X i j (f j)),
-        ← map_map (by fun_prop) (by fun_prop),
-        infinitePi_map_eval, infinitePi_map_pi, infinitePi_map_eval]
-    all_goals fun_prop
-  all_goals fun_prop
+  let M := infinitePi (fun i ↦ infinitePi (μ i))
+  have hOuter : HasLaw (fun ω ↦ ω i) (infinitePi (μ i)) M :=
+    (measurePreserving_eval_infinitePi (fun i ↦ infinitePi (μ i)) i).hasLaw
+  have hInnerCoord (j : κ i) :
+      HasLaw (fun u ↦ X i j (u j)) ((μ i j).map (X i j) (mX i j).aemeasurable)
+        (infinitePi (μ i)) := by
+    have hEval : HasLaw (fun u ↦ u j) (μ i j) (infinitePi (μ i)) :=
+      (measurePreserving_eval_infinitePi (μ i) j).hasLaw
+    exact (hasLaw_map (mX i j).aemeasurable).fun_comp hEval
+  have hInnerIndep : iIndepFun (fun j u ↦ X i j (u j)) (infinitePi (μ i)) :=
+    iIndepFun_infinitePi (P := μ i) (X := X i) (mX i)
+  have hInnerJoint :
+      HasLaw (fun u j ↦ X i j (u j))
+        (infinitePi fun j ↦ (μ i j).map (X i j) (mX i j).aemeasurable)
+        (infinitePi (μ i)) :=
+    hInnerIndep.hasLaw_infinitePi hInnerCoord
+      (measurable_pi_iff.2 fun j ↦ (mX i j).comp (measurable_pi_apply j)).aemeasurable
+  have hCoord (j : κ i) :
+      HasLaw (fun ω ↦ X i j (ω i j)) ((μ i j).map (X i j) (mX i j).aemeasurable) M := by
+    exact (hInnerCoord j).fun_comp hOuter
+  have hJoint :
+      HasLaw (fun ω j ↦ X i j (ω i j))
+        (infinitePi fun j ↦ (μ i j).map (X i j) (mX i j).aemeasurable) M := by
+    exact hInnerJoint.fun_comp hOuter
+  exact (iIndepFun_iff_hasLaw_Pi_infinitePi hCoord hJoint.aemeasurable).2 hJoint
 
 end dependent
 

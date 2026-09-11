@@ -199,8 +199,9 @@ instance isHaarMeasure_inducedMeasure : IsHaarMeasure (inducedMeasure H μA μC)
       exists_continuousMap_one_of_isCompact_subset_isOpen hK isOpen_univ K.subset_univ
     exact lt_of_le_of_lt (RealRMK.rieszMeasure_le_of_eq_one (f := ⟨f, hf2⟩) _
       (fun x ↦ (hf4 x).1) hK (fun x hx ↦ hf1 hx)) ENNReal.ofReal_lt_top
-  map_mul_left_eq_self b := by
-    have : ((inducedMeasure H μA μC).map (b * ·)).Regular := Regular.map (Homeomorph.mulLeft b)
+  map_mul_left_eq_self b _ := by
+    have : ((inducedMeasure H μA μC).map (b * ·) (by fun_prop)).Regular :=
+      Regular.map (Homeomorph.mulLeft b)
     refine ext_of_integral_eq_on_compactlySupported fun f ↦ ?_
     rw [integral_map (by fun_prop) (by fun_prop)]
     have h (x : B) : f (b * x) = f.comp (Homeomorph.mulLeft b).toCocompactMap x := rfl

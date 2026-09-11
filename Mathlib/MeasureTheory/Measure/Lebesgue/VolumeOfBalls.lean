@@ -91,16 +91,17 @@ theorem MeasureTheory.measure_lt_one_eq_integral_div_gamma {p : ℝ} (hp : 0 < p
   -- The map between `E` and `F` as a continuous linear equivalence
   let φ := @LinearEquiv.toContinuousLinearEquiv ℝ _ E _ _ tE _ _ F _ _ _ _ _ _ _ _ _
     (LinearEquiv.refl ℝ E : E ≃ₗ[ℝ] F)
+  have hφ : @Measurable E F mE _ φ := by
+    refine @Continuous.measurable E F tE mE _ _ _ _ φ ?_
+    exact @ContinuousLinearEquiv.continuous ℝ ℝ _ _ _ _ _ _ E tE _ F _ _ _ _ φ
   -- The measure `ν` is the measure on `F` defined by `μ`
   -- Since we have two different topologies, it is necessary to specify the topology of E
-  let ν : Measure F := @Measure.map E F mE _ φ μ
+  let ν : Measure F := @Measure.map E F mE _ φ μ hφ.aemeasurable
   convert! (measure_unitBall_eq_integral_div_gamma ν hp) using 1
-  · rw [@Measure.map_apply E F mE _ μ φ _ _ measurableSet_ball]
-    · congr!
-      simp_rw [Metric.ball, dist_zero_right]
-      rfl
-    · refine @Continuous.measurable E F tE mE _ _ _ _ φ ?_
-      exact @ContinuousLinearEquiv.continuous ℝ ℝ _ _ _ _ _ _ E tE _ F _ _ _ _ φ
+  · rw [@Measure.map_apply E F mE _ μ φ _ measurableSet_ball hφ.aemeasurable]
+    congr!
+    simp_rw [Metric.ball, dist_zero_right]
+    rfl
   · -- The map between `E` and `F` as a measurable equivalence
     let ψ := @Homeomorph.toMeasurableEquiv E F tE mE _ _ _ _
       (@ContinuousLinearEquiv.toHomeomorph ℝ ℝ _ _ _ _ _ _ E tE _ F _ _ _ _ φ)
@@ -124,22 +125,21 @@ theorem MeasureTheory.measure_le_eq_lt [Nontrivial E] (r : ℝ) :
   -- The map between `E` and `F` as a continuous linear equivalence
   let φ := @LinearEquiv.toContinuousLinearEquiv ℝ _ E _ _ tE _ _ F _ _ _ _ _ _ _ _ _
     (LinearEquiv.refl ℝ E : E ≃ₗ[ℝ] F)
+  have hφ : @Measurable E F mE _ φ := by
+    refine @Continuous.measurable E F tE mE _ _ _ _ φ ?_
+    exact @ContinuousLinearEquiv.continuous ℝ ℝ _ _ _ _ _ _ E tE _ F _ _ _ _ φ
   -- The measure `ν` is the measure on `F` defined by `μ`
   -- Since we have two different topologies, it is necessary to specify the topology of E
-  let ν : Measure F := @Measure.map E F mE _ φ μ
+  let ν : Measure F := @Measure.map E F mE _ φ μ hφ.aemeasurable
   convert! addHaar_closedBall_eq_addHaar_ball ν 0 r using 1
-  · rw [@Measure.map_apply E F mE _ μ φ _ _ measurableSet_closedBall]
-    · congr!
-      simp_rw [Metric.closedBall, dist_zero_right]
-      rfl
-    · refine @Continuous.measurable E F tE mE _ _ _ _ φ ?_
-      exact @ContinuousLinearEquiv.continuous ℝ ℝ _ _ _ _ _ _ E tE _ F _ _ _ _ φ
-  · rw [@Measure.map_apply E F mE _ μ φ _ _ measurableSet_ball]
-    · congr!
-      simp_rw [Metric.ball, dist_zero_right]
-      rfl
-    · refine @Continuous.measurable E F tE mE _ _ _ _ φ ?_
-      exact @ContinuousLinearEquiv.continuous ℝ ℝ _ _ _ _ _ _ E tE _ F _ _ _ _ φ
+  · rw [@Measure.map_apply E F mE _ μ φ _ measurableSet_closedBall hφ.aemeasurable]
+    congr!
+    simp_rw [Metric.closedBall, dist_zero_right]
+    rfl
+  · rw [@Measure.map_apply E F mE _ μ φ _ measurableSet_ball hφ.aemeasurable]
+    congr!
+    simp_rw [Metric.ball, dist_zero_right]
+    rfl
 
 end general_case
 

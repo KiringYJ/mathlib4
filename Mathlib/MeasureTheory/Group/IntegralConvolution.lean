@@ -36,7 +36,7 @@ lemma integrable_mconv_iff [SFinite ν] (hf : AEStronglyMeasurable f (μ ∗ₘ 
     Integrable f (μ ∗ₘ ν)
       ↔ (∀ᵐ x ∂μ, Integrable (fun y ↦ f (x * y)) ν)
         ∧ Integrable (fun x ↦ ∫ y, ‖f (x * y)‖ ∂ν) μ := by
-  simp [Measure.mconv, integrable_map_measure hf (by fun_prop),
+  simp [Measure.mconv, integrable_map_measure (by fun_prop) hf,
     integrable_prod_iff (hf.comp_measurable (by fun_prop))]
 
 @[to_additive]
@@ -44,6 +44,6 @@ lemma integral_mconv [NormedSpace ℝ F] [SFinite μ] [SFinite ν] (hf : Integra
     ∫ x, f x ∂(μ ∗ₘ ν) = ∫ x, ∫ y, f (x * y) ∂ν ∂μ := by
   unfold Measure.mconv
   rw [integral_map (by fun_prop) hf.1, integral_prod]
-  exact (integrable_map_measure hf.1 (by fun_prop)).mp hf
+  exact (integrable_map_measure (by fun_prop) hf.1).mp hf
 
 end MeasureTheory

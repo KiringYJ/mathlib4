@@ -101,7 +101,8 @@ lemma _root_.ProbabilityTheory.Kernel.compProd_apply_eq_compProd_sectR {γ : Typ
 
 lemma compProd_id [SFinite μ] : μ ⊗ₘ Kernel.id = μ.map Function.diag := by
   ext s hs
-  rw [compProd_apply hs, map_apply (measurable_id.prod measurable_id) hs]
+  rw [compProd_apply hs,
+    Measure.map_apply hs (measurable_id.prod measurable_id).aemeasurable]
   have h_meas a : MeasurableSet (Prod.mk a ⁻¹' s) := measurable_prodMk_left hs
   simp_rw [Kernel.id_apply, dirac_apply' _ (h_meas _)]
   calc ∫⁻ a, (Prod.mk a ⁻¹' s).indicator 1 a ∂μ
@@ -141,7 +142,8 @@ measures. -/
 lemma compProd_const {ν : Measure β} [SFinite μ] [SFinite ν] :
     μ ⊗ₘ (Kernel.const α ν) = μ.prod ν := by
   ext s hs
-  simp_rw [compProd_apply hs, prod_apply hs, Kernel.const_apply]
+  simp_rw [compProd_apply hs,
+    prod_apply hs Measurable.map_prodMk_left.aemeasurable, Kernel.const_apply]
 
 lemma compProd_add_left (μ ν : Measure α) [SFinite μ] [SFinite ν] (κ : Kernel α β) :
     (μ + ν) ⊗ₘ κ = μ ⊗ₘ κ + ν ⊗ₘ κ := by
@@ -202,11 +204,13 @@ lemma dirac_compProd_apply [MeasurableSingletonClass α] {a : α} [IsSFiniteKern
 
 lemma dirac_unit_compProd (κ : Kernel Unit β) [IsSFiniteKernel κ] :
     Measure.dirac () ⊗ₘ κ = (κ ()).map (Prod.mk ()) := by
-  ext s hs; rw [dirac_compProd_apply hs, Measure.map_apply measurable_prodMk_left hs]
+  ext s hs; rw [dirac_compProd_apply hs, Measure.map_apply hs measurable_prodMk_left.aemeasurable]
 
 lemma dirac_unit_compProd_const (μ : Measure β) [SFinite μ] :
     Measure.dirac () ⊗ₘ Kernel.const Unit μ = μ.map (Prod.mk ()) := by
-  rw [dirac_unit_compProd, Kernel.const_apply]
+  ext s hs
+  rw [dirac_compProd_apply hs, Kernel.const_apply,
+    Measure.map_apply hs measurable_prodMk_left.aemeasurable]
 
 lemma snd_dirac_unit_compProd_const (μ : Measure β) [SFinite μ] :
     snd (Measure.dirac () ⊗ₘ Kernel.const Unit μ) = μ := by simp
@@ -236,7 +240,7 @@ lemma compProd_assoc {γ : Type*} {mγ : SigmaAlgebra γ} {η : Kernel (α × β
   by_cases hη : IsSFiniteKernel η
   swap; · simp [hη]
   ext s hs
-  rw [Measure.compProd_apply hs, Measure.map_apply (by fun_prop) hs,
+  rw [Measure.compProd_apply hs, Measure.map_apply hs (by fun_prop),
     Measure.compProd_apply (hs.preimage (by fun_prop)), Measure.lintegral_compProd]
   swap; · exact Kernel.measurable_kernel_prodMk_left hs
   congr with a

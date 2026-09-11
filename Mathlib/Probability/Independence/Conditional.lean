@@ -801,13 +801,46 @@ lemma condIndepFun_iff_map_prod_eq_prod_comp_trim
     {mβ : SigmaAlgebra β} {mβ' : SigmaAlgebra β'} (hf : Measurable f) (hg : Measurable g) :
     CondIndepFun m' hm' f g μ
       ↔ @Measure.map _ _ _ (m'.prod _) (fun ω ↦ (ω, f ω, g ω)) μ
+          (by
+            change @AEMeasurable Ω (Ω × β × β') (m'.prod (mβ.prod mβ')) mΩ
+              (fun ω ↦ (ω, f ω, g ω)) μ
+            have hfg : @Measurable Ω (β × β') mΩ (mβ.prod mβ')
+                (fun ω ↦ (f ω, g ω)) := @Measurable.prodMk Ω mΩ β β' mβ mβ' f g hf hg
+            have hjoint : @Measurable Ω (Ω × β × β') mΩ (mΩ.prod (mβ.prod mβ'))
+                (fun ω ↦ (ω, f ω, g ω)) :=
+              @Measurable.prodMk Ω mΩ Ω (β × β') mΩ (mβ.prod mβ') id
+                (fun ω ↦ (f ω, g ω)) measurable_id hfg
+            have htarget : m'.prod (mβ.prod mβ') ≤ mΩ.prod (mβ.prod mβ') := by
+              unfold SigmaAlgebra.prod
+              gcongr
+            exact @Measurable.aemeasurable Ω (Ω × β × β') mΩ
+              (m'.prod (mβ.prod mβ')) (fun ω ↦ (ω, f ω, g ω)) μ
+              (hjoint.mono (mb' := m'.prod (mβ.prod mβ')) le_rfl htarget))
         = (Kernel.id ×ₖ ((condExpKernel μ m').map f ×ₖ (condExpKernel μ m').map g))
           ∘ₘ μ.trim hm' := by
   rw [condIndepFun_iff_compProd_map_prod_eq_compProd_prod_map_map hf hg]
   congr!
-  · rw [Measure.compProd_map (by fun_prop), compProd_trim_condExpKernel]
-    exact Measure.map_map (by fun_prop) ((measurable_id.mono le_rfl hm').prodMk measurable_id)
-  · rw [Measure.compProd_eq_comp_prod]
+  · rw [Measure.compProd_map (by fun_prop)]
+    let F : Ω × Ω → Ω × (β × β') := Prod.map id fun ω ↦ (f ω, g ω)
+    have hfg : @Measurable Ω (β × β') mΩ (mβ.prod mβ')
+        (fun ω ↦ (f ω, g ω)) := @Measurable.prodMk Ω mΩ β β' mβ mβ' f g hf hg
+    have hF : @Measurable (Ω × Ω) (Ω × (β × β')) (m'.prod mΩ)
+        (m'.prod (mβ.prod mβ'))
+        F := @Measurable.prodMap Ω Ω Ω (β × β') m' m' mΩ (mβ.prod mβ') id
+          (fun ω ↦ (f ω, g ω)) measurable_id hfg
+    have hdiag := compProd_trim_condExpKernel (μ := μ) hm'
+    simp only [hdiag]
+    have hdiagAe := aemeasurable_diag_of_le μ hm'
+    have hFae : @AEMeasurable (Ω × Ω) (Ω × (β × β'))
+        (m'.prod (mβ.prod mβ')) (m'.prod mΩ) F
+        (@Measure.map Ω (Ω × Ω) mΩ (m'.prod mΩ) (fun ω ↦ (ω, ω)) μ hdiagAe) :=
+      @Measurable.aemeasurable (Ω × Ω) (Ω × (β × β')) (m'.prod mΩ)
+        (m'.prod (mβ.prod mβ')) F _ hF
+    rw [Measure.map_map hdiagAe hFae]
+    apply Measure.map_congr (hf := AEMeasurable.comp_aemeasurable hdiagAe hFae)
+    filter_upwards with ω
+    rfl
+  · exact Measure.compProd_eq_comp_prod _ _
 
 /-- Two random variables `f, g` are conditionally independent given a third `k` iff the
 joint distribution of `k, f, g` factors into a product of their conditional distributions
@@ -817,24 +850,44 @@ theorem condIndepFun_iff_map_prod_eq_prod_condDistrib_prod_condDistrib
     [StandardBorelSpace β] [Nonempty β] [StandardBorelSpace β'] [Nonempty β']
     (hf : Measurable f) (hg : Measurable g) {k : Ω → γ} (hk : Measurable k) :
     f ⟂ᵢ[k, hk; μ] g ↔
-      μ.map (fun ω ↦ (k ω, f ω, g ω)) =
-        (Kernel.id ×ₖ (condDistrib f k μ ×ₖ condDistrib g k μ)) ∘ₘ μ.map k := by
+      μ.map (fun ω ↦ (k ω, f ω, g ω)) (hk.prodMk (hf.prodMk hg)).aemeasurable =
+        (Kernel.id ×ₖ (condDistrib f k μ ×ₖ condDistrib g k μ)) ∘ₘ
+          μ.map k hk.aemeasurable := by
   rw [condIndepFun_iff_map_prod_eq_prod_comp_trim hf hg]
   simp_rw [Measure.ext_prod₃_iff]
   have hk_meas {s : Set γ} (hs : MeasurableSet s) : k ⁻¹' s ∈ mγ.comap k :=
     ⟨s, hs, rfl⟩
+  have hjoint_comap : @AEMeasurable Ω (Ω × β × β')
+      ((mγ.comap k).prod (mβ.prod mβ')) mΩ
+      (fun ω ↦ (ω, f ω, g ω)) μ := by
+    have hfg : @Measurable Ω (β × β') mΩ (mβ.prod mβ')
+        (fun ω ↦ (f ω, g ω)) := @Measurable.prodMk Ω mΩ β β' mβ mβ' f g hf hg
+    have hjoint : @Measurable Ω (Ω × β × β') mΩ (mΩ.prod (mβ.prod mβ'))
+        (fun ω ↦ (ω, f ω, g ω)) :=
+      @Measurable.prodMk Ω mΩ Ω (β × β') mΩ (mβ.prod mβ') id
+        (fun ω ↦ (f ω, g ω)) measurable_id hfg
+    have htarget : (mγ.comap k).prod (mβ.prod mβ') ≤ mΩ.prod (mβ.prod mβ') := by
+      unfold SigmaAlgebra.prod
+      gcongr
+      exact hk.comap_le
+    exact @Measurable.aemeasurable Ω (Ω × β × β') mΩ
+      ((mγ.comap k).prod (mβ.prod mβ')) (fun ω ↦ (ω, f ω, g ω)) μ
+      (hjoint.mono (mb' := (mγ.comap k).prod (mβ.prod mβ')) le_rfl htarget)
   have h_left {s : Set γ} {t : Set β} {u : Set β'} (hs : MeasurableSet s) (ht : MeasurableSet t)
       (hu : MeasurableSet u) :
-      (μ.map (fun ω ↦ (k ω, f ω, g ω))) (s ×ˢ t ×ˢ u) =
+      (μ.map (fun ω ↦ (k ω, f ω, g ω)) (hk.prodMk (hf.prodMk hg)).aemeasurable)
+          (s ×ˢ t ×ˢ u) =
         (@Measure.map _ _ _ ((mγ.comap k).prod inferInstance)
-          (fun ω ↦ (ω, f ω, g ω)) μ) ((k ⁻¹' s) ×ˢ t ×ˢ u) := by
-    rw [Measure.map_apply (by fun_prop) (hs.prod (ht.prod hu)),
-      Measure.map_apply _ ((measurableSet_iff_mem.mpr (hk_meas hs)).prod (ht.prod hu))]
+          (fun ω ↦ (ω, f ω, g ω)) μ hjoint_comap)
+          ((k ⁻¹' s) ×ˢ t ×ˢ u) := by
+    rw [Measure.map_apply (hs.prod (ht.prod hu)) (hk.prodMk (hf.prodMk hg)).aemeasurable,
+      Measure.map_apply ((measurableSet_iff_mem.mpr (hk_meas hs)).prod (ht.prod hu))
+        hjoint_comap]
     · simp [Set.mk_preimage_prod]
-    · exact (measurable_id.mono le_rfl hk.comap_le).prodMk (by fun_prop)
   have h_right {s : Set γ} {t : Set β} {u : Set β'} (hs : MeasurableSet s) (ht : MeasurableSet t)
       (hu : MeasurableSet u) :
-      ((Kernel.id ×ₖ (condDistrib f k μ ×ₖ condDistrib g k μ)) ∘ₘ μ.map k) (s ×ˢ t ×ˢ u) =
+      ((Kernel.id ×ₖ (condDistrib f k μ ×ₖ condDistrib g k μ)) ∘ₘ
+        μ.map k hk.aemeasurable) (s ×ˢ t ×ˢ u) =
         ((Kernel.id ×ₖ
           ((condExpKernel μ (mγ.comap k)).map f ×ₖ (condExpKernel μ (mγ.comap k)).map g)) ∘ₘ
         μ.trim hk.comap_le) ((k ⁻¹' s) ×ˢ t ×ˢ u) := by
@@ -893,8 +946,7 @@ theorem condIndepFun_iff_condDistrib_prod_ae_eq_prodMkRight
     rfl
   have h1_symm : μ.map (fun a ↦ (k a, g a, f a)) =
       (μ.map (fun x ↦ ((k x, g x), f x))).map e.symm := by
-    rw [h1, Measure.map_map (by fun_prop) (by fun_prop), MeasurableEquiv.symm_comp_self,
-      Measure.map_id]
+    exact (MeasurableEquiv.map_apply_eq_iff_map_symm_apply_eq e).mp h1.symm
   have h2 : ((Kernel.id ×ₖ condDistrib g k μ) ×ₖ condDistrib f k μ) ∘ₘ μ.map k =
       ((Kernel.id ×ₖ (condDistrib g k μ ×ₖ condDistrib f k μ)) ∘ₘ μ.map k).map e := by
     rw [← Measure.deterministic_comp_eq_map e.measurable, Measure.comp_assoc]
@@ -903,8 +955,7 @@ theorem condIndepFun_iff_condDistrib_prod_ae_eq_prodMkRight
     rw [Kernel.deterministic_comp_eq_map, Kernel.prodAssoc_symm_prod]
   have h2_symm : (Kernel.id ×ₖ (condDistrib g k μ ×ₖ condDistrib f k μ)) ∘ₘ μ.map k =
       (((Kernel.id ×ₖ condDistrib g k μ) ×ₖ condDistrib f k μ) ∘ₘ μ.map k).map e.symm := by
-    rw [h2, Measure.map_map (by fun_prop) (by fun_prop), MeasurableEquiv.symm_comp_self,
-      Measure.map_id]
+    exact (MeasurableEquiv.map_apply_eq_iff_map_symm_apply_eq e).mp h2.symm
   rw [h1, h2]
   exact ⟨fun h ↦ by rw [h], fun h ↦ by rw [h1_symm, h1, h2_symm, h2, h]⟩
 

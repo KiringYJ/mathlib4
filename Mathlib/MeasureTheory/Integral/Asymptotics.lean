@@ -175,7 +175,7 @@ theorem LocallyIntegrable.integrable_of_isBigO_atTop_of_norm_isNegInvariant
     simp
   rw [IntegrableOn, ← h_map_neg, measurableEmbedding_neg.integrable_map_iff]
   refine h_int.congr' ?_ hsymm.restrict
-  refine AEStronglyMeasurable.comp_aemeasurable ?_ measurable_neg.aemeasurable
+  refine AEStronglyMeasurable.comp_aemeasurable measurable_neg.aemeasurable ?_
   exact h_map_neg ▸ hf.aestronglyMeasurable.restrict
 
 end LinearOrderedAddCommGroup

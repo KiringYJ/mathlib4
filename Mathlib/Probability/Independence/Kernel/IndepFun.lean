@@ -305,9 +305,9 @@ theorem indepFun_iff_compProd_map_prod_eq_compProd_prod_map_map
     by_cases hωu : ω ∈ u
     swap; · simp [hωu]
     simp only [hωu, ↓reduceIte]
-    rw [map_apply _ (by fun_prop), Measure.map_apply (by fun_prop) (hs.prod ht),
-      mk_preimage_prod, hω, prod_apply_prod, map_apply' _ (by fun_prop), map_apply' _ (by fun_prop)]
-    exacts [ht, hs]
+    rw [map_apply _ _ (by fun_prop), Measure.map_apply (hs.prod ht) (by fun_prop),
+      mk_preimage_prod, hω, prod_apply_prod, map_apply' _ _ ht (by fun_prop),
+      map_apply' _ _ hs (by fun_prop)]
   · intro s t hs ht
     rw [Measure.ext_prod₃_iff] at h
     refine ae_eq_of_forall_setLIntegral_eq_of_sigmaFinite ?_ ?_ ?_
@@ -318,8 +318,8 @@ theorem indepFun_iff_compProd_map_prod_eq_compProd_prod_map_map
     rw [Measure.compProd_apply_prod hu (hs.prod ht),
       Measure.compProd_apply_prod hu (hs.prod ht)] at h
     convert! h with ω ω
-    · rw [map_apply' _ (by fun_prop) _ (hs.prod ht), mk_preimage_prod]
-    · rw [prod_apply_prod, map_apply' _ (by fun_prop) _ hs, map_apply' _ (by fun_prop) _ ht]
+    · rw [map_apply' _ _ (hs.prod ht) (by fun_prop), mk_preimage_prod]
+    · rw [prod_apply_prod, map_apply' _ _ hs (by fun_prop), map_apply' _ _ ht (by fun_prop)]
 
 section iIndepFun
 variable {β : ι → Type*} {m : ∀ i, SigmaAlgebra (β i)} {f : ∀ i, Ω → β i}

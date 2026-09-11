@@ -1121,22 +1121,32 @@ theorem lintegral_abs_det_fderiv_eq_addHaar_image₀ (hs : NullMeasurableSet s �
   intro x hx
   exact (hf' x (ts hx)).mono ts
 
+omit [FiniteDimensional ℝ E] [μ.IsAddHaarMeasure] in
+/-- A function differentiable on a null measurable set is a.e. measurable with respect to the
+restriction of a measure to that set, including after adding a density. -/
+theorem aemeasurable_withDensity_abs_det_fderiv (hs : NullMeasurableSet s μ)
+    (hf' : ∀ x ∈ s, HasFDerivWithinAt f (f' x) s x) :
+    AEMeasurable f ((μ.restrict s).withDensity fun x => ENNReal.ofReal |(f' x).det|) := by
+  have h'f : AEMeasurable f (μ.restrict s) := by
+    apply ContinuousOn.aemeasurable₀ (fun x hx ↦ ?_) hs
+    exact (hf' x hx).differentiableWithinAt.continuousWithinAt
+  exact h'f.mono_ac (withDensity_absolutelyContinuous _ _)
+
 /-- Change of variable formula for differentiable functions, set version: if a function `f` is
 injective and differentiable on a null measurable set `s`, then the pushforward of the measure with
 density `|(f' x).det|` on `s` is the Lebesgue measure on the image set. -/
 theorem map_withDensity_abs_det_fderiv_eq_addHaar (hs : NullMeasurableSet s μ)
     (hf' : ∀ x ∈ s, HasFDerivWithinAt f (f' x) s x) (hf : InjOn f s) :
-    Measure.map f ((μ.restrict s).withDensity fun x => ENNReal.ofReal |(f' x).det|) =
+    Measure.map f ((μ.restrict s).withDensity fun x => ENNReal.ofReal |(f' x).det|)
+        (aemeasurable_withDensity_abs_det_fderiv μ hs hf') =
       μ.restrict (f '' s) := by
   have h'f : AEMeasurable f (μ.restrict s) := by
     apply ContinuousOn.aemeasurable₀ (fun x hx ↦ ?_) hs
     exact (hf' x hx).differentiableWithinAt.continuousWithinAt
-  have h''f : AEMeasurable f ((μ.restrict s).withDensity fun x => ENNReal.ofReal |(f' x).det|) := by
-    apply h'f.mono_ac
-    exact withDensity_absolutelyContinuous _ _
+  have h''f := aemeasurable_withDensity_abs_det_fderiv μ hs hf'
   apply Measure.ext fun t ht => ?_
   have h't : NullMeasurableSet (f ⁻¹' t) (μ.restrict s) := h'f.nullMeasurableSet_preimage ht
-  rw [map_apply_of_aemeasurable h''f ht, withDensity_apply₀ _ h't,
+  rw [Measure.map_apply ht h''f, withDensity_apply₀ _ h't,
     Measure.restrict_apply ht, restrict_restrict₀ h't,
     lintegral_abs_det_fderiv_eq_addHaar_image₀ μ ((nullMeasurableSet_restrict hs).1 h't)
       (fun x hx => (hf' x hx.2).mono inter_subset_right) (hf.mono inter_subset_right),
@@ -1150,7 +1160,9 @@ For a version for the original function, see `map_withDensity_abs_det_fderiv_eq_
 -/
 theorem restrict_map_withDensity_abs_det_fderiv_eq_addHaar (hs : MeasurableSet s)
     (hf' : ∀ x ∈ s, HasFDerivWithinAt f (f' x) s x) (hf : InjOn f s) :
-    Measure.map (s.domRestrict f) (comap (↑) (μ.withDensity fun x => ENNReal.ofReal |(f' x).det|)) =
+    Measure.map (s.domRestrict f)
+        (comap (↑) (μ.withDensity fun x => ENNReal.ofReal |(f' x).det|))
+        (measurableEmbedding_of_fderivWithin hs hf' hf).measurable.aemeasurable =
       μ.restrict (f '' s) := by
   obtain ⟨u, u_meas, uf⟩ : ∃ u, Measurable u ∧ EqOn u f s := by
     classical
@@ -1160,18 +1172,21 @@ theorem restrict_map_withDensity_abs_det_fderiv_eq_addHaar (hs : MeasurableSet s
     exact this.continuousOn
   have u' : ∀ x ∈ s, HasFDerivWithinAt u (f' x) s x := fun x hx =>
     (hf' x hx).congr (fun y hy => uf hy) (uf hx)
-  set F : s → E := u ∘ (↑) with hF
+  have humeas : Measurable (u ∘ (↑) : s → E) := u_meas.comp measurable_subtype_coe
   have A :
-    Measure.map F (comap (↑) (μ.withDensity fun x => ENNReal.ofReal |(f' x).det|)) =
+    Measure.map (u ∘ ((↑) : s → E))
+        (comap ((↑) : s → E) (μ.withDensity fun x => ENNReal.ofReal |(f' x).det|))
+        humeas.aemeasurable =
       μ.restrict (u '' s) := by
-    rw [hF, ← Measure.map_map u_meas measurable_subtype_coe, map_comap_subtype_coe hs,
+    rw [← Measure.map_map measurable_subtype_coe.aemeasurable u_meas.aemeasurable,
+      map_comap_subtype_coe hs,
       restrict_withDensity hs]
     exact map_withDensity_abs_det_fderiv_eq_addHaar μ hs.nullMeasurableSet u' (hf.congr uf.symm)
   rw [uf.image_eq] at A
-  have : F = s.domRestrict f := by
-    ext x
-    exact uf x.2
-  rwa [this] at A
+  have huf : (u ∘ (↑) : s → E) =ᵐ[comap ((↑) : s → E)
+      (μ.withDensity fun x => ENNReal.ofReal |(f' x).det|)] s.domRestrict f :=
+    ae_of_all _ fun x ↦ uf x.2
+  exact (Measure.map_congr huf humeas.aemeasurable).symm.trans A
 
 /-! ### Change of variable formulas in integrals -/
 
@@ -1250,7 +1265,8 @@ lemma _root_.MeasurableEquiv.withDensity_ofReal_map_symm_apply_eq_integral_abs_d
     (hs : MeasurableSet s) (f : E ≃ᵐ E)
     {g : E → ℝ} (hg : ∀ᵐ x ∂μ, x ∈ f '' s → 0 ≤ g x) (hg_int : IntegrableOn g (f '' s) μ)
     (hf' : ∀ x ∈ s, HasFDerivWithinAt f (f' x) s x) :
-    (μ.withDensity (fun x ↦ ENNReal.ofReal (g x))).map f.symm s
+    (μ.withDensity (fun x ↦ ENNReal.ofReal (g x))).map f.symm
+        f.symm.measurable.aemeasurable s
       = ENNReal.ofReal (∫ x in s, |(f' x).det| * g (f x) ∂μ) := by
   rw [MeasurableEquiv.map_symm,
     MeasurableEmbedding.withDensity_ofReal_comap_apply_eq_integral_abs_det_fderiv_mul μ hs

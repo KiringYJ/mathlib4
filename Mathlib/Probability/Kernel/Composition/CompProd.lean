@@ -89,9 +89,11 @@ theorem compProd_of_not_isSFiniteKernel_right (κ : Kernel α β) (η : Kernel (
 theorem compProd_apply (hs : MeasurableSet s) (κ : Kernel α β) [IsSFiniteKernel κ]
     (η : Kernel (α × β) γ) [IsSFiniteKernel η] (a : α) :
     (κ ⊗ₖ η) a s = ∫⁻ b, η (a, b) (Prod.mk b ⁻¹' s) ∂κ a := by
-  rw [compProd, comp_apply, copy_apply, Measure.dirac_bind (by fun_prop), comp_apply,
-    parallelComp_apply, Kernel.id_apply, Measure.bind_apply hs (by fun_prop),
-    lintegral_prod _ (Kernel.measurable_coe _ hs).aemeasurable, lintegral_dirac']
+  rw [compProd, comp_apply' _ _ _ hs, copy_apply,
+    lintegral_dirac' _ (Kernel.measurable_coe _ hs), comp_apply' _ _ _ hs,
+    parallelComp_apply,
+    lintegral_prod _ (Kernel.measurable_coe _ hs).aemeasurable, Kernel.id_apply,
+    lintegral_dirac']
   swap
   · suffices Measurable fun p : α × β ↦
       (swap γ β ∘ₖ (η ∥ₖ Kernel.id)
@@ -99,13 +101,20 @@ theorem compProd_apply (hs : MeasurableSet s) (κ : Kernel α β) [IsSFiniteKern
         ∘ₖ (Kernel.id ∥ₖ copy β)) p s by fun_prop
     exact Kernel.measurable_coe _ hs
   congr with b
-  rw [comp_apply, parallelComp_apply, Kernel.id_apply, copy_apply, Measure.dirac_prod_dirac,
-    Measure.dirac_bind (by fun_prop), comp_apply, deterministic_apply (by fun_prop),
-    Measure.dirac_bind (by fun_prop), comp_apply]
+  have h_meas : Measurable fun y : β × β =>
+      (swap γ β ∘ₖ (η ∥ₖ Kernel.id)
+        ∘ₖ deterministic MeasurableEquiv.prodAssoc.symm (MeasurableEquiv.measurable _))
+          (((a, a).1, b).1, y) s :=
+    (Kernel.measurable_coe _ hs).comp (measurable_const.prodMk measurable_id)
+  rw [comp_apply' _ _ _ hs, lintegral_parallelComp _ (Kernel.measurable_coe _ hs),
+    Kernel.id_apply, copy_apply,
+    lintegral_dirac' _ (Kernel.measurable_coe _ hs).lintegral_prod_right',
+    lintegral_dirac' _ h_meas,
+    comp_apply' _ _ _ hs, deterministic_apply (by fun_prop),
+    lintegral_dirac' _ (Kernel.measurable_coe _ hs), comp_apply' _ _ _ hs]
   simp only [MeasurableEquiv.prodAssoc, MeasurableEquiv.symm_mk, MeasurableEquiv.coe_mk,
     Equiv.prodAssoc_symm_apply]
-  rw [parallelComp_apply, Kernel.id_apply, Measure.bind_apply hs (by fun_prop),
-    lintegral_prod _ (Kernel.measurable_coe _ hs).aemeasurable]
+  rw [lintegral_parallelComp _ (Kernel.measurable_coe _ hs), Kernel.id_apply]
   classical
   have h_int x : ∫⁻ y, swap γ β (x, y) s ∂Measure.dirac b = (Prod.mk b ⁻¹' s).indicator 1 x := by
     rw [lintegral_dirac']
@@ -484,7 +493,7 @@ lemma compProd_assoc {δ : Type*} {mδ : SigmaAlgebra δ}
       infer_instance
     simp [hξ, this]
   ext a s hs
-  rw [compProd_apply hs, map_apply' _ (by fun_prop) _ hs,
+  rw [compProd_apply hs, map_apply' _ _ hs (by fun_prop),
     compProd_apply (hs.preimage (by fun_prop)), lintegral_compProd]
   swap; · exact measurable_kernel_prodMk_left' hs a
   congr with b

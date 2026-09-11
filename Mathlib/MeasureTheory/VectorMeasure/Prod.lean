@@ -193,16 +193,19 @@ lemma prod_flip_apply_eq_integral [CompleteSpace G] [IsFiniteMeasure μ.variatio
   simp [prod_apply_eq_integral hs]
 
 lemma variation_prod_le [CompleteSpace G] [IsFiniteMeasure μ.variation] [SFinite ν.variation] :
-    (μ.prod ν B).variation ≤ ‖B‖ₑ • μ.variation.prod ν.variation := by
+    (μ.prod ν B).variation ≤ ‖B‖ₑ • μ.variation.prod ν.variation
+      Measurable.map_prodMk_left.aemeasurable := by
   apply variation_le_of_forall_enorm_le (fun s hs ↦ ?_)
   rw [prod_apply_eq_integral hs]
-  simp only [Measure.smul_apply, smul_eq_mul, Measure.prod_apply hs]
+  simp only [Measure.smul_apply, smul_eq_mul,
+    Measure.prod_apply hs Measurable.map_prodMk_left.aemeasurable]
   grw [enorm_integral_le_lintegral_enorm, ContinuousLinearMap.opENorm_flip,
     enorm_measure_le_variation]
 
 instance [CompleteSpace G] [IsFiniteMeasure μ.variation] [IsFiniteMeasure ν.variation] :
     IsFiniteMeasure (μ.prod ν B).variation := by
-  have : IsFiniteMeasure (‖B‖ₑ • μ.variation.prod ν.variation) := by
+  have : IsFiniteMeasure (‖B‖ₑ • μ.variation.prod ν.variation
+      Measurable.map_prodMk_left.aemeasurable) := by
     simp only [enorm_eq_nnnorm, Measure.coe_nnreal_smul]
     infer_instance
   exact isFiniteMeasure_of_le _ variation_prod_le
@@ -210,7 +213,8 @@ instance [CompleteSpace G] [IsFiniteMeasure μ.variation] [IsFiniteMeasure ν.va
 omit [NormedSpace ℝ H] in
 lemma _root_.MeasureTheory.Integrable.prod_vectorMeasure
     [CompleteSpace G] [IsFiniteMeasure μ.variation] [IsFiniteMeasure ν.variation]
-    {f : X × Y → H} (hf : Integrable f (μ.variation.prod ν.variation)) :
+    {f : X × Y → H} (hf : Integrable f (μ.variation.prod ν.variation
+      Measurable.map_prodMk_left.aemeasurable)) :
     (μ.prod ν B).Integrable f :=
   Integrable.of_measure_le_smul (by simp) variation_prod_le hf
 

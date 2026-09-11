@@ -191,10 +191,11 @@ theorem NullMeasurableSet.mono_ac (h : NullMeasurableSet s μ) (hle : ν ≪ μ)
   exact ⟨t, ht, hst.filter_mono (ν.ae_le_iff_absolutelyContinuous.2 hle)⟩
 
 theorem ae_eq_comp' {ν : Measure β} {f : α → β} {g g' : β → δ} (hf : AEMeasurable f μ)
-    (h : g =ᵐ[ν] g') (h2 : μ.map f ≪ ν) : g ∘ f =ᵐ[μ] g' ∘ f :=
+    (h : g =ᵐ[ν] g') (h2 : μ.map f hf ≪ ν) : g ∘ f =ᵐ[μ] g' ∘ f :=
   (μ.tendsto_ae_map hf).mono_right h2.ae_le h
 
-theorem ae_eq_comp {f : α → β} {g g' : β → δ} (hf : AEMeasurable f μ) (h : g =ᵐ[μ.map f] g') :
+theorem ae_eq_comp {f : α → β} {g g' : β → δ} (hf : AEMeasurable f μ)
+    (h : g =ᵐ[μ.map f hf] g') :
     g ∘ f =ᵐ[μ] g' ∘ f :=
   ae_eq_comp' hf h .rfl
 
@@ -207,7 +208,7 @@ open MeasureTheory
 variable {m0 : SigmaAlgebra α} {m1 : SigmaAlgebra β} {f : α → β} {μ ν : Measure α}
 
 lemma absolutelyContinuous_map (hf : MeasurableEmbedding f) (hμν : μ ≪ ν) :
-    μ.map f ≪ ν.map f := by
+    μ.map f hf.measurable.aemeasurable ≪ ν.map f hf.measurable.aemeasurable := by
   intro t ht
   rw [hf.map_apply] at ht ⊢
   exact hμν ht

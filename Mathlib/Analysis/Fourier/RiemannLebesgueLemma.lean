@@ -257,9 +257,11 @@ theorem tendsto_integral_exp_smul_cocompact (μ : Measure V) [μ.IsAddHaarMeasur
   let Aₘ : MeasurableEquiv V V' := A.toHomeomorph.toMeasurableEquiv
   -- isomorphism between duals derived from A
   let Adual : StrongDual ℝ V ≃L[ℝ] StrongDual ℝ V' := A.arrowCongrSL (.refl _ _)
-  have : (μ.map Aₘ).IsAddHaarMeasure := A.isAddHaarMeasure_map _
+  have : (μ.map Aₘ Aₘ.measurable.aemeasurable).IsAddHaarMeasure :=
+    A.isAddHaarMeasure_map _
   convert!
-    (tendsto_integral_exp_smul_cocompact_of_inner_product (f ∘ A.symm) (μ.map Aₘ)).comp
+    (tendsto_integral_exp_smul_cocompact_of_inner_product (f ∘ A.symm)
+      (μ.map Aₘ Aₘ.measurable.aemeasurable)).comp
       Adual.toHomeomorph.toCocompactMap.cocompact_tendsto' with
     w
   suffices ∫ v, 𝐞 (-w v) • f v ∂μ = ∫ (x : V), 𝐞 (-w (A.symm (Aₘ x))) • f (A.symm (Aₘ x)) ∂μ by

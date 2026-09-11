@@ -345,7 +345,7 @@ theorem contDiffOn_convolution_right_with_param {f : G → E} {n : ℕ∞} (L : 
   let isoF : eF ≃L[𝕜] F := ContinuousLinearEquiv.ulift
   let isoP : eP ≃L[𝕜] P := ContinuousLinearEquiv.ulift
   let ef := f ∘ isoG
-  let eμ : Measure eG := Measure.map isoG.symm μ
+  let eμ : Measure eG := Measure.map isoG.symm μ (by fun_prop)
   let eg : eP → eG → eE' := fun ep ex => isoE'.symm (g (isoP ep) (isoG ex))
   let eL :=
     ContinuousLinearMap.comp

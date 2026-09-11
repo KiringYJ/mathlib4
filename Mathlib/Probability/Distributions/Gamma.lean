@@ -128,6 +128,10 @@ noncomputable
 def gammaMeasure (a r : ℝ) : Measure ℝ :=
   volume.withDensity (gammaPDF a r)
 
+noncomputable instance instSFiniteGammaMeasure (a r : ℝ) : SFinite (gammaMeasure a r) := by
+  rw [gammaMeasure]
+  infer_instance
+
 lemma isProbabilityMeasure_gammaMeasure {a r : ℝ} (ha : 0 < a) (hr : 0 < r) :
     IsProbabilityMeasure (gammaMeasure a r) where
   measure_univ := by simp [gammaMeasure, lintegral_gammaPDF_eq_one ha hr]

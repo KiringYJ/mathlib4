@@ -56,13 +56,23 @@ variable (μ : Π i, FiniteMeasure (α i))
   simp only [mass]
   rw [← pi_univ (univ : Set ι), pi_pi]
 
+lemma aemeasurable_pi_map {β : ι → Type*} [∀ i, SigmaAlgebra (β i)]
+    {f : Π i, α i → β i} (f_mble : ∀ i, AEMeasurable (f i) (μ i)) :
+    AEMeasurable (fun (x : Π i, α i) i ↦ f i (x i)) (FiniteMeasure.pi μ) := by
+  change AEMeasurable (fun (x : Π i, α i) i ↦ f i (x i))
+    (Measure.pi fun i ↦ (μ i : Measure (α i)))
+  exact Measure.aemeasurable_pi_map f_mble (fun _ ↦ inferInstance)
+
 lemma pi_map_pi {β : ι → Type*} [∀ i, SigmaAlgebra (β i)] {f : Π i, α i → β i}
     (f_mble : ∀ i, AEMeasurable (f i) (μ i)) :
-    (FiniteMeasure.pi μ).map (fun x i ↦ (f i (x i))) =
-      FiniteMeasure.pi (fun i ↦ (μ i).map (f i)) := by
+    (FiniteMeasure.pi μ).map (fun x i ↦ f i (x i))
+        (FiniteMeasure.aemeasurable_pi_map μ f_mble) =
+      FiniteMeasure.pi (fun i ↦ (μ i).map (f i) (f_mble i)) := by
   apply Subtype.ext
-  simp only [val_eq_toMeasure, toMeasure_map, toMeasure_pi]
-  rw [Measure.pi_map_pi f_mble]
+  change Measure.map (fun x i ↦ f i (x i))
+      (Measure.pi fun i ↦ (μ i : Measure (α i))) _ =
+    Measure.pi fun i ↦ ((μ i).map (f i) (f_mble i) : Measure (β i))
+  exact Measure.pi_map_pi f_mble
 
 end FiniteMeasure
 

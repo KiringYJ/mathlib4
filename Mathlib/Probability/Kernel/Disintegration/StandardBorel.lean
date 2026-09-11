@@ -265,11 +265,12 @@ lemma compProd_fst_borelMarkovFromReal_eq_comapRight_compProd
   change fst κ ⊗ₖ borelMarkovFromReal Ω η = comapRight (fst κ' ⊗ₖ η) h_prod_embed
   rw [comapRight_compProd_id_prod _ _ he]
   have h_fst : fst κ' = fst κ := by
-    ext a u
-    unfold κ'
-    rw [fst_apply, map_apply _ (by fun_prop),
-      Measure.map_map measurable_fst h_prod_embed.measurable, fst_apply]
-    congr
+    calc
+      fst κ' = map κ Prod.fst := by
+        unfold κ'
+        change fst (map κ (fun x ↦ (x.1, e x.2))) = map κ Prod.fst
+        exact fst_map_prod κ (he.measurable.comp measurable_snd)
+      _ = fst κ := (fst_eq κ).symm
   rw [h_fst]
   ext a t ht : 2
   simp_rw [compProd_apply ht]
@@ -278,8 +279,7 @@ lemma compProd_fst_borelMarkovFromReal_eq_comapRight_compProd
     rw [← h_fst]
     have h_compProd : κ' a (univ ×ˢ range e)ᶜ = 0 := by
       unfold κ'
-      rw [map_apply' _ (by fun_prop)]
-      swap; · exact (MeasurableSet.univ.prod he.measurableSet_range).compl
+      rw [map_apply' _ _ ((MeasurableSet.univ.prod he.measurableSet_range).compl) (by fun_prop)]
       suffices Prod.map id e ⁻¹' (univ ×ˢ range e)ᶜ = ∅ by rw [this]; simp
       ext x
       simp
@@ -312,7 +312,7 @@ lemma compProd_fst_borelMarkovFromReal (κ : Kernel α (β × Ω)) [IsSFiniteKer
   have : κ = comapRight κ' h_prod_embed := by
     ext c t : 2
     unfold κ'
-    rw [comapRight_apply, map_apply _ (by fun_prop), h_prod_embed.comap_map]
+    rw [comapRight_apply, map_apply _ _ (by fun_prop), h_prod_embed.comap_map]
   conv_rhs => rw [this, ← hη']
   exact compProd_fst_borelMarkovFromReal_eq_comapRight_compProd κ η hη
 

@@ -503,31 +503,38 @@ variable {mβ : SigmaAlgebra β} {f : α → β}
 
 lemma _root_.MeasurableEmbedding.rnDeriv_map_aux (hf : MeasurableEmbedding f)
     (hμν : μ ≪ ν) [SigmaFinite μ] [SigmaFinite ν] :
-    (fun x ↦ (μ.map f).rnDeriv (ν.map f) (f x)) =ᵐ[ν] μ.rnDeriv ν := by
+    (fun x ↦ (μ.map f hf.measurable.aemeasurable).rnDeriv
+      (ν.map f hf.measurable.aemeasurable) (f x)) =ᵐ[ν] μ.rnDeriv ν := by
   refine ae_eq_of_forall_setLIntegral_eq_of_sigmaFinite ?_ ?_ (fun s _ _ ↦ ?_)
   · exact (Measure.measurable_rnDeriv _ _).comp hf.measurable
   · exact Measure.measurable_rnDeriv _ _
   rw [← hf.lintegral_map, Measure.setLIntegral_rnDeriv hμν]
   have hs_eq : s = f ⁻¹' f '' s := by rw [hf.injective.preimage_image]
-  have : SigmaFinite (ν.map f) := hf.sigmaFinite_map
+  have : SigmaFinite (ν.map f hf.measurable.aemeasurable) := hf.sigmaFinite_map
   rw [hs_eq, ← hf.restrict_map, Measure.setLIntegral_rnDeriv (hf.absolutelyContinuous_map hμν),
     hf.map_apply]
 
 lemma _root_.MeasurableEmbedding.rnDeriv_map (hf : MeasurableEmbedding f)
     (μ ν : Measure α) [SigmaFinite μ] [SigmaFinite ν] :
-    (fun x ↦ (μ.map f).rnDeriv (ν.map f) (f x)) =ᵐ[ν] μ.rnDeriv ν := by
+    (fun x ↦ (μ.map f hf.measurable.aemeasurable).rnDeriv
+      (ν.map f hf.measurable.aemeasurable) (f x)) =ᵐ[ν] μ.rnDeriv ν := by
   rw [μ.haveLebesgueDecomposition_add ν, Measure.map_add _ _ hf.measurable]
-  have : SigmaFinite (map f ν) := hf.sigmaFinite_map
-  have : SigmaFinite (map f (μ.singularPart ν)) := hf.sigmaFinite_map
-  have : SigmaFinite (map f (ν.withDensity (μ.rnDeriv ν))) := hf.sigmaFinite_map
-  have h_add := Measure.rnDeriv_add' ((μ.singularPart ν).map f)
-    ((ν.withDensity (μ.rnDeriv ν)).map f) (ν.map f)
+  have : SigmaFinite (map f ν hf.measurable.aemeasurable) := hf.sigmaFinite_map
+  have : SigmaFinite (map f (μ.singularPart ν) hf.measurable.aemeasurable) :=
+    hf.sigmaFinite_map
+  have : SigmaFinite (map f (ν.withDensity (μ.rnDeriv ν)) hf.measurable.aemeasurable) :=
+    hf.sigmaFinite_map
+  have h_add := Measure.rnDeriv_add'
+    ((μ.singularPart ν).map f hf.measurable.aemeasurable)
+    ((ν.withDensity (μ.rnDeriv ν)).map f hf.measurable.aemeasurable)
+    (ν.map f hf.measurable.aemeasurable)
   rw [Filter.EventuallyEq, hf.ae_map_iff, ← Filter.EventuallyEq] at h_add
   refine h_add.trans ((Measure.rnDeriv_add' _ _ _).trans ?_).symm
   refine Filter.EventuallyEq.add ?_ ?_
   · refine (Measure.rnDeriv_singularPart μ ν).trans ?_
     symm
-    suffices (fun x ↦ ((μ.singularPart ν).map f).rnDeriv (ν.map f) x) =ᵐ[ν.map f] 0 by
+    suffices (fun x ↦ ((μ.singularPart ν).map f hf.measurable.aemeasurable).rnDeriv
+        (ν.map f hf.measurable.aemeasurable) x) =ᵐ[ν.map f hf.measurable.aemeasurable] 0 by
       rw [Filter.EventuallyEq, hf.ae_map_iff] at this
       exact this
     refine Measure.rnDeriv_eq_zero_of_mutuallySingular ?_ Measure.AbsolutelyContinuous.rfl
@@ -536,7 +543,10 @@ lemma _root_.MeasurableEmbedding.rnDeriv_map (hf : MeasurableEmbedding f)
 
 lemma _root_.MeasurableEmbedding.map_withDensity_rnDeriv (hf : MeasurableEmbedding f)
     (μ ν : Measure α) [SigmaFinite μ] [SigmaFinite ν] :
-    (ν.withDensity (μ.rnDeriv ν)).map f = (ν.map f).withDensity ((μ.map f).rnDeriv (ν.map f)) := by
+    (ν.withDensity (μ.rnDeriv ν)).map f hf.measurable.aemeasurable =
+      (ν.map f hf.measurable.aemeasurable).withDensity
+        ((μ.map f hf.measurable.aemeasurable).rnDeriv
+          (ν.map f hf.measurable.aemeasurable)) := by
   ext s hs
   rw [hf.map_apply, withDensity_apply _ (hf.measurable hs), withDensity_apply _ hs,
     setLIntegral_map hs (Measure.measurable_rnDeriv _ _) hf.measurable]
@@ -545,9 +555,14 @@ lemma _root_.MeasurableEmbedding.map_withDensity_rnDeriv (hf : MeasurableEmbeddi
 
 lemma _root_.MeasurableEmbedding.singularPart_map (hf : MeasurableEmbedding f)
     (μ ν : Measure α) [SigmaFinite μ] [SigmaFinite ν] :
-    (μ.map f).singularPart (ν.map f) = (μ.singularPart ν).map f := by
-  have h_add : μ.map f = (μ.singularPart ν).map f
-      + (ν.map f).withDensity ((μ.map f).rnDeriv (ν.map f)) := by
+    (μ.map f hf.measurable.aemeasurable).singularPart
+      (ν.map f hf.measurable.aemeasurable) =
+        (μ.singularPart ν).map f hf.measurable.aemeasurable := by
+  have h_add : μ.map f hf.measurable.aemeasurable =
+      (μ.singularPart ν).map f hf.measurable.aemeasurable
+        + (ν.map f hf.measurable.aemeasurable).withDensity
+          ((μ.map f hf.measurable.aemeasurable).rnDeriv
+            (ν.map f hf.measurable.aemeasurable)) := by
     conv_lhs => rw [μ.haveLebesgueDecomposition_add ν]
     rw [Measure.map_add _ _ hf.measurable, ← hf.map_withDensity_rnDeriv μ ν]
   refine (Measure.eq_singularPart (Measure.measurable_rnDeriv _ _) ?_ h_add).symm
@@ -636,15 +651,16 @@ variable {G : Type*} [Group G] {mG : SigmaAlgebra G} [MeasurableMul₂ G] [Measu
 
 @[to_additive]
 theorem mconv_eq_withDensity_mlconvolution_rnDeriv [SFinite μ] {ν₁ ν₂ : Measure G}
-    [ν₁.HaveLebesgueDecomposition μ] [ν₂.HaveLebesgueDecomposition μ]
+    [SFinite ν₂] [ν₁.HaveLebesgueDecomposition μ] [ν₂.HaveLebesgueDecomposition μ]
     (hν₁ : ν₁ ≪ μ) (hν₂ : ν₂ ≪ μ) :
     ν₁ ∗ₘ ν₂ = μ.withDensity (ν₁.rnDeriv μ ⋆ₘₗ[μ] ν₂.rnDeriv μ) := by
-  rw [← mconv_withDensity_eq_mlconvolution (by fun_prop) (by fun_prop),
-    withDensity_rnDeriv_eq _ _ hν₁, withDensity_rnDeriv_eq _ _ hν₂]
+  simpa only [withDensity_rnDeriv_eq _ _ hν₁, withDensity_rnDeriv_eq _ _ hν₂] using
+    (mconv_withDensity_eq_mlconvolution (μ := μ) (Measure.measurable_rnDeriv ν₁ μ)
+      (Measure.measurable_rnDeriv ν₂ μ))
 
 @[to_additive]
 theorem HaveLebesgueDecomposition.mconv [SFinite μ] {ν₁ ν₂ : Measure G}
-    [ν₁.HaveLebesgueDecomposition μ] [ν₂.HaveLebesgueDecomposition μ]
+    [SFinite ν₂] [ν₁.HaveLebesgueDecomposition μ] [ν₂.HaveLebesgueDecomposition μ]
     (hν₁ : ν₁ ≪ μ) (hν₂ : ν₂ ≪ μ) : (ν₁ ∗ₘ ν₂).HaveLebesgueDecomposition μ :=
   ⟨⟨0, (ν₁.rnDeriv μ) ⋆ₘₗ[μ] (ν₂.rnDeriv μ)⟩, by fun_prop, by simp,
     by simpa using mconv_eq_withDensity_mlconvolution_rnDeriv hν₁ hν₂⟩

@@ -31,7 +31,7 @@ The main definitions are
   bounded continuous nonnegative functions on `Ω`. This is used for the definition of the
   topology of weak convergence.
 * `MeasureTheory.FiniteMeasure.map`: The push-forward `f* μ` of a finite measure `μ` on `Ω`
-  along a measurable function `f : Ω → Ω'`.
+  along an almost everywhere measurable function `f : Ω → Ω'`.
 * `MeasureTheory.FiniteMeasure.mapCLM`: The push-forward along a given continuous `f : Ω → Ω'`
   as a continuous linear map `f* : FiniteMeasure Ω →L[ℝ≥0] FiniteMeasure Ω'`.
 
@@ -901,38 +901,42 @@ section map
 
 variable {Ω Ω' : Type*} [SigmaAlgebra Ω] [SigmaAlgebra Ω']
 
-/-- The push-forward of a finite measure by a function between measurable spaces. -/
-noncomputable def map (ν : FiniteMeasure Ω) (f : Ω → Ω') : FiniteMeasure Ω' :=
-  ⟨(ν : Measure Ω).map f, (ν : Measure Ω).isFiniteMeasure_map f⟩
+/-- The push-forward of a finite measure by an almost everywhere measurable function. -/
+noncomputable def map (ν : FiniteMeasure Ω) (f : Ω → Ω')
+    (hf : AEMeasurable f ν := by fun_prop) : FiniteMeasure Ω' :=
+  ⟨(ν : Measure Ω).map f hf, (ν : Measure Ω).isFiniteMeasure_map f hf⟩
 
-@[simp] lemma toMeasure_map (ν : FiniteMeasure Ω) (f : Ω → Ω') :
-    (ν.map f).toMeasure = ν.toMeasure.map f := rfl
+@[simp] lemma toMeasure_map (ν : FiniteMeasure Ω) (f : Ω → Ω')
+    (hf : AEMeasurable f ν := by fun_prop) :
+    (ν.map f hf).toMeasure = ν.toMeasure.map f hf := rfl
 
 /-- Note that this is an equality of elements of `ℝ≥0∞`. See also
 `MeasureTheory.FiniteMeasure.map_apply` for the corresponding equality as elements of `ℝ≥0`. -/
-lemma map_apply' (ν : FiniteMeasure Ω) {f : Ω → Ω'} (f_aemble : AEMeasurable f ν)
-    {A : Set Ω'} (A_mble : MeasurableSet A) :
-    (ν.map f : Measure Ω') A = (ν : Measure Ω) (f ⁻¹' A) :=
-  Measure.map_apply_of_aemeasurable f_aemble A_mble
+lemma map_apply' (ν : FiniteMeasure Ω) {f : Ω → Ω'} {A : Set Ω'}
+    (A_mble : MeasurableSet A) (f_aemble : AEMeasurable f ν := by fun_prop) :
+    (ν.map f f_aemble : Measure Ω') A = (ν : Measure Ω) (f ⁻¹' A) :=
+  Measure.map_apply A_mble f_aemble
 
-lemma map_apply_of_aemeasurable (ν : FiniteMeasure Ω) {f : Ω → Ω'} (f_aemble : AEMeasurable f ν)
-    {A : Set Ω'} (A_mble : MeasurableSet A) :
-    ν.map f A = ν (f ⁻¹' A) := by
-  have key := ν.map_apply' f_aemble A_mble
+@[simp]
+lemma map_apply (ν : FiniteMeasure Ω) {f : Ω → Ω'} {A : Set Ω'}
+    (A_mble : MeasurableSet A) (f_aemble : AEMeasurable f ν := by fun_prop) :
+    ν.map f f_aemble A = ν (f ⁻¹' A) := by
+  have key := ν.map_apply' A_mble f_aemble
   exact (ENNReal.toNNReal_eq_toNNReal_iff' (measure_ne_top _ _) (measure_ne_top _ _)).mpr key
-
-lemma map_apply (ν : FiniteMeasure Ω) {f : Ω → Ω'} (f_mble : Measurable f)
-    {A : Set Ω'} (A_mble : MeasurableSet A) :
-    ν.map f A = ν (f ⁻¹' A) :=
-  map_apply_of_aemeasurable ν f_mble.aemeasurable A_mble
 
 @[simp] lemma map_add {f : Ω → Ω'} (f_mble : Measurable f) (ν₁ ν₂ : FiniteMeasure Ω) :
     (ν₁ + ν₂).map f = ν₁.map f + ν₂.map f := by ext; simp [*]
 
+@[fun_prop]
+lemma aemeasurable_smul {f : Ω → Ω'} {ν : FiniteMeasure Ω} (hf : AEMeasurable f ν)
+    (c : ℝ≥0) : AEMeasurable f (c • ν) := by
+  simpa only [toMeasure_smul] using hf.smul_measure c
+
 @[simp] lemma map_smul {f : Ω → Ω'} (c : ℝ≥0) {ν : FiniteMeasure Ω} (hf : AEMeasurable f ν) :
-    (c • ν).map f = c • (ν.map f) := by
-  ext s _
-  simp [toMeasure_smul, hf]
+    (c • ν).map f (aemeasurable_smul hf c) = c • (ν.map f hf) := by
+  apply Subtype.ext
+  change Measure.map f (c • (ν : Measure Ω)) _ = c • Measure.map f (ν : Measure Ω) hf
+  exact Measure.map_smul c hf
 
 /-- The push-forward of a finite measure by a function between measurable spaces as a linear map. -/
 noncomputable def mapHom {f : Ω → Ω'} (f_mble : Measurable f) :
@@ -942,10 +946,10 @@ noncomputable def mapHom {f : Ω → Ω'} (f_mble : Measurable f) :
   map_smul' m _ := map_smul m f_mble.aemeasurable
 
 lemma mass_map_le {f : Ω → Ω'} {μ : FiniteMeasure Ω} (hf : AEMeasurable f μ) :
-    (μ.map f).mass ≤ μ.mass := by
+    (μ.map f hf).mass ≤ μ.mass := by
   simp only [mass, coeFn_def, toMeasure_map, ne_eq, measure_ne_top, not_false_eq_true,
     ENNReal.toNNReal_le_toNNReal]
-  rw [Measure.map_apply_of_aemeasurable hf MeasurableSet.univ]
+  rw [Measure.map_apply MeasurableSet.univ hf]
   exact measure_mono (subset_univ _)
 
 variable [TopologicalSpace Ω] [OpensSigmaAlgebra Ω]
@@ -985,14 +989,15 @@ noncomputable def mapCLM {f : Ω → Ω'} (f_cont : Continuous f) :
 lemma Topology.IsClosedEmbedding.isEmbedding_map_finiteMeasure {Ω : Type*}
     [SigmaAlgebra Ω] [TopologicalSpace Ω] [BorelSpace Ω] [NormalSpace Ω']
     (f : Ω → Ω') (hf : IsClosedEmbedding f) :
-    IsEmbedding (fun (μ : FiniteMeasure Ω) ↦ μ.map f) := by
+    IsEmbedding (fun (μ : FiniteMeasure Ω) ↦ μ.map f hf.continuous.measurable.aemeasurable) := by
   let M : Set (FiniteMeasure Ω') := {μ | μ (range f)ᶜ = 0}
   have A : IsEmbedding (Subtype.val : M → FiniteMeasure Ω') := IsEmbedding.subtypeVal
   let B : FiniteMeasure Ω ≃ₜ M :=
   { toFun μ := by
-      refine ⟨μ.map f, ?_⟩
+      refine ⟨μ.map f hf.continuous.measurable.aemeasurable, ?_⟩
       simp only [null_iff_toMeasure_null, mem_ofPred_eq, toMeasure_map, M]
-      rw [Measure.map_apply hf.continuous.measurable hf.isClosed_range.isOpen_compl.measurableSet]
+      rw [Measure.map_apply hf.isClosed_range.isOpen_compl.measurableSet
+        hf.continuous.measurable.aemeasurable]
       simp
     invFun := M.domRestrict (fun μ ↦ μ.comap f)
     continuous_toFun := by fun_prop
@@ -1002,17 +1007,14 @@ lemma Topology.IsClosedEmbedding.isEmbedding_map_finiteMeasure {Ω : Type*}
     left_inv μ := by
       ext s hs
       simp only [Set.domRestrict_apply, toMeasure_comap, toMeasure_map]
-      rw [Measure.comap_apply, Measure.map_apply, preimage_image_eq]
-      · exact hf.injective
-      · exact hf.continuous.measurable
-      · exact hf.measurableEmbedding.measurableSet_image' hs
-      · exact hf.injective
-      · exact fun t ht ↦ hf.measurableEmbedding.measurableSet_image' ht
-      · exact hs
+      rw [Measure.comap_apply f hf.injective hf.measurableEmbedding.measurableSet_image' _ hs,
+        Measure.map_apply (hf.measurableEmbedding.measurableSet_image' hs)
+          hf.continuous.measurable.aemeasurable,
+        preimage_image_eq _ hf.injective]
     right_inv μ := by
       ext s hs
       simp only [Set.domRestrict_apply, toMeasure_map]
-      rw [Measure.map_apply hf.continuous.measurable hs]
+      rw [Measure.map_apply hs hf.continuous.measurable.aemeasurable]
       simp only [toMeasure_comap]
       rw [Measure.comap_apply _ hf.injective, image_preimage_eq_inter_range]
       · rw [← Measure.restrict_apply hs, Measure.restrict_eq_self_of_ae_mem]

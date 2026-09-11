@@ -285,15 +285,14 @@ lemma of_map {Ω'' : Type*} {mΩ'' : SigmaAlgebra Ω''} {κ : Kernel Ω' Ω''}
     HasSubgaussianMGF (X ∘ Y) c κ ν where
   integrable_exp_mul t := by
     have h1 := h.integrable_exp_mul t
-    rwa [← Measure.map_comp _ _ hY, integrable_map_measure h1.aestronglyMeasurable (by fun_prop)]
+    rwa [← Measure.map_comp _ _ hY, integrable_map_measure (by fun_prop) h1.aestronglyMeasurable]
       at h1
   mgf_le := by
     filter_upwards [h.ae_forall_integrable_exp_mul, h.mgf_le] with ω' h_int h_mgf t
     convert! h_mgf t
     ext t
-    rw [map_apply _ hY, mgf_map hY.aemeasurable]
+    rw [map_apply _ _ hY, mgf_map hY.aemeasurable]
     convert! (h_int t).1
-    rw [map_apply _ hY]
 
 lemma id_map_iff (hX : Measurable X) :
     HasSubgaussianMGF id c (κ.map X) ν ↔ HasSubgaussianMGF X c κ ν := by
@@ -301,9 +300,9 @@ lemma id_map_iff (hX : Measurable X) :
   · change HasSubgaussianMGF (id ∘ X) c κ ν
     exact .of_map hX h
   · rw [← Kernel.deterministic_comp_eq_map hX, ← Measure.comp_assoc,
-      Measure.deterministic_comp_eq_map, integrable_map_measure (by fun_prop) hX.aemeasurable]
+      Measure.deterministic_comp_eq_map, integrable_map_measure hX.aemeasurable (by fun_prop)]
     exact h.integrable_exp_mul t
-  · simpa [Kernel.map_apply _ hX, mgf_id_map hX.aemeasurable] using h.mgf_le
+  · simpa [Kernel.map_apply _ _ hX, mgf_id_map hX.aemeasurable] using h.mgf_le
 
 protected lemma const_mul (h : HasSubgaussianMGF X c κ ν) (r : ℝ) :
     HasSubgaussianMGF (fun ω ↦ r * X ω) (.mk (r ^ 2) (sq_nonneg r) * c) κ ν where
@@ -476,12 +475,19 @@ lemma integrable_exp_add_compProd {η : Kernel (Ω' × Ω) Ω''} [IsZeroOrMarkov
   refine MemLp.integrable_mul (p := 2) (q := 2) ?_ ?_
   · have h := hX.memLp_exp_mul t 2
     simp only [ENNReal.coe_ofNat] at h
-    have : κ ∘ₘ ν = ((κ ⊗ₖ η) ∘ₘ ν).map Prod.fst := by
-      rw [Measure.map_comp _ _ measurable_fst, ← fst_eq, fst_compProd]
-    rwa [this, memLp_map_measure_iff h.1 measurable_fst.aemeasurable] at h
+    have : κ ∘ₘ ν = ((κ ⊗ₖ η) ∘ₘ ν).map Prod.fst measurable_fst.aemeasurable := by
+      symm
+      calc
+        ((κ ⊗ₖ η) ∘ₘ ν).map Prod.fst = ((κ ⊗ₖ η).map Prod.fst) ∘ₘ ν :=
+          Measure.map_comp _ _ measurable_fst
+        _ = (κ ⊗ₖ η).fst ∘ₘ ν := congrArg (fun ξ : Kernel Ω' Ω ↦ ξ ∘ₘ ν)
+          (Kernel.fst_eq (κ ⊗ₖ η)).symm
+        _ = κ ∘ₘ ν := congrArg (fun ξ : Kernel Ω' Ω ↦ ξ ∘ₘ ν)
+          (Kernel.fst_compProd κ η)
+    rwa [this, memLp_map_measure_iff measurable_fst.aemeasurable h.1] at h
   · have h := hY.memLp_exp_mul t 2
     rwa [ENNReal.coe_ofNat, Measure.comp_compProd_comm, Measure.snd,
-      memLp_map_measure_iff h.1 measurable_snd.aemeasurable] at h
+      memLp_map_measure_iff measurable_snd.aemeasurable h.1] at h
 
 /-- For `ν : Measure Ω'`, `κ : Kernel Ω' Ω` and `η : (Ω' × Ω) Ω''`, if a random variable `X : Ω → ℝ`
 has a sub-Gaussian mgf with respect to `κ` and `ν` and another random variable `Y : Ω'' → ℝ` has
@@ -647,21 +653,22 @@ lemma neg {c : ℝ≥0} (h : HasSubgaussianMGF X c μ) : HasSubgaussianMGF (-X) 
   simpa [HasSubgaussianMGF_iff_kernel] using (HasSubgaussianMGF_iff_kernel.1 h).neg
 
 lemma of_map {Ω' : Type*} {mΩ' : SigmaAlgebra Ω'} {μ : Measure Ω'}
-    {Y : Ω' → Ω} {X : Ω → ℝ} (hY : AEMeasurable Y μ) (h : HasSubgaussianMGF X c (μ.map Y)) :
+    {Y : Ω' → Ω} {X : Ω → ℝ} (hY : AEMeasurable Y μ)
+    (h : HasSubgaussianMGF X c (μ.map Y hY)) :
     HasSubgaussianMGF (X ∘ Y) c μ where
   integrable_exp_mul t := by
     have h1 := h.integrable_exp_mul t
-    rwa [integrable_map_measure h1.aestronglyMeasurable (by fun_prop)] at h1
+    rwa [integrable_map_measure (by fun_prop) h1.aestronglyMeasurable] at h1
   mgf_le t := by
     convert! h.mgf_le t using 1
     rw [mgf_map hY (h.integrable_exp_mul t).1]
 
 lemma id_map_iff (hX : AEMeasurable X μ) :
-    HasSubgaussianMGF id c (μ.map X) ↔ HasSubgaussianMGF X c μ := by
+    HasSubgaussianMGF id c (μ.map X hX) ↔ HasSubgaussianMGF X c μ := by
   refine ⟨fun h ↦ ?_, fun h ↦ ⟨fun t ↦ ?_, fun t ↦ ?_⟩⟩
   · rw [← Function.id_comp X]
     exact .of_map hX h
-  · rw [integrable_map_measure (by fun_prop) hX]
+  · rw [integrable_map_measure hX (by fun_prop)]
     exact h.integrable_exp_mul t
   · rw [mgf_id_map hX]
     exact h.mgf_le t
@@ -882,7 +889,9 @@ lemma HasSubgaussianMGF.add_of_hasCondSubgaussianMGF [IsFiniteMeasure μ]
     (hX : HasSubgaussianMGF X cX (μ.trim hm)) (hY : HasCondSubgaussianMGF m hm Y cY μ) :
     HasSubgaussianMGF (X + Y) (cX + cY) μ := by
   suffices HasSubgaussianMGF (fun p ↦ X p.1 + Y p.2) (cX + cY)
-      (@Measure.map Ω (Ω × Ω) mΩ (m.prod mΩ) Function.diag μ) by
+      (@Measure.map Ω (Ω × Ω) mΩ (m.prod mΩ) Function.diag μ
+        (@Measurable.aemeasurable _ _ _ (m.prod mΩ) _ _
+          ((measurable_id'' hm).prodMk measurable_id))) by
     have h_eq : X + Y = (fun p ↦ X p.1 + Y p.2) ∘ Function.diag := rfl
     rw [h_eq]
     refine HasSubgaussianMGF.of_map ?_ this

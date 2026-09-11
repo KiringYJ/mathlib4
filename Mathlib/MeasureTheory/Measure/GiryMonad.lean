@@ -102,9 +102,9 @@ theorem _root_.Measurable.measure_of_isPiSystem_of_isProbabilityMeasure {μ : α
 
 @[fun_prop]
 theorem measurable_map (f : α → β) (hf : Measurable f) :
-    Measurable fun μ : Measure α => map f μ := by
+    Measurable fun μ : Measure α => map f μ hf.aemeasurable := by
   refine measurable_of_measurable_coe _ fun s hs => ?_
-  simp_rw [map_apply hf hs]
+  simp_rw [map_apply hs hf.aemeasurable]
   exact measurable_coe (hf hs)
 
 @[fun_prop]
@@ -224,37 +224,40 @@ theorem lintegral_join_le (f : α → ℝ≥0∞) (m : Measure (Measure α)) :
   gcongr
   apply hgf
 
-/-- Monadic bind on `Measure`, only works in the category of measurable spaces and measurable
-functions. When the function `f` is not measurable the result is not well defined. -/
-def bind (m : Measure α) (f : α → Measure β) : Measure β :=
-  join (map f m)
+/-- Monadic bind on `Measure`, defined for an almost everywhere measurable measure-valued
+function. -/
+def bind (m : Measure α) (f : α → Measure β)
+    (hf : AEMeasurable f m := by fun_prop) : Measure β :=
+  join (map f m hf)
 
 @[simp]
 theorem bind_zero_left (f : α → Measure β) : bind (0 : Measure α) f = 0 := by simp [bind]
 
 @[simp]
 theorem bind_apply {m : Measure α} {f : α → Measure β} {s : Set β} (hs : MeasurableSet s)
-    (hf : AEMeasurable f m) : bind m f s = ∫⁻ a, f a s ∂m := by
-  rw [bind, join_apply hs, lintegral_map' (measurable_coe hs).aemeasurable hf]
+    (hf : AEMeasurable f m := by fun_prop) : bind m f hf s = ∫⁻ a, f a s ∂m := by
+  rw [bind, join_apply hs, lintegral_map' hf (measurable_coe hs).aemeasurable]
 
-theorem bind_apply_le {m : Measure α} {f : α → Measure β} (hf : AEMeasurable f m) {s : Set β}
-    (hs : MeasurableSet s) :
-    bind m f s ≤ ∫⁻ a, f a s ∂m := by
+theorem bind_apply_le {m : Measure α} {f : α → Measure β} {s : Set β}
+    (hs : MeasurableSet s) (hf : AEMeasurable f m := by fun_prop) :
+    bind m f hf s ≤ ∫⁻ a, f a s ∂m := by
   rw [bind, join_apply hs]
   apply lintegral_map_le _ hf
 
 theorem ae_ae_of_ae_bind {m : Measure α} {f : α → Measure β} {p : β → Prop} (hf : AEMeasurable f m)
-    (h : ∀ᵐ b ∂m.bind f, p b) : ∀ᵐ a ∂m, ∀ᵐ b ∂f a, p b :=
+    (h : ∀ᵐ b ∂m.bind f hf, p b) : ∀ᵐ a ∂m, ∀ᵐ b ∂f a, p b :=
   ae_of_ae_map hf <| ae_ae_of_ae_join h
 
 theorem _root_.AEMeasurable.ae_of_bind {γ : Type*} {_ : SigmaAlgebra γ} {m : Measure α}
-    {f : α → Measure β} {g : β → γ} (hf : AEMeasurable f m) (hg : AEMeasurable g (m.bind f)) :
+    {f : α → Measure β} {g : β → γ} (hf : AEMeasurable f m)
+    (hg : AEMeasurable g (m.bind f hf)) :
     ∀ᵐ a ∂m, AEMeasurable g (f a) :=
   ae_of_ae_map hf hg.ae_of_join
 
-theorem bind_congr_right {μ : Measure α} {f g : α → Measure β} (h : f =ᵐ[μ] g) :
-    μ.bind f = μ.bind g :=
-  congrArg join <| map_congr h
+theorem bind_congr_right {μ : Measure α} {f g : α → Measure β} (h : f =ᵐ[μ] g)
+    (hf : AEMeasurable f μ := by fun_prop) :
+    μ.bind f hf = μ.bind g (hf.congr h) :=
+  congrArg join <| map_congr h hf
 
 @[simp]
 lemma bind_const {m : Measure α} {ν : Measure β} : m.bind (fun _ ↦ ν) = m Set.univ • ν := by
@@ -267,40 +270,64 @@ theorem bind_zero_right (m : Measure α) : bind m (0 : α → Measure β) = 0 :=
 
 @[fun_prop]
 theorem measurable_bind' {g : α → Measure β} (hg : Measurable g) :
-    Measurable fun m : Measure α => bind m g :=
+    Measurable fun m : Measure α => bind m g hg.aemeasurable :=
   measurable_join.comp (measurable_map _ hg)
-
-theorem aemeasurable_bind {g : α → Measure β} {m : Measure (Measure α)}
-    (hg : AEMeasurable g m.join) : AEMeasurable (bind · g) m :=
-  let ⟨f, hfm, hf⟩ := hg
-  ⟨(bind · f), measurable_bind' hfm, (ae_ae_of_ae_join hf).mono fun _ ↦ bind_congr_right⟩
 
 theorem bind_sum {ι : Type*} (m : ι → Measure α) (f : α → Measure β)
     (h : AEMeasurable f (sum fun i => m i)) :
-    (sum fun (i : ι) ↦ m i).bind f = sum fun (i : ι) ↦ (m i).bind f := by
+    (sum fun (i : ι) ↦ m i).bind f h =
+      sum fun (i : ι) ↦ (m i).bind f (h.mono_measure (le_sum m i)) := by
   simp_rw [bind, map_sum h, join_sum]
 
 lemma bind_smul {R : Type*} [SMul R ℝ≥0∞] [IsScalarTower R ℝ≥0∞ ℝ≥0∞] (c : R) (m : Measure α)
-    {f : α → Measure β} (hf : AEMeasurable f m) : (c • m).bind f = c • (m.bind f) := by
+    {f : α → Measure β} (hf : AEMeasurable f m) :
+    (c • m).bind f (hf.smul_measure c) = c • (m.bind f hf) := by
   simp_rw [bind, Measure.map_smul _ hf, join_smul]
 
 theorem lintegral_bind {m : Measure α} {μ : α → Measure β} {f : β → ℝ≥0∞} (hμ : AEMeasurable μ m)
-    (hf : AEMeasurable f (bind m μ)) : ∫⁻ x, f x ∂bind m μ = ∫⁻ a, ∫⁻ x, f x ∂μ a ∂m :=
-  (lintegral_join hf).trans (lintegral_map' (aemeasurable_lintegral hf) hμ)
+    (hf : AEMeasurable f (bind m μ hμ)) :
+    ∫⁻ x, f x ∂bind m μ hμ = ∫⁻ a, ∫⁻ x, f x ∂μ a ∂m :=
+  (lintegral_join hf).trans (lintegral_map' hμ (aemeasurable_lintegral hf))
 
 theorem lintegral_bind_le (f : β → ℝ≥0∞) (m : Measure α) {μ : α → Measure β}
     (hμ : AEMeasurable μ m) :
-    ∫⁻ x, f x ∂bind m μ ≤ ∫⁻ a, ∫⁻ x, f x ∂μ a ∂m :=
+    ∫⁻ x, f x ∂bind m μ hμ ≤ ∫⁻ a, ∫⁻ x, f x ∂μ a ∂m :=
   (lintegral_join_le _ _).trans (lintegral_map_le _ hμ)
 
-theorem bind_bind {γ} [SigmaAlgebra γ] {m : Measure α} {f : α → Measure β} {g : β → Measure γ}
-    (hf : AEMeasurable f m) (hg : AEMeasurable g (m.bind f)) :
-    bind (bind m f) g = bind m fun a => bind (f a) g := by
+theorem bind_bind_of_aemeasurable {γ} [SigmaAlgebra γ] {m : Measure α}
+    {f : α → Measure β} {g : β → Measure γ}
+    (hf : AEMeasurable f m) (hg : AEMeasurable g (m.bind f hf)) :
+    bind (bind m f hf) g hg =
+      bind m (fun a => bind (f a) (hg.mk g) hg.measurable_mk.aemeasurable)
+        ((measurable_bind' hg.measurable_mk).comp_aemeasurable hf) := by
   ext1 s hs
-  rw [bind_apply hs hg, lintegral_bind hf, bind_apply hs]
-  · exact lintegral_congr_ae <| (hf.ae_of_bind hg).mono fun a ha ↦ .symm <| bind_apply hs ha
-  · exact (aemeasurable_bind hg).comp_aemeasurable hf
-  · exact (measurable_coe hs).comp_aemeasurable hg
+  rw [bind_apply hs hg]
+  change (∫⁻ a, ((fun ν : Measure γ ↦ ν s) ∘ g) a ∂m.bind f hf) = _
+  rw [lintegral_bind hf ((measurable_coe hs).comp_aemeasurable hg),
+    bind_apply (f := fun a => bind (f a) (hg.mk g) hg.measurable_mk.aemeasurable) hs
+      ((measurable_bind' hg.measurable_mk).comp_aemeasurable hf)]
+  apply lintegral_congr_ae
+  filter_upwards [ae_ae_of_ae_bind hf hg.ae_eq_mk] with a ha
+  rw [bind_apply hs hg.measurable_mk.aemeasurable]
+  have ha' : g =ᵐ[f a] hg.mk g := ha
+  exact lintegral_congr_ae (ha'.fun_comp fun ν ↦ ν s)
+
+/-- Associativity of measure bind when the second measure-valued function is measurable. -/
+theorem bind_bind {γ} [SigmaAlgebra γ] {m : Measure α} {f : α → Measure β}
+    {g : β → Measure γ} (hf : AEMeasurable f m) (hg : Measurable g) :
+    bind (bind m f hf) g hg.aemeasurable =
+      bind m (fun a => bind (f a) g hg.aemeasurable)
+        ((measurable_bind' hg).comp_aemeasurable hf) := by
+  ext1 s hs
+  rw [bind_apply hs hg.aemeasurable]
+  change (∫⁻ a, ((fun ν : Measure γ ↦ ν s) ∘ g) a ∂m.bind f hf) = _
+  rw [lintegral_bind hf ((measurable_coe hs).comp hg).aemeasurable,
+    bind_apply (f := fun a => bind (f a) g hg.aemeasurable) hs
+      ((measurable_bind' hg).comp_aemeasurable hf)]
+  apply lintegral_congr
+  intro a
+  rw [bind_apply hs hg.aemeasurable]
+  rfl
 
 @[simp]
 theorem dirac_bind {f : α → Measure β} (hf : Measurable f) (a : α) : bind (dirac a) f = f a := by
@@ -314,27 +341,36 @@ theorem bind_dirac {m : Measure α} : bind m dirac = m := by
 
 @[simp]
 lemma bind_dirac_eq_map (m : Measure α) {f : α → β} (hf : Measurable f) :
-    m.bind (fun x ↦ Measure.dirac (f x)) = m.map f := by
-  rw [← bind_dirac (m := m.map f), bind, bind, map_map, Function.comp_def]
-  exacts [measurable_dirac, hf]
+    m.bind (fun x ↦ Measure.dirac (f x)) (measurable_dirac.comp hf).aemeasurable =
+      m.map f hf.aemeasurable := by
+  ext s hs
+  rw [bind_apply (f := fun x ↦ Measure.dirac (f x)) hs
+      (measurable_dirac.comp hf).aemeasurable,
+    Measure.map_apply hs hf.aemeasurable]
+  simp only [dirac_apply' _ hs]
+  change (∫⁻ a, s.indicator (fun _ : β ↦ (1 : ℝ≥0∞)) (f a) ∂m) = m (f ⁻¹' s)
+  simpa using lintegral_indicator_const_comp (μ := m) hf hs 1
 
-theorem join_eq_bind (μ : Measure (Measure α)) : join μ = bind μ id := by rw [bind, map_id]
+theorem join_eq_bind (μ : Measure (Measure α)) :
+    join μ = bind μ id measurable_id.aemeasurable := by rw [bind, map_id]
 
 theorem join_map_map {f : α → β} (hf : Measurable f) (μ : Measure (Measure α)) :
-    join (map (map f) μ) = map f (join μ) := by
+    join (map (fun ν ↦ map f ν hf.aemeasurable) μ (measurable_map f hf).aemeasurable) =
+      map f (join μ) hf.aemeasurable := by
   ext1 s hs
-  rw [join_apply hs, map_apply hf hs, join_apply (hf hs),
+  rw [join_apply hs, map_apply hs hf.aemeasurable, join_apply (hf hs),
     lintegral_map (measurable_coe hs) (measurable_map f hf)]
-  simp_rw [map_apply hf hs]
+  simp_rw [map_apply hs hf.aemeasurable]
 
-theorem join_map_join (μ : Measure (Measure (Measure α))) : join (map join μ) = join (join μ) := by
-  change bind μ join = join (join μ)
-  rw [join_eq_bind, join_eq_bind, bind_bind aemeasurable_id aemeasurable_id]
-  apply congr_arg (bind μ)
-  funext ν
-  exact join_eq_bind ν
+theorem join_map_join (μ : Measure (Measure (Measure α))) :
+    join (map join μ measurable_join.aemeasurable) = join (join μ) := by
+  ext s hs
+  rw [join_apply hs, lintegral_map (measurable_coe hs) measurable_join, join_apply hs,
+    lintegral_join (measurable_coe hs).aemeasurable]
+  simp_rw [join_apply hs]
 
-theorem join_map_dirac (μ : Measure α) : join (map dirac μ) = μ := bind_dirac
+theorem join_map_dirac (μ : Measure α) :
+    join (map dirac μ measurable_dirac.aemeasurable) = μ := bind_dirac
 
 end Measure
 

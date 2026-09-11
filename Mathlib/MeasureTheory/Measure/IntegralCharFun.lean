@@ -95,7 +95,7 @@ the characteristic function, for a probability measure on `ℝ`. -/
 lemma measureReal_abs_gt_le_integral_charFun [IsProbabilityMeasure μ] (hr : 0 < r) :
     μ.real {x | r < |x|} ≤ 2⁻¹ * r * ‖∫ t in (-2 * r⁻¹)..(2 * r⁻¹), 1 - charFun μ t‖ := by
   have integrable_sinc_const_mul (r : ℝ) : Integrable (fun x ↦ sinc (r * x)) μ :=
-    (integrable_map_measure stronglyMeasurable_sinc.aestronglyMeasurable (by fun_prop)).mp
+    (integrable_map_measure (by fun_prop) stronglyMeasurable_sinc.aestronglyMeasurable).mp
       integrable_sinc
   calc μ.real {x | r < |x|}
   _ = μ.real {x | 2 < |2 * r⁻¹ * x|} := by

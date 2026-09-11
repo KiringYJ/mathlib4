@@ -131,7 +131,7 @@ variable {X : ι → Type*} {mX : ∀ i, SigmaAlgebra (X i)} {μ : (i : ι) → 
 lemma integrable_comp_eval [∀ i, IsFiniteMeasure (μ i)] {i : ι} {f : X i → E}
     (hf : Integrable f (μ i)) :
     Integrable (fun x ↦ f (x i)) (Measure.pi μ) := by
-  refine Integrable.comp_measurable ?_ (by fun_prop)
+  refine Integrable.comp_measurable (by fun_prop) ?_
   classical
   rw [Measure.pi_map_eval]
   exact hf.smul_measure <| ENNReal.prod_ne_top (by finiteness)
@@ -144,9 +144,13 @@ lemma integrable_eval [∀ i, NormedAddCommGroup (X i)] [∀ i, IsFiniteMeasure 
 lemma integral_comp_eval [NormedSpace ℝ E] [∀ i, IsProbabilityMeasure (μ i)] {i : ι} {f : X i → E}
     (hf : AEStronglyMeasurable f (μ i)) :
     ∫ x : Π i, X i, f (x i) ∂Measure.pi μ = ∫ x, f x ∂μ i := by
-  rw [← (measurePreserving_eval μ i).map_eq, integral_map]
-  · exact Measurable.aemeasurable (by fun_prop)
-  · rwa [(measurePreserving_eval μ i).map_eq]
+  have hmeas : AEMeasurable (Function.eval i) (Measure.pi μ) :=
+    (measurable_pi_apply i).aemeasurable
+  have hf' : AEStronglyMeasurable f ((Measure.pi μ).map (Function.eval i) hmeas) := by
+    rwa [(measurePreserving_eval μ i).map_eq]
+  have h := integral_map hmeas hf'
+  rw [(measurePreserving_eval μ i).map_eq] at h
+  exact h.symm
 
 lemma integral_eval [∀ i, NormedAddCommGroup (X i)] [∀ i, NormedSpace ℝ (X i)]
     [∀ i, IsProbabilityMeasure (μ i)] {i : ι} [OpensSigmaAlgebra (X i)]

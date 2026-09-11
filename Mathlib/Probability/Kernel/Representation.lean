@@ -44,7 +44,8 @@ variable {X Y : Type*} {mX : SigmaAlgebra X} [Nonempty Y] {mY : SigmaAlgebra Y}
 namespace ProbabilityTheory.Kernel
 
 private lemma exists_measurable_map_eq_unitInterval_aux (κ : Kernel X I) [IsMarkovKernel κ] :
-    ∃ (f : X → I → I), Measurable (uncurry f) ∧ ∀ a, volume.map (f a) = κ a := by
+    ∃ (f : X → I → I), ∃ hf : Measurable (uncurry f),
+      ∀ a, volume.map (f a) hf.of_uncurry_left.aemeasurable = κ a := by
   let f := fun s (t : I) ↦ sSup {x | (κ s).real (Icc 0 x) < t}
   have measurable_f : Measurable (uncurry f) := by
     refine measurable_of_Ioi fun a ↦ ?_
@@ -73,10 +74,11 @@ private lemma exists_measurable_map_eq_unitInterval_aux (κ : Kernel X I) [IsMar
     simp_rw [measureReal_def]
     have hκ := κ.measurable_coe (s := Icc 0 ⟨b, bI⟩) measurableSet_Icc
     fun_prop
-  refine ⟨f, measurable_f, fun a ↦ (volume.map (f a)).ext_of_Iic (κ a) fun x ↦ ?_⟩
+  refine ⟨f, measurable_f, fun a ↦
+    (volume.map (f a) measurable_f.of_uncurry_left.aemeasurable).ext_of_Iic (κ a) fun x ↦ ?_⟩
   have Iic_to_Icc : Iic x = Icc 0 x := by ext; simp
   have κ_in_I : ((κ a).real (Icc 0 x)) ∈ I := ⟨measureReal_nonneg, measureReal_le_one⟩
-  simp_rw [volume.map_apply measurable_f.of_uncurry_left measurableSet_Iic, preimage,
+  simp_rw [Measure.map_apply measurableSet_Iic measurable_f.of_uncurry_left.aemeasurable, preimage,
     mem_Iic, Iic_to_Icc, ← ofReal_measureReal (measure_ne_top (κ a) _), ← volume_Iic ⟨_, κ_in_I⟩]
   congr with ξ
   constructor
@@ -109,22 +111,35 @@ private lemma exists_measurable_map_eq_unitInterval_aux (κ : Kernel X I) [IsMar
     simp
 
 theorem exists_measurable_map_eq_unitInterval (κ : Kernel X Y) [IsMarkovKernel κ] :
-    ∃ (f : X → I → Y), Measurable (uncurry f) ∧ ∀ a, volume.map (f a) = κ a := by
+    ∃ (f : X → I → Y), ∃ hf : Measurable (uncurry f),
+      ∀ a, volume.map (f a) hf.of_uncurry_left.aemeasurable = κ a := by
   let g := sigmoid ∘ embeddingReal Y
   have hg := measurableEmbedding_sigmoid_comp_embeddingReal Y
   have hκg : IsMarkovKernel (κ.map g) := IsMarkovKernel.map κ hg.measurable
   have hg'κ : κ = (κ.map g).map hg.invFun := by
-    rw [← map_comp_right _ hg.measurable (by fun_prop), LeftInverse.id hg.leftInverse_invFun,
-      map_id]
-  obtain ⟨f', hf', hf'κ⟩ := (κ.map g).exists_measurable_map_eq_unitInterval_aux
+    calc
+      κ = κ.map id := (map_id κ).symm
+      _ = κ.map (hg.invFun ∘ g) :=
+        (Kernel.map_congr κ (LeftInverse.id hg.leftInverse_invFun) (by fun_prop) measurable_id).symm
+      _ = (κ.map g).map hg.invFun := map_comp_right κ hg.measurable (by fun_prop)
+  obtain ⟨f', hf', hf'κ⟩ :=
+    (κ.map g hg.measurable).exists_measurable_map_eq_unitInterval_aux
   refine ⟨fun a u ↦ hg.invFun (f' a u), by fun_prop, fun a ↦ ?_⟩
-  rw [hg'κ, map_apply _ (by fun_prop), ← hf'κ, Measure.map_map (by fun_prop) (by fun_prop)]
-  rfl
+  have hf'a : Measurable (f' a) := hf'.of_uncurry_left
+  have hinv : Measurable hg.invFun := by fun_prop
+  calc
+    volume.map (fun u ↦ hg.invFun (f' a u)) (by fun_prop) =
+        volume.map (hg.invFun ∘ f' a) (by fun_prop) := rfl
+    _ = (volume.map (f' a) hf'a.aemeasurable).map hg.invFun hinv.aemeasurable :=
+      (Measure.map_map hf'a.aemeasurable hinv.aemeasurable).symm
+    _ = ((κ.map g) a).map hg.invFun hinv.aemeasurable := by rw [hf'κ]
+    _ = ((κ.map g).map hg.invFun) a := (map_apply _ _ hinv).symm
+    _ = κ a := (congrArg (fun η : Kernel X Y ↦ η a) hg'κ).symm
 
 end ProbabilityTheory.Kernel
 
 theorem MeasureTheory.Measure.exists_measurable_map_eq (μ : Measure Y) [IsProbabilityMeasure μ] :
-    ∃ (f : I → Y), Measurable f ∧ volume.map f = μ := by
+    ∃ (f : I → Y), ∃ hf : Measurable f, volume.map f hf.aemeasurable = μ := by
   obtain ⟨f, hf_meas, hf_map⟩ := Kernel.exists_measurable_map_eq_unitInterval (Kernel.const Unit μ)
   specialize hf_map ()
   exact ⟨f (), by fun_prop, by simpa⟩

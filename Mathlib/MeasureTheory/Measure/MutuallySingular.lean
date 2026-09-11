@@ -175,7 +175,7 @@ lemma absolutelyContinuous_of_add_of_mutuallySingular {ν₁ ν₂ : Measure α}
 
 lemma _root_.MeasurableEmbedding.mutuallySingular_map {β : Type*} {_ : SigmaAlgebra β}
     {f : α → β} (hf : MeasurableEmbedding f) (hμν : μ ⟂ₘ ν) :
-    μ.map f ⟂ₘ ν.map f := by
+    μ.map f hf.measurable.aemeasurable ⟂ₘ ν.map f hf.measurable.aemeasurable := by
   refine ⟨f '' hμν.nullSet, hf.measurableSet_image' hμν.measurableSet_nullSet, ?_, ?_⟩
   · rw [hf.map_apply, hf.injective.preimage_image, hμν.measure_nullSet]
   · rw [hf.map_apply, Set.preimage_compl, hf.injective.preimage_image, hμν.measure_compl_nullSet]

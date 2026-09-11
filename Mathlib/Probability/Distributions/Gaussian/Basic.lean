@@ -44,17 +44,21 @@ namespace ProbabilityTheory
 /-- A measure is Gaussian if its map by every continuous linear form is a real Gaussian measure. -/
 class IsGaussian {E : Type*} [TopologicalSpace E] [AddCommMonoid E] [Module ℝ E]
     {mE : SigmaAlgebra E} (μ : Measure E) : Prop where
-  map_eq_gaussianReal (L : StrongDual ℝ E) : μ.map L = gaussianReal (μ[L]) (Var[L; μ]).toNNReal
+  protected aemeasurable (L : StrongDual ℝ E) : AEMeasurable L μ := by fun_prop
+  map_eq_gaussianReal (L : StrongDual ℝ E) :
+    μ.map L (aemeasurable L) = gaussianReal (μ[L]) (Var[L; μ]).toNNReal
+
+attribute [fun_prop] IsGaussian.aemeasurable
 
 /-- A Gaussian measure is a probability measure. -/
 instance IsGaussian.toIsProbabilityMeasure {E : Type*} [TopologicalSpace E] [AddCommMonoid E]
     [Module ℝ E] {mE : SigmaAlgebra E} (μ : Measure E) [IsGaussian μ] :
     IsProbabilityMeasure μ where
   measure_univ := by
-    have : μ.map (0 : StrongDual ℝ E) Set.univ = 1 := by
+    have : (μ.map (0 : StrongDual ℝ E)) Set.univ = 1 := by
       simp [-FunLike.coe_zero, IsGaussian.map_eq_gaussianReal]
     simpa [-FunLike.coe_zero,
-      Measure.map_apply (by fun_prop : Measurable (0 : StrongDual ℝ E)) .univ] using this
+      Measure.map_apply .univ (IsGaussian.aemeasurable (μ := μ) 0)] using this
 
 /-- A real Gaussian measure is Gaussian. -/
 instance isGaussian_gaussianReal (m : ℝ) (v : ℝ≥0) : IsGaussian (gaussianReal m v) where
@@ -77,7 +81,7 @@ lemma IsGaussian.eq_gaussianReal (μ : Measure ℝ) (h : IsGaussian μ) :
 lemma isGaussian_of_isGaussian_map {E : Type*} [TopologicalSpace E] [AddCommMonoid E]
     [Module ℝ E] {mE : SigmaAlgebra E} [OpensSigmaAlgebra E] {μ : Measure E}
     (h : ∀ L : E →L[ℝ] ℝ, IsGaussian (μ.map L)) : IsGaussian μ := by
-  refine ⟨fun L ↦ ?_⟩
+  refine { map_eq_gaussianReal := fun L ↦ ?_ }
   rw [(h L).eq_gaussianReal, integral_map, variance_map]
   · simp
   all_goals fun_prop
@@ -101,8 +105,13 @@ lemma isGaussian_map_of_measurable {E F : Type*} [TopologicalSpace E] [AddCommMo
     [Module ℝ F] {mF : SigmaAlgebra F} [OpensSigmaAlgebra F] {μ : Measure E}
     {L : E →L[ℝ] F} [IsGaussian μ] (hL : Measurable L) : IsGaussian (μ.map L) := by
   refine isGaussian_of_map_eq_gaussianReal fun L' ↦ ⟨μ[L' ∘L L], Var[L' ∘L L; μ].toNNReal, ?_⟩
-  rw [Measure.map_map (by fun_prop) hL, ← ContinuousLinearMap.coe_comp,
-    IsGaussian.map_eq_gaussianReal]
+  have hcomp : AEMeasurable (⇑L' ∘ ⇑L) μ :=
+    hL.aemeasurable.comp_aemeasurable L'.continuous.aemeasurable
+  calc
+    _ = μ.map (⇑L' ∘ ⇑L) hcomp := Measure.map_map hL.aemeasurable (by fun_prop)
+    _ = μ.map (L' ∘L L) (IsGaussian.aemeasurable (μ := μ) (L' ∘L L)) :=
+      Measure.map_congr (ae_of_all _ fun _ ↦ rfl) hcomp
+    _ = _ := IsGaussian.map_eq_gaussianReal _
 
 variable {E F : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [SigmaAlgebra E] [BorelSpace E]
   [NormedAddCommGroup F] [NormedSpace ℝ F] [SigmaAlgebra F] [BorelSpace F]
@@ -120,6 +129,7 @@ lemma IsGaussian.of_subsingleton [Subsingleton E] [IsProbabilityMeasure μ] :
   apply Subsingleton.set_cases (p := fun s ↦ μ s = _)
   all_goals simp
 
+omit [BorelSpace E] in
 lemma IsGaussian.memLp_dual (μ : Measure E) [IsGaussian μ] (L : StrongDual ℝ E)
     (p : ℝ≥0∞) (hp : p ≠ ∞) :
     MemLp L p μ := by
@@ -128,6 +138,7 @@ lemma IsGaussian.memLp_dual (μ : Measure E) [IsGaussian μ] (L : StrongDual ℝ
   convert! memLp_id_gaussianReal p.toNNReal
   simp [hp]
 
+omit [BorelSpace E] in
 @[fun_prop]
 lemma IsGaussian.integrable_dual (μ : Measure E) [IsGaussian μ] (L : StrongDual ℝ E) :
     Integrable L μ := by
@@ -170,7 +181,9 @@ lemma IsGaussian.charFunDual_eq (L : StrongDual ℝ E) :
 `exp (μ[L] * I - Var[L; μ] / 2)` for every `L : Dual ℝ E`. -/
 theorem isGaussian_iff_charFunDual_eq {μ : Measure E} [IsFiniteMeasure μ] :
     IsGaussian μ ↔ ∀ L : StrongDual ℝ E, charFunDual μ L = exp (μ[L] * I - Var[L; μ] / 2) := by
-  refine ⟨fun h ↦ h.charFunDual_eq, fun h ↦ ⟨fun L ↦ Measure.ext_of_charFun ?_⟩⟩
+  refine ⟨fun h ↦ h.charFunDual_eq, fun h ↦
+    { aemeasurable := fun _ ↦ by fun_prop
+      map_eq_gaussianReal := fun L ↦ Measure.ext_of_charFun ?_ }⟩
   ext u
   rw [charFun_map_eq_charFunDual_smul L u, h (u • L), charFun_gaussianReal]
   simp only [smul_apply, smul_eq_mul, ofReal_mul, Real.coe_toNNReal']
@@ -216,8 +229,8 @@ instance isGaussian_conv [SecondCountableTopology E]
       rw [← Measure.map_conv_continuousLinearMap L,
         integral_map (φ := L) (by fun_prop) (by fun_prop)]
     rw [Measure.map_conv_continuousLinearMap L, this, ← variance_id_map (by fun_prop),
-      Measure.map_conv_continuousLinearMap L, IsGaussian.map_eq_gaussianReal L,
-      IsGaussian.map_eq_gaussianReal L, gaussianReal_conv_gaussianReal]
+      Measure.map_conv_continuousLinearMap L]
+    simp only [IsGaussian.map_eq_gaussianReal, gaussianReal_conv_gaussianReal]
     congr <;> simp [variance_nonneg]
 
 instance (c : E) : IsGaussian (μ.map (fun x ↦ x + c)) := by
@@ -241,10 +254,15 @@ instance : IsGaussian (μ.map (fun x ↦ -x)) := by
   infer_instance
 
 instance (c : E) : IsGaussian (μ.map (fun x ↦ c - x)) := by
-  simp_rw [sub_eq_add_neg]
-  suffices IsGaussian ((μ.map (fun x ↦ -x)).map (fun x ↦ c + x)) by
-    rwa [Measure.map_map (by fun_prop) (by fun_prop), Function.comp_def] at this
-  infer_instance
+  have hcomp : IsGaussian ((μ.map (fun x ↦ -x)).map (fun x ↦ c + x)) := inferInstance
+  have hfun : (fun x : E ↦ c - x) = (fun x ↦ c + x) ∘ fun x ↦ -x := by
+    ext
+    simp [sub_eq_add_neg]
+  rw [Measure.map_map (by fun_prop) (by fun_prop)] at hcomp
+  have hmap : μ.map (fun x ↦ c - x) = μ.map ((fun x ↦ c + x) ∘ fun x ↦ -x) :=
+    Measure.map_congr (ae_of_all _ fun x ↦ congrFun hfun x) (by fun_prop)
+  rw [hmap]
+  exact hcomp
 
 /-- A product of Gaussian distributions is Gaussian. -/
 instance [SecondCountableTopologyEither E F] {ν : Measure F} [IsGaussian ν] :

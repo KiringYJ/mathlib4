@@ -195,7 +195,7 @@ lemma isCompact_setOfPred_finiteMeasure_le_of_isCompact
       refine ⟨μ.comap f, (FiniteMeasure.mass_comap_le _ _).trans hμ.1, ?_⟩
       ext s hs
       simp only [toMeasure_map, F]
-      rw [Measure.map_apply measurable_subtype_coe hs]
+      rw [Measure.map_apply hs measurable_subtype_coe.aemeasurable]
       simp only [toMeasure_comap]
       rw [Measure.comap_apply _ (Subtype.val_injective), image_preimage_eq_inter_range]
       · rw [← Measure.restrict_apply hs, Measure.restrict_eq_self_of_ae_mem]
@@ -207,7 +207,7 @@ lemma isCompact_setOfPred_finiteMeasure_le_of_isCompact
     · simp only [null_iff_toMeasure_null, image_subset_iff, preimage_ofPred_eq, toMeasure_map,
         ofPred_subset_ofPred, F, T]
       intro μ hμ
-      rw [Measure.map_apply hf.continuous.measurable hK.measurableSet.compl]
+      rw [Measure.map_apply hK.measurableSet.compl hf.continuous.measurable.aemeasurable]
       refine ⟨(mass_map_le hf.measurable.aemeasurable).trans hμ, by simp [f]⟩
   rw [this]
   apply IsCompact.image _ (by fun_prop)

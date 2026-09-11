@@ -673,12 +673,10 @@ variable [AddCommGroup G]
 theorem support_convolution_subset : support (f ⋆[L, μ] g) ⊆ support f + support g :=
   (support_convolution_subset_swap L).trans (add_comm _ _).subset
 
+variable [MeasurableNeg G] [MeasurableAdd G]
 variable [IsAddLeftInvariant μ] [IsNegInvariant μ]
 
 section Measurable
-
-variable [MeasurableNeg G]
-variable [MeasurableAdd G]
 
 /-- Commutativity of convolution -/
 theorem convolution_flip : g ⋆[L.flip, μ] f = f ⋆[L, μ] g := by

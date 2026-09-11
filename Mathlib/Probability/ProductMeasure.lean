@@ -66,7 +66,8 @@ lemma isProjectiveMeasureFamily_pi :
     IsProjectiveMeasureFamily (fun I : Finset ι ↦ (Measure.pi (fun i : I ↦ μ i))) := by
   refine fun I J hJI ↦ Measure.pi_eq (fun s ms ↦ ?_)
   classical
-  simp_rw [Measure.map_apply (measurable_restrict₂ hJI) (.univ_pi ms), restrict₂_preimage hJI,
+  simp_rw [Measure.map_apply (.univ_pi ms) (measurable_restrict₂ hJI).aemeasurable,
+    restrict₂_preimage hJI,
     Measure.pi_pi, prod_eq_prod_extend]
   refine (prod_subset_one_on_sdiff hJI (fun x hx ↦ ?_) (fun x hx ↦ ?_)).symm
   · rw [Function.extend_val_apply (mem_sdiff.1 hx).1, dite_eq_right (mem_sdiff.1 hx).2,
@@ -91,7 +92,7 @@ theorem piContent_eq_measure_pi [Fintype ι] {s : Set (Π i, X i)} (hs : Measura
   nth_rw 1 [this]
   dsimp [e]
   rw [piContent_cylinder _ (hs.preimage (by fun_prop)), ← Measure.pi_map_piCongrLeft e,
-    ← Measure.map_apply (by fun_prop) hs]; rfl
+    ← Measure.map_apply hs (by fun_prop)]; rfl
 
 end Preliminaries
 
@@ -123,7 +124,8 @@ lemma pi_prod_map_IocProdIoc {a b c : ℕ} (hab : a ≤ b) (hbc : b ≤ c) :
     ((Measure.pi (fun i : Ioc a b ↦ μ i)).prod (Measure.pi (fun i : Ioc b c ↦ μ i))).map
       (IocProdIoc a b c) = Measure.pi (fun i : Ioc a c ↦ μ i) := by
   refine (Measure.pi_eq fun s ms ↦ ?_).symm
-  simp_rw [Measure.map_apply measurable_IocProdIoc (.univ_pi ms), IocProdIoc_preimage hab hbc,
+  simp_rw [Measure.map_apply (.univ_pi ms) measurable_IocProdIoc.aemeasurable,
+    IocProdIoc_preimage hab hbc,
     Measure.prod_prod, Measure.pi_pi, prod_eq_prod_extend]
   nth_rw 1 [Eq.comm, ← Ioc_union_Ioc_eq_Ioc hab hbc, prod_union (Ioc_disjoint_Ioc_of_le le_rfl)]
   congr 1 <;> refine prod_congr rfl fun x hx ↦ ?_
@@ -140,17 +142,30 @@ lemma pi_prod_map_IicProdIoc {a b : ℕ} :
       (IicProdIoc a b) = Measure.pi (fun i : Iic b ↦ μ i) := by
   obtain hab | hba := le_total a b
   · refine (Measure.pi_eq fun s ms ↦ ?_).symm
-    simp_rw [Measure.map_apply measurable_IicProdIoc (.univ_pi ms), IicProdIoc_preimage hab,
+    simp_rw [Measure.map_apply (.univ_pi ms) measurable_IicProdIoc.aemeasurable,
+      IicProdIoc_preimage hab,
       Measure.prod_prod, Measure.pi_pi, prod_eq_prod_extend]
     nth_rw 1 [Eq.comm, ← Iic_union_Ioc_eq_Iic hab, prod_union (Iic_disjoint_Ioc le_rfl)]
     congr 1 <;> refine prod_congr rfl fun x hx ↦ ?_
     · rw [Function.extend_val_apply hx, Function.extend_val_apply (Iic_subset_Iic.2 hab hx),
         frestrictLe₂, restrict₂]
     · rw [Function.extend_val_apply hx, Function.extend_val_apply (Ioc_subset_Iic_self hx),
-        restrict₂]
-  · rw [IicProdIoc_le hba, ← Measure.map_map, ← Measure.fst, Measure.fst_prod]
-    · exact isProjectiveMeasureFamily_pi μ (Iic a) (Iic b) (Iic_subset_Iic.2 hba) |>.symm
-    all_goals fun_prop
+      restrict₂]
+  · have hfun : IicProdIoc (X := X) a b = (frestrictLe₂ hba) ∘ Prod.fst :=
+      IicProdIoc_le hba
+    calc
+      _ = ((Measure.pi (fun i : Iic a ↦ μ i)).prod
+          (Measure.pi (fun i : Ioc a b ↦ μ i))).map ((frestrictLe₂ hba) ∘ Prod.fst) :=
+        Measure.map_congr (ae_of_all _ fun x ↦ congrFun hfun x) (by fun_prop)
+      _ = (((Measure.pi (fun i : Iic a ↦ μ i)).prod
+          (Measure.pi (fun i : Ioc a b ↦ μ i))).map Prod.fst).map
+          (restrict₂ (Iic_subset_Iic.2 hba)) :=
+        (Measure.map_map (by fun_prop) (by fun_prop)).symm
+      _ = (Measure.pi (fun i : Iic a ↦ μ i)).map
+          (restrict₂ (Iic_subset_Iic.2 hba)) := by
+        rw [← Measure.fst, Measure.fst_prod]
+      _ = Measure.pi (fun i : Iic b ↦ μ i) :=
+        isProjectiveMeasureFamily_pi μ (Iic a) (Iic b) (Iic_subset_Iic.2 hba) |>.symm
 
 /-- Let `μ (i + 1) : Measure (X (i + 1))` be a measure. Up to an equivalence,
 `μ i = ⨂ j : Ioc i (i + 1), μ i`, where `⊗` denotes the product of measures. -/
@@ -159,7 +174,7 @@ lemma map_piSingleton (μ : (n : ℕ) → Measure (X n)) [∀ n, SigmaFinite (μ
   refine (Measure.pi_eq fun s hs ↦ ?_).symm
   have : Subsingleton (Ioc n (n + 1)) := by rw [Nat.Ioc_succ_singleton]; infer_instance
   rw [Fintype.prod_subsingleton _ ⟨n + 1, mem_Ioc.2 (by lia)⟩,
-    Measure.map_apply (by fun_prop) (.univ_pi hs)]
+    Measure.map_apply (.univ_pi hs) (by fun_prop)]
   congr 1 with x
   simp only [Set.mem_preimage, Set.mem_pi, Set.mem_univ, forall_const, Subtype.forall,
     Nat.Ioc_succ_singleton, mem_singleton]
@@ -174,19 +189,66 @@ theorem partialTraj_const_restrict₂ {a b : ℕ} :
     (partialTraj (fun n ↦ const _ (μ (n + 1))) a b).map (restrict₂ Ioc_subset_Iic_self) =
     const _ (Measure.pi (fun i : Ioc a b ↦ μ i)) := by
   obtain hab | hba := lt_or_ge a b
-  · refine Nat.le_induction ?_ (fun n hn hind ↦ ?_) b (Nat.succ_le_of_lt hab) <;> ext1 x₀
-    · rw [partialTraj_succ_self, ← map_comp_right, map_apply, prod_apply, map_apply, const_apply,
-        const_apply, Measure.map_piSingleton, restrict₂_comp_IicProdIoc, Measure.map_snd_prod,
-        measure_univ, one_smul]
-      all_goals fun_prop
-    · have : (restrict₂ (Ioc_subset_Iic_self (a := a))) ∘ (IicProdIoc (X := X) n (n + 1)) =
+  · refine Nat.le_induction ?_ (fun n hn hind ↦ ?_) b (Nat.succ_le_of_lt hab)
+    · rw [partialTraj_succ_self, ← map_comp_right,
+        Kernel.map_congr _ (restrict₂_comp_IicProdIoc a (a + 1)), ← snd_eq, snd_prod,
+        Kernel.map_const, Measure.map_piSingleton]
+    · ext1 x₀
+      have : (restrict₂ (Ioc_subset_Iic_self (a := a))) ∘ (IicProdIoc (X := X) n (n + 1)) =
           (IocProdIoc a n (n + 1)) ∘ (Prod.map (restrict₂ Ioc_subset_Iic_self) id) := rfl
-      rw [const_apply, partialTraj_succ_of_le (by lia), map_const, prod_const_comp, id_comp,
-        ← map_comp_right, this, map_comp_right, ← map_prod_map, hind, Kernel.map_id, map_apply,
-        prod_apply, const_apply, const_apply, Measure.map_piSingleton,
-        Measure.pi_prod_map_IocProdIoc]
+      rw [const_apply, partialTraj_succ_of_le (by lia), Kernel.map_const, prod_const_comp, id_comp,
+        ← map_comp_right, Kernel.map_congr _ this, map_comp_right, ← map_prod_map, hind,
+        Kernel.map_id, map_apply]
       any_goals fun_prop
-      all_goals lia
+      have hp := congrArg
+        (Measure.mapₗ (IocProdIoc a n (n + 1)) measurable_IocProdIoc)
+        (Kernel.prod_apply
+          (const (Π i : Iic a, X i) (Measure.pi (fun i : Ioc a n ↦ μ i)))
+          (const (Π i : Iic a, X i) ((μ (n + 1)).map (piSingleton n))) x₀)
+      have hp' : Measure.map (IocProdIoc a n (n + 1))
+          ((const (Π i : Iic a, X i) (Measure.pi (fun i : Ioc a n ↦ μ i)) ×ₖ
+            const (Π i : Iic a, X i) ((μ (n + 1)).map (piSingleton n))) x₀) =
+          Measure.map (IocProdIoc a n (n + 1))
+            ((const (Π i : Iic a, X i) (Measure.pi (fun i : Ioc a n ↦ μ i)) x₀).prod
+              (const (Π i : Iic a, X i) ((μ (n + 1)).map (piSingleton n)) x₀)) := by
+        simpa only [Measure.mapₗ_apply_of_measurable] using hp
+      have hc₁ : const (Π i : Iic a, X i) (Measure.pi (fun i : Ioc a n ↦ μ i)) x₀ =
+          Measure.pi (fun i : Ioc a n ↦ μ i) := rfl
+      have hc₂ : const (Π i : Iic a, X i) ((μ (n + 1)).map (piSingleton n)) x₀ =
+          (μ (n + 1)).map (piSingleton n) := rfl
+      have hconstProd :
+          ((const (Π i : Iic a, X i) (Measure.pi (fun i : Ioc a n ↦ μ i)) x₀).prod
+            (const (Π i : Iic a, X i) ((μ (n + 1)).map (piSingleton n)) x₀)) =
+          (Measure.pi (fun i : Ioc a n ↦ μ i)).prod
+            ((μ (n + 1)).map (piSingleton n)) := by
+        cases hc₁
+        cases hc₂
+        rfl
+      have hconstMap : Measure.map (IocProdIoc a n (n + 1))
+          ((const (Π i : Iic a, X i) (Measure.pi (fun i : Ioc a n ↦ μ i)) x₀).prod
+            (const (Π i : Iic a, X i) ((μ (n + 1)).map (piSingleton n)) x₀)) =
+          Measure.map (IocProdIoc a n (n + 1))
+            ((Measure.pi (fun i : Ioc a n ↦ μ i)).prod
+              ((μ (n + 1)).map (piSingleton n))) := by
+        simpa only [Measure.mapₗ_apply_of_measurable] using congrArg
+          (Measure.mapₗ (IocProdIoc a n (n + 1)) measurable_IocProdIoc) hconstProd
+      have hpi := Measure.map_piSingleton μ n
+      have hpiProd :
+          (Measure.pi (fun i : Ioc a n ↦ μ i)).prod
+              ((μ (n + 1)).map (piSingleton n)) =
+          (Measure.pi (fun i : Ioc a n ↦ μ i)).prod
+              (Measure.pi (fun i : Ioc n (n + 1) ↦ μ i)) := by
+        simp only [hpi]
+      have hpiMap : Measure.map (IocProdIoc a n (n + 1))
+          ((Measure.pi (fun i : Ioc a n ↦ μ i)).prod
+            ((μ (n + 1)).map (piSingleton n))) =
+          Measure.map (IocProdIoc a n (n + 1))
+            ((Measure.pi (fun i : Ioc a n ↦ μ i)).prod
+              (Measure.pi (fun i : Ioc n (n + 1) ↦ μ i))) := by
+        simpa only [Measure.mapₗ_apply_of_measurable] using congrArg
+          (Measure.mapₗ (IocProdIoc a n (n + 1)) measurable_IocProdIoc) hpiProd
+      exact hp'.trans (hconstMap.trans (hpiMap.trans
+        (Measure.pi_prod_map_IocProdIoc μ (by lia) (by lia))))
   · have : IsEmpty (Ioc a b) := by simpa [hba] using Subtype.isEmpty_false
     ext x s ms
     by_cases hs : s.Nonempty
@@ -208,12 +270,64 @@ namespace Measure
 
 theorem isProjectiveLimit_infinitePiNat :
     IsProjectiveLimit (infinitePiNat μ) (fun I : Finset ℕ ↦ (Measure.pi (fun i : I ↦ μ i))) := by
-  intro I
-  rw [isProjectiveMeasureFamily_pi μ _ _ I.subset_Iic_sup_id,
-    ← restrict₂_comp_restrict I.subset_Iic_sup_id, ← map_map, ← frestrictLe, infinitePiNat,
-    map_comp, traj_map_frestrictLe, partialTraj_const, ← map_comp, ← compProd_eq_comp_prod,
-    compProd_const, pi_prod_map_IicProdIoc]
-  all_goals fun_prop
+  rw [isProjectiveLimit_nat_iff (isProjectiveMeasureFamily_pi μ)]
+  intro n
+  let κ := fun n ↦ const (Π i : Iic n, X i) (μ (n + 1))
+  let ν := Measure.pi (fun i : Iic 0 ↦ μ i)
+  let ρ := Measure.pi (fun i : Ioc 0 n ↦ μ i)
+  have hνsf : SFinite ν := by dsimp only [ν]; infer_instance
+  have hρsf : SFinite ρ := by dsimp only [ρ]; infer_instance
+  let _ : SFinite ν := hνsf
+  let _ : SFinite ρ := hρsf
+  let ξ := Kernel.id ×ₖ const (Π i : Iic 0, X i) ρ
+  let η := ξ.map (IicProdIoc 0 n)
+  change (((traj κ 0) ∘ₘ ν).map (frestrictLe n)) = Measure.pi (fun i : Iic n ↦ μ i)
+  have hrestrict : ((traj κ 0).map (frestrictLe n)) ∘ₘ ν =
+      (partialTraj κ 0 n) ∘ₘ ν :=
+    Measure.comp_congr <| ae_of_all ν fun x ↦
+      congrArg (fun η : Kernel (Π i : Iic 0, X i) (Π i : Iic n, X i) ↦ η x)
+        (traj_map_frestrictLe 0 n)
+  have hkernel : partialTraj κ 0 n = η := by
+    simpa only [κ, ρ, ξ, η] using (partialTraj_const (μ := μ) (a := 0) (b := n))
+  have hpartial : (partialTraj κ 0 n) ∘ₘ ν = η ∘ₘ ν :=
+    Measure.comp_congr <| ae_of_all ν fun x ↦
+      congrArg (fun η : Kernel (Π i : Iic 0, X i) (Π i : Iic n, X i) ↦ η x)
+        hkernel
+  have hcompProd : ξ ∘ₘ ν = ν ⊗ₘ const (Π i : Iic 0, X i) ρ := by
+    change (Kernel.id ×ₖ const (Π i : Iic 0, X i) ρ) ∘ₘ ν = _
+    exact (Measure.compProd_eq_comp_prod
+      (α := Π i : Iic 0, X i) (β := Π i : Ioc 0 n, X i)
+      ν (const (Π i : Iic 0, X i) ρ)).symm
+  have hcompProdMap : (ξ ∘ₘ ν).map (IicProdIoc 0 n) =
+      (ν ⊗ₘ const (Π i : Iic 0, X i) ρ).map (IicProdIoc 0 n) := by
+    exact congrArg
+      (fun m : Measure ((Π i : Iic 0, X i) × (Π i : Ioc 0 n, X i)) ↦
+        m.map (IicProdIoc 0 n) measurable_IicProdIoc.aemeasurable)
+      hcompProd
+  have hprod : ν ⊗ₘ const (Π i : Iic 0, X i) ρ = ν.prod ρ :=
+    Measure.compProd_const (α := Π i : Iic 0, X i) (β := Π i : Ioc 0 n, X i)
+      (μ := ν) (ν := ρ)
+  have hprodMap : (ν ⊗ₘ const (Π i : Iic 0, X i) ρ).map (IicProdIoc 0 n) =
+      (ν.prod ρ).map (IicProdIoc 0 n) := by
+    exact congrArg
+      (fun m : Measure ((Π i : Iic 0, X i) × (Π i : Ioc 0 n, X i)) ↦
+        m.map (IicProdIoc 0 n) measurable_IicProdIoc.aemeasurable)
+      hprod
+  have hpi : (ν.prod ρ).map (IicProdIoc 0 n) = Measure.pi (fun i : Iic n ↦ μ i) := by
+    change ((Measure.pi (fun i : Iic 0 ↦ μ i)).prod
+      (Measure.pi (fun i : Ioc 0 n ↦ μ i))).map (IicProdIoc 0 n) = _
+    exact pi_prod_map_IicProdIoc (μ := μ) (a := 0) (b := n)
+  calc
+    ((traj κ 0) ∘ₘ ν).map (frestrictLe n) =
+        ((traj κ 0).map (frestrictLe n)) ∘ₘ ν :=
+      Measure.map_comp ν (traj κ 0) (measurable_frestrictLe n)
+    _ = (partialTraj κ 0 n) ∘ₘ ν := hrestrict
+    _ = η ∘ₘ ν := hpartial
+    _ = (ξ ∘ₘ ν).map (IicProdIoc 0 n) :=
+      (Measure.map_comp ν ξ measurable_IicProdIoc).symm
+    _ = (ν ⊗ₘ const (Π i : Iic 0, X i) ρ).map (IicProdIoc 0 n) := hcompProdMap
+    _ = (ν.prod ρ).map (IicProdIoc 0 n) := hprodMap
+    _ = Measure.pi (fun i : Iic n ↦ μ i) := hpi
 
 /-- Restricting the product measure to a product indexed by a finset yields the usual
 product measure. -/
@@ -225,7 +339,8 @@ theorem piContent_eq_infinitePiNat {A : Set (Π n, X n)} (hA : A ∈ measurableC
     piContent μ A = infinitePiNat μ A := by
   obtain ⟨s, S, mS, rfl⟩ : ∃ s S, MeasurableSet S ∧ A = cylinder s S := by
     simpa [mem_measurableCylinders] using hA
-  rw [piContent_cylinder _ mS, cylinder, ← map_apply (measurable_restrict _) mS,
+  rw [piContent_cylinder _ mS, cylinder,
+    ← map_apply mS (measurable_restrict _).aemeasurable,
     infinitePiNat_map_restrict]
 
 end Measure
@@ -246,14 +361,14 @@ on the reindexed product in the sense that it coincides with `piContent μ` over
 measurable cylinders. See `infinitePi_map_piCongrLeft` for a general version. -/
 lemma Measure.infinitePiNat_map_piCongrLeft (e : ℕ ≃ ι) {s : Set (Π i, X i)}
     (hs : s ∈ measurableCylinders X) :
-    (infinitePiNat (fun n ↦ μ (e n))).map (piCongrLeft X e) s = piContent μ s := by
+    ((infinitePiNat (fun n ↦ μ (e n))).map (piCongrLeft X e)) s = piContent μ s := by
   obtain ⟨I, S, hS, rfl⟩ := (mem_measurableCylinders s).1 hs
-  rw [map_apply _ hS.cylinder, cylinder, ← Set.preimage_comp, coe_piCongrLeft,
+  rw [map_apply hS.cylinder (by fun_prop), cylinder, ← Set.preimage_comp, coe_piCongrLeft,
     restrict_comp_piCongrLeft, Set.preimage_comp, ← map_apply,
     infinitePiNat_map_restrict (fun n ↦ μ (e n)), ← cylinder, piContent_cylinder μ hS,
-    ← pi_map_piCongrLeft (e.restrictPreimageFinset I), map_apply _ hS, coe_piCongrLeft]
+    ← pi_map_piCongrLeft (e.restrictPreimageFinset I), map_apply hS (by fun_prop),
+    coe_piCongrLeft]
   · simp
-  any_goals fun_prop
   exact hS.preimage (MeasurableEquiv.piCongrLeft _ _).measurable
 
 /-- This is the key theorem to build the product of an arbitrary family of probability measures:
@@ -315,7 +430,7 @@ theorem piContent_tendsto_zero {A : ℕ → Set (Π i, X i)} (A_mem : ∀ n, A n
   conv =>
     enter [1]; ext n
     rw [A_eq, piContent_cylinder μ (mS n), ← pi_map_piCongrLeft (aux n),
-      map_apply (by fun_prop) (mS n)]
+      map_apply (mS n) (by fun_prop)]
     change (Measure.pi (fun i : t n ↦ μ i)) (T n)
     rw [← piContent_cylinder (fun i : u ↦ μ i) (mT n), ← B_eq n]
   obtain u_fin | u_inf := finite_or_infinite u
@@ -364,7 +479,8 @@ theorem isProjectiveLimit_infinitePi :
     IsProjectiveLimit (infinitePi μ) (fun I : Finset ι ↦ (Measure.pi (fun i : I ↦ μ i))) := by
   intro I
   ext s hs
-  rw [map_apply (measurable_restrict I) hs, infinitePi, dite_eq_left hμ, AddContent.measure_eq,
+  rw [map_apply hs (measurable_restrict I).aemeasurable, infinitePi, dite_eq_left hμ,
+    AddContent.measure_eq,
     ← cylinder, piContent_cylinder μ hs]
   · exact generateFrom_measurableCylinders.symm
   · exact cylinder_mem_measurableCylinders _ _ hs
@@ -377,7 +493,7 @@ theorem infinitePi_map_restrict {I : Finset ι} :
 
 instance : IsProbabilityMeasure (infinitePi μ) := by
   constructor
-  rw [← cylinder_univ ∅, cylinder, ← map_apply (measurable_restrict _) .univ,
+  rw [← cylinder_univ ∅, cylinder, ← map_apply .univ (measurable_restrict _).aemeasurable,
     infinitePi_map_restrict, measure_univ]
 
 /-- To prove that a measure is equal to the product measure it is enough to check that it
@@ -389,15 +505,14 @@ theorem eq_infinitePi {ν : Measure (Π i, X i)}
   refine (isProjectiveLimit_infinitePi μ).unique ?_ |>.symm
   refine fun s ↦ (pi_eq fun t ht ↦ ?_).symm
   classical
-  rw [Measure.map_apply, restrict_preimage_univ, hν, ← prod_attach, univ_eq_attach]
+  rw [Measure.map_apply (.univ_pi ht) (measurable_restrict s).aemeasurable,
+    restrict_preimage_univ, hν, ← prod_attach, univ_eq_attach]
   · congr with i
     rw [dite_eq_left i.2]
-  any_goals fun_prop
   · rintro i
     split_ifs with hi
     · exact ht ⟨i, hi⟩
     · exact .univ
-  · exact .univ_pi ht
 
 lemma infinitePi_pi {s : Finset ι} {t : (i : ι) → Set (X i)}
     (mt : ∀ i ∈ s, MeasurableSet (t i)) :
@@ -405,19 +520,19 @@ lemma infinitePi_pi {s : Finset ι} {t : (i : ι) → Set (X i)}
   have : Set.pi s t = cylinder s ((@Set.univ s).pi (fun i : s ↦ t i)) := by
     ext x
     simp
-  rw [this, cylinder, ← map_apply, infinitePi_map_restrict, pi_pi]
+  rw [this, cylinder,
+    ← map_apply (.univ_pi fun i ↦ mt i.1 i.2) (measurable_restrict s).aemeasurable,
+    infinitePi_map_restrict, pi_pi]
   · rw [univ_eq_attach, prod_attach _ (fun i ↦ (μ i) (t i))]
-  · exact measurable_restrict _
-  · exact .univ_pi fun i ↦ mt i.1 i.2
 
 theorem infinitePi_map_restrict' {I : Set ι} :
     (infinitePi μ).map I.domRestrict = infinitePi fun i : I ↦ μ i := by
   apply eq_infinitePi
   intro s t ht
   classical
-  rw [map_apply (by fun_prop), domRestrict_preimage, infinitePi_pi _ (by measurability)]
+  rw [map_apply (by apply MeasurableSet.pi (countable_toSet _) (by measurability)) (by fun_prop),
+    domRestrict_preimage, infinitePi_pi _ (by measurability)]
   · simp
-  · exact .pi s.countable_toSet (by measurability)
 
 lemma infinitePi_pi_of_countable {s : Set ι} (hs : Countable s) {t : (i : ι) → Set (X i)}
     (mt : ∀ i ∈ s, MeasurableSet (t i)) :
@@ -428,7 +543,7 @@ lemma infinitePi_pi_of_countable {s : Set ι} (hs : Countable s) {t : (i : ι) �
   classical
   · conv in ∏ _ ∈ _, _ =>
       rw [← infinitePi_pi _ (by measurability), ← infinitePi_map_restrict', map_apply
-        (by fun_prop) (by apply MeasurableSet.pi (countable_toSet _) (by measurability)),
+        (by apply MeasurableSet.pi (countable_toSet _) (by measurability)) (by fun_prop),
         domRestrict_preimage]
       simp only [coe_image, dite_eq_ite]
     have : s.pi t
@@ -468,27 +583,41 @@ lemma _root_.measurePreserving_eval_infinitePi (i : ι) :
     MeasurePreserving (Function.eval i) (infinitePi μ) (μ i) where
   measurable := by fun_prop
   map_eq := by
+    classical
     ext s hs
-    have : @Function.eval ι X i =
-        (@Function.eval ({i} : Finset ι) (fun j ↦ X j) ⟨i, by simp⟩) ∘
-        (Finset.restrict {i}) := by ext; simp
-    rw [this, ← map_map, infinitePi_map_restrict, (measurePreserving_eval _ _).map_eq]
-    all_goals fun_prop
+    rw [Measure.map_apply hs (measurable_pi_apply i).aemeasurable]
+    let t : (j : ι) → Set (X j) := fun j ↦ if h : j = i then h ▸ s else Set.univ
+    have hpre : (fun x : ∀ i, X i ↦ x i) ⁻¹' s = Set.pi ({i} : Finset ι) t := by
+      ext x
+      simp [t]
+    calc
+      infinitePi μ ((fun x : ∀ i, X i ↦ x i) ⁻¹' s) =
+          infinitePi μ (Set.pi ({i} : Finset ι) t) := congrArg (infinitePi μ) hpre
+      _ = ∏ j ∈ ({i} : Finset ι), μ j (t j) := infinitePi_pi μ fun j hj ↦ by
+        simp only [Finset.mem_singleton] at hj
+        subst j
+        simp [t, hs]
+      _ = μ i s := by simp [t]
 
 lemma infinitePi_map_eval (i : ι) :
-    (infinitePi μ).map (fun x ↦ x i) = μ i :=
+    (infinitePi μ).map (fun x ↦ x i) (measurable_pi_apply i).aemeasurable = μ i :=
   (measurePreserving_eval_infinitePi μ i).map_eq
 
 lemma infinitePi_map_pi {Y : ι → Type*} [∀ i, SigmaAlgebra (Y i)] {f : (i : ι) → X i → Y i}
     (hf : ∀ i, Measurable (f i)) :
-    (infinitePi μ).map (fun x i ↦ f i (x i)) = infinitePi (fun i ↦ (μ i).map (f i)) := by
+    (infinitePi μ).map (fun (x : ∀ i, X i) (i : ι) ↦ f i (x i))
+        (show AEMeasurable (fun (x : ∀ i, X i) i ↦ f i (x i)) (infinitePi μ) from
+          (measurable_pi_iff.2 fun i ↦ (hf i).comp (measurable_pi_apply i)).aemeasurable) =
+      infinitePi (fun i ↦ (μ i).map (f i) (hf i).aemeasurable) := by
+  have hmap : AEMeasurable (fun (x : ∀ i, X i) i ↦ f i (x i)) (infinitePi μ) :=
+    (measurable_pi_iff.2 fun i ↦ (hf i).comp (measurable_pi_apply i)).aemeasurable
   refine eq_infinitePi _ fun s t ht ↦ ?_
-  rw [map_apply (by fun_prop) (.pi s.countable_toSet fun _ _ ↦ ht _)]
+  rw [map_apply (.pi s.countable_toSet fun _ _ ↦ ht _) hmap]
   have : (fun (x : Π i, X i) i ↦ f i (x i)) ⁻¹' ((s : Set ι).pi t) =
       (s : Set ι).pi (fun i ↦ (f i) ⁻¹' (t i)) := by ext x; simp
   rw [this, infinitePi_pi _ (fun i _ ↦ hf i (ht i))]
   congr! with i hi
-  rw [map_apply (by fun_prop) (ht i)]
+  rw [map_apply (ht i) (by fun_prop)]
 
 /-- If we push the product measure forward by a reindexing equivalence, we get a product measure
 on the reindexed product. -/
@@ -496,13 +625,12 @@ theorem infinitePi_map_piCongrLeft {α : Type*} (e : α ≃ ι) :
     (infinitePi (fun i ↦ μ (e i))).map (piCongrLeft X e) = infinitePi μ := by
   refine eq_infinitePi μ fun s t ht ↦ ?_
   conv_lhs => enter [2, 1]; rw [← e.image_preimage s, ← coe_preimage _ e.injective.injOn]
-  rw [map_apply, coe_piCongrLeft, Equiv.piCongrLeft_preimage_pi, infinitePi_pi,
+  rw [map_apply (MeasurableSet.pi ((countable_toSet _).image e) (by simp_all)) (by fun_prop),
+    coe_piCongrLeft, Equiv.piCongrLeft_preimage_pi, infinitePi_pi,
     prod_equiv e]
   · simp
   · simp
   · simp_all
-  · fun_prop
-  · exact .pi ((countable_toSet _).image e) (by simp_all)
 
 theorem infinitePi_eq_pi [Fintype ι] : infinitePi μ = Measure.pi μ := by
   refine (pi_eq fun s hs ↦ ?_).symm
@@ -511,7 +639,8 @@ theorem infinitePi_eq_pi [Fintype ι] : infinitePi μ = Measure.pi μ := by
 
 lemma infinitePi_cylinder {s : Finset ι} {S : Set (Π i : s, X i)} (mS : MeasurableSet S) :
     infinitePi μ (cylinder s S) = Measure.pi (fun i : s ↦ μ i) S := by
-  rw [cylinder, ← Measure.map_apply (measurable_restrict _) mS, infinitePi_map_restrict]
+  rw [cylinder, ← Measure.map_apply mS (measurable_restrict _).aemeasurable,
+    infinitePi_map_restrict]
 
 section curry
 
@@ -525,7 +654,7 @@ lemma infinitePi_map_piCurry_symm :
   apply eq_infinitePi
   intro s t ht
   classical
-  rw [map_apply (by fun_prop) (.pi (countable_toSet _) fun _ _ ↦ ht _),
+  rw [map_apply (.pi (countable_toSet _) fun _ _ ↦ ht _) (by fun_prop),
     ← Finset.sigma_image_fst_preimage_mk s, coe_piCurry_symm, Finset.coe_sigma,
     Set.uncurry_preimage_sigma_pi, infinitePi_pi, Finset.prod_sigma]
   · exact Finset.prod_congr rfl (fun _ _ ↦ infinitePi_pi _ fun _ _ ↦ ht _)
@@ -543,14 +672,30 @@ variable {ι κ X : Type*} {mX : SigmaAlgebra X} (μ : ι → κ → Measure X)
 lemma infinitePi_map_curry_symm :
     (infinitePi fun i : ι ↦ infinitePi fun j : κ ↦ μ i j).map (curry ι κ X).symm =
       infinitePi fun p : ι × κ ↦ μ p.1 p.2 := by
-  rw [← (MeasurableEquiv.piCongrLeft (fun _ ↦ X)
-    (Equiv.sigmaEquivProd ι κ).symm).map_measurableEquiv_injective.eq_iff, map_map]
-  · have : (MeasurableEquiv.piCongrLeft (fun _ ↦ X) (Equiv.sigmaEquivProd ι κ).symm) ∘
-        (MeasurableEquiv.curry ι κ X).symm = ⇑(MeasurableEquiv.piCurry (fun _ _ ↦ X)).symm := by
-      ext; simp [piCongrLeft, Equiv.piCongrLeft, Sigma.uncurry]
-    rw [this, infinitePi_map_piCurry_symm]
-    convert! infinitePi_map_piCongrLeft (fun p ↦ μ p.1 p.2) (Equiv.sigmaEquivProd ι κ).symm |>.symm
-  all_goals fun_prop
+  let e := MeasurableEquiv.piCongrLeft (fun _ ↦ X) (Equiv.sigmaEquivProd ι κ).symm
+  apply e.map_measurableEquiv_injective
+  have hcurry : AEMeasurable (MeasurableEquiv.curry ι κ X).symm
+      (infinitePi fun i : ι ↦ infinitePi fun j : κ ↦ μ i j) :=
+    (MeasurableEquiv.curry ι κ X).symm.measurable.aemeasurable
+  have he : AEMeasurable e
+      ((infinitePi fun i : ι ↦ infinitePi fun j : κ ↦ μ i j).map
+        (MeasurableEquiv.curry ι κ X).symm hcurry) := e.measurable.aemeasurable
+  have hcomp := hcurry.comp_aemeasurable he
+  have hfun : e ∘ (MeasurableEquiv.curry ι κ X).symm =
+      ⇑(MeasurableEquiv.piCurry (fun _ _ ↦ X)).symm := by
+    ext
+    simp [e, piCongrLeft, Equiv.piCongrLeft, Sigma.uncurry]
+  calc
+    _ = (infinitePi fun i : ι ↦ infinitePi fun j : κ ↦ μ i j).map
+        (e ∘ (MeasurableEquiv.curry ι κ X).symm) hcomp :=
+      Measure.map_map hcurry he
+    _ = (infinitePi fun i : ι ↦ infinitePi fun j : κ ↦ μ i j).map
+        (MeasurableEquiv.piCurry (fun _ _ ↦ X)).symm :=
+      Measure.map_congr (ae_of_all _ fun x ↦ congrFun hfun x) hcomp
+    _ = infinitePi fun p : (i : ι) × κ ↦ μ p.1 p.2 := infinitePi_map_piCurry_symm μ
+    _ = (infinitePi fun p : ι × κ ↦ μ p.1 p.2).map e := by
+      convert! (infinitePi_map_piCongrLeft (fun p ↦ μ p.1 p.2)
+        (Equiv.sigmaEquivProd ι κ).symm).symm
 
 lemma infinitePi_map_curry :
     (infinitePi fun p : ι × κ ↦ μ p.1 p.2).map (curry ι κ X) =

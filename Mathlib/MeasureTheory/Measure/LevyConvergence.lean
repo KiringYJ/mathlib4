@@ -244,7 +244,8 @@ characteristic functions of the sequence of pushforward measures under the seque
 variables converge pointwise to the characteristic function of the pushforward measure under the
 random variable. -/
 lemma TendstoInDistribution.tendsto_charFun (h : TendstoInDistribution X atTop X' P P') (t : E) :
-    Tendsto (fun n ↦ charFun ((P n).map (X n)) t) atTop (𝓝 (charFun (P'.map X') t)) := by
+    Tendsto (fun n ↦ charFun ((P n).map (X n) (h.forall_aemeasurable n)) t) atTop
+      (𝓝 (charFun (P'.map X' h.aemeasurable_limit) t)) := by
   simpa only [ProbabilityMeasure.coe_mk] using
       ProbabilityMeasure.tendsto_iff_tendsto_charFun.mp h.tendsto t
 
@@ -253,7 +254,8 @@ of the characteristic functions of their pushforwards. -/
 lemma tendstoInDistribution_iff_tendsto_charFun
     (hX : ∀ n, AEMeasurable (X n) (P n)) (hX' : AEMeasurable X' P') :
     TendstoInDistribution X atTop X' P P' ↔
-    (∀ t : E, Tendsto (fun n ↦ charFun ((P n).map (X n)) t) atTop (𝓝 (charFun (P'.map X') t))) where
+    (∀ t : E, Tendsto (fun n ↦ charFun ((P n).map (X n) (hX n)) t) atTop
+      (𝓝 (charFun (P'.map X' hX') t))) where
   mp := TendstoInDistribution.tendsto_charFun
   mpr := TendstoInDistribution.of_tendsto_charFun hX hX'
 

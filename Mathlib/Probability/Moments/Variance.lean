@@ -313,9 +313,9 @@ lemma variance_dirac [MeasurableSingletonClass Ω] (x : Ω) : Var[X; Measure.dir
   · exact aemeasurable_dirac
 
 lemma variance_map {Ω' : Type*} {mΩ' : SigmaAlgebra Ω'} {μ : Measure Ω'}
-    {Y : Ω' → Ω} (hX : AEMeasurable X (μ.map Y)) (hY : AEMeasurable Y μ) :
-    Var[X; μ.map Y] = Var[X ∘ Y; μ] := by
-  rw [variance_eq_integral hX, integral_map hY, variance_eq_integral (hX.comp_aemeasurable hY),
+    {Y : Ω' → Ω} (hY : AEMeasurable Y μ) (hX : AEMeasurable X (μ.map Y hY)) :
+    Var[X; μ.map Y hY] = Var[X ∘ Y; μ] := by
+  rw [variance_eq_integral hX, integral_map hY, variance_eq_integral (hY.comp_aemeasurable hX),
     integral_map hY]
   · congr
   · exact hX.aestronglyMeasurable
@@ -326,7 +326,9 @@ lemma _root_.MeasureTheory.MeasurePreserving.variance_fun_comp {Ω' : Type*}
     {mΩ' : SigmaAlgebra Ω'} {ν : Measure Ω'} {X : Ω → Ω'}
     (hX : MeasurePreserving X μ ν) {f : Ω' → ℝ} (hf : AEMeasurable f ν) :
     Var[fun ω ↦ f (X ω); μ] = Var[f; ν] := by
-  rw [← hX.map_eq, variance_map (hX.map_eq ▸ hf) hX.aemeasurable, Function.comp_def]
+  have hf' : AEMeasurable f (μ.map X hX.aemeasurable) := by
+    simpa only [hX.map_eq] using hf
+  rw [← hX.map_eq, variance_map hX.aemeasurable hf', Function.comp_def]
 
 lemma variance_map_equiv {Ω' : Type*} {mΩ' : SigmaAlgebra Ω'} {μ : Measure Ω'}
     (X : Ω → ℝ) (Y : Ω' ≃ᵐ Ω) :
@@ -334,7 +336,7 @@ lemma variance_map_equiv {Ω' : Type*} {mΩ' : SigmaAlgebra Ω'} {μ : Measure �
   simp_rw [variance, evariance, lintegral_map_equiv, integral_map_equiv, Function.comp_apply]
 
 lemma variance_id_map (hX : AEMeasurable X μ) : Var[id; μ.map X] = Var[X; μ] := by
-  simp [variance_map measurable_id.aemeasurable hX]
+  simp [variance_map hX measurable_id.aemeasurable]
 
 theorem variance_le_expectation_sq [IsProbabilityMeasure μ] {X : Ω → ℝ}
     (hm : AEStronglyMeasurable X μ) : variance X μ ≤ μ[X ^ 2] := by
@@ -452,9 +454,9 @@ lemma variance_sum_pi [Fintype ι] {Ω : ι → Type*} {mΩ : ∀ i, SigmaAlgebr
   · congr with i
     change Var[(X i) ∘ (fun ω ↦ ω i); Measure.pi μ] = _
     rw [← variance_map, (measurePreserving_eval _ i).map_eq]
-    · rw [(measurePreserving_eval _ i).map_eq]
-      exact (h i).aestronglyMeasurable.aemeasurable
-    · exact Measurable.aemeasurable (by fun_prop)
+    · exact (measurable_pi_apply i).aemeasurable
+    · simpa only [(measurePreserving_eval _ i).map_eq] using
+        (h i).aestronglyMeasurable.aemeasurable
   · exact fun i _ ↦ (h i).comp_measurePreserving (measurePreserving_eval _ i)
   · exact fun i _ j _ hij ↦
       (iIndepFun_pi fun i ↦ (h i).aestronglyMeasurable.aemeasurable).indepFun hij

@@ -622,15 +622,21 @@ variable {G}
 @[to_additive addMeasure_map_restrict_apply]
 lemma measure_map_restrict_apply (s : Set α) {U : Set (Quotient α_mod_G)}
     (meas_U : MeasurableSet U) :
-    (μ.restrict s).map π U = μ ((π ⁻¹' U) ∩ s) := by
-  rw [map_apply (f := π) (fun V hV ↦ measurableSet_quotient.mp hV) meas_U,
+    ((μ.restrict s).map π
+      (show Measurable π from fun _ hV ↦ measurableSet_quotient.mp hV).aemeasurable) U =
+      μ ((π ⁻¹' U) ∩ s) := by
+  rw [map_apply (f := π) meas_U
+    (show Measurable π from fun _ hV ↦ measurableSet_quotient.mp hV).aemeasurable,
     Measure.restrict_apply (t := (Quotient.mk α_mod_G ⁻¹' U)) (measurableSet_quotient.mp meas_U)]
 
 @[to_additive]
 lemma IsFundamentalDomain.quotientMeasure_eq [Countable G] {s t : Set α}
     [SMulInvariantMeasure G α μ] [MeasurableConstSMul G α] (fund_dom_s : IsFundamentalDomain G s μ)
     (fund_dom_t : IsFundamentalDomain G t μ) :
-    (μ.restrict s).map π = (μ.restrict t).map π := by
+    (μ.restrict s).map π
+        (show Measurable π from fun _ hV ↦ measurableSet_quotient.mp hV).aemeasurable =
+      (μ.restrict t).map π
+        (show Measurable π from fun _ hV ↦ measurableSet_quotient.mp hV).aemeasurable := by
   ext U meas_U
   rw [measure_map_restrict_apply (meas_U := meas_U), measure_map_restrict_apply (meas_U := meas_U)]
   apply MeasureTheory.IsFundamentalDomain.measure_set_eq fund_dom_s fund_dom_t

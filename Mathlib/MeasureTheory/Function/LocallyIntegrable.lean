@@ -386,7 +386,9 @@ theorem LocallyIntegrable.indicator {f : X → ε''} (hf : LocallyIntegrable f �
   exact ⟨U, hU, h'U.indicator hs⟩
 
 theorem locallyIntegrable_map_homeomorph [BorelSpace X] [BorelSpace Y] (e : X ≃ₜ Y) {f : Y → ε''}
-    {μ : Measure X} : LocallyIntegrable f (Measure.map e μ) ↔ LocallyIntegrable (f ∘ e) μ := by
+    {μ : Measure X} :
+    LocallyIntegrable f (Measure.map e μ e.measurable.aemeasurable) ↔
+      LocallyIntegrable (f ∘ e) μ := by
   refine ⟨fun h x => ?_, fun h x => ?_⟩
   · rcases h (e x) with ⟨U, hU, h'U⟩
     refine ⟨e ⁻¹' U, e.continuous.continuousAt.preimage_mem_nhds hU, ?_⟩

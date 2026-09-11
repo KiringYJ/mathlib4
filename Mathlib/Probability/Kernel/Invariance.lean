@@ -51,7 +51,12 @@ theorem Invariant.comp (hκ : Invariant κ μ) (hη : Invariant η μ) :
     Invariant (κ ∘ₖ η) μ := by
   rcases isEmpty_or_nonempty α with _ | hα
   · exact Subsingleton.elim _ _
-  · rw [Invariant, ← Measure.comp_assoc, hη, hκ]
+  · rw [Invariant]
+    calc
+      (κ ∘ₖ η) ∘ₘ μ = κ ∘ₘ (η ∘ₘ μ) := Measure.comp_assoc.symm
+      _ = κ ∘ₘ μ := congrArg (fun ν : Measure α ↦
+        Measure.bind ν κ κ.measurable.aemeasurable) hη
+      _ = μ := hκ
 
 /-! ### Reversibility of kernels -/
 

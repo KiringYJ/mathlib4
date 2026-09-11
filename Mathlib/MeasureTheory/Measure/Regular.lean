@@ -244,7 +244,7 @@ protected theorem map {α β} [SigmaAlgebra α] [SigmaAlgebra β]
     (hB₂ : ∀ U, qb U → MeasurableSet U) :
     InnerRegularWRT (map f μ) pb qb := by
   intro U hU r hr
-  rw [map_apply_of_aemeasurable hf (hB₂ _ hU)] at hr
+  rw [Measure.map_apply (hB₂ _ hU) hf] at hr
   rcases H (hAB U hU) r hr with ⟨K, hKU, hKc, hK⟩
   refine ⟨f '' K, image_subset_iff.2 hKU, hAB' _ hKc, ?_⟩
   exact hK.trans_le (le_map_apply_image hf _)
@@ -394,13 +394,13 @@ alias _root_.MeasurableSet.exists_isOpen_diff_lt := _root_.MeasurableSet.exists_
 
 protected theorem map [OpensSigmaAlgebra α] [SigmaAlgebra β] [TopologicalSpace β]
     [BorelSpace β] (f : α ≃ₜ β) (μ : Measure α) [OuterRegular μ] :
-    (Measure.map f μ).OuterRegular := by
+    (Measure.map f μ f.measurable.aemeasurable).OuterRegular := by
   refine ⟨fun A hA r hr => ?_⟩
-  rw [map_apply f.measurable hA, ← f.image_symm] at hr
+  rw [map_apply hA f.measurable.aemeasurable, ← f.image_symm] at hr
   rcases Set.exists_isOpen_lt_of_lt _ r hr with ⟨U, hAU, hUo, hU⟩
   have : IsOpen (f.symm ⁻¹' U) := hUo.preimage f.symm.continuous
   refine ⟨f.symm ⁻¹' U, image_subset_iff.1 hAU, this, ?_⟩
-  rwa [map_apply f.measurable this.measurableSet, f.preimage_symm, f.preimage_image]
+  rwa [map_apply this.measurableSet f.measurable.aemeasurable, f.preimage_symm, f.preimage_image]
 
 theorem comap' {mβ : SigmaAlgebra β} [TopologicalSpace β] (μ : Measure β) [OuterRegular μ]
     {f : α → β} (f_cont : Continuous f) (f_me : MeasurableEmbedding f) :
@@ -736,21 +736,26 @@ theorem _root_.MeasurableSet.exists_lt_isCompact [InnerRegular μ] ⦃A : Set α
 
 protected theorem map_of_continuous [BorelSpace α] [SigmaAlgebra β] [TopologicalSpace β]
     [BorelSpace β] [h : InnerRegular μ] {f : α → β} (hf : Continuous f) :
-    InnerRegular (Measure.map f μ) :=
+    InnerRegular (Measure.map f μ hf.measurable.aemeasurable) :=
   ⟨InnerRegularWRT.map h.innerRegular hf.aemeasurable (fun _s hs ↦ hf.measurable hs)
     (fun _K hK ↦ hK.image hf) (fun _s hs ↦ hs)⟩
 
 protected theorem map [BorelSpace α] [SigmaAlgebra β] [TopologicalSpace β]
-    [BorelSpace β] [InnerRegular μ] (f : α ≃ₜ β) : (Measure.map f μ).InnerRegular :=
+    [BorelSpace β] [InnerRegular μ] (f : α ≃ₜ β) :
+    (Measure.map f μ f.measurable.aemeasurable).InnerRegular :=
   InnerRegular.map_of_continuous f.continuous
 
 protected theorem map_iff [BorelSpace α] [SigmaAlgebra β] [TopologicalSpace β]
     [BorelSpace β] (f : α ≃ₜ β) :
-    InnerRegular (Measure.map f μ) ↔ InnerRegular μ := by
+    InnerRegular (Measure.map f μ f.measurable.aemeasurable) ↔ InnerRegular μ := by
   refine ⟨fun h ↦ ?_, fun h ↦ h.map f⟩
-  convert! h.map f.symm
-  rw [map_map f.symm.continuous.measurable f.continuous.measurable]
-  simp
+  have h' := h.map f.symm
+  have hmap :
+      (Measure.map f μ f.measurable.aemeasurable).map f.symm
+        f.symm.measurable.aemeasurable = μ := by
+    simpa only [f.symm_comp_self, Measure.map_id] using
+      (Measure.map_map f.measurable.aemeasurable f.symm.measurable.aemeasurable)
+  rwa [hmap] at h'
 
 open Topology in
 protected theorem comap' [BorelSpace α]
@@ -994,11 +999,11 @@ instance (priority := 80) [InnerRegularCompactLTTop μ] [SigmaFinite μ] : Inner
 
 protected theorem map_of_continuous [BorelSpace α] [SigmaAlgebra β] [TopologicalSpace β]
     [BorelSpace β] [h : InnerRegularCompactLTTop μ] {f : α → β} (hf : Continuous f) :
-    InnerRegularCompactLTTop (Measure.map f μ) := by
+    InnerRegularCompactLTTop (Measure.map f μ hf.measurable.aemeasurable) := by
   constructor
   refine InnerRegularWRT.map h.innerRegular hf.aemeasurable ?_ (fun K hK ↦ hK.image hf) ?_
   · rintro s ⟨hs, h's⟩
-    exact ⟨hf.measurable hs, by rwa [map_apply hf.measurable hs] at h's⟩
+    exact ⟨hf.measurable hs, by rwa [map_apply hs hf.measurable.aemeasurable] at h's⟩
   · rintro s ⟨hs, -⟩
     exact hs
 
@@ -1124,7 +1129,8 @@ instance (priority := 100) [Regular μ] : InnerRegularCompactLTTop μ :=
   ⟨Regular.innerRegular.measurableSet_of_isOpen (fun _ _ hs hU ↦ hs.diff hU)⟩
 
 protected theorem map [BorelSpace α] [SigmaAlgebra β] [TopologicalSpace β]
-    [BorelSpace β] [Regular μ] (f : α ≃ₜ β) : (Measure.map f μ).Regular := by
+    [BorelSpace β] [Regular μ] (f : α ≃ₜ β) :
+    (Measure.map f μ f.measurable.aemeasurable).Regular := by
   have := OuterRegular.map f μ
   have := IsFiniteMeasureOnCompacts.map μ f
   exact
@@ -1134,11 +1140,15 @@ protected theorem map [BorelSpace α] [SigmaAlgebra β] [TopologicalSpace β]
 
 protected theorem map_iff [BorelSpace α] [SigmaAlgebra β] [TopologicalSpace β]
     [BorelSpace β] (f : α ≃ₜ β) :
-    Regular (Measure.map f μ) ↔ Regular μ := by
+    Regular (Measure.map f μ f.measurable.aemeasurable) ↔ Regular μ := by
   refine ⟨fun h ↦ ?_, fun h ↦ h.map f⟩
-  convert! h.map f.symm
-  rw [map_map f.symm.continuous.measurable f.continuous.measurable]
-  simp
+  have h' := h.map f.symm
+  have hmap :
+      (Measure.map f μ f.measurable.aemeasurable).map f.symm
+        f.symm.measurable.aemeasurable = μ := by
+    simpa only [f.symm_comp_self, Measure.map_id] using
+      (Measure.map_map f.measurable.aemeasurable f.symm.measurable.aemeasurable)
+  rwa [hmap] at h'
 
 open Topology in
 protected theorem comap' [BorelSpace α]

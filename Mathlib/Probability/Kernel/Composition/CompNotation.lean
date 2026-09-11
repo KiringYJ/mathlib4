@@ -49,7 +49,9 @@ lemma deterministic_comp_eq_map {f : α → β} (hf : Measurable f) :
   Measure.bind_dirac_eq_map μ hf
 
 @[simp]
-lemma id_comp : Kernel.id ∘ₘ μ = μ := by rw [Kernel.id, deterministic_comp_eq_map, Measure.map_id]
+lemma id_comp : Kernel.id ∘ₘ μ = μ := by
+  change Kernel.deterministic id measurable_id ∘ₘ μ = μ
+  rw [deterministic_comp_eq_map, Measure.map_id]
 
 lemma swap_comp {μ : Measure (α × β)} : (Kernel.swap α β) ∘ₘ μ = μ.map Prod.swap :=
   deterministic_comp_eq_map measurable_swap

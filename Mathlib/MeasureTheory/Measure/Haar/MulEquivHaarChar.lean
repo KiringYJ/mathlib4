@@ -38,7 +38,7 @@ variable {G : Type*} [Group G] [TopologicalSpace G] [SigmaAlgebra G]
 @[to_additive /-- If `φ : A ≃ₜ+ A` then `addEquivAddHaarChar φ` is the positive
 real factor by which `φ` scales Haar measures on `A`. -/]
 noncomputable def mulEquivHaarChar (φ : G ≃ₜ* G) : ℝ≥0 :=
-  haarScalarFactor haar (haar.map φ)
+  haarScalarFactor haar (haar.map φ (map_continuous φ).measurable.aemeasurable)
 
 @[to_additive]
 lemma mulEquivHaarChar_pos (φ : G ≃ₜ* G) : 0 < mulEquivHaarChar φ :=
@@ -47,7 +47,8 @@ lemma mulEquivHaarChar_pos (φ : G ≃ₜ* G) : 0 < mulEquivHaarChar φ :=
 @[to_additive]
 lemma mulEquivHaarChar_eq (μ : Measure G) [IsHaarMeasure μ]
     [Regular μ] (φ : G ≃ₜ* G) :
-    mulEquivHaarChar φ = haarScalarFactor μ (μ.map φ) := by
+    mulEquivHaarChar φ =
+      haarScalarFactor μ (μ.map φ (map_continuous φ).measurable.aemeasurable) := by
   have smul := isMulLeftInvariant_eq_smul_of_regular haar μ
   unfold mulEquivHaarChar
   conv =>
@@ -62,43 +63,51 @@ lemma mulEquivHaarChar_eq (μ : Measure G) [IsHaarMeasure μ]
 @[to_additive addEquivAddHaarChar_smul_map]
 lemma mulEquivHaarChar_smul_map (μ : Measure G)
     [IsHaarMeasure μ] [Regular μ] (φ : G ≃ₜ* G) :
-    mulEquivHaarChar φ • μ.map φ = μ := by
+    mulEquivHaarChar φ • μ.map φ (map_continuous φ).measurable.aemeasurable = μ := by
   rw [mulEquivHaarChar_eq μ φ]
-  have : Regular (map φ μ) := Regular.map φ.toHomeomorph
-  exact (isMulLeftInvariant_eq_smul_of_regular μ (map φ μ)).symm
+  have : Regular (map φ μ (map_continuous φ).measurable.aemeasurable) :=
+    Regular.map φ.toHomeomorph
+  exact (isMulLeftInvariant_eq_smul_of_regular μ
+    (map φ μ (map_continuous φ).measurable.aemeasurable)).symm
 
 @[to_additive addEquivAddHaarChar_smul_eq_comap]
 lemma mulEquivHaarChar_smul_eq_comap (μ : Measure G)
     [IsHaarMeasure μ] [Regular μ] (φ : G ≃ₜ* G) :
     (mulEquivHaarChar φ) • μ = μ.comap φ := by
   let e := φ.toHomeomorph.toMeasurableEquiv
-  rw [show ⇑φ = ⇑e from rfl, ← e.map_symm, show ⇑e.symm = ⇑φ.symm from rfl]
-  have : (map (φ.symm) μ).Regular := Regular.map φ.symm.toHomeomorph
-  rw [← mulEquivHaarChar_smul_map (map φ.symm μ) φ, map_map]
-  · simp
-  · fun_prop
-  · fun_prop
+  change (mulEquivHaarChar φ) • μ = μ.comap e
+  rw [← e.map_symm]
+  have : (map e.symm μ e.symm.measurable.aemeasurable).IsHaarMeasure :=
+    φ.symm.isHaarMeasure_map μ
+  have : (map e.symm μ e.symm.measurable.aemeasurable).Regular :=
+    Regular.map φ.symm.toHomeomorph
+  rw [← mulEquivHaarChar_smul_map (map e.symm μ e.symm.measurable.aemeasurable) φ,
+    map_map e.symm.measurable.aemeasurable (map_continuous φ).measurable.aemeasurable]
+  have hmap : map (φ ∘ e.symm) μ (by fun_prop) = μ := by
+    calc
+      map (φ ∘ e.symm) μ (by fun_prop) = map id μ measurable_id.aemeasurable := by
+        apply Measure.map_congr (ae_of_all μ fun x ↦ by simp [e]) (by fun_prop)
+      _ = μ := Measure.map_id
+  rw [hmap]
 
 @[to_additive addEquivAddHaarChar_smul_integral_map]
 lemma mulEquivHaarChar_smul_integral_map (μ : Measure G)
     [IsHaarMeasure μ] [Regular μ] {f : G → ℝ} (φ : G ≃ₜ* G) :
-    mulEquivHaarChar φ • ∫ a, f a ∂(μ.map φ) = ∫ a, f a ∂μ := by
-  nth_rw 2 [← mulEquivHaarChar_smul_map μ φ]
-  simp
+    mulEquivHaarChar φ •
+      ∫ a, f a ∂(μ.map φ (map_continuous φ).measurable.aemeasurable) = ∫ a, f a ∂μ := by
+  calc
+    mulEquivHaarChar φ •
+        ∫ a, f a ∂(μ.map φ (map_continuous φ).measurable.aemeasurable) =
+      ∫ a, f a ∂(mulEquivHaarChar φ •
+        μ.map φ (map_continuous φ).measurable.aemeasurable) := by
+        rw [integral_smul_nnreal_measure]
+    _ = ∫ a, f a ∂μ := by rw [mulEquivHaarChar_smul_map]
 
 @[to_additive integral_comap_eq_addEquivAddHaarChar_smul]
 lemma integral_comap_eq_mulEquivHaarChar_smul (μ : Measure G)
     [IsHaarMeasure μ] [Regular μ] {f : G → ℝ} (φ : G ≃ₜ* G) :
     ∫ a, f a ∂(μ.comap φ) = mulEquivHaarChar φ • ∫ a, f a ∂μ := by
-  let e := φ.toHomeomorph.toMeasurableEquiv
-  change ∫ a, f a ∂(comap e μ) = mulEquivHaarChar φ • ∫ a, f a ∂μ
-  have : (map (e.symm) μ).IsHaarMeasure := φ.symm.isHaarMeasure_map μ
-  have : (map (e.symm) μ).Regular := Regular.map φ.symm.toHomeomorph
-  rw [← e.map_symm, ← mulEquivHaarChar_smul_integral_map (map e.symm μ) φ,
-    map_map (by exact φ.toHomeomorph.toMeasurableEquiv.measurable) e.symm.measurable]
-  -- congr -- breaks to_additive
-  rw [show ⇑φ ∘ ⇑e.symm = id by ext; simp [e]]
-  simp
+  rw [← mulEquivHaarChar_smul_eq_comap μ φ, integral_smul_nnreal_measure]
 
 @[to_additive addEquivAddHaarChar_smul_preimage]
 lemma mulEquivHaarChar_smul_preimage
@@ -119,10 +128,10 @@ lemma mulEquivHaarChar_trans {φ ψ : G ≃ₜ* G} :
   rw [mulEquivHaarChar_eq haar ψ, mulEquivHaarChar_eq haar (ψ.trans φ)]
   have hφ : Measurable φ := by fun_prop
   have hψ : Measurable ψ := by fun_prop
-  simp_rw [ContinuousMulEquiv.coe_trans, ← map_map hφ hψ]
-  have h_reg : (haar.map ψ).Regular := Regular.map ψ.toHomeomorph
-  rw [MeasureTheory.Measure.haarScalarFactor_eq_mul haar (haar.map ψ),
-    ← mulEquivHaarChar_eq (haar.map ψ)]
+  simp_rw [ContinuousMulEquiv.coe_trans, ← map_map hψ.aemeasurable hφ.aemeasurable]
+  have h_reg : (haar.map ψ hψ.aemeasurable).Regular := Regular.map ψ.toHomeomorph
+  rw [MeasureTheory.Measure.haarScalarFactor_eq_mul haar (haar.map ψ hψ.aemeasurable),
+    ← mulEquivHaarChar_eq (haar.map ψ hψ.aemeasurable)]
 
 @[to_additive]
 lemma mulEquivHaarChar_symm {φ : G ≃ₜ* G} :
@@ -138,13 +147,18 @@ lemma mulEquivHaarChar_eq_one_of_compactSpace [CompactSpace G] (φ : G ≃ₜ* G
   set μ := haarMeasure (⟨⟨univ, isCompact_univ⟩, by simp⟩ : PositiveCompacts G)
   have hμ : μ univ = 1 := haarMeasure_self
   rw [mulEquivHaarChar_eq μ]
-  suffices (μ.haarScalarFactor (map φ μ) : ℝ≥0∞) = 1 by exact_mod_cast this
+  suffices (μ.haarScalarFactor
+      (map φ μ (map_continuous φ).measurable.aemeasurable) : ℝ≥0∞) = 1 by
+    exact_mod_cast this
   calc
-    _ = μ.haarScalarFactor (map φ μ) • (1 : ℝ≥0∞) := by rw [ENNReal.smul_def, smul_eq_mul, mul_one]
-    _ = μ.haarScalarFactor (map φ μ) • (map φ μ univ) := by
-          rw [map_apply (map_continuous φ).measurable .univ, Set.preimage_univ, hμ]
+    _ = μ.haarScalarFactor (map φ μ (map_continuous φ).measurable.aemeasurable) •
+        (1 : ℝ≥0∞) := by rw [ENNReal.smul_def, smul_eq_mul, mul_one]
+    _ = μ.haarScalarFactor (map φ μ (map_continuous φ).measurable.aemeasurable) •
+        (map φ μ (map_continuous φ).measurable.aemeasurable) univ := by
+          rw [map_apply .univ (map_continuous φ).measurable.aemeasurable, Set.preimage_univ, hμ]
     _ = μ univ := by
-          conv_rhs => rw [isMulInvariant_eq_smul_of_compactSpace μ (map φ μ), Measure.smul_apply]
+          conv_rhs => rw [isMulInvariant_eq_smul_of_compactSpace μ
+            (map φ μ (map_continuous φ).measurable.aemeasurable), Measure.smul_apply]
     _ = 1 := hμ
 
 end MeasureTheory

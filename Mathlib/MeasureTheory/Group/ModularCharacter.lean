@@ -45,12 +45,15 @@ variable {G : Type*} [TopologicalSpace G] [Group G] [IsTopologicalGroup G] [Loca
 noncomputable def modularCharacterFun (g : G) : ℝ≥0 :=
   letI : SigmaAlgebra G := borel G
   haveI : BorelSpace G := ⟨rfl⟩
-  haarScalarFactor (map (· * g) MeasureTheory.Measure.haar) MeasureTheory.Measure.haar
+  haarScalarFactor
+    (map (· * g) MeasureTheory.Measure.haar (measurable_mul_const g).aemeasurable)
+    MeasureTheory.Measure.haar
 
 /-- Independence of modularCharacterFun from the chosen Haar measure. -/
 @[to_additive /-- Independence of addModularCharacterFun from the chosen Haar measure -/]
 lemma modularCharacterFun_eq_haarScalarFactor [SigmaAlgebra G] [BorelSpace G] (μ : Measure G)
-    [IsHaarMeasure μ] (g : G) : modularCharacterFun g = haarScalarFactor (map (· * g) μ) μ := by
+    [IsHaarMeasure μ] (g : G) : modularCharacterFun g =
+      haarScalarFactor (map (· * g) μ (measurable_mul_const g).aemeasurable) μ := by
   let ν := MeasureTheory.Measure.haar (G := G)
   obtain ⟨⟨f, f_cont⟩, f_comp, f_nonneg, f_one⟩ :
     ∃ f : C(G, ℝ), HasCompactSupport f ∧ 0 ≤ f ∧ f 1 ≠ 0 := exists_continuous_nonneg_pos 1
@@ -68,8 +71,12 @@ lemma modularCharacterFun_eq_haarScalarFactor [SigmaAlgebra G] [BorelSpace G] (�
     rw [NNReal.coe_ne_zero]
     apply (ne_of_lt (haarScalarFactor_pos_of_isHaarMeasure _ _)).symm
   calc
-  ↑(modularCharacterFun g) = ↑(haarScalarFactor (map (· * g) ν) ν) := by borelize G; rfl
-  _ = (∫ x, f x ∂(map (· * g) ν)) / ∫ x, f x ∂ν :=
+  ↑(modularCharacterFun g) =
+      ↑(haarScalarFactor (map (· * g) ν (measurable_mul_const g).aemeasurable) ν) := by
+    borelize G
+    rfl
+  _ = (∫ x, f x ∂(map (· * g) ν (measurable_mul_const g).aemeasurable)) /
+      ∫ x, f x ∂ν :=
     haarScalarFactor_eq_integral_div _ _ f_cont f_comp (int_f_ne_zero ν)
   _ = (∫ x, f (x * g) ∂ν) / ∫ x, f x ∂ν := by
     rw [integral_map (AEMeasurable.mul_const aemeasurable_id' _)
@@ -83,15 +90,17 @@ lemma modularCharacterFun_eq_haarScalarFactor [SigmaAlgebra G] [BorelSpace G] (�
     mul_div_mul_comm _ _ _ _
   _ = 1 * ((∫ x, f (x * g) ∂μ) / ∫ x, f x ∂μ) := by rw [r]
   _ = (∫ x, f (x * g) ∂μ) / ∫ x, f x ∂μ := by rw [one_mul]
-  _ = (∫ x, f x ∂(map (· * g) μ)) / ∫ x, f x ∂μ := by
+  _ = (∫ x, f x ∂(map (· * g) μ (measurable_mul_const g).aemeasurable)) /
+      ∫ x, f x ∂μ := by
     rw [integral_map (AEMeasurable.mul_const aemeasurable_id' _)
     (Continuous.aestronglyMeasurable f_cont)]
-  _ = haarScalarFactor (map (· * g) μ) μ :=
+  _ = haarScalarFactor (map (· * g) μ (measurable_mul_const g).aemeasurable) μ :=
     (haarScalarFactor_eq_integral_div _ _ f_cont f_comp (int_f_ne_zero μ)).symm
 
 @[to_additive]
 lemma map_right_mul_eq_modularCharacterFun_smul [SigmaAlgebra G] [BorelSpace G] (μ : Measure G)
-    [IsHaarMeasure μ] [InnerRegular μ] (g : G) : map (· * g) μ = modularCharacterFun g • μ := by
+    [IsHaarMeasure μ] [InnerRegular μ] (g : G) :
+    map (· * g) μ (measurable_mul_const g).aemeasurable = modularCharacterFun g • μ := by
   rw [modularCharacterFun_eq_haarScalarFactor μ _]
   exact isMulLeftInvariant_eq_smul_of_innerRegular _ μ
 
@@ -116,13 +125,19 @@ lemma modularCharacterFun_map_mul (g h : G) : modularCharacterFun (g * h) =
   calc
     modularCharacterFun g * modularCharacterFun h =
       modularCharacterFun h * modularCharacterFun g := mul_comm _ _
-    _ = haarScalarFactor (map (· * h) (map (· * g) ν)) (map (· * g) ν) *
+    _ = haarScalarFactor
+      (map (· * h) (map (· * g) ν mul_g_meas.aemeasurable) mul_h_meas.aemeasurable)
+      (map (· * g) ν mul_g_meas.aemeasurable) *
       modularCharacterFun g := by
-      rw [modularCharacterFun_eq_haarScalarFactor (map (· * g) ν) _]
-    _ = haarScalarFactor (map (· * h) (map (· * g) ν)) (map (· * g) ν) *
-      haarScalarFactor (map (· * g) ν) ν := rfl
-    _ = haarScalarFactor (map (· * (g * h)) ν) ν := by simp only [map_map mul_h_meas mul_g_meas,
-      comp_mul_right, ← haarScalarFactor_eq_mul]
+      rw [modularCharacterFun_eq_haarScalarFactor
+        (map (· * g) ν mul_g_meas.aemeasurable) _]
+    _ = haarScalarFactor
+        (map (· * h) (map (· * g) ν mul_g_meas.aemeasurable) mul_h_meas.aemeasurable)
+        (map (· * g) ν mul_g_meas.aemeasurable) *
+      haarScalarFactor (map (· * g) ν mul_g_meas.aemeasurable) ν := rfl
+    _ = haarScalarFactor (map (· * (g * h)) ν (measurable_mul_const _).aemeasurable) ν := by
+      simp only [map_map mul_g_meas.aemeasurable mul_h_meas.aemeasurable,
+        comp_mul_right, ← haarScalarFactor_eq_mul]
 
 /-- The modular character homomorphism. The underlying function is `modularCharacterFun`, which is
 `g ↦ μ (· * g⁻¹) / μ`, where `μ` is a left Haar measure.

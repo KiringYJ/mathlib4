@@ -33,20 +33,22 @@ namespace MeasureTheory
 namespace Measure
 
 @[simp]
-theorem map_dirac' {f : α → β} (hf : Measurable f) (a : α) : (dirac a).map f = dirac (f a) := by
+theorem map_dirac' {f : α → β} (hf : Measurable f) (a : α) :
+    (dirac a).map f hf.aemeasurable = dirac (f a) := by
   classical
   apply ext
   intro s hs
-  rw [map_apply hf hs, dirac_apply' _ (hf hs), dirac_apply' _ hs]
+  rw [map_apply hs hf.aemeasurable, dirac_apply' _ (hf hs), dirac_apply' _ hs]
   simp [indicator_apply]
 
 @[simp]
-lemma map_const (μ : Measure α) (c : β) : μ.map (fun _ ↦ c) = (μ Set.univ) • dirac c := by
+lemma map_const (μ : Measure α) (c : β) :
+    μ.map (fun _ ↦ c) measurable_const.aemeasurable = (μ Set.univ) • dirac c := by
   ext s hs
   simp only [Measure.coe_smul, Pi.smul_apply,
     dirac_apply' _ hs, smul_eq_mul]
   classical
-  rw [Measure.map_apply measurable_const hs, Set.preimage_const]
+  rw [Measure.map_apply hs measurable_const.aemeasurable, Set.preimage_const]
   by_cases hsc : c ∈ s
   · rw [(Set.indicator_eq_one_iff_mem _).mpr hsc, mul_one, ite_eq_left hsc]
   · rw [ite_eq_right hsc, (Set.indicator_eq_zero_iff_notMem _).mpr hsc, measure_empty, mul_zero]
@@ -185,7 +187,7 @@ theorem Measure.map_dirac [MeasurableSingletonClass α] [MeasurableSingletonClas
     {f : α → β} (a : α) : (dirac a).map f = dirac (f a) := by
   classical
   ext s hs
-  rw [map_apply_of_aemeasurable (by fun_prop) hs]
+  rw [Measure.map_apply hs (by fun_prop)]
   simp [indicator_apply]
 
 instance Measure.dirac.isProbabilityMeasure {x : α} : IsProbabilityMeasure (dirac x) :=

@@ -139,33 +139,46 @@ lemma covarianceBilin_map_const_add [CompleteSpace E] [IsProbabilityMeasure μ] 
     convert! (memLp_const (-c)).add h
     ext; simp
 
+private lemma aemeasurable_toLp_pi {ι Ω : Type*} [Countable ι] {mΩ : SigmaAlgebra Ω}
+    {μ : Measure Ω} {X : ι → Ω → ℝ} (hX : ∀ i, AEMeasurable (X i) μ) :
+    AEMeasurable (fun ω ↦ toLp 2 (X · ω)) μ :=
+  (AEMeasurable.of_eval hX).comp_aemeasurable
+    (MeasurableEquiv.toLp 2 (ι → ℝ)).measurable.aemeasurable
+
 lemma covarianceBilin_apply_basisFun {ι Ω : Type*} [Fintype ι] {mΩ : SigmaAlgebra Ω}
-    {μ : Measure Ω} [IsFiniteMeasure μ] {X : ι → Ω → ℝ} (hX : ∀ i, MemLp (X i) 2 μ) (i j : ι) :
-    covarianceBilin (μ.map (fun ω ↦ toLp 2 (X · ω)))
+    {μ : Measure Ω} [IsFiniteMeasure μ] {X : ι → Ω → ℝ} (hX : ∀ i, MemLp (X i) 2 μ) (i j : ι)
+    (hmap : AEMeasurable (fun ω ↦ toLp 2 (X · ω)) μ := by
+      exact aemeasurable_toLp_pi fun i ↦ (hX i).aemeasurable) :
+    covarianceBilin (μ.map (fun ω ↦ toLp 2 (X · ω)) hmap)
       (basisFun ι ℝ i) (basisFun ι ℝ j) = cov[X i, X j; μ] := by
   have (i : ι) := (hX i).aemeasurable
-  rw [covarianceBilin_apply_eq_cov, covariance_map]
+  rw [covarianceBilin_apply_eq_cov, covariance_map hmap]
   · simp [basisFun_inner]; rfl
   · exact Measurable.aestronglyMeasurable (by fun_prop)
   · exact Measurable.aestronglyMeasurable (by fun_prop)
-  · fun_prop
-  · exact (memLp_map_measure_iff aestronglyMeasurable_id (by fun_prop)).2 (MemLp.of_eval_piLp hX)
+  · exact (memLp_map_measure_iff hmap aestronglyMeasurable_id).2
+      (MemLp.of_eval_piLp hX)
 
 lemma covarianceBilin_apply_basisFun_self {ι Ω : Type*} [Fintype ι] {mΩ : SigmaAlgebra Ω}
-    {μ : Measure Ω} [IsFiniteMeasure μ] {X : ι → Ω → ℝ} (hX : ∀ i, MemLp (X i) 2 μ) (i : ι) :
-    covarianceBilin (μ.map (fun ω ↦ toLp 2 (X · ω)))
+    {μ : Measure Ω} [IsFiniteMeasure μ] {X : ι → Ω → ℝ} (hX : ∀ i, MemLp (X i) 2 μ) (i : ι)
+    (hmap : AEMeasurable (fun ω ↦ toLp 2 (X · ω)) μ := by
+      exact aemeasurable_toLp_pi fun i ↦ (hX i).aemeasurable) :
+    covarianceBilin (μ.map (fun ω ↦ toLp 2 (X · ω)) hmap)
       (basisFun ι ℝ i) (basisFun ι ℝ i) = Var[X i; μ] := by
-  rw [covarianceBilin_apply_basisFun hX, covariance_self]
+  rw [covarianceBilin_apply_basisFun hX i i hmap, covariance_self]
   have (i : ι) := (hX i).aemeasurable
   fun_prop
 
 lemma covarianceBilin_apply_pi {ι Ω : Type*} [Fintype ι] {mΩ : SigmaAlgebra Ω}
     {μ : Measure Ω} [IsFiniteMeasure μ] {X : ι → Ω → ℝ}
-    (hX : ∀ i, MemLp (X i) 2 μ) (x y : EuclideanSpace ℝ ι) :
-    covarianceBilin (μ.map (fun ω ↦ toLp 2 (X · ω))) x y =
+    (hX : ∀ i, MemLp (X i) 2 μ) (x y : EuclideanSpace ℝ ι)
+    (hmap : AEMeasurable (fun ω ↦ toLp 2 (X · ω)) μ := by
+      exact aemeasurable_toLp_pi fun i ↦ (hX i).aemeasurable) :
+    covarianceBilin (μ.map (fun ω ↦ toLp 2 (X · ω)) hmap) x y =
       ∑ i, ∑ j, x i * y j * cov[X i, X j; μ] := by
   have (i : ι) := (hX i).aemeasurable
-  nth_rw 1 [covarianceBilin_apply_eq_cov, covariance_map_fun, ← (basisFun ι ℝ).sum_repr' x,
+  nth_rw 1 [covarianceBilin_apply_eq_cov, covariance_map_fun hmap,
+    ← (basisFun ι ℝ).sum_repr' x,
     ← (basisFun ι ℝ).sum_repr' y]
   · simp_rw [sum_inner, real_inner_smul_left, basisFun_inner]
     rw [covariance_fun_sum_fun_sum]
@@ -174,8 +187,8 @@ lemma covarianceBilin_apply_pi {ι Ω : Type*} [Fintype ι] {mΩ : SigmaAlgebra 
       ring
     all_goals exact fun i ↦ (hX i).const_mul _
   any_goals exact Measurable.aestronglyMeasurable (by fun_prop)
-  · fun_prop
-  · exact (memLp_map_measure_iff aestronglyMeasurable_id (by fun_prop)).2 (MemLp.of_eval_piLp hX)
+  · exact (memLp_map_measure_iff hmap aestronglyMeasurable_id).2
+      (MemLp.of_eval_piLp hX)
 
 section covarianceOperator
 

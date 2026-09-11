@@ -26,7 +26,7 @@ lemma MemLp.comp_fst {f : α → ε} (hf : MemLp f p μ) (ν : Measure β) [IsFi
     MemLp (fun x ↦ f x.1) p (μ.prod ν) := by
   have hf' : MemLp f p (ν .univ • μ) := hf.smul_measure (by simp)
   change MemLp (f ∘ Prod.fst) p (μ.prod ν)
-  rw [← memLp_map_measure_iff ?_ (by fun_prop)]
+  rw [← memLp_map_measure_iff (by fun_prop) ?_]
   · simpa using hf'
   · simpa using hf'.1
 
@@ -35,7 +35,7 @@ lemma MemLp.comp_snd {f : β → ε} (hf : MemLp f p ν) (μ : Measure α) [IsFi
     MemLp (fun x ↦ f x.2) p (μ.prod ν) := by
   have hf' : MemLp f p (μ .univ • ν) := hf.smul_measure (by simp)
   change MemLp (f ∘ Prod.snd) p (μ.prod ν)
-  rw [← memLp_map_measure_iff ?_ (by fun_prop)]
+  rw [← memLp_map_measure_iff (by fun_prop) ?_]
   · simpa using hf'
   · simpa using hf'.1
 

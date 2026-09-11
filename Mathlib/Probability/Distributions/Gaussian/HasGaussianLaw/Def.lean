@@ -31,6 +31,6 @@ public structure ProbabilityTheory.HasGaussianLaw {Ω E : Type*} {mΩ : SigmaAlg
     [TopologicalSpace E] [AddCommMonoid E] [Module ℝ E] [mE : SigmaAlgebra E]
     (X : Ω → E) (P : Measure Ω) : Prop where
   protected aemeasurable : AEMeasurable X P := by fun_prop
-  protected isGaussian_map : IsGaussian (P.map X)
+  protected isGaussian_map : IsGaussian (P.map X aemeasurable)
 
 attribute [fun_prop] ProbabilityTheory.HasGaussianLaw.aemeasurable

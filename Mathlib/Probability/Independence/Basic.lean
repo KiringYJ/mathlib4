@@ -690,10 +690,10 @@ theorem indepFun_iff_map_prod_eq_prod_map_map' {mβ : SigmaAlgebra β} {mβ' : S
     f ⟂ᵢ[μ] g ↔ μ.map (fun ω ↦ (f ω, g ω)) = (μ.map f).prod (μ.map g) := by
   rw [indepFun_iff_measure_inter_preimage_eq_mul]
   have h₀ {s : Set β} {t : Set β'} (hs : MeasurableSet s) (ht : MeasurableSet t) :
-      μ (f ⁻¹' s) * μ (g ⁻¹' t) = μ.map f s * μ.map g t ∧
-      μ (f ⁻¹' s ∩ g ⁻¹' t) = μ.map (fun ω ↦ (f ω, g ω)) (s ×ˢ t) :=
-    ⟨by rw [Measure.map_apply_of_aemeasurable hf hs, Measure.map_apply_of_aemeasurable hg ht],
-      (Measure.map_apply_of_aemeasurable (hf.prodMk hg) (hs.prod ht)).symm⟩
+      μ (f ⁻¹' s) * μ (g ⁻¹' t) = (μ.map f) s * (μ.map g) t ∧
+      μ (f ⁻¹' s ∩ g ⁻¹' t) = (μ.map (fun ω ↦ (f ω, g ω))) (s ×ˢ t) :=
+    ⟨by rw [Measure.map_apply hs hf, Measure.map_apply ht hg],
+      (Measure.map_apply (hs.prod ht) (hf.prodMk hg)).symm⟩
   constructor
   · refine fun h ↦ (Measure.prod_eq fun s t hs ht ↦ ?_).symm
     rw [← (h₀ hs ht).1, ← (h₀ hs ht).2, h s t hs ht]
@@ -728,10 +728,14 @@ lemma indepFun_prod (mX : Measurable X) (mY : Measurable Y) :
     (fun ω ↦ X ω.1) ⟂ᵢ[μ.prod ν] (fun ω ↦ Y ω.2) := by
   refine indepFun_iff_map_prod_eq_prod_map_map (by fun_prop) (by fun_prop) |>.2 ?_
   convert! Measure.map_prod_map μ ν mX mY |>.symm
-  · rw [← Function.comp_def, ← Measure.map_map mX measurable_fst, Measure.map_fst_prod,
-      measure_univ, one_smul]
-  · rw [← Function.comp_def, ← Measure.map_map mY measurable_snd, Measure.map_snd_prod,
-      measure_univ, one_smul]
+  · calc
+      (μ.prod ν).map (fun ω ↦ X ω.1) =
+          ((μ.prod ν).map Prod.fst).map X := (Measure.map_map (by fun_prop) (by fun_prop)).symm
+      _ = μ.map X := by simp
+  · calc
+      (μ.prod ν).map (fun ω ↦ Y ω.2) =
+          ((μ.prod ν).map Prod.snd).map Y := (Measure.map_map (by fun_prop) (by fun_prop)).symm
+      _ = ν.map Y := by simp
 
 /-- Given random variables `X : Ω → 𝓧` and `Y : Ω' → 𝓨`, they are independent when viewed as random
 variables defined on the product space `Ω × Ω'`. -/
@@ -740,16 +744,10 @@ lemma indepFun_prod₀ (mX : AEMeasurable X μ) (mY : AEMeasurable Y ν) :
   have : (fun ω ↦ mX.mk X ω.1) ⟂ᵢ[μ.prod ν] (fun ω ↦ mY.mk Y ω.2) :=
     indepFun_prod mX.measurable_mk mY.measurable_mk
   refine this.congr ?_ ?_
-  · rw [← Function.comp_def, ← Function.comp_def]
-    apply ae_eq_comp
-    · exact measurable_fst.aemeasurable
-    · rw [measurePreserving_fst.map_eq]
-      exact (AEMeasurable.ae_eq_mk mX).symm
-  · rw [← Function.comp_def, ← Function.comp_def]
-    apply ae_eq_comp
-    · exact measurable_snd.aemeasurable
-    · rw [measurePreserving_snd.map_eq]
-      exact (AEMeasurable.ae_eq_mk mY).symm
+  · exact ae_eq_comp' measurable_fst.aemeasurable mX.ae_eq_mk.symm (by
+      simpa only [measurePreserving_fst.map_eq] using (Measure.AbsolutelyContinuous.rfl : μ ≪ μ))
+  · exact ae_eq_comp' measurable_snd.aemeasurable mY.ae_eq_mk.symm (by
+      simpa only [measurePreserving_snd.map_eq] using (Measure.AbsolutelyContinuous.rfl : ν ≪ ν))
 
 end Prod
 
@@ -844,12 +842,12 @@ theorem iIndepFun.map_fun_eq_pi_map [Fintype ι] {β : ι → Type*}
   have := h.isProbabilityMeasure
   rw [iIndepFun_iff_measure_inter_preimage_eq_mul] at h
   have h₀ {s : ∀ i, Set (β i)} (hm : ∀ (i : ι), MeasurableSet (s i)) :
-      ∏ i : ι, μ (f i ⁻¹' s i) = ∏ i : ι, μ.map (f i) (s i) ∧
-      μ (⋂ i : ι, (f i ⁻¹' s i)) = μ.map (fun ω i ↦ f i ω) (univ.pi s) := by
+      ∏ i : ι, μ (f i ⁻¹' s i) = ∏ i : ι, (μ.map (f i)) (s i) ∧
+      μ (⋂ i : ι, (f i ⁻¹' s i)) = (μ.map (fun ω i ↦ f i ω)) (univ.pi s) := by
     constructor
     · congr with x
-      rw [Measure.map_apply_of_aemeasurable (hf x) (hm x)]
-    · rw [Measure.map_apply_of_aemeasurable (.of_eval fun x ↦ hf x) (.univ_pi hm)]
+      rw [Measure.map_apply (hm x) (hf x)]
+    · rw [Measure.map_apply (.univ_pi hm) (.of_eval fun x ↦ hf x)]
       congr with x
       simp
   refine (Measure.pi_eq fun h' hm ↦ ?_).symm
@@ -865,12 +863,12 @@ theorem iIndepFun_iff_map_fun_eq_pi_map [Fintype ι] {β : ι → Type*}
   classical
   rw [iIndepFun_iff_measure_inter_preimage_eq_mul]
   have h₀ {s : ∀ i, Set (β i)} (hm : ∀ (i : ι), MeasurableSet (s i)) :
-      ∏ i : ι, μ (f i ⁻¹' s i) = ∏ i : ι, μ.map (f i) (s i) ∧
-      μ (⋂ i : ι, (f i ⁻¹' s i)) = μ.map (fun ω i ↦ f i ω) (univ.pi s) := by
+      ∏ i : ι, μ (f i ⁻¹' s i) = ∏ i : ι, (μ.map (f i)) (s i) ∧
+      μ (⋂ i : ι, (f i ⁻¹' s i)) = (μ.map (fun ω i ↦ f i ω)) (univ.pi s) := by
     constructor
     · congr with x
-      rw [Measure.map_apply_of_aemeasurable (hf x) (hm x)]
-    · rw [Measure.map_apply_of_aemeasurable (.of_eval fun x ↦ hf x) (.univ_pi hm)]
+      rw [Measure.map_apply (hm x) (hf x)]
+    · rw [Measure.map_apply (.univ_pi hm) (.of_eval fun x ↦ hf x)]
       congr with x
       simp
   intro h S s hs
@@ -895,11 +893,16 @@ lemma iIndepFun_pi (mX : ∀ i, AEMeasurable (X i) (μ i)) :
   rw [Measure.pi_map_pi mX]
   congr
   ext i : 1
-  rw [← (measurePreserving_eval μ i).map_eq, AEMeasurable.map_map_of_aemeasurable,
-    Function.comp_def]
-  · rw [(measurePreserving_eval μ i).map_eq]
-    exact mX i
-  · exact (measurable_pi_apply i).aemeasurable
+  have heval : AEMeasurable (fun ω ↦ ω i) (Measure.pi μ) :=
+    (measurable_pi_apply i).aemeasurable
+  have hXi : AEMeasurable (X i) ((Measure.pi μ).map (fun ω ↦ ω i) heval) := by
+    simpa only [(measurePreserving_eval μ i).map_eq] using mX i
+  calc
+    (μ i).map (X i) = ((Measure.pi μ).map (fun ω ↦ ω i) heval).map (X i) hXi := by
+      simp only [(measurePreserving_eval μ i).map_eq]
+    _ = (Measure.pi μ).map (fun (ω : ∀ i, Ω i) ↦ X i (ω i)) (by
+        exact (heval.comp_aemeasurable hXi).congr (ae_of_all _ fun _ ↦ rfl)) := by
+      simpa only [Function.comp_def] using Measure.map_map heval hXi
 
 end iIndepFun
 
@@ -1112,7 +1115,7 @@ theorem IndepFun.map_mul_eq_map_mconv_map₀'
     (σf : SigmaFinite (μ.map f)) (σg : SigmaFinite (μ.map g)) (hfg : f ⟂ᵢ[μ] g) :
     μ.map (f * g) = (μ.map f) ∗ₘ (μ.map g) := by
   conv in f * g => change (fun x ↦ x.1 * x.2) ∘ (fun ω ↦ (f ω, g ω))
-  rw [← measurable_mul.aemeasurable.map_map_of_aemeasurable (hf.prodMk hg),
+  rw [← Measure.map_map (hf.prodMk hg) measurable_mul.aemeasurable,
     (indepFun_iff_map_prod_eq_prod_map_map' hf hg σf σg).mp hfg, Measure.mconv]
 
 @[to_additive]

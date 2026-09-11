@@ -60,7 +60,8 @@ noncomputable def binomial (n : ℕ) (p : I) : Measure ℕ := setBer(Iio n, p).m
 scoped notation3 "Bin(" n ", " p ")" => binomial n p
 
 /-- The binomial probability distribution with parameter `p` valued in the semiring `R`. -/
-scoped notation3 "Bin(" R ", " n ", " p ")" => (binomial n p).map (Nat.cast : ℕ → R)
+scoped notation3 "Bin(" R ", " n ", " p ")" =>
+  (binomial n p).map (Nat.cast : ℕ → R) Measurable.of_discrete.aemeasurable
 
 @[simp]
 lemma binomial_nat : Bin(ℕ, n, p) = Bin(n, p) := map_id
@@ -144,8 +145,30 @@ lemma map_cast_binomial_eq_sum_dirac [MeasurableSingletonClass R] (n : ℕ) (p :
     Bin(R, n, p) =
       ∑ k ∈ Finset.Iic n, ENNReal.ofReal ((n.choose k) * p ^ k * (1 - p) ^ (n - k)) •
         dirac (k : R) := by
-  rw [binomial_eq_sum_dirac, Measure.map_finset_sum .of_discrete]
-  exact Finset.sum_congr rfl fun _ _ ↦ by rw [Measure.map_smul _ (by fun_prop), map_dirac]
+  calc
+    Bin(R, n, p) =
+        (∑ k ∈ Finset.Iic n,
+          ENNReal.ofReal ((n.choose k) * p ^ k * (1 - p) ^ (n - k)) • dirac k).map
+            (Nat.cast : ℕ → R) Measurable.of_discrete.aemeasurable := by
+      exact congrArg
+        (fun μ : Measure ℕ ↦ μ.map (Nat.cast : ℕ → R) Measurable.of_discrete.aemeasurable)
+        (binomial_eq_sum_dirac n p)
+    _ = ∑ i : Finset.Iic n,
+        ENNReal.ofReal ((n.choose i) * p ^ (i : ℕ) * (1 - p) ^ (n - i)) • dirac (i : R) := by
+      rw [Measure.map_finset_sum
+        (m := fun k ↦
+          ENNReal.ofReal ((n.choose k) * p ^ k * (1 - p) ^ (n - k)) • dirac k)
+        (s := Finset.Iic n)
+        (Measurable.of_discrete.aemeasurable :
+          AEMeasurable (Nat.cast : ℕ → R) _)]
+      refine Finset.sum_congr rfl fun i _ ↦ ?_
+      rw [Measure.map_smul _
+        (Measurable.of_discrete.aemeasurable :
+          AEMeasurable (Nat.cast : ℕ → R) (dirac (i : ℕ))), map_dirac]
+    _ = ∑ k ∈ Finset.Iic n,
+        ENNReal.ofReal ((n.choose k) * p ^ k * (1 - p) ^ (n - k)) • dirac (k : R) :=
+      Finset.sum_coe_sort (Finset.Iic n) fun k ↦
+        ENNReal.ofReal ((n.choose k) * p ^ k * (1 - p) ^ (n - k)) • dirac (k : R)
 
 section Integral
 

@@ -152,18 +152,20 @@ variable {γ : Type*} {mγ : SigmaAlgebra γ} {f : α → γ} {g : γ → β}
 
 theorem essSup_comp_le_essSup_map_measure (hf : AEMeasurable f μ)
     (hgf : IsCoboundedUnder (· ≤ ·) (ae μ) (g ∘ f) := by isBoundedDefault)
-    (hg : IsBoundedUnder (· ≤ ·) (ae (Measure.map f μ)) g := by isBoundedDefault) :
-    essSup (g ∘ f) μ ≤ essSup g (Measure.map f μ) := by
+    (hg : IsBoundedUnder (· ≤ ·) (ae (Measure.map f μ hf)) g := by isBoundedDefault) :
+    essSup (g ∘ f) μ ≤ essSup g (Measure.map f μ hf) := by
   refine limsSup_le_limsSup_of_le ?_ hgf hg
   rw [← map_map]
   exact map_mono (Measure.tendsto_ae_map hf)
 
 theorem MeasurableEmbedding.essSup_map_measure (hf : MeasurableEmbedding f)
-    (hg_co : IsCoboundedUnder (· ≤ ·) (ae (Measure.map f μ)) g := by isBoundedDefault)
+    (hg_co : IsCoboundedUnder (· ≤ ·) (ae (Measure.map f μ hf.measurable.aemeasurable)) g :=
+      by isBoundedDefault)
     (hgf : IsBoundedUnder (· ≤ ·) (ae μ) (g ∘ f) := by isBoundedDefault)
     (hgf_co : IsCoboundedUnder (· ≤ ·) (ae μ) (g ∘ f) := by isBoundedDefault)
-    (hg : IsBoundedUnder (· ≤ ·) (ae (Measure.map f μ)) g := by isBoundedDefault) :
-    essSup g (Measure.map f μ) = essSup (g ∘ f) μ := by
+    (hg : IsBoundedUnder (· ≤ ·) (ae (Measure.map f μ hf.measurable.aemeasurable)) g :=
+      by isBoundedDefault) :
+    essSup g (Measure.map f μ hf.measurable.aemeasurable) = essSup (g ∘ f) μ := by
   refine le_antisymm ?_ (essSup_comp_le_essSup_map_measure hf.measurable.aemeasurable hgf_co hg)
   refine limsSup_le_limsSup hg_co hgf (fun c h_le => ?_)
   rw [eventually_map] at h_le ⊢
@@ -173,26 +175,27 @@ variable [SigmaAlgebra β] [TopologicalSpace β] [SecondCountableTopology β]
   [OrderClosedTopology β] [OpensSigmaAlgebra β]
 
 theorem essSup_map_measure_of_measurable (hg : Measurable g) (hf : AEMeasurable f μ)
-    (hg_co : IsCoboundedUnder (· ≤ ·) (ae (Measure.map f μ)) g := by isBoundedDefault)
+    (hg_co : IsCoboundedUnder (· ≤ ·) (ae (Measure.map f μ hf)) g := by isBoundedDefault)
     (hgf : IsBoundedUnder (· ≤ ·) (ae μ) (g ∘ f) := by isBoundedDefault)
     (hgf_co : IsCoboundedUnder (· ≤ ·) (ae μ) (g ∘ f) := by isBoundedDefault)
-    (hg_bdd : IsBoundedUnder (· ≤ ·) (ae (Measure.map f μ)) g := by isBoundedDefault) :
-    essSup g (Measure.map f μ) = essSup (g ∘ f) μ := by
+    (hg_bdd : IsBoundedUnder (· ≤ ·) (ae (Measure.map f μ hf)) g := by isBoundedDefault) :
+    essSup g (Measure.map f μ hf) = essSup (g ∘ f) μ := by
   refine le_antisymm ?_ (essSup_comp_le_essSup_map_measure hf hgf_co hg_bdd)
   refine limsSup_le_limsSup hg_co hgf (fun c h_le => ?_)
   rw [eventually_map] at h_le ⊢
   rw [ae_map_iff hf (measurableSet_le hg measurable_const)]
   exact h_le
 
-theorem essSup_map_measure (hg : AEMeasurable g (Measure.map f μ)) (hf : AEMeasurable f μ)
-    (hg_co : IsCoboundedUnder (· ≤ ·) (ae (Measure.map f μ)) g := by isBoundedDefault)
+theorem essSup_map_measure (hf : AEMeasurable f μ)
+    (hg : AEMeasurable g (Measure.map f μ hf))
+    (hg_co : IsCoboundedUnder (· ≤ ·) (ae (Measure.map f μ hf)) g := by isBoundedDefault)
     (hgf : IsBoundedUnder (· ≤ ·) (ae μ) (g ∘ f) := by isBoundedDefault)
     (hgf_co : IsCoboundedUnder (· ≤ ·) (ae μ) (g ∘ f) := by isBoundedDefault)
-    (hg_bdd : IsBoundedUnder (· ≤ ·) (ae (Measure.map f μ)) g := by isBoundedDefault) :
-    essSup g (Measure.map f μ) = essSup (g ∘ f) μ := by
-  have hg_mk_co : IsCoboundedUnder (· ≤ ·) (ae (Measure.map f μ)) (hg.mk g) := by
+    (hg_bdd : IsBoundedUnder (· ≤ ·) (ae (Measure.map f μ hf)) g := by isBoundedDefault) :
+    essSup g (Measure.map f μ hf) = essSup (g ∘ f) μ := by
+  have hg_mk_co : IsCoboundedUnder (· ≤ ·) (ae (Measure.map f μ hf)) (hg.mk g) := by
     simpa [IsCoboundedUnder, ← map_congr hg.ae_eq_mk]
-  have hg_mk_bdd : IsBoundedUnder (· ≤ ·) (ae (Measure.map f μ)) (hg.mk g) := by
+  have hg_mk_bdd : IsBoundedUnder (· ≤ ·) (ae (Measure.map f μ hf)) (hg.mk g) := by
     simpa [IsBoundedUnder, ← map_congr hg.ae_eq_mk]
   have h_eq := ae_eq_comp hf hg.ae_eq_mk
   have hg_mk_f : IsBoundedUnder (· ≤ ·) (ae μ) ((hg.mk g) ∘ f) := by

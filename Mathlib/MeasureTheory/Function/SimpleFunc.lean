@@ -1135,8 +1135,9 @@ theorem lintegral_map' {β} [SigmaAlgebra β] {μ' : Measure β} (f : α →ₛ 
     exact (h (g ⁻¹' {y}) (g.measurableSet_preimage _)).symm
 
 theorem lintegral_map {β} [SigmaAlgebra β] (g : β →ₛ ℝ≥0∞) {f : α → β} (hf : Measurable f) :
-    g.lintegral (Measure.map f μ) = (g.comp f hf).lintegral μ :=
-  Eq.symm <| lintegral_map' _ _ f (fun _ => rfl) fun _s hs => Measure.map_apply hf hs
+    g.lintegral (Measure.map f μ hf.aemeasurable) = (g.comp f hf).lintegral μ :=
+  Eq.symm <| lintegral_map' _ _ f (fun _ => rfl) fun _s hs =>
+    Measure.map_apply hs hf.aemeasurable
 
 end Measure
 

@@ -53,7 +53,7 @@ theorem ae_eq_trim_iff_of_aestronglyMeasurable {α β} [TopologicalSpace β] [Me
 
 theorem AEStronglyMeasurable.comp_ae_measurable' {α β γ : Type*} [TopologicalSpace β]
     {mα : SigmaAlgebra α} {_ : SigmaAlgebra γ} {f : α → β} {μ : Measure γ} {g : γ → α}
-    (hf : AEStronglyMeasurable f (μ.map g)) (hg : AEMeasurable g μ) :
+    (hg : AEMeasurable g μ) (hf : AEStronglyMeasurable f (μ.map g hg)) :
     AEStronglyMeasurable[mα.comap g] (f ∘ g) μ :=
   ⟨hf.mk f ∘ g, hf.stronglyMeasurable_mk.comp_measurable (measurable_iff_comap_le.mpr le_rfl),
     ae_eq_comp hg hf.ae_eq_mk⟩

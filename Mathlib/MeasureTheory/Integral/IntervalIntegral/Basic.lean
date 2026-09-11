@@ -957,9 +957,10 @@ theorem integral_comp_add_right (d) : (∫ x in a..b, f (x + d)) = ∫ x in a + 
   have A : MeasurableEmbedding fun x => x + d :=
     (Homeomorph.addRight d).isClosedEmbedding.measurableEmbedding
   calc
-    (∫ x in a..b, f (x + d)) = ∫ x in a + d..b + d, f x ∂Measure.map (fun x => x + d) volume := by
-      simp [intervalIntegral, A.setIntegral_map]
-    _ = ∫ x in a + d..b + d, f x := by rw [map_add_right_eq_self]
+    (∫ x in a..b, f (x + d)) =
+        ∫ x in a + d..b + d, f x ∂Measure.map (fun x => x + d) volume (by fun_prop) := by
+      simp [intervalIntegral, A.setIntegral_map (μ := volume)]
+    _ = ∫ x in a + d..b + d, f x := by rw [map_add_right_eq_self volume d]
 
 @[simp]
 nonrec theorem integral_comp_add_left (d) :

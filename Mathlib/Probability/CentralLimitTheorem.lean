@@ -43,8 +43,9 @@ variable {Ω Ω' : Type*} {mΩ : SigmaAlgebra Ω} {mΩ' : SigmaAlgebra Ω'}
 
 lemma charFun_inv_sqrt_mul_sum (hindep : iIndepFun X P)
     (hident : ∀ (i : ℕ), IdentDistrib (X i) (X 0) P P) {n : ℕ} {t : ℝ} :
-    charFun (P.map (fun ω ↦ (√n)⁻¹ * ∑ k ∈ Finset.range n, X k ω)) t =
-      (charFun (P.map (X 0)) ((√n)⁻¹ * t)) ^ n := by
+    charFun (P.map (fun ω ↦ (√n)⁻¹ * ∑ k ∈ Finset.range n, X k ω)
+      ((Finset.aemeasurable_fun_sum _ fun k _ ↦ (hident k).aemeasurable_fst).const_mul _)) t =
+      (charFun (P.map (X 0) (hident 0).aemeasurable_fst) ((√n)⁻¹ * t)) ^ n := by
   have mX n := (hident n).aemeasurable_fst
   rw [charFun_map_mul_comp, (hindep.restrict _).charFun_map_fun_finsetSum_eq_prod (fun _ _ ↦ mX _)]
   · simp [fun i ↦ (hident i).map_eq]
@@ -54,9 +55,10 @@ variable [IsProbabilityMeasure P]
 
 lemma tendsto_charFun_inv_sqrt_mul_pow {X : Ω → ℝ}
     (hX : AEMeasurable X P) (h0 : P[X] = 0) (h1 : P[X ^ 2] = 1) (t : ℝ) :
-    Tendsto (fun (n : ℕ) ↦ (charFun (P.map X) ((√n)⁻¹ * t)) ^ n) atTop (𝓝 (exp (- t ^ 2 / 2))) := by
+    Tendsto (fun (n : ℕ) ↦ (charFun (P.map X hX) ((√n)⁻¹ * t)) ^ n) atTop
+      (𝓝 (exp (- t ^ 2 / 2))) := by
   apply tendsto_pow_exp_of_isLittleO_sub_add_div
-  suffices (fun (n : ℕ) ↦ charFun (Measure.map X P) ((√n)⁻¹ * t) -
+  suffices (fun (n : ℕ) ↦ charFun (Measure.map X P hX) ((√n)⁻¹ * t) -
       (1 + (-(((√n)⁻¹ * t) ^ 2 / 2) : ℂ))) =o[atTop] fun n ↦ ((√n)⁻¹ * t) ^ 2 by
     have aux : (fun (n : ℕ) ↦ ‖(1 / n : ℂ)‖) = fun (n : ℕ) ↦ ‖(1 / n : ℝ)‖ := by simp
     rw [← Asymptotics.isLittleO_norm_right, aux, Asymptotics.isLittleO_norm_right]
@@ -136,7 +138,7 @@ theorem tendstoInDistribution_inv_sqrt_mul_sum_sub
       · rwa [(hident n).variance_eq]
     have mX (n : ℕ) := (hident n).aemeasurable_fst
     refine tendstoInDistribution_of_identDistrib 0 (fun n ↦ ?_) ?_
-    · refine ⟨by fun_prop, by fun_prop, Measure.map_congr ?_⟩
+    · refine ⟨by fun_prop, by fun_prop, Measure.map_congr ?_ (by fun_prop)⟩
       filter_upwards [this] with ω hω
       simp [hω]
     · exact ⟨by fun_prop, by fun_prop, by simp [hY.map_eq, h]⟩

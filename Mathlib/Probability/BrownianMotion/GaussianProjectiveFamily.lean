@@ -80,6 +80,7 @@ we want to extend this family to a measure over `ℝ≥0 → ℝ` through the Ko
 theorem, which is phrased in this language. -/
 noncomputable def projectiveFamily (I : Finset ℝ≥0) : Measure (I → ℝ) :=
   multivariateGaussian 0 (covMatrix I) |>.map (MeasurableEquiv.toLp 2 (I → ℝ)).symm
+    (MeasurableEquiv.toLp 2 (I → ℝ)).symm.measurable.aemeasurable
 
 /-- Up to a measurable equivalence, `projectiveFamily I` is the centered multivariate Gaussian
 with covariance matrix `covMatrix I`. -/
@@ -96,9 +97,15 @@ lemma measurePreserving_toLp_projectiveFamily (I : Finset ℝ≥0) :
       (multivariateGaussian 0 (covMatrix I)) where
   measurable := by fun_prop
   map_eq := by
-    rw [projectiveFamily, Measure.map_map]
-    · simp [← MeasurableEquiv.coe_toLp]
-    all_goals fun_prop
+    have hsource : AEMeasurable (MeasurableEquiv.toLp 2 (I → ℝ)).symm
+        (multivariateGaussian 0 (covMatrix I)) :=
+      (MeasurableEquiv.toLp 2 (I → ℝ)).symm.measurable.aemeasurable
+    have htarget : AEMeasurable (toLp 2)
+        ((multivariateGaussian 0 (covMatrix I)).map
+          (MeasurableEquiv.toLp 2 (I → ℝ)).symm hsource) := by
+      fun_prop
+    rw [projectiveFamily, Measure.map_map hsource htarget]
+    simp [← MeasurableEquiv.coe_toLp]
 
 lemma integral_projectiveFamily {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
     (I : Finset ℝ≥0) (f : (I → ℝ) → E) :
@@ -122,8 +129,10 @@ lemma variance_projectiveFamily (I : Finset ℝ≥0) (f : (I → ℝ) → ℝ) :
 
 instance isGaussian_projectiveFamily (I : Finset ℝ≥0) :
     IsGaussian (projectiveFamily I) := by
-  rw [projectiveFamily,
-    show ⇑(MeasurableEquiv.toLp 2 (I → ℝ)).symm = ⇑(EuclideanSpace.equiv I ℝ) from rfl]
+  rw [projectiveFamily]
+  have hfun : ⇑(MeasurableEquiv.toLp 2 (I → ℝ)).symm = ⇑(EuclideanSpace.equiv I ℝ) := rfl
+  rw [Measure.map_congr (ae_of_all _ fun x ↦ congrFun hfun x)
+    (MeasurableEquiv.toLp 2 (I → ℝ)).symm.measurable.aemeasurable]
   infer_instance
 
 @[simp]
@@ -193,14 +202,27 @@ lemma measurePreserving_eval_sub_eval_projectiveFamily (I : Finset ℝ≥0) (s t
 lemma isProjectiveMeasureFamily_projectiveFamily :
     IsProjectiveMeasureFamily (α := fun _ ↦ ℝ) projectiveFamily := by
   intro I J hJI
-  nth_rw 2 [projectiveFamily]
-  rw [Measure.map_map]
-  · have : (Finset.restrict₂ (π := fun _ ↦ ℝ) hJI ∘ (MeasurableEquiv.toLp 2 (I → ℝ)).symm) =
-        ofLp ∘ (EuclideanSpace.restrict₂ hJI) := by ext; simp
-    rw [this, ((measurePreserving_ofLp_multivariateGaussian J).comp
-        (measurePreserving_restrict₂_multivariateGaussian (posSemidef_covMatrix I) hJI)).map_eq]
-  · exact Finset.measurable_restrict₂ _ -- fun_prop fails
-  · fun_prop
+  have hsource : AEMeasurable (MeasurableEquiv.toLp 2 (I → ℝ)).symm
+      (multivariateGaussian 0 (covMatrix I)) :=
+    (MeasurableEquiv.toLp 2 (I → ℝ)).symm.measurable.aemeasurable
+  have hrestrict : AEMeasurable (Finset.restrict₂ (π := fun _ ↦ ℝ) hJI)
+      ((multivariateGaussian 0 (covMatrix I)).map
+        (MeasurableEquiv.toLp 2 (I → ℝ)).symm hsource) :=
+    (Finset.measurable_restrict₂ _).aemeasurable
+  have hcomp := hsource.comp_aemeasurable hrestrict
+  change projectiveFamily J =
+    (((multivariateGaussian 0 (covMatrix I)).map
+      (MeasurableEquiv.toLp 2 (I → ℝ)).symm hsource).map
+        (Finset.restrict₂ (π := fun _ ↦ ℝ) hJI) hrestrict)
+  rw [Measure.map_map hsource hrestrict]
+  have hfun :
+      Finset.restrict₂ (π := fun _ ↦ ℝ) hJI ∘ (MeasurableEquiv.toLp 2 (I → ℝ)).symm =
+        ofLp ∘ EuclideanSpace.restrict₂ hJI := by
+    ext
+    simp
+  rw [Measure.map_congr (ae_of_all _ fun x ↦ congrFun hfun x) hcomp,
+    ((measurePreserving_ofLp_multivariateGaussian J).comp
+      (measurePreserving_restrict₂_multivariateGaussian (posSemidef_covMatrix I) hJI)).map_eq]
 
 /-- If one restricts the finite-dimensional distribution of the real Brownian motion over a finset
 `J` to a smaller finset `I`, one obtains the finite-dimensional distribution of

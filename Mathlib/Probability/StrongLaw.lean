@@ -85,7 +85,7 @@ variable {m : SigmaAlgebra α} {μ : Measure α} {f : α → ℝ}
 
 theorem _root_.MeasureTheory.AEStronglyMeasurable.truncation (hf : AEStronglyMeasurable f μ)
     {A : ℝ} : AEStronglyMeasurable (truncation f A) μ := by
-  apply AEStronglyMeasurable.comp_aemeasurable _ hf.aemeasurable
+  apply AEStronglyMeasurable.comp_aemeasurable hf.aemeasurable
   exact (stronglyMeasurable_id.indicator measurableSet_Ioc).aestronglyMeasurable
 
 theorem abs_truncation_le_bound (f : α → ℝ) (A : ℝ) (x : α) : |truncation f A x| ≤ |A| := by
@@ -272,7 +272,7 @@ theorem sum_prob_mem_Ioc_le {X : Ω → ℝ} (hint : Integrable X) (hnonneg : 0 
   have B : ∀ a b, ℙ {ω | X ω ∈ Set.Ioc a b} = ENNReal.ofReal (∫ _ in Set.Ioc a b, (1 : ℝ) ∂ρ) := by
     intro a b
     rw [ofReal_setIntegral_one ρ _,
-      Measure.map_apply_of_aemeasurable hint.aemeasurable measurableSet_Ioc]
+      Measure.map_apply measurableSet_Ioc hint.aemeasurable]
     rfl
   calc
     ∑ j ∈ range K, ℙ {ω | X ω ∈ Set.Ioc (j : ℝ) N} =

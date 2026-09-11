@@ -130,12 +130,12 @@ variable (ν : Measure G) [IsMulLeftInvariant ν]
 lemma MeasureTheory.QuotientMeasureEqMeasurePreimage.mulInvariantMeasure_quotient
     [hasFun : HasFundamentalDomain Γ.op G ν] [QuotientMeasureEqMeasurePreimage ν μ] :
     μ.IsMulLeftInvariant where
-  map_mul_left_eq_self x := by
+  map_mul_left_eq_self x hx := by
     ext A hA
     obtain ⟨x₁, h⟩ := @Quotient.exists_rep _ (QuotientGroup.leftRel Γ) x
     convert! measure_preimage_smul μ x₁ A using 1
-    · rw [← h, Measure.map_apply (measurable_const_mul _) hA]
-      simp [← MulAction.Quotient.coe_smul_out, ← Quotient.mk''_eq_mk]
+    · rw [Measure.map_apply hA hx.aemeasurable]
+      simp [← h, ← MulAction.Quotient.coe_smul_out, ← Quotient.mk''_eq_mk]
     exact smulInvariantMeasure_quotient ν
 
 variable [Countable Γ] [IsMulRightInvariant ν] [SigmaFinite ν]
@@ -174,7 +174,7 @@ theorem MeasureTheory.Measure.IsMulLeftInvariant.quotientMeasureEqMeasurePreimag
   rw [measure_eq_div_smul μ' μ neZeroV neTopV, hV]
   symm
   suffices (μ' V / ν (QuotientGroup.mk ⁻¹' V ∩ s)) = 1 by rw [this, one_smul]
-  rw [Measure.map_apply meas_π meas_V, Measure.restrict_apply]
+  rw [Measure.map_apply meas_V meas_π.aemeasurable, Measure.restrict_apply]
   · convert! ENNReal.div_self ..
     · exact trans hV.symm neZeroV
     · exact trans hV.symm neTopV
@@ -321,7 +321,9 @@ include h𝓕
 
 variable [Countable Γ] [SigmaAlgebra (G ⧸ Γ)] [BorelSpace (G ⧸ Γ)]
 
-local notation "μ_𝓕" => Measure.map (@QuotientGroup.mk G _ Γ) (μ.restrict 𝓕)
+local notation "μ_𝓕" =>
+  Measure.map (@QuotientGroup.mk G _ Γ) (μ.restrict 𝓕)
+    continuous_quotient_mk'.measurable.aemeasurable
 
 /-- The `essSup` of a function `g` on the quotient space `G ⧸ Γ` with respect to the pushforward
   of the restriction, `μ_𝓕`, of a right-invariant measure `μ` to a fundamental domain `𝓕`, is the
@@ -333,7 +335,7 @@ local notation "μ_𝓕" => Measure.map (@QuotientGroup.mk G _ Γ) (μ.restrict 
 lemma essSup_comp_quotientGroup_mk [μ.IsMulRightInvariant] {g : G ⧸ Γ → ℝ≥0∞}
     (g_ae_measurable : AEMeasurable g μ_𝓕) : essSup g μ_𝓕 = essSup (fun (x : G) ↦ g x) μ := by
   have hπ : Measurable (QuotientGroup.mk : G → G ⧸ Γ) := continuous_quotient_mk'.measurable
-  rw [essSup_map_measure g_ae_measurable hπ.aemeasurable]
+  rw [essSup_map_measure hπ.aemeasurable g_ae_measurable]
   refine h𝓕.essSup_measure_restrict ?_
   intro ⟨γ, hγ⟩ x
   dsimp
@@ -352,12 +354,14 @@ lemma essSup_comp_quotientGroup_mk [μ.IsMulRightInvariant] {g : G ⧸ Γ → �
   will take the value `∞` on any open set in the quotient! -/]
 lemma _root_.MeasureTheory.IsFundamentalDomain.absolutelyContinuous_map
     [μ.IsMulRightInvariant] :
-    map (QuotientGroup.mk : G → G ⧸ Γ) μ ≪ map (QuotientGroup.mk : G → G ⧸ Γ) (μ.restrict 𝓕) := by
+    map (QuotientGroup.mk : G → G ⧸ Γ) μ continuous_quotient_mk'.measurable.aemeasurable ≪
+      map (QuotientGroup.mk : G → G ⧸ Γ) (μ.restrict 𝓕)
+        continuous_quotient_mk'.measurable.aemeasurable := by
   set π : G → G ⧸ Γ := QuotientGroup.mk
   have meas_π : Measurable π := continuous_quotient_mk'.measurable
   apply AbsolutelyContinuous.mk
   intro s s_meas hs
-  rw [map_apply meas_π s_meas] at hs ⊢
+  rw [map_apply s_meas meas_π.aemeasurable] at hs ⊢
   rw [Measure.restrict_apply] at hs
   · apply h𝓕.measure_zero_of_invariant _ _ hs
     intro γ

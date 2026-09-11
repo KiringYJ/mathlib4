@@ -118,6 +118,10 @@ open MeasureTheory
 noncomputable def paretoMeasure (t r : ℝ) : Measure ℝ :=
   volume.withDensity (paretoPDF t r)
 
+noncomputable instance instSFiniteParetoMeasure (t r : ℝ) : SFinite (paretoMeasure t r) := by
+  rw [paretoMeasure]
+  infer_instance
+
 lemma isProbabilityMeasure_paretoMeasure (ht : 0 < t) (hr : 0 < r) :
     IsProbabilityMeasure (paretoMeasure t r) where
   measure_univ := by simp [paretoMeasure, lintegral_paretoPDF_eq_one ht hr]

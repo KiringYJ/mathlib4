@@ -54,11 +54,11 @@ for probability measures. In that case, it satisfies `cdf μ x = μ.real (Iic x)
 `ProbabilityTheory.cdf_eq_real`). -/
 @[wikidata Q386228]
 noncomputable
-def cdf (μ : Measure ℝ) : StieltjesFunction ℝ :=
-  condCDF ((dirac Unit.unit).prod μ) Unit.unit
+def cdf (μ : Measure ℝ) [SFinite μ] : StieltjesFunction ℝ :=
+  condCDF ((dirac Unit.unit).prod μ Measurable.map_prodMk_left.aemeasurable) Unit.unit
 
 section ExplicitMeasureArg
-variable (μ : Measure ℝ)
+variable (μ : Measure ℝ) [SFinite μ]
 
 /-- The cdf is non-negative. -/
 lemma cdf_nonneg (x : ℝ) : 0 ≤ cdf μ x := condCDF_nonneg _ _ _
@@ -76,7 +76,8 @@ lemma tendsto_cdf_atBot : Tendsto (cdf μ) atBot (𝓝 0) := tendsto_condCDF_atB
 lemma tendsto_cdf_atTop : Tendsto (cdf μ) atTop (𝓝 1) := tendsto_condCDF_atTop _ _
 
 lemma ofReal_cdf [IsProbabilityMeasure μ] (x : ℝ) : ENNReal.ofReal (cdf μ x) = μ (Iic x) := by
-  have h := lintegral_condCDF ((dirac Unit.unit).prod μ) x
+  have h := lintegral_condCDF
+    ((dirac Unit.unit).prod μ Measurable.map_prodMk_left.aemeasurable) x
   simpa only [fst_prod, prod_prod, measure_univ, one_mul, lintegral_dirac] using! h
 
 lemma cdf_eq_real [IsProbabilityMeasure μ] (x : ℝ) : cdf μ x = μ.real (Iic x) := by
@@ -94,7 +95,8 @@ lemma measure_cdf [IsProbabilityMeasure μ] : (cdf μ).measure = μ := by
 
 end ExplicitMeasureArg
 
-lemma cdf_measure_stieltjesFunction (f : StieltjesFunction ℝ) (hf0 : Tendsto f atBot (𝓝 0))
+lemma cdf_measure_stieltjesFunction (f : StieltjesFunction ℝ) [SFinite f.measure]
+    (hf0 : Tendsto f atBot (𝓝 0))
     (hf1 : Tendsto f atTop (𝓝 1)) :
     cdf f.measure = f := by
   refine (cdf f.measure).eq_of_measure_of_tendsto_atBot f ?_ (tendsto_cdf_atBot _) hf0
@@ -120,4 +122,4 @@ lemma MeasureTheory.Measure.eq_of_cdf (μ ν : Measure ℝ) [IsProbabilityMeasur
 @[simp] lemma MeasureTheory.Measure.cdf_eq_iff (μ ν : Measure ℝ) [IsProbabilityMeasure μ]
     [IsProbabilityMeasure ν] :
     cdf μ = cdf ν ↔ μ = ν :=
-⟨eq_of_cdf μ ν, fun h ↦ by rw [h]⟩
+⟨eq_of_cdf μ ν, fun h ↦ by subst ν; rfl⟩

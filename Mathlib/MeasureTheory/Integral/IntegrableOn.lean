@@ -294,7 +294,8 @@ theorem integrableOn_add_measure [PseudoMetrizableSpace ε] :
 
 theorem _root_.MeasurableEmbedding.integrableOn_map_iff [SigmaAlgebra β] {e : α → β}
     (he : MeasurableEmbedding e) {f : β → ε} {μ : Measure α} {s : Set β} :
-    IntegrableOn f s (μ.map e) ↔ IntegrableOn (f ∘ e) (e ⁻¹' s) μ := by
+    IntegrableOn f s (μ.map e he.measurable.aemeasurable) ↔
+      IntegrableOn (f ∘ e) (e ⁻¹' s) μ := by
   simp_rw [IntegrableOn, he.restrict_map, he.integrable_map_iff]
 
 theorem _root_.MeasurableEmbedding.integrableOn_iff_comap [SigmaAlgebra β] {e : α → β}
@@ -313,7 +314,8 @@ theorem integrableOn_iff_comap_subtypeVal (hs : MeasurableSet s) :
   rw [← (MeasurableEmbedding.subtype_coe hs).integrableOn_range_iff_comap, Subtype.range_val]
 
 theorem integrableOn_map_equiv [SigmaAlgebra β] (e : α ≃ᵐ β) {f : β → ε} {μ : Measure α}
-    {s : Set β} : IntegrableOn f s (μ.map e) ↔ IntegrableOn (f ∘ e) (e ⁻¹' s) μ := by
+    {s : Set β} : IntegrableOn f s (μ.map e e.measurable.aemeasurable) ↔
+      IntegrableOn (f ∘ e) (e ⁻¹' s) μ := by
   simp only [IntegrableOn, e.restrict_map, integrable_map_equiv e]
 
 theorem MeasurePreserving.integrableOn_comp_preimage [SigmaAlgebra β] {e : α → β} {ν}
@@ -526,7 +528,8 @@ variable {l l' : Filter α}
 
 theorem _root_.MeasurableEmbedding.integrableAtFilter_map_iff [SigmaAlgebra β] {e : α → β}
     (he : MeasurableEmbedding e) {f : β → ε} :
-    IntegrableAtFilter f (l.map e) (μ.map e) ↔ IntegrableAtFilter (f ∘ e) l μ := by
+    IntegrableAtFilter f (l.map e) (μ.map e he.measurable.aemeasurable) ↔
+      IntegrableAtFilter (f ∘ e) l μ := by
   simp_rw [IntegrableAtFilter, he.integrableOn_map_iff]
   constructor <;> rintro ⟨s, hs⟩
   · exact ⟨_, hs⟩

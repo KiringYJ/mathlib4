@@ -226,14 +226,14 @@ lemma nullSingletonClass (h : ∀ x, μ ≠ Measure.dirac x) : NullSingletonClas
     obtain ⟨L, hL⟩ : ∃ L : StrongDual ℝ E, Var[L; μ] ≠ 0 := by
       contrapose! h
       exact ⟨_, eq_dirac_of_variance_eq_zero h⟩
-    have hL_zero : μ.map L {L x} = 0 := by
+    have hL_zero : (μ.map L) {L x} = 0 := by
       have : NullSingletonClass (μ.map L) := by
         rw [map_eq_gaussianReal L]
         refine nullSingletonClass_gaussianReal ?_
         simp only [ne_eq, Real.toNNReal_eq_zero, not_le]
         exact lt_of_le_of_ne (variance_nonneg _ _) hL.symm
       rw [measure_singleton]
-    rw [Measure.map_apply (by fun_prop) (measurableSet_singleton _)] at hL_zero
+    rw [Measure.map_apply (measurableSet_singleton _) (by fun_prop)] at hL_zero
     refine measure_mono_null ?_ hL_zero
     exact fun ⦃a⦄ ↦ congrArg ⇑L
 

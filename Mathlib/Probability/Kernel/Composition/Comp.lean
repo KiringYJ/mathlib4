@@ -160,7 +160,8 @@ lemma comp_discard (κ : Kernel α β) [IsMarkovKernel κ] : discard β ∘ₖ �
 @[simp]
 lemma swap_copy : (swap α α) ∘ₖ (copy α) = copy α := by
   ext a s hs
-  rw [comp_apply, copy_apply, Measure.dirac_bind (Kernel.measurable _), swap_apply' _ hs,
+  rw [comp_apply' _ _ _ hs, copy_apply,
+    lintegral_dirac' _ ((swap α α).measurable_coe hs), swap_apply' _ hs,
     Measure.dirac_apply' _ hs]
   congr
 

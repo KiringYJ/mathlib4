@@ -77,13 +77,14 @@ theorem prod_apply' (κ : Kernel α β) [IsSFiniteKernel κ] (η : Kernel α γ)
     (a : α) {s : Set (β × γ)} (hs : MeasurableSet s) :
     (κ ×ₖ η) a s = ∫⁻ b : β, (η a) (Prod.mk b ⁻¹' s) ∂κ a := by
   simp_rw [prod, comp_apply, copy_apply, Measure.dirac_bind (Kernel.measurable _) (a, a),
-    parallelComp_apply, Measure.prod_apply hs]
+    parallelComp_apply, Measure.prod_apply hs Measurable.map_prodMk_left.aemeasurable]
 
 lemma prod_apply (κ : Kernel α β) [IsSFiniteKernel κ] (η : Kernel α γ) [IsSFiniteKernel η]
     (a : α) :
-    (κ ×ₖ η) a = (κ a).prod (η a) := by
+    (κ ×ₖ η) a = (κ a).prod (η a) Measurable.map_prodMk_left.aemeasurable := by
   ext s hs
-  rw [prod_apply' _ _ _ hs, Measure.prod_apply hs]
+  rw [prod_apply' _ _ _ hs,
+    Measure.prod_apply hs Measurable.map_prodMk_left.aemeasurable]
 
 lemma prod_apply_prod {κ : Kernel α β} {η : Kernel α γ}
     [IsSFiniteKernel κ] [IsSFiniteKernel η] {s : Set β} {t : Set γ} {a : α} :
@@ -92,8 +93,8 @@ lemma prod_apply_prod {κ : Kernel α β} {η : Kernel α γ}
 
 lemma prod_const (μ : Measure β) [SFinite μ] (ν : Measure γ) [SFinite ν] :
     const α μ ×ₖ const α ν = const α (μ.prod ν) := by
-  ext x
-  rw [const_apply, prod_apply, const_apply, const_apply]
+  ext x s hs
+  rw [prod_apply' _ _ _ hs, const_apply, const_apply, const_apply, Measure.prod_apply hs]
 
 theorem lintegral_prod (κ : Kernel α β) [IsSFiniteKernel κ] (η : Kernel α γ) [IsSFiniteKernel η]
     (a : α) {g : β × γ → ℝ≥0∞} (hg : Measurable g) :
@@ -156,10 +157,13 @@ instance IsSFiniteKernel.prod (κ : Kernel α β) (η : Kernel α γ) :
 
 @[simp] lemma fst_prod (κ : Kernel α β) [IsSFiniteKernel κ] (η : Kernel α γ) [IsMarkovKernel η] :
     fst (κ ×ₖ η) = κ := by
-  rw [prod, fst_comp]
-  ext a : 1
-  rw [comp_apply, copy_apply, Measure.dirac_bind (by fun_prop), fst_apply, parallelComp_apply]
-  simp
+  ext a s hs
+  rw [fst_apply' _ _ hs]
+  calc
+    (κ ×ₖ η) a (Prod.fst ⁻¹' s) = ((κ a).prod (η a)) (Prod.fst ⁻¹' s) :=
+      congrArg (fun ρ : Measure (β × γ) ↦ ρ (Prod.fst ⁻¹' s)) (prod_apply κ η a)
+    _ = ((κ a).prod (η a)).fst s := (Measure.fst_apply hs).symm
+    _ = κ a s := by rw [Measure.fst_prod]
 
 @[simp] lemma snd_prod (κ : Kernel α β) [IsMarkovKernel κ] (η : Kernel α γ) [IsSFiniteKernel η] :
     snd (κ ×ₖ η) = η := by
@@ -168,15 +172,15 @@ instance IsSFiniteKernel.prod (κ : Kernel α β) (η : Kernel α γ) :
 lemma comap_prod (κ : Kernel β γ) [IsSFiniteKernel κ] (η : Kernel β δ) [IsSFiniteKernel η]
     {f : α → β} (hf : Measurable f) :
     (κ ×ₖ η).comap f hf = (κ.comap f hf) ×ₖ (η.comap f hf) := by
-  ext1 x
-  rw [comap_apply, prod_apply, prod_apply, comap_apply, comap_apply]
+  ext x s hs
+  rw [comap_apply' _ hf _ s, prod_apply' _ _ _ hs, prod_apply' _ _ _ hs]
+  rfl
 
 lemma map_prod_map {ε} {mε : SigmaAlgebra ε} (κ : Kernel α β) [IsSFiniteKernel κ]
     (η : Kernel α δ) [IsSFiniteKernel η] {f : β → γ} (hf : Measurable f) {g : δ → ε}
     (hg : Measurable g) : (κ.map f) ×ₖ (η.map g) = (κ ×ₖ η).map (Prod.map f g) := by
   ext1 x
-  rw [map_apply _ (hf.prodMap hg), prod_apply κ, ← Measure.map_prod_map _ _ hf hg, prod_apply,
-    map_apply _ hf, map_apply _ hg]
+  simpa only [map_apply, prod_apply] using Measure.map_prod_map (κ x) (η x) hf hg
 
 lemma map_prod_eq (κ : Kernel α β) [IsSFiniteKernel κ] (η : Kernel α γ) [IsSFiniteKernel η]
     {f : β → δ} (hf : Measurable f) : (κ.map f) ×ₖ η = (κ ×ₖ η).map (Prod.map f id) := by
@@ -228,8 +232,8 @@ lemma prodAssoc_prod (κ : Kernel α β) [IsSFiniteKernel κ] (η : Kernel α γ
     (ξ : Kernel α δ) [IsSFiniteKernel ξ] :
     ((κ ×ₖ ξ) ×ₖ η).map MeasurableEquiv.prodAssoc = κ ×ₖ (ξ ×ₖ η) := by
   ext1 a
-  rw [map_apply _ (by fun_prop), prod_apply, prod_apply, Measure.prodAssoc_prod, prod_apply,
-    prod_apply]
+  simpa only [map_apply, prod_apply] using
+    (Measure.prodAssoc_prod (μ := κ a) (ν := ξ a) (τ := η a))
 
 lemma prodAssoc_symm_prod (κ : Kernel α β) [IsSFiniteKernel κ] (η : Kernel α γ) [IsSFiniteKernel η]
     (ξ : Kernel α δ) [IsSFiniteKernel ξ] :

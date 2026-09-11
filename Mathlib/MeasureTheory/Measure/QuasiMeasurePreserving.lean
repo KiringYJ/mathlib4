@@ -45,7 +45,7 @@ structure QuasiMeasurePreserving {m0 : SigmaAlgebra α} (f : α → β)
   (μa : Measure α := by volume_tac)
   (μb : Measure β := by volume_tac) : Prop where
   protected measurable : Measurable f
-  protected absolutelyContinuous : μa.map f ≪ μb
+  protected absolutelyContinuous : μa.map f measurable.aemeasurable ≪ μb
 
 attribute [fun_prop] QuasiMeasurePreserving.measurable
 
@@ -59,7 +59,7 @@ variable {μa μa' : Measure α} {μb μb' : Measure β} {μc : Measure γ} {f :
 
 protected theorem _root_.Measurable.quasiMeasurePreserving
     {_m0 : SigmaAlgebra α} (hf : Measurable f) (μ : Measure α) :
-    QuasiMeasurePreserving f μ (μ.map f) :=
+    QuasiMeasurePreserving f μ (μ.map f hf.aemeasurable) :=
   ⟨hf, AbsolutelyContinuous.rfl⟩
 
 theorem mono_left (h : QuasiMeasurePreserving f μa μb) (ha : μa' ≪ μa) :
@@ -79,7 +79,7 @@ theorem mono (ha : μa' ≪ μa) (hb : μb ≪ μb') (h : QuasiMeasurePreserving
 protected theorem comp {g : β → γ} {f : α → β} (hg : QuasiMeasurePreserving g μb μc)
     (hf : QuasiMeasurePreserving f μa μb) : QuasiMeasurePreserving (g ∘ f) μa μc :=
   ⟨hg.measurable.comp hf.measurable, by
-    rw [← map_map hg.1 hf.1]
+    rw [← map_map hf.measurable.aemeasurable hg.measurable.aemeasurable]
     exact (hf.2.map hg.1).trans hg.2⟩
 
 protected theorem iterate {f : α → α} (hf : QuasiMeasurePreserving f μa μa) :
@@ -93,14 +93,15 @@ protected theorem aemeasurable (hf : QuasiMeasurePreserving f μa μb) : AEMeasu
 protected theorem congr (hf : QuasiMeasurePreserving f μa μb) {f' : α → β} (hf' : Measurable f')
     (h : f =ᵐ[μa] f') : QuasiMeasurePreserving f' μa μb := by
   refine ⟨hf', ?_⟩
-  rw [Measure.map_congr h.symm]
+  rw [Measure.map_congr h.symm hf'.aemeasurable]
   exact hf.absolutelyContinuous
 
 theorem smul_measure {R : Type*} [SMul R ℝ≥0∞] [IsScalarTower R ℝ≥0∞ ℝ≥0∞]
     (hf : QuasiMeasurePreserving f μa μb) (c : R) : QuasiMeasurePreserving f (c • μa) (c • μb) :=
   ⟨hf.1, by rw [Measure.map_smul _ hf.aemeasurable]; exact hf.2.smul c⟩
 
-theorem ae_map_le (h : QuasiMeasurePreserving f μa μb) : ae (μa.map f) ≤ ae μb :=
+theorem ae_map_le (h : QuasiMeasurePreserving f μa μb) :
+    ae (μa.map f h.aemeasurable) ≤ ae μb :=
   h.2.ae_le
 
 theorem tendsto_ae (h : QuasiMeasurePreserving f μa μb) : Tendsto f (ae μa) (ae μb) :=
@@ -241,7 +242,12 @@ namespace MeasurableEquiv
 variable {_ : SigmaAlgebra α} [SigmaAlgebra β] {μ : Measure α}
 
 theorem quasiMeasurePreserving_symm (μ : Measure α) (e : α ≃ᵐ β) :
-    Measure.QuasiMeasurePreserving e.symm (μ.map e) μ :=
-  ⟨e.symm.measurable, by rw [Measure.map_map, e.symm_comp_self, Measure.map_id] <;> measurability⟩
+    Measure.QuasiMeasurePreserving e.symm (μ.map e e.measurable.aemeasurable) μ :=
+  ⟨e.symm.measurable, by
+    have hmap :
+        (μ.map e e.measurable.aemeasurable).map e.symm e.symm.measurable.aemeasurable = μ := by
+      simpa only [e.symm_comp_self, Measure.map_id] using
+        (Measure.map_map e.measurable.aemeasurable e.symm.measurable.aemeasurable)
+    exact hmap.absolutelyContinuous⟩
 
 end MeasurableEquiv

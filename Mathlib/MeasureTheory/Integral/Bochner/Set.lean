@@ -554,20 +554,24 @@ theorem integral_indicatorConstLp [CompleteSpace E]
     _ = μ.real t • e := by rw [inter_univ]
 
 theorem setIntegral_map {Y} [SigmaAlgebra Y] {g : X → Y} {f : Y → E} {s : Set Y}
-    (hs : MeasurableSet s) (hf : AEStronglyMeasurable f (Measure.map g μ)) (hg : AEMeasurable g μ) :
-    ∫ y in s, f y ∂Measure.map g μ = ∫ x in g ⁻¹' s, f (g x) ∂μ := by
+    (hs : MeasurableSet s) (hg : AEMeasurable g μ)
+    (hf : AEStronglyMeasurable f (Measure.map g μ hg)) :
+    ∫ y in s, f y ∂Measure.map g μ hg = ∫ x in g ⁻¹' s, f (g x) ∂μ := by
   rw [Measure.restrict_map_of_aemeasurable hg hs,
     integral_map (hg.mono_measure Measure.restrict_le_self) (hf.mono_measure _)]
   exact Measure.map_mono_of_aemeasurable Measure.restrict_le_self hg
 
 theorem _root_.MeasurableEmbedding.setIntegral_map {Y} {_ : SigmaAlgebra Y} {f : X → Y}
     (hf : MeasurableEmbedding f) (g : Y → E) (s : Set Y) :
-    ∫ y in s, g y ∂Measure.map f μ = ∫ x in f ⁻¹' s, g (f x) ∂μ := by
+    ∫ y in s, g y ∂Measure.map f μ hf.measurable.aemeasurable =
+      ∫ x in f ⁻¹' s, g (f x) ∂μ := by
   rw [hf.restrict_map, hf.integral_map]
 
 theorem _root_.Topology.IsClosedEmbedding.setIntegral_map [TopologicalSpace X] [BorelSpace X] {Y}
     [SigmaAlgebra Y] [TopologicalSpace Y] [BorelSpace Y] {g : X → Y} {f : Y → E} (s : Set Y)
-    (hg : IsClosedEmbedding g) : ∫ y in s, f y ∂Measure.map g μ = ∫ x in g ⁻¹' s, f (g x) ∂μ :=
+    (hg : IsClosedEmbedding g) :
+    ∫ y in s, f y ∂Measure.map g μ hg.measurable.aemeasurable =
+      ∫ x in g ⁻¹' s, f (g x) ∂μ :=
   hg.measurableEmbedding.setIntegral_map _ _
 
 theorem MeasurePreserving.setIntegral_preimage_emb {Y} {_ : SigmaAlgebra Y} {f : X → Y} {ν}

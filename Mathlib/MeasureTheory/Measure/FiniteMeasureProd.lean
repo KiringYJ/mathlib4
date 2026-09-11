@@ -52,7 +52,7 @@ variable (μ : FiniteMeasure α) (ν : FiniteMeasure β)
 
 lemma prod_apply (s : Set (α × β)) (s_mble : MeasurableSet s) :
     μ.prod ν s = ENNReal.toNNReal (∫⁻ x, ν.toMeasure (Prod.mk x ⁻¹' s) ∂μ) := by
-  simp [coeFn_def, Measure.prod_apply s_mble]
+  simp [coeFn_def, Measure.prod_apply s_mble Measurable.map_prodMk_left.aemeasurable]
 
 lemma prod_apply_symm (s : Set (α × β)) (s_mble : MeasurableSet s) :
     μ.prod ν s = ENNReal.toNNReal (∫⁻ y, μ.toMeasure ((fun x ↦ ⟨x, y⟩) ⁻¹' s) ∂ν) := by
@@ -107,7 +107,7 @@ variable (μ : ProbabilityMeasure α) (ν : ProbabilityMeasure β)
 
 lemma prod_apply (s : Set (α × β)) (s_mble : MeasurableSet s) :
     μ.prod ν s = ENNReal.toNNReal (∫⁻ x, ν.toMeasure (Prod.mk x ⁻¹' s) ∂μ) := by
-  simp [coeFn_def, Measure.prod_apply s_mble]
+  simp [coeFn_def, Measure.prod_apply s_mble Measurable.map_prodMk_left.aemeasurable]
 
 lemma prod_apply_symm (s : Set (α × β)) (s_mble : MeasurableSet s) :
     μ.prod ν s = ENNReal.toNNReal (∫⁻ y, μ.toMeasure ((fun x ↦ ⟨x, y⟩) ⁻¹' s) ∂ν) := by

@@ -319,7 +319,6 @@ theorem Integrable.comp_snd_iff [IsFiniteMeasure μ] {f : β → E} (hμ : μ �
     Integrable (f ·.2) (μ.prod ν) ↔ Integrable f ν :=
   ⟨(.of_comp_snd · hμ), (.comp_snd · μ)⟩
 
-omit [SFinite ν] in
 theorem Integrable.comp_fst_iff [SFinite μ] [IsFiniteMeasure ν] {f : α → E} (hν : ν ≠ 0) :
     Integrable (f ·.1) (μ.prod ν) ↔ Integrable f μ :=
   ⟨(.of_comp_fst · hν), (.comp_fst · ν)⟩

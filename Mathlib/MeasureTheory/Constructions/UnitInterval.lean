@@ -69,7 +69,7 @@ lemma measurePreserving_symm : MeasurePreserving symm volume volume where
     ext s hs
     apply symmMeasurableEquiv.map_apply _ |>.trans
     conv_lhs => rw [coe_symmMeasurableEquiv, volume_apply, image_coe_preimage_symm,
-      ← map_apply (by fun_prop) (measurableSet_Icc.subtype_image hs),
+      ← map_apply (measurableSet_Icc.subtype_image hs),
       volume.measurePreserving_sub_left 1 |>.map_eq, ← volume_apply]
 
 open Set

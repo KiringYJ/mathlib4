@@ -50,8 +50,8 @@ with respect to the comap by `g` of the sigma-algebra on `𝓨`.
 See `toReal_rnDeriv_map_ae_eq_trim` for the same statement, but with a.e. equality with respect to
 the trimmed measure `ν.trim hg.comap_le`. -/
 lemma toReal_rnDeriv_map [IsFiniteMeasure μ] (hμν : μ ≪ ν)
-    {g : 𝓧 → 𝓨} (hg : Measurable g) [hσ : SigmaFinite (ν.map g)] :
-    (fun a ↦ ((μ.map g).rnDeriv (ν.map g) (g a)).toReal) =ᵐ[ν]
+    {g : 𝓧 → 𝓨} (hg : Measurable g) [hσ : SigmaFinite (ν.map g hg.aemeasurable)] :
+    (fun a ↦ ((μ.map g hg.aemeasurable).rnDeriv (ν.map g hg.aemeasurable) (g a)).toReal) =ᵐ[ν]
       ν[(fun a ↦ (μ.rnDeriv ν a).toReal) | m𝓨.comap g] := by
   have : SigmaFinite (ν.trim hg.comap_le) := by
     rw [← map_trim_comap hg] at hσ
@@ -61,15 +61,22 @@ lemma toReal_rnDeriv_map [IsFiniteMeasure μ] (hμν : μ ≪ ν)
   have : SigmaFinite ν := SigmaFinite.of_map _ hg.aemeasurable hσ
   refine ae_eq_condExp_of_forall_setIntegral_eq _ (by fun_prop) ?_ ?_ ?_
   · rintro _ ⟨t, _, rfl⟩ _
-    exact Integrable.integrableOn (Measure.integrable_toReal_rnDeriv.comp_measurable hg)
+    exact Integrable.integrableOn
+      (Integrable.comp_measurable (f := g) hg Measure.integrable_toReal_rnDeriv)
   · rintro _ ⟨t, ht, rfl⟩ _
-    calc ∫ x in g ⁻¹' t, ((μ.map g).rnDeriv (ν.map g) (g x)).toReal ∂ν
-    _ = ∫ y in t, ((μ.map g).rnDeriv (ν.map g) y).toReal ∂(ν.map g) := by
-      rw [setIntegral_map ht _ hg.aemeasurable]
-      exact Measurable.aestronglyMeasurable (by fun_prop)
+    calc
+      ∫ x in g ⁻¹' t,
+          ((μ.map g hg.aemeasurable).rnDeriv (ν.map g hg.aemeasurable) (g x)).toReal ∂ν =
+        ∫ y in t, ((μ.map g hg.aemeasurable).rnDeriv (ν.map g hg.aemeasurable) y).toReal
+          ∂(ν.map g hg.aemeasurable) :=
+        (setIntegral_map
+          (f := fun y ↦
+            ((μ.map g hg.aemeasurable).rnDeriv (ν.map g hg.aemeasurable) y).toReal)
+          ht hg.aemeasurable Measure.integrable_toReal_rnDeriv.aestronglyMeasurable).symm
     _ = ∫ x in g ⁻¹' t, (μ.rnDeriv ν x).toReal ∂ν := by
       rw [Measure.setIntegral_toReal_rnDeriv (hμν.map hg),
-        Measure.setIntegral_toReal_rnDeriv hμν, measureReal_def, Measure.map_apply hg ht,
+        Measure.setIntegral_toReal_rnDeriv hμν, measureReal_def,
+        Measure.map_apply ht hg.aemeasurable,
         measureReal_def]
   · refine (Measurable.ennreal_toReal fun s hs ↦ ?_).aestronglyMeasurable
     exact ⟨_, Measure.measurable_rnDeriv _ _ hs, rfl⟩
@@ -81,11 +88,14 @@ with respect to the comap by `g` of the sigma-algebra on `𝓨`.
 See `rnDeriv_map_ae_eq_trim` for the same statement, but with a.e. equality with respect to
 the trimmed measure `ν.trim hg.comap_le`. -/
 lemma rnDeriv_map [IsFiniteMeasure μ] (hμν : μ ≪ ν)
-    {g : 𝓧 → 𝓨} (hg : Measurable g) [hσ : SigmaFinite (ν.map g)] :
-    (fun a ↦ (μ.map g).rnDeriv (ν.map g) (g a)) =ᵐ[ν] ν⁻[μ.rnDeriv ν|m𝓨.comap g] := by
+    {g : 𝓧 → 𝓨} (hg : Measurable g) [hσ : SigmaFinite (ν.map g hg.aemeasurable)] :
+    (fun a ↦ (μ.map g hg.aemeasurable).rnDeriv (ν.map g hg.aemeasurable) (g a)) =ᵐ[ν]
+      ν⁻[μ.rnDeriv ν|m𝓨.comap g] := by
   have : SigmaFinite ν := SigmaFinite.of_map _ hg.aemeasurable hσ
-  have h_ne_top1 : ∀ᵐ x ∂ν, (μ.map g).rnDeriv (ν.map g) (g x) ≠ ∞ :=
-    ae_of_ae_map hg.aemeasurable (Measure.rnDeriv_ne_top (μ.map g) (ν.map g))
+  have h_ne_top1 : ∀ᵐ x ∂ν,
+      (μ.map g hg.aemeasurable).rnDeriv (ν.map g hg.aemeasurable) (g x) ≠ ∞ :=
+    ae_of_ae_map hg.aemeasurable
+      (Measure.rnDeriv_ne_top (μ.map g hg.aemeasurable) (ν.map g hg.aemeasurable))
   have h_ne_top2 : ∀ᵐ x ∂ν, ν⁻[μ.rnDeriv ν|SigmaAlgebra.comap g m𝓨] x ≠ ∞ := by
     refine condLExp_ne_top ?_
     simp [Measure.lintegral_rnDeriv hμν]
@@ -138,7 +148,9 @@ lemma toReal_rnDeriv_trim (hm : m ≤ m𝓧) [IsFiniteMeasure μ] [hsf : SigmaFi
     (fun x ↦ ((μ.trim hm).rnDeriv (ν.trim hm) x).toReal) =ᵐ[ν.trim hm]
       ν[fun x ↦ (μ.rnDeriv ν x).toReal | m] := by
   simp_rw [trim_eq_map hm]
-  have : SigmaFinite (@Measure.map _ _ m𝓧 m id ν) := by rwa [← trim_eq_map hm]
+  have : SigmaFinite (@Measure.map _ _ m𝓧 m id ν
+      (@Measurable.aemeasurable 𝓧 𝓧 m𝓧 m id ν (@measurable_id'' 𝓧 m m𝓧 hm))) := by
+    rwa [← trim_eq_map hm]
   have h := toReal_rnDeriv_map_ae_eq_trim hμν (measurable_id'' hm)
   simp_rw [SigmaAlgebra.comap_id, id_def, trim_eq_map] at h
   convert! h <;> rw [SigmaAlgebra.comap_id]

@@ -79,7 +79,7 @@ theorem nonempty_of_measureReal_ne_zero (h : μ.real s ≠ 0) : s.Nonempty :=
 theorem map_measureReal_apply_of_aemeasurable [SigmaAlgebra β] {f : α → β}
     (hf : AEMeasurable f μ) {s : Set β} (hs : MeasurableSet s) :
     (μ.map f).real s = μ.real (f ⁻¹' s) := by
-  simp_rw [measureReal_def, map_apply_of_aemeasurable hf hs]
+  simp_rw [measureReal_def, Measure.map_apply hs hf]
 
 theorem map_measureReal_apply [SigmaAlgebra β] {f : α → β} (hf : Measurable f)
     {s : Set β} (hs : MeasurableSet s) : (μ.map f).real s = μ.real (f ⁻¹' s) :=

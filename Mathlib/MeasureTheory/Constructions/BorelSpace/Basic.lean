@@ -744,9 +744,10 @@ namespace MeasureTheory.Measure.IsFiniteMeasureOnCompacts
 
 variable {mα} in
 protected theorem map (μ : Measure α) [IsFiniteMeasureOnCompacts μ] (f : α ≃ₜ β) :
-    IsFiniteMeasureOnCompacts (μ.map f) := by
+    IsFiniteMeasureOnCompacts (μ.map f f.measurable.aemeasurable) := by
   refine ⟨fun K hK ↦ ?_⟩
-  rw [← f.toMeasurableEquiv_coe, MeasurableEquiv.map_apply]
+  change (μ.map f.toMeasurableEquiv f.toMeasurableEquiv.measurable.aemeasurable) K < ∞
+  rw [MeasurableEquiv.map_apply]
   exact IsCompact.measure_lt_top (f.isCompact_preimage.2 hK)
 
 variable {mβ} in

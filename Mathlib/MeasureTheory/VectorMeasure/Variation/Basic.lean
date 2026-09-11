@@ -257,20 +257,23 @@ instance [IsFiniteMeasure μ.variation] : IsFiniteMeasure (μ.restrict s).variat
 
 variable {Y : Type*} [SigmaAlgebra Y] {φ : X → Y}
 
-lemma variation_map_le : (μ.map φ).variation ≤ μ.variation.map φ := by
-  by_cases hφ : Measurable φ; swap
-  · simp [VectorMeasure.map, hφ, Measure.zero_le]
+lemma variation_map_le (hφ : Measurable φ) :
+    (μ.map φ).variation ≤ μ.variation.map φ hφ.aemeasurable := by
   apply variation_le_of_forall_enorm_le (fun s hs ↦ ?_)
-  simp [VectorMeasure.map_apply _ hφ hs, Measure.map_apply hφ hs, enorm_measure_le_variation]
+  simp [VectorMeasure.map_apply _ hφ hs, Measure.map_apply hs hφ.aemeasurable,
+    enorm_measure_le_variation]
 
-instance [IsFiniteMeasure μ.variation] : IsFiniteMeasure (μ.map φ).variation :=
-  isFiniteMeasure_of_le _ variation_map_le
+instance [IsFiniteMeasure μ.variation] : IsFiniteMeasure (μ.map φ).variation := by
+  classical
+  by_cases hφ : Measurable φ
+  · exact isFiniteMeasure_of_le _ (variation_map_le hφ)
+  · simpa [VectorMeasure.map, hφ] using (@isFiniteMeasureZero Y _)
 
 theorem _root_.MeasurableEmbedding.variation_map (hφ : MeasurableEmbedding φ) :
-    (μ.map φ).variation = μ.variation.map φ := by
-  apply le_antisymm variation_map_le ?_
+    (μ.map φ).variation = μ.variation.map φ hφ.measurable.aemeasurable := by
+  apply le_antisymm (variation_map_le hφ.measurable) ?_
   apply Measure.le_iff.2 (fun s hs ↦ ?_)
-  simp only [hφ.measurable, hs, Measure.map_apply]
+  simp only [hs, Measure.map_apply]
   have : (μ.map φ).variation s = (μ.map φ).variation (s ∩ range φ) := by
     nth_rw 1 [← inter_union_sdiff s (range φ)]
     have : (μ.map φ).variation (s \ range φ) = 0 := by

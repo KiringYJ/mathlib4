@@ -45,11 +45,13 @@ lemma IdentDistrib.prodMk [IsFiniteMeasure μ]
   aemeasurable_snd := hXZ.aemeasurable_snd.prodMk hYW.aemeasurable_snd
   map_eq := by
     have : IsFiniteMeasure ν := by
-      have : IsFiniteMeasure (ν.map Z) := by rw [← hXZ.map_eq]; infer_instance
+      have : IsFiniteMeasure (ν.map Z hXZ.aemeasurable_snd) := by
+        rw [← hXZ.map_eq]
+        infer_instance
       exact Measure.isFiniteMeasure_of_map hXZ.aemeasurable_snd
     rw [hXY.map_prod_eq_prod_map_map hXZ.aemeasurable_fst hYW.aemeasurable_fst,
-      hZW.map_prod_eq_prod_map_map hXZ.aemeasurable_snd hYW.aemeasurable_snd,
-      hXZ.map_eq, hYW.map_eq]
+      hZW.map_prod_eq_prod_map_map hXZ.aemeasurable_snd hYW.aemeasurable_snd]
+    simp only [hXZ.map_eq, hYW.map_eq]
 
 /-- If `(X i)` and `(Y i)` are families of independent random variables indexed by a countable
 type `ι`, such that for each `i`, `X i` and `Y i` are identically distributed, then the products

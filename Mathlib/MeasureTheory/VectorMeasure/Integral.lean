@@ -809,32 +809,33 @@ theorem nndist_integral_add_vectorMeasure_le_lintegral
 
 variable {β : Type*} [SigmaAlgebra β] {φ : X → β} {a : X}
 
-lemma variation_transpose_map_le :
-    ((μ.map φ).transpose B).variation ≤ Measure.map φ (μ.transpose B).variation := by
-  grw [transpose_map, variation_map_le]
+lemma variation_transpose_map_le (hφ : Measurable φ) :
+    ((μ.map φ).transpose B).variation ≤
+      Measure.map φ (μ.transpose B).variation hφ.aemeasurable := by
+  grw [transpose_map, variation_map_le hφ]
 
 omit [NormedSpace ℝ E] [NormedSpace ℝ F] in
 theorem Integrable.map {β : Type*} [SigmaAlgebra β] {φ : X → β}
-    {f : β → E} (hfm : AEStronglyMeasurable f (μ.variation.map φ))
+    {f : β → E} (hφ : Measurable φ)
+    (hfm : AEStronglyMeasurable f (μ.variation.map φ hφ.aemeasurable))
     (h : μ.Integrable (f ∘ φ)) : (μ.map φ).Integrable f := by
-  by_cases hφ : Measurable φ; swap
-  · simp [VectorMeasure.map, hφ]
   simp_rw [VectorMeasure.Integrable] at h ⊢
-  apply ((integrable_map_measure hfm hφ.aemeasurable).2 h).mono_measure
-  apply variation_map_le
+  apply ((integrable_map_measure hφ.aemeasurable hfm).2 h).mono_measure
+  apply variation_map_le hφ
 
 set_option backward.isDefEq.respectTransparency.types false in
 theorem integral_map {β : Type*} [SigmaAlgebra β]
     {φ : X → β} (hφ : Measurable φ) {f : β → E}
-    (hfm : AEStronglyMeasurable f (μ.variation.map φ))
+    (hfm : AEStronglyMeasurable f (μ.variation.map φ hφ.aemeasurable))
     (hfi' : μ.Integrable (f ∘ φ)) :
     ∫ᵛ y, f y ∂[B; μ.map φ] = ∫ᵛ x, f (φ x) ∂[B; μ] := by
-  apply setToFun_of_le_map _ _ hfi' hfm hφ variation_map_le
+  apply setToFun_of_le_map _ _ hfi' hφ hfm (variation_map_le hφ)
   intro s x hs
   simp [hs, VectorMeasure.map, transpose, hφ]
 
 theorem _root_.MeasurableEmbedding.variation_transpose_map (hφ : MeasurableEmbedding φ) :
-    ((μ.map φ).transpose B).variation = (μ.transpose B).variation.map φ := by
+    ((μ.map φ).transpose B).variation =
+      (μ.transpose B).variation.map φ hφ.measurable.aemeasurable := by
   rw [transpose_map, hφ.variation_map]
 
 omit [NormedSpace ℝ E] [NormedSpace ℝ F] in
@@ -846,7 +847,8 @@ theorem _root_.MeasurableEmbedding.integrable_map_vectorMeasure
 theorem _root_.MeasurableEmbedding.integral_map_vectorMeasure
     (hφ : MeasurableEmbedding φ) {f : β → E} :
     ∫ᵛ y, f y ∂[B; μ.map φ] = ∫ᵛ x, f (φ x) ∂[B; μ] := by
-  by_cases hfm : AEStronglyMeasurable f (μ.variation.map φ)
+  by_cases hfm : AEStronglyMeasurable f
+      (μ.variation.map φ hφ.measurable.aemeasurable)
   · by_cases h'fm : μ.Integrable (f ∘ φ)
     · apply integral_map hφ.measurable hfm h'fm
     · rw [integral_undef, integral_undef]

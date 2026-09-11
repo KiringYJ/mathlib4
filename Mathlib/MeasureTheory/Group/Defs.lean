@@ -70,24 +70,28 @@ variable {G : Type*} [SigmaAlgebra G]
 /-- A measure `μ` on a measurable additive group is left invariant
   if the measure of left translations of a set are equal to the measure of the set itself. -/
 class IsAddLeftInvariant [Add G] (μ : Measure G) : Prop where
-  map_add_left_eq_self : ∀ g : G, map (g + ·) μ = μ
+  map_add_left_eq_self : ∀ g : G,
+    ∀ (hg : Measurable (g + ·) := by fun_prop), map (g + ·) μ hg.aemeasurable = μ
 
 /-- A measure `μ` on a measurable group is left invariant
   if the measure of left translations of a set are equal to the measure of the set itself. -/
 @[to_additive existing]
 class IsMulLeftInvariant [Mul G] (μ : Measure G) : Prop where
-  map_mul_left_eq_self : ∀ g : G, map (g * ·) μ = μ
+  map_mul_left_eq_self : ∀ g : G,
+    ∀ (hg : Measurable (g * ·) := by fun_prop), map (g * ·) μ hg.aemeasurable = μ
 
 /-- A measure `μ` on a measurable additive group is right invariant
   if the measure of right translations of a set are equal to the measure of the set itself. -/
 class IsAddRightInvariant [Add G] (μ : Measure G) : Prop where
-  map_add_right_eq_self : ∀ g : G, map (· + g) μ = μ
+  map_add_right_eq_self : ∀ g : G,
+    ∀ (hg : Measurable (· + g) := by fun_prop), map (· + g) μ hg.aemeasurable = μ
 
 /-- A measure `μ` on a measurable group is right invariant
   if the measure of right translations of a set are equal to the measure of the set itself. -/
 @[to_additive existing]
 class IsMulRightInvariant [Mul G] (μ : Measure G) : Prop where
-  map_mul_right_eq_self : ∀ g : G, map (· * g) μ = μ
+  map_mul_right_eq_self : ∀ g : G,
+    ∀ (hg : Measurable (· * g) := by fun_prop), map (· * g) μ hg.aemeasurable = μ
 
 variable {μ : Measure G}
 
@@ -95,8 +99,9 @@ variable {μ : Measure G}
 instance IsMulLeftInvariant.smulInvariantMeasure [Mul G] [IsMulLeftInvariant μ]
     [MeasurableConstSMul G G] :
     SMulInvariantMeasure G G μ :=
-  ⟨fun _x _s hs => measure_preimage_of_map_eq_self (map_mul_left_eq_self _)
-    (measurable_const_smul (_x)).aemeasurable hs.nullMeasurableSet⟩
+  ⟨fun _x _s hs => measure_preimage_of_map_eq_self
+    (measurable_const_smul _x).aemeasurable
+    (map_mul_left_eq_self _ (measurable_const_smul _x)) hs.nullMeasurableSet⟩
 
 @[to_additive]
 instance [Monoid G] [MeasurableConstSMul G G] (s : Submonoid G) [IsMulLeftInvariant μ] :
@@ -107,8 +112,9 @@ instance [Monoid G] [MeasurableConstSMul G G] (s : Submonoid G) [IsMulLeftInvari
 instance IsMulRightInvariant.toSMulInvariantMeasure_op [Mul G] [MeasurableConstSMul Gᵐᵒᵖ G]
     [μ.IsMulRightInvariant] :
     SMulInvariantMeasure Gᵐᵒᵖ G μ :=
-  ⟨fun _x _s hs => measure_preimage_of_map_eq_self (map_mul_right_eq_self _)
-    (measurable_const_smul _x).aemeasurable hs.nullMeasurableSet⟩
+  ⟨fun _x _s hs => measure_preimage_of_map_eq_self
+    (measurable_const_smul _x).aemeasurable
+    (map_mul_right_eq_self _ (measurable_const_smul _x)) hs.nullMeasurableSet⟩
 
 end Measure
 

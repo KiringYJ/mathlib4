@@ -1032,42 +1032,48 @@ theorem integral_smul_nnreal_measure (f : α → G) (c : ℝ≥0) :
   integral_smul_measure f (c : ℝ≥0∞)
 
 theorem integral_map_of_stronglyMeasurable {β} [SigmaAlgebra β] {φ : α → β} (hφ : Measurable φ)
-    {f : β → G} (hfm : StronglyMeasurable f) : ∫ y, f y ∂Measure.map φ μ = ∫ x, f (φ x) ∂μ := by
-  by_cases hfi : Integrable f (Measure.map φ μ); swap
+    {f : β → G} (hfm : StronglyMeasurable f) :
+    ∫ y, f y ∂Measure.map φ μ hφ.aemeasurable = ∫ x, f (φ x) ∂μ := by
+  by_cases hfi : Integrable f (Measure.map φ μ hφ.aemeasurable); swap
   · rw [integral_undef hfi, integral_undef]
-    exact fun hfφ => hfi ((integrable_map_measure hfm.aestronglyMeasurable hφ.aemeasurable).2 hfφ)
+    exact fun hfφ => hfi ((integrable_map_measure hφ.aemeasurable hfm.aestronglyMeasurable).2 hfφ)
   simp only [integral_eq_setToFun]
   apply setToFun_of_le_map_of_stronglyMeasurable _ _
-    ((integrable_map_measure hfm.aestronglyMeasurable hφ.aemeasurable).1 hfi) hfm hφ le_rfl
+    ((integrable_map_measure hφ.aemeasurable hfm.aestronglyMeasurable).1 hfi) hfm hφ le_rfl
   intro s x hs
   simp [weightedSMul_apply, map_measureReal_apply, hs, hφ]
 
 theorem integral_map {β} [SigmaAlgebra β] {φ : α → β} (hφ : AEMeasurable φ μ) {f : β → G}
-    (hfm : AEStronglyMeasurable f (Measure.map φ μ)) :
-    ∫ y, f y ∂Measure.map φ μ = ∫ x, f (φ x) ∂μ :=
+    (hfm : AEStronglyMeasurable f (Measure.map φ μ hφ)) :
+    ∫ y, f y ∂Measure.map φ μ hφ = ∫ x, f (φ x) ∂μ :=
   let g := hfm.mk f
   calc
-    ∫ y, f y ∂Measure.map φ μ = ∫ y, g y ∂Measure.map φ μ := integral_congr_ae hfm.ae_eq_mk
-    _ = ∫ y, g y ∂Measure.map (hφ.mk φ) μ := by congr 1; exact Measure.map_congr hφ.ae_eq_mk
+    ∫ y, f y ∂Measure.map φ μ hφ = ∫ y, g y ∂Measure.map φ μ hφ :=
+      integral_congr_ae hfm.ae_eq_mk
+    _ = ∫ y, g y ∂Measure.map (hφ.mk φ) μ hφ.measurable_mk.aemeasurable := by
+      congr 1
+      exact Measure.map_congr hφ.ae_eq_mk hφ
     _ = ∫ x, g (hφ.mk φ x) ∂μ :=
       (integral_map_of_stronglyMeasurable hφ.measurable_mk hfm.stronglyMeasurable_mk)
     _ = ∫ x, g (φ x) ∂μ := integral_congr_ae (hφ.ae_eq_mk.symm.fun_comp _)
     _ = ∫ x, f (φ x) ∂μ := integral_congr_ae <| ae_eq_comp hφ hfm.ae_eq_mk.symm
 
 theorem _root_.MeasurableEmbedding.integral_map {β} {_ : SigmaAlgebra β} {f : α → β}
-    (hf : MeasurableEmbedding f) (g : β → G) : ∫ y, g y ∂Measure.map f μ = ∫ x, g (f x) ∂μ := by
-  by_cases hgm : AEStronglyMeasurable g (Measure.map f μ)
+    (hf : MeasurableEmbedding f) (g : β → G) :
+    ∫ y, g y ∂Measure.map f μ hf.measurable.aemeasurable = ∫ x, g (f x) ∂μ := by
+  by_cases hgm : AEStronglyMeasurable g (Measure.map f μ hf.measurable.aemeasurable)
   · exact MeasureTheory.integral_map hf.measurable.aemeasurable hgm
   · rw [integral_non_aestronglyMeasurable hgm, integral_non_aestronglyMeasurable]
     exact fun hgf => hgm (hf.aestronglyMeasurable_map_iff.2 hgf)
 
 theorem _root_.Topology.IsClosedEmbedding.integral_map {β} [TopologicalSpace α] [BorelSpace α]
     [TopologicalSpace β] [SigmaAlgebra β] [BorelSpace β] {φ : α → β} (hφ : IsClosedEmbedding φ)
-    (f : β → G) : ∫ y, f y ∂Measure.map φ μ = ∫ x, f (φ x) ∂μ :=
+    (f : β → G) :
+    ∫ y, f y ∂Measure.map φ μ hφ.measurable.aemeasurable = ∫ x, f (φ x) ∂μ :=
   hφ.measurableEmbedding.integral_map _
 
 theorem integral_map_equiv {β} [SigmaAlgebra β] (e : α ≃ᵐ β) (f : β → G) :
-    ∫ y, f y ∂Measure.map e μ = ∫ x, f (e x) ∂μ :=
+    ∫ y, f y ∂Measure.map e μ e.measurable.aemeasurable = ∫ x, f (e x) ∂μ :=
   e.measurableEmbedding.integral_map f
 
 omit hE in

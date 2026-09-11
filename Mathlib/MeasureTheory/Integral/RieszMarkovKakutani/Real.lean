@@ -481,7 +481,7 @@ lemma _root_.MeasureTheory.Measure.exists_innerRegular_eq_of_isCompact
     exact Measure.exists_regular_eq_of_compactSpace μ'
   refine ⟨ν'.map Subtype.val, Measure.InnerRegular.map_of_continuous (by fun_prop),
     by infer_instance, ?_, fun g ↦ ?_⟩
-  · rw [Measure.map_apply (by fun_prop) hK.measurableSet.compl]
+  · rw [Measure.map_apply hK.measurableSet.compl]
     simp
   convert! hν' (g.compContinuous ⟨Subtype.val, by fun_prop⟩)
   · simp only [BoundedContinuousFunction.compContinuous_apply, ContinuousMap.coe_mk]

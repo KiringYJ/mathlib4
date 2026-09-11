@@ -832,9 +832,9 @@ theorem hausdorffMeasure_preimage (hf : Isometry f) (hd : 0 ≤ d ∨ Surjective
   rw [← hf.hausdorffMeasure_image hd, image_preimage_eq_inter_range]
 
 theorem map_hausdorffMeasure (hf : Isometry f) (hd : 0 ≤ d ∨ Surjective f) :
-    Measure.map f μH[d] = μH[d].restrict (range f) := by
+    Measure.map f μH[d] hf.continuous.measurable.aemeasurable = μH[d].restrict (range f) := by
   ext1 s hs
-  rw [map_apply hf.continuous.measurable hs, Measure.restrict_apply hs,
+  rw [map_apply hs hf.continuous.measurable.aemeasurable, Measure.restrict_apply hs,
     hf.hausdorffMeasure_preimage hd]
 
 end Isometry
@@ -850,7 +850,8 @@ theorem hausdorffMeasure_preimage (e : X ≃ᵢ Y) (d : ℝ) (s : Set Y) : μH[d
   rw [← e.image_symm, e.symm.hausdorffMeasure_image]
 
 @[simp]
-theorem map_hausdorffMeasure (e : X ≃ᵢ Y) (d : ℝ) : Measure.map e μH[d] = μH[d] := by
+theorem map_hausdorffMeasure (e : X ≃ᵢ Y) (d : ℝ) :
+    Measure.map e μH[d] e.continuous.measurable.aemeasurable = μH[d] := by
   rw [e.isometry.map_hausdorffMeasure (Or.inr e.surjective), e.surjective.range_eq, restrict_univ]
 
 theorem measurePreserving_hausdorffMeasure (e : X ≃ᵢ Y) (d : ℝ) : MeasurePreserving e μH[d] μH[d] :=
@@ -872,11 +873,12 @@ instance {α : Type*} [Group α] [MulAction α X] [IsIsometricSMul α X] {d : �
 
 @[to_additive]
 instance {d : ℝ} [Group X] [IsIsometricSMul X X] : IsMulLeftInvariant (μH[d] : Measure X) where
-  map_mul_left_eq_self x := (IsometryEquiv.constSMul x).map_hausdorffMeasure _
+  map_mul_left_eq_self x _ := (IsometryEquiv.constSMul x).map_hausdorffMeasure _
 
 @[to_additive]
 instance {d : ℝ} [Group X] [IsIsometricSMul Xᵐᵒᵖ X] : IsMulRightInvariant (μH[d] : Measure X) where
-  map_mul_right_eq_self x := (IsometryEquiv.constSMul (MulOpposite.op x)).map_hausdorffMeasure _
+  map_mul_right_eq_self x _ :=
+    (IsometryEquiv.constSMul (MulOpposite.op x)).map_hausdorffMeasure _
 
 /-!
 ### Hausdorff measure and Lebesgue measure
@@ -1014,15 +1016,25 @@ theorem hausdorffMeasure_measurePreserving_piFinTwo (α : Fin 2 → Type*)
 /-- In the space `ℝ`, the Hausdorff measure coincides exactly with the Lebesgue measure. -/
 @[simp]
 theorem hausdorffMeasure_real : (μH[1] : Measure ℝ) = volume := by
-  rw [← (volume_preserving_funUnique Unit ℝ).map_eq,
-    ← (hausdorffMeasure_measurePreserving_funUnique Unit ℝ 1).map_eq,
+  apply (MeasurableEquiv.funUnique Unit ℝ).symm.map_measurableEquiv_injective
+  change Measure.map (MeasurableEquiv.funUnique Unit ℝ).symm μH[1]
+      (MeasurableEquiv.funUnique Unit ℝ).symm.measurable.aemeasurable =
+    Measure.map (MeasurableEquiv.funUnique Unit ℝ).symm volume
+      (MeasurableEquiv.funUnique Unit ℝ).symm.measurable.aemeasurable
+  rw [(volume_preserving_funUnique Unit ℝ).symm.map_eq,
+    (hausdorffMeasure_measurePreserving_funUnique Unit ℝ 1).symm.map_eq,
     ← hausdorffMeasure_pi_real, Fintype.card_unit, Nat.cast_one]
 
 /-- In the space `ℝ × ℝ`, the Hausdorff measure coincides exactly with the Lebesgue measure. -/
 @[simp]
 theorem hausdorffMeasure_prod_real : (μH[2] : Measure (ℝ × ℝ)) = volume := by
-  rw [← (volume_preserving_piFinTwo fun _ => ℝ).map_eq,
-    ← (hausdorffMeasure_measurePreserving_piFinTwo (fun _ => ℝ) _).map_eq,
+  apply (MeasurableEquiv.piFinTwo fun _ => ℝ).symm.map_measurableEquiv_injective
+  change Measure.map (MeasurableEquiv.piFinTwo fun _ => ℝ).symm μH[2]
+      (MeasurableEquiv.piFinTwo fun _ => ℝ).symm.measurable.aemeasurable =
+    Measure.map (MeasurableEquiv.piFinTwo fun _ => ℝ).symm volume
+      (MeasurableEquiv.piFinTwo fun _ => ℝ).symm.measurable.aemeasurable
+  rw [(volume_preserving_piFinTwo fun _ => ℝ).symm.map_eq,
+    (hausdorffMeasure_measurePreserving_piFinTwo (fun _ => ℝ) _).symm.map_eq,
     ← hausdorffMeasure_pi_real, Fintype.card_fin, Nat.cast_two]
 
 /-! ### Geometric results in affine spaces -/
@@ -1077,7 +1089,7 @@ theorem hausdorffMeasure_homothety_preimage {d : ℝ} (hd : 0 ≤ d) (x : P) {c 
 theorem map_homothety_hausdorffMeasure {d : ℝ} (hd : 0 ≤ d) (x : P) {c : 𝕜} (hc : c ≠ 0) :
     Measure.map (AffineMap.homothety x c) μH[d] = ‖c‖₊⁻¹ ^ d • μH[d] := by
   ext s hs
-  rw [Measure.map_apply (AffineMap.homothety_continuous x c).measurable hs,
+  rw [Measure.map_apply hs (AffineMap.homothety_continuous x c).measurable.aemeasurable,
     hausdorffMeasure_homothety_preimage hd x hc s, Measure.smul_apply]
 
 end NormedFieldAffine

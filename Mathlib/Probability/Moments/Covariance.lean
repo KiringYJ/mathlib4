@@ -306,18 +306,20 @@ lemma covariance_map_equiv (X Y : Ω → ℝ) (Z : Ω' ≃ᵐ Ω) :
     cov[X, Y; μ.map Z] = cov[X ∘ Z, Y ∘ Z; μ] := by
   simp_rw [covariance, integral_map_equiv, Function.comp_apply]
 
-lemma covariance_map {Z : Ω' → Ω} (hX : AEStronglyMeasurable X (μ.map Z))
-    (hY : AEStronglyMeasurable Y (μ.map Z)) (hZ : AEMeasurable Z μ) :
-    cov[X, Y; μ.map Z] = cov[X ∘ Z, Y ∘ Z; μ] := by
+lemma covariance_map {Z : Ω' → Ω} (hZ : AEMeasurable Z μ)
+    (hX : AEStronglyMeasurable X (μ.map Z hZ))
+    (hY : AEStronglyMeasurable Y (μ.map Z hZ)) :
+    cov[X, Y; μ.map Z hZ] = cov[X ∘ Z, Y ∘ Z; μ] := by
   simp_rw [covariance, Function.comp_apply]
   repeat rw [integral_map]
   any_goals assumption
   exact (hX.sub aestronglyMeasurable_const).mul (hY.sub aestronglyMeasurable_const)
 
-lemma covariance_map_fun {Z : Ω' → Ω} (hX : AEStronglyMeasurable X (μ.map Z))
-    (hY : AEStronglyMeasurable Y (μ.map Z)) (hZ : AEMeasurable Z μ) :
-    cov[X, Y; μ.map Z] = cov[fun ω ↦ X (Z ω), fun ω ↦ Y (Z ω); μ] :=
-  covariance_map hX hY hZ
+lemma covariance_map_fun {Z : Ω' → Ω} (hZ : AEMeasurable Z μ)
+    (hX : AEStronglyMeasurable X (μ.map Z hZ))
+    (hY : AEStronglyMeasurable Y (μ.map Z hZ)) :
+    cov[X, Y; μ.map Z hZ] = cov[fun ω ↦ X (Z ω), fun ω ↦ Y (Z ω); μ] :=
+  covariance_map hZ hX hY
 
 end Map
 

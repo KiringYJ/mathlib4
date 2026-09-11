@@ -151,12 +151,13 @@ theorem bernoulliMeasure_self_eq_dirac (x : X) (p : I) :
 
 @[simp]
 theorem map_bernoulliMeasure [MeasurableSingletonClass X] [MeasurableSingletonClass Y]
-    (x y : X) (f : X → Y) (p : I) :
-    Ber(x, y, p).map f = bernoulliMeasure (f x) (f y) p := by
-  have hf (x : X) : AEMeasurable f (dirac x) := by fun_prop
+    (x y : X) (f : X → Y) (p : I)
+    (hf : AEMeasurable f Ber(x, y, p) := by simp [bernoulliMeasure_def]) :
+    Ber(x, y, p).map f hf = bernoulliMeasure (f x) (f y) p := by
+  have hf_dirac (x : X) : AEMeasurable f (dirac x) := by fun_prop
   simp only [bernoulliMeasure_def]
   rw [AEMeasurable.map_add₀ (by fun_prop) (by fun_prop)]
-  simp [hf]
+  simp [hf_dirac]
 
 theorem map_bernoulliMeasure' (x y : X) {f : X → Y} (hf : Measurable f) (p : I) :
     Ber(x, y, p).map f = bernoulliMeasure (f x) (f y) p := by
@@ -205,7 +206,7 @@ theorem hasLaw_indicator_bernoulliMeasure [IsProbabilityMeasure P] {M : Type*} [
   refine ⟨h, eq_bernoulliMeasure ?_ ?_ ?_ ?_⟩
   all_goals
     intro t ht h1 h2
-    simp_all [map_apply_of_aemeasurable h ht, Set.indicator_const_preimage_eq_union,
+    simp_all [map_apply ht h, Set.indicator_const_preimage_eq_union,
       measure_compl₀ hs, ENNReal.coe_nnreal_eq, ENNReal.ofReal_sub]
 
 /-- The constant indicator of a set follows a Bernoulli distribution. -/

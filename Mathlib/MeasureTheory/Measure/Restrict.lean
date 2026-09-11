@@ -325,9 +325,11 @@ theorem restrict_iUnion_apply_eq_iSup [Countable ι] {s : ι → Set α} (hd : D
 /-- The restriction of the pushforward measure is the pushforward of the restriction. For a version
 assuming only `AEMeasurable`, see `restrict_map_of_aemeasurable`. -/
 theorem restrict_map {f : α → β} (hf : Measurable f) {s : Set β} (hs : MeasurableSet s) :
-    (μ.map f).restrict s = (μ.restrict <| f ⁻¹' s).map f :=
+    (μ.map f hf.aemeasurable).restrict s =
+      (μ.restrict <| f ⁻¹' s).map f hf.aemeasurable :=
   ext fun t ht => by
-    rw [restrict_apply ht, map_apply hf (ht.inter hs), map_apply hf ht,
+    rw [restrict_apply ht, map_apply (ht.inter hs) hf.aemeasurable,
+      map_apply ht hf.aemeasurable,
       restrict_apply (hf ht), preimage_inter]
 
 theorem restrict_inter_toMeasurable (h : μ s ≠ ∞) (ht : MeasurableSet t) (hst : s ⊆ t) :
@@ -434,7 +436,7 @@ theorem QuasiMeasurePreserving.restrict {ν : Measure β} {f : α → β}
   absolutelyContinuous := by
     refine AbsolutelyContinuous.mk fun u hum ↦ ?_
     intro hu
-    rw [map_apply hf.measurable hum, restrict_apply (hf.measurable hum)]
+    rw [map_apply hum hf.measurable.aemeasurable, restrict_apply (hf.measurable hum)]
     have hut : ν (u ∩ t) = 0 := by
       rwa [restrict_apply hum] at hu
     refine measure_mono_null ?_ (hf.preimage_null hut)
@@ -878,7 +880,8 @@ section
 variable (hf : MeasurableEmbedding f)
 include hf
 
-theorem map_comap (μ : Measure β) : (comap f μ).map f = μ.restrict (range f) := by
+theorem map_comap (μ : Measure β) :
+    (comap f μ).map f hf.measurable.aemeasurable = μ.restrict (range f) := by
   ext1 t ht
   rw [hf.map_apply, comap_apply f hf.injective hf.measurableSet_image' _ (hf.measurable ht),
     image_preimage_eq_inter_range, Measure.restrict_apply ht]
@@ -886,20 +889,24 @@ theorem map_comap (μ : Measure β) : (comap f μ).map f = μ.restrict (range f)
 theorem comap_apply (μ : Measure β) (s : Set α) : comap f μ s = μ (f '' s) :=
   calc
     comap f μ s = comap f μ (f ⁻¹' f '' s) := by rw [hf.injective.preimage_image]
-    _ = (comap f μ).map f (f '' s) := (hf.map_apply _ _).symm
+    _ = ((comap f μ).map f hf.measurable.aemeasurable) (f '' s) :=
+      (hf.map_apply _ _).symm
     _ = μ (f '' s) := by
       rw [hf.map_comap, restrict_apply' hf.measurableSet_range,
         inter_eq_self_of_subset_left (image_subset_range _ _)]
 
-theorem comap_map (μ : Measure α) : (map f μ).comap f = μ := by
+theorem comap_map (μ : Measure α) :
+    (map f μ hf.measurable.aemeasurable).comap f = μ := by
   ext t _
   rw [hf.comap_apply, hf.map_apply, preimage_image_eq _ hf.injective]
 
-theorem ae_map_iff {p : β → Prop} {μ : Measure α} : (∀ᵐ x ∂μ.map f, p x) ↔ ∀ᵐ x ∂μ, p (f x) := by
+theorem ae_map_iff {p : β → Prop} {μ : Measure α} :
+    (∀ᵐ x ∂μ.map f hf.measurable.aemeasurable, p x) ↔ ∀ᵐ x ∂μ, p (f x) := by
   simp only [ae_iff, hf.map_apply, preimage_ofPred_eq]
 
 theorem restrict_map (μ : Measure α) (s : Set β) :
-    (μ.map f).restrict s = (μ.restrict <| f ⁻¹' s).map f :=
+    (μ.map f hf.measurable.aemeasurable).restrict s =
+      (μ.restrict <| f ⁻¹' s).map f hf.measurable.aemeasurable :=
   Measure.ext fun t ht => by
     rw [Measure.restrict_apply ht, hf.map_apply, hf.map_apply,
       Measure.restrict_apply (hf.measurable ht), preimage_inter]
@@ -921,7 +928,8 @@ lemma restrict_comap (μ : Measure β) (s : Set α) :
 end
 
 theorem _root_.MeasurableEquiv.restrict_map (e : α ≃ᵐ β) (μ : Measure α) (s : Set β) :
-    (μ.map e).restrict s = (μ.restrict <| e ⁻¹' s).map e :=
+    (μ.map e e.measurable.aemeasurable).restrict s =
+      (μ.restrict <| e ⁻¹' s).map e e.measurable.aemeasurable :=
   e.measurableEmbedding.restrict_map _ _
 
 lemma _root_.MeasurableEquiv.comap_apply (e : α ≃ᵐ β) (μ : Measure β) (s : Set α) :
@@ -932,9 +940,10 @@ end MeasurableEmbedding
 
 lemma MeasureTheory.Measure.map_eq_comap {_ : SigmaAlgebra α} {_ : SigmaAlgebra β} {f : α → β}
     {g : β → α} {μ : Measure α} (hf : Measurable f) (hg : MeasurableEmbedding g)
-    (hμg : ∀ᵐ a ∂μ, a ∈ Set.range g) (hfg : ∀ a, f (g a) = a) : μ.map f = μ.comap g := by
+    (hμg : ∀ᵐ a ∂μ, a ∈ Set.range g) (hfg : ∀ a, f (g a) = a) :
+    μ.map f hf.aemeasurable = μ.comap g := by
   ext s hs
-  rw [map_apply hf hs, hg.comap_apply, ← measure_sdiff_null hμg]
+  rw [map_apply hs hf.aemeasurable, hg.comap_apply, ← measure_sdiff_null hμg]
   congr
   simp
   grind
@@ -946,7 +955,9 @@ theorem comap_subtype_coe_apply {_m0 : SigmaAlgebra α} {s : Set α} (hs : Measu
   (MeasurableEmbedding.subtype_coe hs).comap_apply _ _
 
 theorem map_comap_subtype_coe {m0 : SigmaAlgebra α} {s : Set α} (hs : MeasurableSet s)
-    (μ : Measure α) : (comap (↑) μ).map ((↑) : s → α) = μ.restrict s := by
+    (μ : Measure α) :
+    (comap (↑) μ).map ((↑) : s → α)
+      (MeasurableEmbedding.subtype_coe hs).measurable.aemeasurable = μ.restrict s := by
   rw [(MeasurableEmbedding.subtype_coe hs).map_comap, Subtype.range_coe]
 
 theorem ae_restrict_iff_subtype {m0 : SigmaAlgebra α} {μ : Measure α} {s : Set α}
@@ -967,8 +978,15 @@ theorem volume_set_coe_def (s : Set α) : (volume : Measure s) = comap ((↑) : 
   rfl
 
 theorem MeasurableSet.map_coe_volume {s : Set α} (hs : MeasurableSet s) :
-    volume.map ((↑) : s → α) = restrict volume s := by
-  rw [volume_set_coe_def, (MeasurableEmbedding.subtype_coe hs).map_comap volume, Subtype.range_coe]
+    volume.map ((↑) : s → α) (MeasurableEmbedding.subtype_coe hs).measurable.aemeasurable =
+      restrict volume s := by
+  calc
+    volume.map ((↑) : s → α) (MeasurableEmbedding.subtype_coe hs).measurable.aemeasurable =
+        (comap ((↑) : s → α) volume).map ((↑) : s → α)
+          (MeasurableEmbedding.subtype_coe hs).measurable.aemeasurable := by
+      congr 1
+    _ = restrict volume s := by
+      rw [(MeasurableEmbedding.subtype_coe hs).map_comap volume, Subtype.range_coe]
 
 theorem volume_image_subtype_coe {s : Set α} (hs : MeasurableSet s) (t : Set s) :
     volume ((↑) '' t : Set α) = volume t :=

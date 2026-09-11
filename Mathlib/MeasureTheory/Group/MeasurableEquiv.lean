@@ -219,15 +219,15 @@ variable {G A : Type*} [Group G] [MulAction G A] [SigmaAlgebra A]
   [MeasurableConstSMul G A] {μ ν : Measure A} {g : G}
 
 noncomputable instance : DistribMulAction Gᵈᵐᵃ (Measure A) where
-  smul g μ := μ.map (DomMulAct.mk.symm g⁻¹ • ·)
-  one_smul μ := show μ.map _ = _ by simp
-  mul_smul g g' μ := show μ.map _ = ((μ.map _).map _) by
-    rw [map_map]
-    · simp [Function.comp_def, mul_smul]
-    · exact measurable_const_smul ..
-    · exact measurable_const_smul ..
-  smul_zero g := show (0 : Measure A).map _ = 0 by simp
-  smul_add g μ ν := show (μ + ν).map _ = μ.map _ + ν.map _ by
+  smul g μ := μ.map (DomMulAct.mk.symm g⁻¹ • ·) (by fun_prop)
+  one_smul μ := show μ.map _ (by fun_prop) = _ by simp
+  mul_smul g g' μ :=
+      show μ.map _ (by fun_prop) = ((μ.map _ (by fun_prop)).map _ (by fun_prop)) by
+    rw [map_map (by fun_prop) (by fun_prop)]
+    simp [Function.comp_def, mul_smul]
+  smul_zero g := show (0 : Measure A).map _ (by fun_prop) = 0 by simp
+  smul_add g μ ν :=
+      show (μ + ν).map _ (by fun_prop) = μ.map _ (by fun_prop) + ν.map _ (by fun_prop) by
     rw [Measure.map_add]; exact measurable_const_smul ..
 
 lemma domSMul_apply (μ : Measure A) (g : Gᵈᵐᵃ) (s : Set A) :
@@ -237,7 +237,9 @@ lemma domSMul_apply (μ : Measure A) (g : Gᵈᵐᵃ) (s : Set A) :
   exact Set.preimage_smul_inv (DomMulAct.mk.symm g) s
 
 instance : SMulCommClass ℝ≥0 Gᵈᵐᵃ (Measure A) where
-  smul_comm r g μ := show r • μ.map _ = (r • μ).map _ by rw [Measure.map_smul _ (by fun_prop)]
+  smul_comm r g μ :=
+    show r • μ.map _ (by fun_prop) = (r • μ).map _ (by fun_prop) by
+      rw [Measure.map_smul _ (by fun_prop)]
 
 instance : SMulCommClass Gᵈᵐᵃ ℝ≥0 (Measure A) := .symm ..
 

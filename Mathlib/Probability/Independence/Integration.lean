@@ -255,7 +255,7 @@ theorem IndepFun.integral_bilin_comp_comp
     simp [integral_congr_ae h1, integral_congr_ae h]
   borelize E F
   have : IsProbabilityMeasure μ :=
-    (hf.comp_aemeasurable hX).isProbabilityMeasure_of_indepFun (f ∘ X) (g ∘ Y) h
+    (Integrable.comp_aemeasurable hX hf).isProbabilityMeasure_of_indepFun (f ∘ X) (g ∘ Y) h
       (hXY.comp₀ hX hY hf.1.aemeasurable hg.1.aemeasurable)
   rw [← integral_map (f := fun z ↦ B (f z.1) (g z.2)) (φ := fun ω ↦ (X ω, Y ω)) (by fun_prop),
     hXY.map_prod_eq_prod_map_map hX hY, integral_prod_bilin _ hf hg, integral_map hX hf.1,
@@ -282,8 +282,8 @@ theorem IndepFun.integral_bilin_comp_comp'
     ∫ ω, B (f (X ω)) (g (Y ω)) ∂μ = B (∫ ω, f (X ω) ∂μ) (∫ ω, g (Y ω) ∂μ) := by
   borelize E F
   have hfXgY := (hXY.comp₀ hX hY hf.aemeasurable hg.aemeasurable)
-  have hfX := (hf.comp_aemeasurable hX)
-  have hgY := (hg.comp_aemeasurable hY)
+  have hfX := AEStronglyMeasurable.comp_aemeasurable hX hf
+  have hgY := AEStronglyMeasurable.comp_aemeasurable hY hg
   by_cases h'X : ∀ᵐ ω ∂μ, f (X ω) = 0
   · have h' : ∀ᵐ ω ∂μ, B (f (X ω)) (g (Y ω)) = 0 := by
       filter_upwards [h'X] with ω hω
@@ -299,9 +299,9 @@ theorem IndepFun.integral_bilin_comp_comp'
     · simpa using hB x y
     all_goals finiteness
   by_cases h : Integrable (fun ω ↦ B (f (X ω)) (g (Y ω))) μ
-  · have h1 : Integrable f (μ.map X) := (integrable_map_measure hf hX).2 <|
+  · have h1 : Integrable f (μ.map X) := (integrable_map_measure hX hf).2 <|
       hfXgY.integrable_left_of_integrable_op (B · ·) c hc hB h hfX hgY h'Y
-    have h2 : Integrable g (μ.map Y) := (integrable_map_measure hg hY).2 <|
+    have h2 : Integrable g (μ.map Y) := (integrable_map_measure hY hg).2 <|
       hfXgY.integrable_right_of_integrable_op (B · ·) c hc hB h hfX hgY h'X
     exact hXY.integral_bilin_comp_comp hX hY h1 h2 B
   · rw [integral_undef h]
@@ -321,9 +321,11 @@ theorem IndepFun.integral_bilin
     (B : E →L[ℝ] F →L[ℝ] G) :
     ∫ ω, B (X ω) (Y ω) ∂μ = B μ[X] μ[Y] :=
   hXY.integral_bilin_comp_comp hX.aemeasurable hY.aemeasurable
-    ((integrable_map_measure hX.aestronglyMeasurable.aestronglyMeasurable_id_map hX.aemeasurable).2
+    ((integrable_map_measure hX.aemeasurable
+      hX.aestronglyMeasurable.aestronglyMeasurable_id_map).2
       hX)
-    ((integrable_map_measure hY.aestronglyMeasurable.aestronglyMeasurable_id_map hY.aemeasurable).2
+    ((integrable_map_measure hY.aemeasurable
+      hY.aestronglyMeasurable.aestronglyMeasurable_id_map).2
       hY) B
 
 /-- If `X` and `Y` are random variables and `B` is a continuous bilinear map

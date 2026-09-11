@@ -34,10 +34,9 @@ For every strict-partiality migration in the S--XL sections below:
 
 ## S -- bounded corrections and strict facades
 
-- [ ] **Correct the stale `Measure.map` module overview.**
-  `Mathlib/MeasureTheory/Measure/Map.lean:17` says that a non-a.e.-measurable map yields zero, but
-  `Measure.map` at lines 99--106 yields an arbitrary Dirac mass when the source measure is nonzero.
-  This documentation correction is independent of the L API migration below.
+- [x] **Correct the stale `Measure.map` module overview.**
+  The overview now describes pushforward only along an a.e.-measurable map and no longer documents
+  an invalid-domain fallback.
 
 - [ ] **Require parabolicity for `GeneralLinearGroup.parabolicEigenvalue`.**
   `Mathlib/LinearAlgebra/Matrix/GeneralLinearGroup/FinTwo.lean:103` exposes `trace / 2` as an
@@ -343,14 +342,14 @@ For every strict-partiality migration in the S--XL sections below:
   uniqueness claims additionally need the appropriate separation and nontrivial-filter conditions.
   Migrate `IsDenseInducing.extend`/`extendFrom` consumers with the same boundary discipline.
 
-- [ ] **Make measure pushforward require a.e. measurability.**
-  `Measure.map` in `Mathlib/MeasureTheory/Measure/Map.lean:99` returns an arbitrary Dirac mass for a
-  non-a.e.-measurable function and nonzero source measure.  Its valid branch already uses an
-  a.e.-measurable representative at lines 101--102, and core results such as `map_apply` and
-  `map_map` already carry measurability evidence.  Promote that evidence to the construction
-  boundary, explicitly name any retained fallback, and migrate the roughly 100 qualified-use files
-  plus `FiniteMeasure.map`, `ProbabilityMeasure.map`, conditional-law, and kernel wrappers.  A new
-  strict facade is M-sized; making it canonical throughout the existing ecosystem is L-sized.
+- [x] **Make measure pushforward require a.e. measurability.**
+  `Measure.map` now takes a proof of a.e. measurability, normally synthesized by `fun_prop`, and
+  `Measure.mapₗ` likewise requires measurability.  The arbitrary-Dirac and zero fallbacks were
+  removed rather than retained under ordinary mathematical names.  The migration covers the
+  existing ecosystem together with `Measure.bind`, `Measure.prod`, `FiniteMeasure.map`,
+  `ProbabilityMeasure.map`, conditional-law APIs, and kernel map wrappers.  Negative tests ensure
+  arbitrary functions cannot recover the former behavior, while proof-indexed congruence,
+  measurable-set-first `map_apply`, and a.e.-measurable `map_map` preserve routine ergonomics.
 
 - [ ] **Make `NormedSpace.exp` require its algebra and convergence context.**
   `Mathlib/Analysis/Normed/Algebra/Exponential.lean:127` returns one if no `Algebra ℚ 𝔸`
@@ -382,17 +381,20 @@ For every strict-partiality migration in the S--XL sections below:
   nonnegative values, bundle the sigma-algebra/measure evidence, and require integrability only for
   the finite Bochner-valued construction.
 
-- [ ] **Require measurable random variables for conditional distributions.**
-  `ProbabilityTheory.condDistrib` in `Mathlib/Probability/Kernel/CondDistrib.lean:64` constructs a
-  joint pushforward for arbitrary `X` and `Y`, inheriting `Measure.map`'s arbitrary-Dirac fallback.
-  Require joint a.e. measurability; retain normal freedom to choose versions on null conditioning
-  fibres.
+- [x] **Require measurable random variables for conditional distributions.**
+  `ProbabilityTheory.condDistrib` now requires joint a.e. measurability of `fun a ↦ (X a, Y a)`,
+  normally synthesized by `fun_prop`, while retaining the normal freedom to choose versions on null
+  conditioning fibres.
 
-- [ ] **Require measurability and s-finiteness in kernel map/product constructors.**
-  `Kernel.map` in `Mathlib/Probability/Kernel/Composition/MapComap.lean:63` returns zero for a
-  nonmeasurable map, while `Kernel.compProd` in
+- [x] **Require measurability in `Kernel.map`.**
+  `Kernel.map` now takes a measurability proof, normally synthesized by `fun_prop`; the zero fallback
+  and the separate `mapOfMeasurable` constructor were removed.
+
+- [ ] **Require s-finiteness in kernel product constructors.**
+  `Kernel.compProd` in
   `Mathlib/Probability/Kernel/Composition/CompProd.lean:69` returns zero when either kernel is not
-  s-finite.  Promote `mapOfMeasurable`-style constructors and evidence-bearing composition products.
+  s-finite.  Promote s-finiteness to the construction boundary for `Kernel.prod` and
+  `Kernel.compProd` and migrate their consumers.
 
 - [ ] **Make Radon--Nikodym data conditional on decomposition existence.**
   `Measure.rnDeriv` and `Measure.singularPart` in

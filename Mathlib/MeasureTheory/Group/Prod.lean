@@ -142,14 +142,16 @@ theorem measurePreserving_mul_prod_inv [IsMulLeftInvariant ν] :
 @[to_additive (attr := fun_prop)]
 theorem quasiMeasurePreserving_inv : QuasiMeasurePreserving (Inv.inv : G → G) μ μ := by
   refine ⟨measurable_inv, AbsolutelyContinuous.mk fun s hsm hμs => ?_⟩
-  rw [map_apply measurable_inv hsm, inv_preimage]
+  rw [map_apply hsm measurable_inv.aemeasurable, inv_preimage]
   have hf : Measurable fun z : G × G => (z.2 * z.1, z.1⁻¹) :=
     (measurable_snd.mul measurable_fst).prodMk measurable_fst.inv
-  suffices map (fun z : G × G => (z.2 * z.1, z.1⁻¹)) (μ.prod μ) (s⁻¹ ×ˢ s⁻¹) = 0 by
+  suffices (map (fun z : G × G => (z.2 * z.1, z.1⁻¹)) (μ.prod μ) hf.aemeasurable)
+      (s⁻¹ ×ˢ s⁻¹) = 0 by
     simpa only [(measurePreserving_mul_prod_inv μ μ).map_eq, prod_prod, mul_eq_zero (M₀ := ℝ≥0∞),
       or_self_iff] using this
   have hsm' : MeasurableSet (s⁻¹ ×ˢ s⁻¹) := hsm.inv.prod hsm.inv
-  simp_rw [map_apply hf hsm', prod_apply_symm (μ := μ) (ν := μ) (hf hsm'), preimage_preimage,
+  simp_rw [map_apply hsm' hf.aemeasurable, prod_apply_symm (μ := μ) (ν := μ) (hf hsm'),
+    preimage_preimage,
     mk_preimage_prod, inv_preimage, inv_inv, measure_mono_null inter_subset_right hμs,
     lintegral_zero]
 
@@ -191,8 +193,8 @@ theorem lintegral_lintegral_mul_inv [IsMulLeftInvariant ν] (f : G → G → ℝ
   conv_rhs => rw [← (measurePreserving_mul_prod_inv μ ν).map_eq]
   symm
   exact
-    lintegral_map' (hf.mono_ac (measurePreserving_mul_prod_inv μ ν).map_eq.absolutelyContinuous)
-      h.aemeasurable
+    lintegral_map' h.aemeasurable
+      (hf.mono_ac (measurePreserving_mul_prod_inv μ ν).map_eq.absolutelyContinuous)
 
 @[to_additive]
 theorem measure_mul_right_null (y : G) : μ ((fun x => x * y) ⁻¹' s) = 0 ↔ μ s = 0 :=
@@ -208,12 +210,13 @@ theorem measure_mul_right_ne_zero (h2s : μ s ≠ 0) (y : G) : μ ((fun x => x *
 @[to_additive]
 theorem absolutelyContinuous_map_mul_right (g : G) : μ ≪ map (· * g) μ := by
   refine AbsolutelyContinuous.mk fun s hs => ?_
-  rw [map_apply (measurable_mul_const g) hs, measure_mul_right_null]; exact id
+  rw [map_apply hs (measurable_mul_const g).aemeasurable, measure_mul_right_null]; exact id
 
 @[to_additive]
 theorem absolutelyContinuous_map_div_left (g : G) : μ ≪ map (fun h => g / h) μ := by
   simp_rw [div_eq_mul_inv]
-  have := map_map (μ := μ) (measurable_const_mul g) measurable_inv
+  have := map_map (μ := μ) measurable_inv.aemeasurable
+    (measurable_const_mul g).aemeasurable
   simp only [Function.comp_def] at this
   rw [← this]
   conv_lhs => rw [← map_mul_left_eq_self μ g]
@@ -468,7 +471,7 @@ This should not be confused with `(measurePreserving_add_right μ g).quasiMeasur
 theorem quasiMeasurePreserving_mul_right [IsMulLeftInvariant μ] (g : G) :
     QuasiMeasurePreserving (fun h : G => h * g) μ μ := by
   refine ⟨measurable_mul_const g, AbsolutelyContinuous.mk fun s hs => ?_⟩
-  rw [map_apply (measurable_mul_const g) hs, measure_mul_right_null]; exact id
+  rw [map_apply hs (measurable_mul_const g).aemeasurable, measure_mul_right_null]; exact id
 
 /-- A *right*-invariant measure is quasi-preserved by *left*-multiplication.
 This should not be confused with `(measurePreserving_mul_left μ g).quasiMeasurePreserving`. -/

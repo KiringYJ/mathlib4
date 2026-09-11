@@ -957,13 +957,15 @@ theorem _root_.MonoidHom.measurePreserving
   measurable := hcont.measurable
   map_eq := by
     have : IsFiniteMeasure μ := ⟨by rw [huniv]; apply measure_lt_top⟩
-    have : (μ.map f).IsHaarMeasure := isHaarMeasure_map_of_isFiniteMeasure μ f hcont hsurj
-    set C : ℝ≥0 := haarScalarFactor (μ.map f) ν
-    have hC : μ.map f = C • ν := isMulLeftInvariant_eq_smul_of_innerRegular _ _
+    have : (μ.map f hcont.measurable.aemeasurable).IsHaarMeasure :=
+      isHaarMeasure_map_of_isFiniteMeasure μ f hcont hsurj
+    set C : ℝ≥0 := haarScalarFactor (μ.map f hcont.measurable.aemeasurable) ν
+    have hC : μ.map f hcont.measurable.aemeasurable = C • ν :=
+      isMulLeftInvariant_eq_smul_of_innerRegular _ _
     suffices C = 1 by rwa [this, one_smul] at hC
     have : C * ν univ = 1 * ν univ := by
       rw [one_mul, ← smul_eq_mul, ← ENNReal.smul_def, ← smul_apply, ← hC,
-        map_apply hcont.measurable .univ, preimage_univ, huniv]
+        map_apply .univ hcont.measurable.aemeasurable, preimage_univ, huniv]
     rwa [ENNReal.mul_left_inj (NeZero.ne _) (measure_ne_top _ _), ENNReal.coe_eq_one] at this
 
 end Group
@@ -984,10 +986,12 @@ instance (priority := 100) IsHaarMeasure.isInvInvariant_of_regular
   constructor
   let c : ℝ≥0∞ := haarScalarFactor μ.inv μ
   have hc : μ.inv = c • μ := isMulLeftInvariant_eq_smul_of_regular μ.inv μ
-  have : map Inv.inv (map Inv.inv μ) = c ^ 2 • μ := by
+  have : map Inv.inv (map Inv.inv μ continuous_inv.measurable.aemeasurable)
+      continuous_inv.measurable.aemeasurable = c ^ 2 • μ := by
     rw [← inv_def μ, hc, Measure.map_smul _ (by fun_prop), ← inv_def μ, hc, smul_smul, pow_two]
   have μeq : μ = c ^ 2 • μ := by
-    rw [map_map continuous_inv.measurable continuous_inv.measurable] at this
+    rw [map_map continuous_inv.measurable.aemeasurable
+      continuous_inv.measurable.aemeasurable] at this
     simpa only [inv_involutive, Involutive.comp_self, Measure.map_id]
   have K : PositiveCompacts G := Classical.arbitrary _
   have : c ^ 2 * μ K = 1 ^ 2 * μ K := by
@@ -1010,10 +1014,12 @@ instance (priority := 100) IsHaarMeasure.isInvInvariant_of_innerRegular
   constructor
   let c : ℝ≥0∞ := haarScalarFactor μ.inv μ
   have hc : μ.inv = c • μ := isMulLeftInvariant_eq_smul_of_innerRegular μ.inv μ
-  have : map Inv.inv (map Inv.inv μ) = c ^ 2 • μ := by
+  have : map Inv.inv (map Inv.inv μ continuous_inv.measurable.aemeasurable)
+      continuous_inv.measurable.aemeasurable = c ^ 2 • μ := by
     rw [← inv_def μ, hc, Measure.map_smul _ (by fun_prop), ← inv_def μ, hc, smul_smul, pow_two]
   have μeq : μ = c ^ 2 • μ := by
-    rw [map_map continuous_inv.measurable continuous_inv.measurable] at this
+    rw [map_map continuous_inv.measurable.aemeasurable
+      continuous_inv.measurable.aemeasurable] at this
     simpa only [inv_involutive, Involutive.comp_self, Measure.map_id]
   have K : PositiveCompacts G := Classical.arbitrary _
   have : c ^ 2 * μ K = 1 ^ 2 * μ K := by

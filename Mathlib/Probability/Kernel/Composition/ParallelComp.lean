@@ -45,12 +45,12 @@ open scoped Classical in
 noncomputable
 irreducible_def parallelComp (κ : Kernel α β) (η : Kernel γ δ) : Kernel (α × γ) (β × δ) :=
   if h : IsSFiniteKernel κ ∧ IsSFiniteKernel η then
-  { toFun := fun x ↦ (κ x.1).prod (η x.2)
+  letI : IsSFiniteKernel κ := h.1
+  letI : IsSFiniteKernel η := h.2
+  { toFun := fun x ↦ (κ x.1).prod (η x.2) Measurable.map_prodMk_left.aemeasurable
     measurable' := by
-      have hκ := h.1
-      have hη := h.2
       refine Measure.measurable_of_measurable_coe _ fun s hs ↦ ?_
-      simp_rw [Measure.prod_apply hs]
+      simp_rw [Measure.prod_apply hs Measurable.map_prodMk_left.aemeasurable]
       refine Measurable.lintegral_kernel_prod_right'
         (f := fun y ↦ prodMkLeft α η y.1 (Prod.mk y.2 ⁻¹' s)) (κ := prodMkRight γ κ) ?_
       have : (fun y ↦ prodMkLeft α η y.1 (Prod.mk y.2 ⁻¹' s))

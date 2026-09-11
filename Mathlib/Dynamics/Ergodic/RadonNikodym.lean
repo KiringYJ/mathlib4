@@ -62,7 +62,8 @@ protected theorem withDensity_rnDeriv [SigmaFinite ν] {f : X → X}
     MeasurePreserving f (ν.withDensity (μ.rnDeriv ν)) (ν.withDensity (μ.rnDeriv ν)) := by
   use hfμ.measurable
   ext s hs
-  rw [← ENNReal.add_left_inj (measure_ne_top (μ.singularPart ν) s), map_apply hfμ.measurable hs,
+  rw [← ENNReal.add_left_inj (measure_ne_top (μ.singularPart ν) s),
+    map_apply hs hfμ.measurable.aemeasurable,
     ← add_apply, rnDeriv_add_singularPart,
     ← (hfμ.singularPart hfν).measure_preimage hs.nullMeasurableSet, ← add_apply,
     rnDeriv_add_singularPart, hfμ.measure_preimage hs.nullMeasurableSet]

@@ -423,11 +423,17 @@ lemma IndepFun.hasGaussianLaw_sub_of_sub {X Y : Ω → E} (hX : HasGaussianLaw X
   intro L
   apply mul_left_cancel₀ (a := charFunDual (P.map X) L)
   · simp [hX.charFunDual_map_eq]
-  rw [← Pi.mul_apply, ← h.charFunDual_map_add_eq_mul, add_sub_cancel, hX.charFunDual_map_eq,
+  rw [← Pi.mul_apply, ← h.charFunDual_map_add_eq_mul]
+  have hsum : AEMeasurable (X + (Y - X)) P :=
+    hX.aemeasurable.add (hY.aemeasurable.sub hX.aemeasurable)
+  have hfun : X + (Y - X) = Y := by
+    funext ω
+    simp
+  rw [Measure.map_congr (ae_of_all _ fun ω ↦ congrFun hfun ω) hsum,
+    hX.charFunDual_map_eq,
     ← exp_add, sub_add_sub_comm, ← add_mul, ← ofReal_add, ← integral_add, ← add_div, ← ofReal_add,
     ← IndepFun.variance_add, hY.charFunDual_map_eq]
   · congr with ω <;> simp
-  any_goals fun_prop
   · exact (hX.map L).memLp_two
   · rw [map_comp_sub]
     exact (hY.map L).memLp_two.sub (hX.map L).memLp_two

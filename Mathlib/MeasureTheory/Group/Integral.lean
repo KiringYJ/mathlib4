@@ -92,7 +92,7 @@ left-invariant measure. -/
 theorem integral_mul_left_eq_self [IsMulLeftInvariant μ] (f : G → E) (g : G) :
     (∫ x, f (g * x) ∂μ) = ∫ x, f x ∂μ := by
   have h_mul : MeasurableEmbedding fun x => g * x := (MeasurableEquiv.mulLeft g).measurableEmbedding
-  rw [← h_mul.integral_map, map_mul_left_eq_self]
+  rw [← h_mul.integral_map, map_mul_left_eq_self μ g (measurable_const_mul g)]
 
 /-- Translating a function by right-multiplication does not change its integral with respect to a
 right-invariant measure. -/
@@ -103,7 +103,7 @@ theorem integral_mul_right_eq_self [IsMulRightInvariant μ] (f : G → E) (g : G
     (∫ x, f (x * g) ∂μ) = ∫ x, f x ∂μ := by
   have h_mul : MeasurableEmbedding fun x => x * g :=
     (MeasurableEquiv.mulRight g).measurableEmbedding
-  rw [← h_mul.integral_map, map_mul_right_eq_self]
+  rw [← h_mul.integral_map, map_mul_right_eq_self μ g (measurable_mul_const g)]
 
 @[to_additive]
 theorem integral_div_right_eq_self [IsMulRightInvariant μ] (f : G → E) (g : G) :

@@ -134,7 +134,7 @@ lemma map [OpensSigmaAlgebra 𝓧] [TopologicalSpace 𝓨] [SigmaAlgebra 𝓨]
   intro ε hε
   obtain ⟨K, hK_compact, hKS⟩ := hS ε hε
   refine ⟨f '' K, hK_compact.image hf, fun μ hμS ↦ ?_⟩
-  rw [Measure.map_apply_of_aemeasurable hf.aemeasurable (hK_compact.image hf).measurableSet.compl]
+  rw [Measure.map_apply (hK_compact.image hf).measurableSet.compl hf.aemeasurable]
   refine (measure_mono ?_).trans (hKS μ hμS)
   simp only [preimage_compl, compl_subset_compl]
   exact subset_preimage_image f K

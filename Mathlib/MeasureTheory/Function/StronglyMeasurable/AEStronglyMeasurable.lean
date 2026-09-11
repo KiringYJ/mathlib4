@@ -607,15 +607,17 @@ theorem _root_.aestronglyMeasurable_of_aestronglyMeasurable_trim {α} {m m0 : Si
   ⟨hf.mk f, StronglyMeasurable.mono hf.stronglyMeasurable_mk hm, ae_eq_of_ae_eq_trim hf.ae_eq_mk⟩
 
 theorem comp_aemeasurable {γ : Type*} {_ : SigmaAlgebra γ} {_ : SigmaAlgebra α} {f : γ → α}
-    {μ : Measure γ} (hg : AEStronglyMeasurable g (Measure.map f μ)) (hf : AEMeasurable f μ) :
+    {μ : Measure γ} (hf : AEMeasurable f μ)
+    (hg : AEStronglyMeasurable g (Measure.map f μ hf)) :
     AEStronglyMeasurable (g ∘ f) μ :=
   ⟨hg.mk g ∘ hf.mk f, hg.stronglyMeasurable_mk.comp_measurable hf.measurable_mk,
     (ae_eq_comp hf hg.ae_eq_mk).trans (hf.ae_eq_mk.fun_comp (hg.mk g))⟩
 
 theorem comp_measurable {γ : Type*} {_ : SigmaAlgebra γ} {_ : SigmaAlgebra α} {f : γ → α}
-    {μ : Measure γ} (hg : AEStronglyMeasurable g (Measure.map f μ)) (hf : Measurable f) :
+    {μ : Measure γ} (hf : Measurable f)
+    (hg : AEStronglyMeasurable g (Measure.map f μ hf.aemeasurable)) :
     AEStronglyMeasurable (g ∘ f) μ :=
-  hg.comp_aemeasurable hf.aemeasurable
+  AEStronglyMeasurable.comp_aemeasurable hf.aemeasurable hg
 
 theorem comp_quasiMeasurePreserving {γ : Type*} {_ : SigmaAlgebra γ} {_ : SigmaAlgebra α}
     {f : γ → α} {μ : Measure γ} {ν : Measure α} (hg : AEStronglyMeasurable g ν)
@@ -633,7 +635,7 @@ space and a Borel space, then the identity is a.e.-strongly measurable w.r.t. `�
 lemma aestronglyMeasurable_id_map {mβ : SigmaAlgebra β}
     [TopologicalSpace.PseudoMetrizableSpace β] [BorelSpace β]
     {f : α → β} (hf : AEStronglyMeasurable f μ) :
-    AEStronglyMeasurable id (μ.map f) := by
+    AEStronglyMeasurable id (μ.map f hf.aemeasurable) := by
   obtain ⟨t, ht1, ht2⟩ := hf.isSeparable_ae_range
   refine aestronglyMeasurable_id_of_isSeparable ht1.closure ?_
   refine ae_map_iff hf.aemeasurable isClosed_closure.measurableSet |>.2 ?_
@@ -667,8 +669,9 @@ theorem _root_.aestronglyMeasurable_iff_nullMeasurable_separable [PseudoMetrizab
 theorem _root_.MeasurableEmbedding.aestronglyMeasurable_map_iff {γ : Type*}
     {mγ : SigmaAlgebra γ} {mα : SigmaAlgebra α} {f : γ → α} {μ : Measure γ}
     (hf : MeasurableEmbedding f) {g : α → β} :
-    AEStronglyMeasurable g (Measure.map f μ) ↔ AEStronglyMeasurable (g ∘ f) μ := by
-  refine ⟨fun H => H.comp_measurable hf.measurable, ?_⟩
+    AEStronglyMeasurable g (Measure.map f μ hf.measurable.aemeasurable) ↔
+      AEStronglyMeasurable (g ∘ f) μ := by
+  refine ⟨fun H => AEStronglyMeasurable.comp_measurable hf.measurable H, ?_⟩
   rintro ⟨g₁, hgm₁, heq⟩
   rcases hf.exists_stronglyMeasurable_extend hgm₁ fun x => ⟨g x⟩ with ⟨g₂, hgm₂, rfl⟩
   exact ⟨g₂, hgm₂, hf.ae_map_iff.2 heq⟩

@@ -299,9 +299,14 @@ lemma _root_.MeasurableEmbedding.gaussianReal_comap_apply (hv : v ≠ 0)
 
 lemma _root_.MeasurableEquiv.gaussianReal_map_symm_apply (hv : v ≠ 0) (f : ℝ ≃ᵐ ℝ) {f' : ℝ → ℝ}
     (h_deriv : ∀ x, HasDerivAt f (f' x) x) {s : Set ℝ} (hs : MeasurableSet s) :
-    (gaussianReal μ v).map f.symm s
+    ((gaussianReal μ v).map f.symm) s
       = ENNReal.ofReal (∫ x in s, |f' x| * gaussianPDFReal μ v (f x)) := by
-  rw [gaussianReal_of_var_ne_zero _ hv, gaussianPDF_def]
+  have hmap := congrArg (Measure.mapₗ f.symm f.symm.measurable)
+    (gaussianReal_of_var_ne_zero μ hv)
+  have hmap' : (gaussianReal μ v).map f.symm =
+      (volume.withDensity (gaussianPDF μ v)).map f.symm := by
+    simpa only [Measure.mapₗ_apply_of_measurable] using hmap
+  rw [hmap', gaussianPDF_def]
   exact f.withDensity_ofReal_map_symm_apply_eq_integral_abs_deriv_mul' hs h_deriv
     (ae_of_all _ (gaussianPDFReal_nonneg _ _)) (integrable_gaussianPDFReal _ _)
 
@@ -373,10 +378,16 @@ lemma gaussianReal_map_sub_const (y : ℝ) :
 
 lemma gaussianReal_map_const_sub (y : ℝ) :
     (gaussianReal μ v).map (y - ·) = gaussianReal (y - μ) v := by
-  simp_rw [sub_eq_add_neg]
-  have : (fun x ↦ y + -x) = (fun x ↦ y + x) ∘ fun x ↦ -x := by ext; simp
-  rw [this, ← Measure.map_map (by fun_prop) (by fun_prop), gaussianReal_map_neg,
-    gaussianReal_map_const_add, add_comm]
+  have hfun : (fun x : ℝ ↦ y - x) = (fun x ↦ y + x) ∘ fun x ↦ -x := by
+    ext
+    exact sub_eq_add_neg _ _
+  calc
+    _ = (gaussianReal μ v).map ((fun x ↦ y + x) ∘ fun x ↦ -x) :=
+      Measure.map_congr (ae_of_all _ fun x ↦ congrFun hfun x) (by fun_prop)
+    _ = ((gaussianReal μ v).map (fun x ↦ -x)).map (fun x ↦ y + x) :=
+      (Measure.map_map (by fun_prop) (by fun_prop)).symm
+    _ = _ := by rw [gaussianReal_map_neg, gaussianReal_map_const_add, add_comm,
+      sub_eq_add_neg]
 
 variable {Ω : Type*} {mΩ : SigmaAlgebra Ω} {P : Measure Ω} {X : Ω → ℝ}
 
@@ -602,11 +613,16 @@ variable {μ : ℝ} {v : ℝ≥0}
 
 lemma gaussianReal_map_linearMap (L : ℝ →ₗ[ℝ] ℝ) :
     (gaussianReal μ v).map L = gaussianReal (L μ) ((L 1 ^ 2).toNNReal * v) := by
-  have : (L : ℝ → ℝ) = fun x ↦ L 1 * x := by simp
-  rw [this, gaussianReal_map_const_mul]
-  congr
-  simp only [mul_one, left_eq_sup]
-  positivity
+  have hfun : (L : ℝ → ℝ) = fun x ↦ L 1 * x := by simp
+  calc
+    _ = (gaussianReal μ v).map (fun x ↦ L 1 * x) :=
+      Measure.map_congr (ae_of_all _ fun x ↦ congrFun hfun x) (by fun_prop)
+    _ = gaussianReal (L 1 * μ) ((L 1 ^ 2).toNNReal * v) := by
+      simpa [Real.toNNReal_of_nonneg (sq_nonneg (L 1))] using
+        (gaussianReal_map_const_mul (μ := μ) (v := v) (L 1))
+    _ = _ := by
+      congr
+      simp
 
 lemma gaussianReal_map_continuousLinearMap (L : ℝ →L[ℝ] ℝ) :
     (gaussianReal μ v).map L = gaussianReal (L μ) ((L 1 ^ 2).toNNReal * v) :=
@@ -654,10 +670,15 @@ lemma gaussianReal_add_gaussianReal_of_indepFun {Ω} {mΩ : SigmaAlgebra Ω} {P 
     {m₁ m₂ : ℝ} {v₁ v₂ : ℝ≥0} {X Y : Ω → ℝ} (hXY : IndepFun X Y P)
     (hX : HasLaw X (gaussianReal m₁ v₁) P) (hY : HasLaw Y (gaussianReal m₂ v₂) P) :
     P.map (X + Y) = gaussianReal (m₁ + m₂) (v₁ + v₂) := by
-  rw [hXY.map_add_eq_map_conv_map₀' hX.aemeasurable hY.aemeasurable, hX.map_eq, hY.map_eq,
-    gaussianReal_conv_gaussianReal]
-  · rw [hX.map_eq]; apply IsFiniteMeasure.toSigmaFinite
-  · rw [hY.map_eq]; apply IsFiniteMeasure.toSigmaFinite
+  have hσX : SigmaFinite (P.map X hX.aemeasurable) := by
+    simpa only [hX.map_eq] using (inferInstance : SigmaFinite (gaussianReal m₁ v₁))
+  have hσY : SigmaFinite (P.map Y hY.aemeasurable) := by
+    simpa only [hY.map_eq] using (inferInstance : SigmaFinite (gaussianReal m₂ v₂))
+  calc
+    _ = P.map X hX.aemeasurable ∗ P.map Y hY.aemeasurable :=
+      hXY.map_add_eq_map_conv_map₀' hX.aemeasurable hY.aemeasurable hσX hσY
+    _ = gaussianReal m₁ v₁ ∗ gaussianReal m₂ v₂ := by simp only [hX.map_eq, hY.map_eq]
+    _ = _ := gaussianReal_conv_gaussianReal
 
 end GaussianReal
 

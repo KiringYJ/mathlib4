@@ -61,7 +61,7 @@ protected theorem aemeasurable {f : α → β} (hf : MeasurePreserving f μa μb
 protected theorem congr {f f' : α → β} (hf : MeasurePreserving f μa μb) (hf' : Measurable f')
     (h : f =ᵐ[μa] f') : MeasurePreserving f' μa μb := by
   refine ⟨hf', ?_⟩
-  rw [Measure.map_congr h.symm]
+  rw [Measure.map_congr h.symm hf'.aemeasurable]
   exact hf.map_eq
 
 @[nontriviality]
@@ -72,16 +72,20 @@ theorem of_isEmpty [IsEmpty β] (f : α → β) (μa : Measure α) (μb : Measur
 theorem symm (e : α ≃ᵐ β) {μa : Measure α} {μb : Measure β} (h : MeasurePreserving e μa μb) :
     MeasurePreserving e.symm μb μa :=
   ⟨e.symm.measurable, by
-    rw [← h.map_eq, map_map e.symm.measurable e.measurable, e.symm_comp_self, map_id]⟩
+    rw [← h.map_eq]
+    simpa only [e.symm_comp_self, map_id] using
+      (Measure.map_map (μ := μa) e.measurable.aemeasurable e.symm.measurable.aemeasurable)⟩
 
 theorem restrict_preimage {f : α → β} (hf : MeasurePreserving f μa μb) {s : Set β}
     (hs : MeasurableSet s) : MeasurePreserving f (μa.restrict (f ⁻¹' s)) (μb.restrict s) :=
-  ⟨hf.measurable, by rw [← hf.map_eq, restrict_map hf.measurable hs]⟩
+  ⟨hf.measurable, (restrict_map hf.measurable hs).symm.trans <|
+    congrArg (fun μ ↦ μ.restrict s) hf.map_eq⟩
 
 theorem restrict_preimage_emb {f : α → β} (hf : MeasurePreserving f μa μb)
     (h₂ : MeasurableEmbedding f) (s : Set β) :
     MeasurePreserving f (μa.restrict (f ⁻¹' s)) (μb.restrict s) :=
-  ⟨hf.measurable, by rw [← hf.map_eq, h₂.restrict_map]⟩
+  ⟨hf.measurable, (h₂.restrict_map μa s).symm.trans <|
+    congrArg (fun μ ↦ μ.restrict s) hf.map_eq⟩
 
 theorem restrict_image_emb {f : α → β} (hf : MeasurePreserving f μa μb) (h₂ : MeasurableEmbedding f)
     (s : Set α) : MeasurePreserving f (μa.restrict s) (μb.restrict (f '' s)) := by
@@ -97,12 +101,14 @@ protected theorem quasiMeasurePreserving {f : α → β} (hf : MeasurePreserving
 
 protected theorem comp {g : β → γ} {f : α → β} (hg : MeasurePreserving g μb μc)
     (hf : MeasurePreserving f μa μb) : MeasurePreserving (g ∘ f) μa μc :=
-  ⟨hg.1.comp hf.1, by rw [← map_map hg.1 hf.1, hf.2, hg.2]⟩
+  ⟨hg.1.comp hf.1, by
+    rw [← map_map hf.aemeasurable hg.measurable.aemeasurable]
+    simpa only [hf.map_eq] using hg.map_eq⟩
 
 protected theorem map_of_comp {f : α → β} {g : β → γ} (hgf : MeasurePreserving (g ∘ f) μa μc)
     (hg : Measurable g) (hf : Measurable f) :
     MeasurePreserving g (μa.map f) μc :=
-  ⟨hg, (map_map hg hf).trans hgf.map_eq⟩
+  ⟨hg, (map_map hf.aemeasurable hg.aemeasurable).trans hgf.map_eq⟩
 
 protected theorem of_semiconj {f : α → β} {ga : α → α} {gb : β → β}
     (hfm : MeasurePreserving f μa μb) (hga : MeasurePreserving ga μa μa) (hf : Semiconj f ga gb)

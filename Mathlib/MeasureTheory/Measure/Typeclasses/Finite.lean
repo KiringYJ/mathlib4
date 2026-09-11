@@ -122,25 +122,20 @@ theorem isFiniteMeasure_dirac {a : α} : IsFiniteMeasure (dirac a) where
 
 @[instance]
 theorem Measure.isFiniteMeasure_map {m : SigmaAlgebra α} (μ : Measure α) [IsFiniteMeasure μ]
-    (f : α → β) : IsFiniteMeasure (μ.map f) := by
-  by_cases hf : AEMeasurable f μ
-  · constructor
-    rw [map_apply_of_aemeasurable hf MeasurableSet.univ]
+    (f : α → β) (hf : AEMeasurable f μ := by fun_prop) : IsFiniteMeasure (μ.map f hf) where
+  measure_univ_lt_top := by
+    rw [map_apply .univ hf]
     exact measure_lt_top μ _
-  · obtain rfl | hμ := eq_or_ne μ 0
-    · rw [Measure.map_zero]; infer_instance
-    rw [map_of_not_aemeasurable_of_ne_zero hf hμ]
-    exact isFiniteMeasure_dirac
 
 theorem Measure.isFiniteMeasure_of_map {μ : Measure α} {f : α → β}
-    (hf : AEMeasurable f μ) [IsFiniteMeasure (μ.map f)] : IsFiniteMeasure μ where
+    (hf : AEMeasurable f μ) [IsFiniteMeasure (μ.map f hf)] : IsFiniteMeasure μ where
   measure_univ_lt_top := by
-    rw [← Set.preimage_univ (f := f), ← map_apply_of_aemeasurable hf .univ]
+    rw [← Set.preimage_univ (f := f), ← map_apply .univ hf]
     exact IsFiniteMeasure.measure_univ_lt_top
 
 theorem Measure.isFiniteMeasure_map_iff {μ : Measure α} {f : α → β}
-    (hf : AEMeasurable f μ) : IsFiniteMeasure (μ.map f) ↔ IsFiniteMeasure μ :=
-  ⟨fun _ ↦ isFiniteMeasure_of_map hf, fun _ ↦ isFiniteMeasure_map μ f⟩
+    (hf : AEMeasurable f μ) : IsFiniteMeasure (μ.map f hf) ↔ IsFiniteMeasure μ :=
+  ⟨fun _ ↦ isFiniteMeasure_of_map hf, fun _ ↦ isFiniteMeasure_map μ f hf⟩
 
 instance IsFiniteMeasure_comap (f : β → α) [IsFiniteMeasure μ] : IsFiniteMeasure (μ.comap f) where
   measure_univ_lt_top :=

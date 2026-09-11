@@ -45,11 +45,12 @@ lemma HasGaussianLaw.congr {Y : Ω → E} (hX : HasGaussianLaw X P) (h : X =ᵐ[
     HasGaussianLaw Y P where
   aemeasurable := hX.aemeasurable.congr h
   isGaussian_map := by
-    rw [← Measure.map_congr h]
+    rw [← Measure.map_congr h hX.aemeasurable]
     exact hX.isGaussian_map
 
-lemma IsGaussian.hasGaussianLaw [IsGaussian (P.map X)] (hX : AEMeasurable X P) :
+lemma IsGaussian.hasGaussianLaw (hX : AEMeasurable X P) [IsGaussian (P.map X hX)] :
     HasGaussianLaw X P where
+  aemeasurable := hX
   isGaussian_map := inferInstance
 
 variable {mE} in
@@ -63,17 +64,18 @@ lemma HasGaussianLaw.isProbabilityMeasure (hX : HasGaussianLaw X P) : IsProbabil
 variable {mE} in
 lemma HasLaw.hasGaussianLaw {μ : Measure E} (hX : HasLaw X μ P) [IsGaussian μ] :
     HasGaussianLaw X P where
+  aemeasurable := hX.aemeasurable
   isGaussian_map := by rwa [hX.map_eq]
 
 lemma HasGaussianLaw.map_of_measurable {F : Type*} [TopologicalSpace F] [AddCommMonoid F]
     [Module ℝ F] [SigmaAlgebra F] [OpensSigmaAlgebra F]
     (L : E →L[ℝ] F) (hX : HasGaussianLaw X P) (hL : Measurable L) :
     HasGaussianLaw (L ∘ X) P where
+  aemeasurable := hX.aemeasurable.comp_aemeasurable hL.aemeasurable
   isGaussian_map := by
     have := hX.isGaussian_map
-    rw [← AEMeasurable.map_map_of_aemeasurable]
-    · exact isGaussian_map_of_measurable hL
-    all_goals fun_prop
+    rw [← Measure.map_map hX.aemeasurable (by fun_prop)]
+    exact isGaussian_map_of_measurable hL
 
 lemma HasGaussianLaw.map_eq_gaussianReal {X : Ω → ℝ} (h : HasGaussianLaw X P) :
     P.map X = gaussianReal P[X] Var[X; P].toNNReal := by
@@ -94,7 +96,7 @@ lemma of_subsingleton [NormedSpace ℝ E] [Subsingleton E] [IsProbabilityMeasure
 lemma charFun_map_eq [InnerProductSpace ℝ E] (t : E) (hX : HasGaussianLaw X P) :
     charFun (P.map X) t = exp ((P[fun ω ↦ ⟪t, X ω⟫] : ℝ) * I - Var[fun ω ↦ ⟪t, X ω⟫; P] / 2) := by
   rw [hX.isGaussian_map.charFun_eq, integral_map hX.aemeasurable (by fun_prop),
-    variance_map (by fun_prop) hX.aemeasurable, integral_complex_ofReal, Function.comp_def]
+    variance_map hX.aemeasurable (by fun_prop), integral_complex_ofReal, Function.comp_def]
 
 lemma _root_.ProbabilityTheory.hasGaussianLaw_iff_charFun_map_eq [CompleteSpace E]
     [InnerProductSpace ℝ E] [IsFiniteMeasure P] (hX : AEMeasurable X P) :
@@ -111,7 +113,7 @@ variable [NormedSpace ℝ E]
 lemma charFunDual_map_eq (L : StrongDual ℝ E) (hX : HasGaussianLaw X P) :
     charFunDual (P.map X) L = exp ((P[L ∘ X] : ℝ) * I - Var[L ∘ X; P] / 2) := by
   rw [hX.isGaussian_map.charFunDual_eq, integral_map hX.aemeasurable (by fun_prop),
-    variance_map (by fun_prop) hX.aemeasurable, integral_complex_ofReal, Function.comp_def]
+    variance_map hX.aemeasurable (by fun_prop), integral_complex_ofReal, Function.comp_def]
 
 lemma _root_.ProbabilityTheory.hasGaussianLaw_iff_charFunDual_map_eq
     [IsFiniteMeasure P] (hX : AEMeasurable X P) :

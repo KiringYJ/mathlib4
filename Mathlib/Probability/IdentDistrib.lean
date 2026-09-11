@@ -73,7 +73,9 @@ structure IdentDistrib (f : α → γ) (g : β → γ)
     (ν : Measure β := by volume_tac) : Prop where
   aemeasurable_fst : AEMeasurable f μ
   aemeasurable_snd : AEMeasurable g ν
-  map_eq : Measure.map f μ = Measure.map g ν
+  map_eq : Measure.map f μ aemeasurable_fst = Measure.map g ν aemeasurable_snd
+
+attribute [fun_prop] IdentDistrib.aemeasurable_fst IdentDistrib.aemeasurable_snd
 
 namespace IdentDistrib
 
@@ -98,13 +100,19 @@ protected theorem trans {ρ : Measure δ} {h : δ → γ} (h₁ : IdentDistrib f
     map_eq := h₁.map_eq.trans h₂.map_eq }
 
 protected theorem comp_of_aemeasurable {u : γ → δ} (h : IdentDistrib f g μ ν)
-    (hu : AEMeasurable u (Measure.map f μ)) : IdentDistrib (u ∘ f) (u ∘ g) μ ν :=
-  { aemeasurable_fst := hu.comp_aemeasurable h.aemeasurable_fst
-    aemeasurable_snd := by rw [h.map_eq] at hu; exact hu.comp_aemeasurable h.aemeasurable_snd
+    (hu : AEMeasurable u (Measure.map f μ h.aemeasurable_fst)) :
+    IdentDistrib (u ∘ f) (u ∘ g) μ ν := by
+  have hu' : AEMeasurable u (Measure.map g ν h.aemeasurable_snd) := by
+    simpa only [← h.map_eq] using hu
+  exact
+  { aemeasurable_fst := h.aemeasurable_fst.comp_aemeasurable hu
+    aemeasurable_snd := h.aemeasurable_snd.comp_aemeasurable hu'
     map_eq := by
-      rw [← AEMeasurable.map_map_of_aemeasurable hu h.aemeasurable_fst, ←
-        AEMeasurable.map_map_of_aemeasurable _ h.aemeasurable_snd, h.map_eq]
-      rwa [← h.map_eq] }
+      calc
+        Measure.map (u ∘ f) μ = (Measure.map f μ h.aemeasurable_fst).map u hu :=
+          (Measure.map_map h.aemeasurable_fst hu).symm
+        _ = (Measure.map g ν h.aemeasurable_snd).map u hu' := by simp only [h.map_eq]
+        _ = Measure.map (u ∘ g) ν := Measure.map_map h.aemeasurable_snd hu' }
 
 protected theorem comp {u : γ → δ} (h : IdentDistrib f g μ ν) (hu : Measurable u) :
     IdentDistrib (u ∘ f) (u ∘ g) μ ν :=
@@ -114,7 +122,7 @@ protected theorem of_ae_eq {g : α → γ} (hf : AEMeasurable f μ) (heq : f =�
     IdentDistrib f g μ μ :=
   { aemeasurable_fst := hf
     aemeasurable_snd := hf.congr heq
-    map_eq := Measure.map_congr heq }
+    map_eq := Measure.map_congr heq hf }
 
 lemma _root_.MeasureTheory.AEMeasurable.identDistrib_mk
     (hf : AEMeasurable f μ) : IdentDistrib f (hf.mk f) μ μ :=
@@ -127,8 +135,8 @@ lemma _root_.MeasureTheory.AEStronglyMeasurable.identDistrib_mk
 
 theorem measure_mem_eq (h : IdentDistrib f g μ ν) {s : Set γ} (hs : MeasurableSet s) :
     μ (f ⁻¹' s) = ν (g ⁻¹' s) := by
-  rw [← Measure.map_apply_of_aemeasurable h.aemeasurable_fst hs, ←
-    Measure.map_apply_of_aemeasurable h.aemeasurable_snd hs, h.map_eq]
+  rw [← Measure.map_apply hs h.aemeasurable_fst, ←
+    Measure.map_apply hs h.aemeasurable_snd, h.map_eq]
 
 alias measure_preimage_eq := measure_mem_eq
 
@@ -179,8 +187,8 @@ theorem essSup_eq [ConditionallyCompleteLinearOrder γ] [TopologicalSpace γ] [O
 theorem lintegral_eq {f : α → ℝ≥0∞} {g : β → ℝ≥0∞} (h : IdentDistrib f g μ ν) :
     ∫⁻ x, f x ∂μ = ∫⁻ x, g x ∂ν := by
   change ∫⁻ x, id (f x) ∂μ = ∫⁻ x, id (g x) ∂ν
-  rw [← lintegral_map' aemeasurable_id h.aemeasurable_fst, ←
-    lintegral_map' aemeasurable_id h.aemeasurable_snd, h.map_eq]
+  rw [← lintegral_map' h.aemeasurable_fst aemeasurable_id, ←
+    lintegral_map' h.aemeasurable_snd aemeasurable_id, h.map_eq]
 
 theorem integral_eq [NormedAddCommGroup γ] [NormedSpace ℝ γ] [BorelSpace γ]
     (h : IdentDistrib f g μ ν) : ∫ x, f x ∂μ = ∫ x, g x ∂ν := by
@@ -318,8 +326,8 @@ theorem MemLp.uniformIntegrable_of_identDistrib_aux {ι : Type*} {f : ι → α 
     ext x
     simp only [F, Set.indicator, Set.mem_ofPred_eq, Function.comp_apply,
       Real.toNNReal_le_iff_le_coe, coe_nnnorm]
-  rw [this, this, ← eLpNorm_map_measure F_meas.aestronglyMeasurable (hf i).aemeasurable_fst,
-    (hf i).map_eq, eLpNorm_map_measure F_meas.aestronglyMeasurable (hf j).aemeasurable_fst]
+  rw [this, this, ← eLpNorm_map_measure (hf i).aemeasurable_fst F_meas.aestronglyMeasurable,
+    (hf i).map_eq, eLpNorm_map_measure (hf j).aemeasurable_fst F_meas.aestronglyMeasurable]
 
 /-- A sequence of identically distributed Lᵖ functions is p-uniformly integrable. -/
 theorem MemLp.uniformIntegrable_of_identDistrib {ι : Type*} {f : ι → α → E} {j : ι} {p : ℝ≥0∞}
@@ -345,12 +353,25 @@ lemma indepFun_of_identDistrib_pair
     {X : γ → α} {X' : δ → α} {Y : γ → β} {Y' : δ → β} (h_indep : X ⟂ᵢ[μ] Y)
     (h_ident : IdentDistrib (fun ω ↦ (X ω, Y ω)) (fun ω ↦ (X' ω, Y' ω)) μ μ') :
     X' ⟂ᵢ[μ'] Y' := by
+  have hx : μ.map X h_ident.aemeasurable_fst.fst =
+      μ'.map X' h_ident.aemeasurable_snd.fst := by
+    ext s hs
+    rw [Measure.map_apply hs h_ident.aemeasurable_fst.fst,
+      Measure.map_apply hs h_ident.aemeasurable_snd.fst]
+    simpa only [Set.preimage_preimage, Function.comp_apply] using
+      h_ident.measure_mem_eq (measurable_fst hs)
+  have hy : μ.map Y h_ident.aemeasurable_fst.snd =
+      μ'.map Y' h_ident.aemeasurable_snd.snd := by
+    ext s hs
+    rw [Measure.map_apply hs h_ident.aemeasurable_fst.snd,
+      Measure.map_apply hs h_ident.aemeasurable_snd.snd]
+    simpa only [Set.preimage_preimage, Function.comp_apply] using
+      h_ident.measure_mem_eq (measurable_snd hs)
   rw [indepFun_iff_map_prod_eq_prod_map_map, ← h_ident.map_eq, h_indep.map_prod_eq_prod_map_map]
-  · exact congr (congrArg Measure.prod <| (h_ident.comp measurable_fst).map_eq)
-      (h_ident.comp measurable_snd).map_eq
-  · exact measurable_fst.aemeasurable.comp_aemeasurable h_ident.aemeasurable_fst
-  · exact measurable_snd.aemeasurable.comp_aemeasurable h_ident.aemeasurable_fst
-  · exact measurable_fst.aemeasurable.comp_aemeasurable h_ident.aemeasurable_snd
-  · exact measurable_snd.aemeasurable.comp_aemeasurable h_ident.aemeasurable_snd
+  · congr 1
+  · exact h_ident.aemeasurable_fst.comp_aemeasurable measurable_fst.aemeasurable
+  · exact h_ident.aemeasurable_fst.comp_aemeasurable measurable_snd.aemeasurable
+  · exact h_ident.aemeasurable_snd.comp_aemeasurable measurable_fst.aemeasurable
+  · exact h_ident.aemeasurable_snd.comp_aemeasurable measurable_snd.aemeasurable
 
 end ProbabilityTheory

@@ -66,7 +66,8 @@ lemma indepFun_iff_charFun_prod [CompleteSpace E] (hX : AEMeasurable X P) (hY : 
     X ⟂ᵢ[P] Y ↔ ∀ t, charFun (P.map (fun ω ↦ toLp 2 (X ω, Y ω))) t =
       charFun (P.map X) t.ofLp.1 * charFun (P.map Y) t.ofLp.2 := by
   rw [indepFun_iff_map_prod_eq_prod_map_map hX hY, ← charFun_eq_prod_iff,
-    AEMeasurable.map_map_of_aemeasurable (by fun_prop) (by fun_prop), Function.comp_def]
+    Measure.map_map (by fun_prop) (by fun_prop)]
+  simp only [Function.comp_def]
 
 end InnerProductSpace
 
@@ -116,7 +117,8 @@ lemma indepFun_iff_charFunDual_prod' (hX : AEMeasurable X P) (hY : AEMeasurable 
         ((prodContinuousLinearEquiv p ℝ E F).symm.toContinuousLinearMap.comp
           (.inr ℝ E F))) := by
   rw [indepFun_iff_map_prod_eq_prod_map_map hX hY, ← charFunDual_eq_prod_iff' p,
-    AEMeasurable.map_map_of_aemeasurable (by fun_prop) (by fun_prop), Function.comp_def]
+    Measure.map_map (by fun_prop) (by fun_prop)]
+  simp only [Function.comp_def]
 
 end NormedSpace
 
@@ -131,42 +133,60 @@ section Sum
 variable {E : Type*} [SigmaAlgebra E] [NormedAddCommGroup E]
     [BorelSpace E] [SecondCountableTopology E] {X : ι → Ω → E}
 
-lemma iIndepFun.charFunDual_map_finsetSum_eq_prod [NormedSpace ℝ E]
-    (mX : ∀ i ∈ s, AEMeasurable (X i) P) (hX : iIndepFun (s.restrict X) P) :
+private lemma iIndepFun.charFunDual_map_finsetSum_eq_prod_aux [NormedSpace ℝ E]
+    (mX : ∀ i, AEMeasurable (X i) P) (hX : iIndepFun (s.restrict X) P) :
     charFunDual (P.map (∑ i ∈ s, X i)) = ∏ i ∈ s, charFunDual (P.map (X i)) := by
   classical
   have := hX.isProbabilityMeasure
   induction s using Finset.induction with
   | empty => ext; simp [show (0 : Ω → E) = fun _ ↦ 0 from rfl]
   | insert i s hi hs =>
-    rw [Finset.sum_insert hi, IndepFun.charFunDual_map_add_eq_mul, Finset.prod_insert hi, hs]
-    · exact fun i hi ↦ (mX i (mem_insert_of_mem hi))
+    simp only [Finset.sum_insert hi]
+    rw [IndepFun.charFunDual_map_add_eq_mul, Finset.prod_insert hi, hs]
     · exact hX.precomp (g := fun x : s ↦ ⟨x.1, mem_insert_of_mem x.2⟩) (fun _ ↦ by simp)
-    · exact mX i (mem_insert_self i s)
-    · exact Finset.aemeasurable_sum s (fun i hi ↦ (mX i (mem_insert_of_mem hi)))
-    symm
-    convert!
-      iIndepFun.indepFun_finsetSum_of_notMem₀ (i := ⟨i, mem_insert_self i s⟩) (f :=
-        fun (x : (insert i s : Finset ι)) ↦ X x.1) (s := {x | x.1 ∈ s}) hX (fun i ↦ (mX i.1 i.2))
-        (by simpa)
-    let e : ((insert i s) : Finset ι) → ι := Subtype.val
-    convert! (Finset.sum_of_injOn Subtype.val ?_ ?_ ?_ ?_).symm
-    · simp
-    · intro _ _; grind
-    · simp; grind
-    · grind
+    · exact Finset.aemeasurable_sum s fun i _ ↦ mX i
+    · symm
+      convert!
+        iIndepFun.indepFun_finsetSum_of_notMem₀ (i := ⟨i, mem_insert_self i s⟩) (f :=
+          fun (x : (insert i s : Finset ι)) ↦ X x.1) (s := {x | x.1 ∈ s}) hX (fun i ↦ mX i.1)
+          (by simpa)
+      let e : ((insert i s) : Finset ι) → ι := Subtype.val
+      convert! (Finset.sum_of_injOn Subtype.val ?_ ?_ ?_ ?_).symm
+      · simp
+      · intro _ _; grind
+      · simp; grind
+      · grind
+
+lemma iIndepFun.charFunDual_map_finsetSum_eq_prod [NormedSpace ℝ E]
+    (mX : ∀ i ∈ s, AEMeasurable (X i) P) (hX : iIndepFun (s.restrict X) P) :
+    charFunDual (P.map (∑ i ∈ s, X i)) =
+      ∏ i : s, charFunDual (P.map (X i) (mX i i.property)) := by
+  classical
+  have h := iIndepFun.charFunDual_map_finsetSum_eq_prod_aux
+    (s := (Finset.univ : Finset s)) (X := s.restrict X) (fun i ↦ mX i i.property)
+    (hX.restrict Finset.univ)
+  have hm : AEMeasurable (∑ i : s, s.restrict X i) P :=
+    Finset.aemeasurable_sum Finset.univ fun i _ ↦ mX i i.property
+  have hsum : (∑ i : s, s.restrict X i) =ᵐ[P] (∑ i ∈ s, X i) :=
+    ae_of_all P fun ω ↦ congrFun (Finset.sum_coe_sort s X) ω
+  have hmap := Measure.map_congr hsum hm
+  rw [hmap] at h
+  simpa using h
 
 @[deprecated (since := "2026-04-08")]
 alias iIndepFun.charFunDual_map_finset_sum_eq_prod := iIndepFun.charFunDual_map_finsetSum_eq_prod
 
 lemma iIndepFun.charFunDual_map_sum_eq_prod [Fintype ι] [NormedSpace ℝ E]
     (mX : ∀ i, AEMeasurable (X i) P) (hX : iIndepFun X P) :
-    charFunDual (P.map (∑ i, X i)) = ∏ i, charFunDual (P.map (X i)) :=
-  (hX.restrict _).charFunDual_map_finsetSum_eq_prod (by simpa)
+    charFunDual (P.map (∑ i, X i)) = ∏ i, charFunDual (P.map (X i)) := by
+  simpa [Finset.prod_coe_sort] using
+    (hX.restrict Finset.univ).charFunDual_map_finsetSum_eq_prod
+      (s := Finset.univ) (fun i _ ↦ mX i)
 
 lemma iIndepFun.charFunDual_map_fun_finsetSum_eq_prod [NormedSpace ℝ E]
     (mX : ∀ i ∈ s, AEMeasurable (X i) P) (hX : iIndepFun (s.restrict X) P) :
-    charFunDual (P.map (fun ω ↦ ∑ i ∈ s, X i ω)) = ∏ i ∈ s, charFunDual (P.map (X i)) := by
+    charFunDual (P.map (fun ω ↦ ∑ i ∈ s, X i ω)) =
+      ∏ i : s, charFunDual (P.map (X i) (mX i i.property)) := by
   convert! hX.charFunDual_map_finsetSum_eq_prod mX
   simp
 
@@ -176,8 +196,10 @@ alias iIndepFun.charFunDual_map_fun_finset_sum_eq_prod :=
 
 lemma iIndepFun.charFunDual_map_fun_sum_eq_prod [Fintype ι] [NormedSpace ℝ E]
     (mX : ∀ i, AEMeasurable (X i) P) (hX : iIndepFun X P) :
-    charFunDual (P.map (fun ω ↦ ∑ i, X i ω)) = ∏ i, charFunDual (P.map (X i)) :=
-  (hX.restrict _).charFunDual_map_fun_finsetSum_eq_prod (by simpa)
+    charFunDual (P.map (fun ω ↦ ∑ i, X i ω)) = ∏ i, charFunDual (P.map (X i)) := by
+  simpa [Finset.prod_coe_sort] using
+    (hX.restrict Finset.univ).charFunDual_map_fun_finsetSum_eq_prod
+      (s := Finset.univ) (fun i _ ↦ mX i)
 
 lemma charFunDual_map_sum_pi_eq_prod [Fintype ι] [NormedSpace ℝ E] {μ : ι → Measure E}
     [∀ i, IsProbabilityMeasure (μ i)] :
@@ -190,7 +212,8 @@ lemma charFunDual_map_sum_pi_eq_prod [Fintype ι] [NormedSpace ℝ E] {μ : ι �
 
 lemma iIndepFun.charFun_map_finsetSum_eq_prod [InnerProductSpace ℝ E]
     (mX : ∀ i ∈ s, AEMeasurable (X i) P) (hX : iIndepFun (s.restrict X) P) :
-    charFun (P.map (∑ i ∈ s, X i)) = ∏ i ∈ s, charFun (P.map (X i)) := by
+    charFun (P.map (∑ i ∈ s, X i)) =
+      ∏ i : s, charFun (P.map (X i) (mX i i.property)) := by
   ext
   simp [charFun_eq_charFunDual_toDualMap, hX.charFunDual_map_finsetSum_eq_prod mX]
 
@@ -199,12 +222,15 @@ alias iIndepFun.charFun_map_finset_sum_eq_prod := iIndepFun.charFun_map_finsetSu
 
 lemma iIndepFun.charFun_map_sum_eq_prod [Fintype ι] [InnerProductSpace ℝ E]
     (mX : ∀ i, AEMeasurable (X i) P) (hX : iIndepFun X P) :
-    charFun (P.map (∑ i, X i)) = ∏ i, charFun (P.map (X i)) :=
-  (hX.restrict _).charFun_map_finsetSum_eq_prod (by simpa)
+    charFun (P.map (∑ i, X i)) = ∏ i, charFun (P.map (X i)) := by
+  simpa [Finset.prod_coe_sort] using
+    (hX.restrict Finset.univ).charFun_map_finsetSum_eq_prod
+      (s := Finset.univ) (fun i _ ↦ mX i)
 
 lemma iIndepFun.charFun_map_fun_finsetSum_eq_prod [InnerProductSpace ℝ E]
     (mX : ∀ i ∈ s, AEMeasurable (X i) P) (hX : iIndepFun (s.restrict X) P) :
-    charFun (P.map (fun ω ↦ ∑ i ∈ s, X i ω)) = ∏ i ∈ s, charFun (P.map (X i)) := by
+    charFun (P.map (fun ω ↦ ∑ i ∈ s, X i ω)) =
+      ∏ i : s, charFun (P.map (X i) (mX i i.property)) := by
   convert! hX.charFun_map_finsetSum_eq_prod mX
   simp
 
@@ -213,8 +239,10 @@ alias iIndepFun.charFun_map_fun_finset_sum_eq_prod := iIndepFun.charFun_map_fun_
 
 lemma iIndepFun.charFun_map_fun_sum_eq_prod [Fintype ι] [InnerProductSpace ℝ E]
     (mX : ∀ i, AEMeasurable (X i) P) (hX : iIndepFun X P) :
-    charFun (P.map (fun ω ↦ ∑ i, X i ω)) = ∏ i, charFun (P.map (X i)) :=
-  (hX.restrict _).charFun_map_fun_finsetSum_eq_prod (by simpa)
+    charFun (P.map (fun ω ↦ ∑ i, X i ω)) = ∏ i, charFun (P.map (X i)) := by
+  simpa [Finset.prod_coe_sort] using
+    (hX.restrict Finset.univ).charFun_map_fun_finsetSum_eq_prod
+      (s := Finset.univ) (fun i _ ↦ mX i)
 
 lemma charFun_map_sum_pi_eq_prod [Fintype ι] [InnerProductSpace ℝ E]
     (μ : ι → Measure E) [∀ i, IsProbabilityMeasure (μ i)] :
@@ -239,7 +267,8 @@ lemma iIndepFun_iff_charFun_pi (hX : ∀ i, AEMeasurable (X i) P) :
     iIndepFun X P ↔ ∀ t, charFun (P.map (fun ω ↦ toLp 2 (X · ω))) t =
       ∏ i, charFun (P.map (X i)) (t i) := by
   rw [iIndepFun_iff_map_fun_eq_pi_map hX, ← charFun_eq_pi_iff,
-    AEMeasurable.map_map_of_aemeasurable (by fun_prop) (by fun_prop), Function.comp_def]
+    Measure.map_map (by fun_prop) (by fun_prop)]
+  simp only [Function.comp_def]
 
 end InnerProductSpace
 
@@ -264,7 +293,8 @@ lemma iIndepFun_iff_charFunDual_pi' (hX : ∀ i, AEMeasurable (X i) P) :
       ∏ i, charFunDual (P.map (X i)) (L.comp
         ((PiLp.continuousLinearEquiv p ℝ E).symm.toContinuousLinearMap.comp (.single ℝ E i))) := by
   rw [iIndepFun_iff_map_fun_eq_pi_map hX, ← charFunDual_eq_pi_iff' p,
-    AEMeasurable.map_map_of_aemeasurable (by fun_prop) (by fun_prop), Function.comp_def]
+    Measure.map_map (by fun_prop) (by fun_prop)]
+  simp only [Function.comp_def]
 
 end NormedSpace
 

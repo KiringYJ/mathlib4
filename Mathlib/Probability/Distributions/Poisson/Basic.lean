@@ -45,7 +45,8 @@ def poissonMeasure (r : ℝ≥0) : Measure ℕ :=
 scoped notation3 "Po(" r ")" => poissonMeasure r
 
 /-- The Poisson probability distribution with rate `r` valued in the `AddMonoidWithOne` `R`. -/
-scoped notation3 "Po(" R ", " r ")" => (poissonMeasure r).map (Nat.cast : ℕ → R)
+scoped notation3 "Po(" R ", " r ")" =>
+  (poissonMeasure r).map (Nat.cast : ℕ → R) Measurable.of_discrete.aemeasurable
 
 lemma poissonMeasure_singleton (r : ℝ≥0) (n : ℕ) :
     Po(r) {n} = ENNReal.ofReal (exp (-r) * r ^ n / (n)!) := by
@@ -174,13 +175,31 @@ private theorem map_cast_poissonMeasure_conv_real (r₁ r₂ : ℝ≥0) :
 theorem poissonMeasure_conv_poissonMeasure (r₁ r₂ : ℝ≥0) :
     Po(r₁) ∗ Po(r₂) = Po(r₁ + r₂) := by
   apply (MeasurableEmbedding.natCast (α := ℝ)).map_injective
-  rw [← Nat.coe_castAddMonoidHom, Measure.map_conv_addMonoidHom _ (by fun_prop)]
-  exact map_cast_poissonMeasure_conv_real _ _
+  calc
+    (Po(r₁) ∗ Po(r₂)).map (Nat.cast : ℕ → ℝ)
+        Measurable.of_discrete.aemeasurable = Po(ℝ, r₁) ∗ Po(ℝ, r₂) := by
+      simpa only [Nat.coe_castAddMonoidHom] using
+        Measure.map_conv_addMonoidHom (L := Nat.castAddMonoidHom ℝ)
+          (Measurable.of_discrete : Measurable (Nat.cast : ℕ → ℝ))
+    _ = Po(ℝ, r₁ + r₂) := map_cast_poissonMeasure_conv_real _ _
+    _ = Po(r₁ + r₂).map (Nat.cast : ℕ → ℝ)
+        Measurable.of_discrete.aemeasurable := rfl
 
 theorem map_cast_poissonMeasure_conv [MeasurableAdd₂ R] (r₁ r₂ : ℝ≥0) :
     Po(R, r₁) ∗ Po(R, r₂) = Po(R, r₁ + r₂) := by
-  rw [← Nat.coe_castAddMonoidHom, ← Measure.map_conv_addMonoidHom _ (by fun_prop),
-    poissonMeasure_conv_poissonMeasure]
+  calc
+    Po(R, r₁) ∗ Po(R, r₂) =
+        (Po(r₁) ∗ Po(r₂)).map (Nat.cast : ℕ → R)
+          Measurable.of_discrete.aemeasurable := by
+      simpa only [Nat.coe_castAddMonoidHom] using
+        (Measure.map_conv_addMonoidHom (L := Nat.castAddMonoidHom R)
+          (Measurable.of_discrete : Measurable (Nat.cast : ℕ → R))).symm
+    _ = Po(r₁ + r₂).map (Nat.cast : ℕ → R)
+        Measurable.of_discrete.aemeasurable := by
+      exact congrArg
+        (fun μ : Measure ℕ ↦ μ.map (Nat.cast : ℕ → R) Measurable.of_discrete.aemeasurable)
+        (poissonMeasure_conv_poissonMeasure r₁ r₂)
+    _ = Po(R, r₁ + r₂) := rfl
 
 /-- The sum of two independent Poisson random variables with rates `r₁, r₂` is a Poisson
 random variable with rate `r₁ + r₂`. -/

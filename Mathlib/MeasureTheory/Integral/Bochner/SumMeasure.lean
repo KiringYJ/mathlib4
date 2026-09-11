@@ -189,11 +189,15 @@ theorem setIntegral_countable (f : X → E) {s : Set X} (hs : s.Countable) (hf :
     ∫ x in s, f x ∂μ = ∑' x : s, μ.real {(x : X)} • f x := by
   have hi : Countable { x // x ∈ s } := Iff.mpr countable_coe_iff hs
   have hf' : Integrable (fun (x : s) ↦ f x) (Measure.comap Subtype.val μ) := by
-    rw [IntegrableOn, ← map_comap_subtype_coe, integrable_map_measure] at hf
-    · apply hf
-    · exact Integrable.aestronglyMeasurable hf
-    · exact Measurable.aemeasurable measurable_subtype_coe
-    · exact Countable.measurableSet hs
+    rw [IntegrableOn] at hf
+    have hcoe : AEMeasurable ((↑) : s → X) (Measure.comap Subtype.val μ) :=
+      measurable_subtype_coe.aemeasurable
+    have hfi : Integrable f
+        ((Measure.comap Subtype.val μ).map ((↑) : s → X) hcoe) := by
+      rw [map_comap_subtype_coe (Countable.measurableSet hs) μ]
+      exact hf
+    exact (integrable_map_measure (μ := Measure.comap Subtype.val μ)
+      (f := ((↑) : s → X)) (g := f) hcoe hfi.aestronglyMeasurable).1 hfi
   rw [← integral_subtype_comap hs.measurableSet, integral_countable hf']
   congr 1 with a : 1
   rw [measureReal_def, Measure.comap_apply Subtype.val Subtype.coe_injective
