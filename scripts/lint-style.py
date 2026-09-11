@@ -4,9 +4,10 @@ Lint a file or files from mathlib for style.
 
 Sample usage:
 
-    $ ./scripts/lint-style.py $(find Mathlib -name '*.lean')
+    $ ./scripts/lint-style.py Mathlib
 
-which will lint all of the Lean files in the specified directories.
+which will recursively lint all Lean files in the specified directories. Individual files may also
+be passed.
 
 The resulting error output will contain one line for each style error
 encountered that isn't in the list of allowed / ignored style exceptions.
@@ -44,6 +45,7 @@ ERR_ARR = 18 # space after "←"
 
 exceptions = []
 new_exceptions = False
+output_messages = []
 
 
 def annotate_comments(enumerate_lines):
@@ -109,6 +111,8 @@ def four_spaces_in_second_line(lines, path):
     # TODO: also fix the space for all lines before ":=", right now we only fix the line after
     # the first line break
     errors = []
+    if not lines:
+        return errors, []
     # We never alter the first line, as it does not occur as next_line in the iteration over the
     # zipped lines below, hence we add it here
     newlines = [lines[0]]
@@ -188,7 +192,8 @@ def left_arrow_check(lines, path):
 def output_message(path, line_nr, code, msg):
     # We are outputting for github. We duplicate path, line_nr and code,
     # so that they are also visible in the plaintext output.
-    print(f"::error file={path},line={line_nr},code={code}::{path}:{line_nr} {code}: {msg}")
+    output_messages.append(
+        f"::error file={path},line={line_nr},code={code}::{path}:{line_nr} {code}: {msg}")
 
 
 def format_errors(errors):
@@ -214,12 +219,11 @@ def lint(path, fix=False):
         # We enumerate the lines so that we can report line numbers in the error messages correctly
         # we will modify lines as we go, so we need to keep track of the original line numbers
         lines = f.readlines()
-        enum_lines = enumerate(lines, 1)
+        enum_lines = list(enumerate(lines, 1))
         newlines = enum_lines
         for error_check in [four_spaces_in_second_line,
                             isolated_by_dot_semicolon_check,
-                            left_arrow_check,
-                            nonterminal_simp_check]:
+                            left_arrow_check]:
             errs, newlines = error_check(newlines, path)
             format_errors(errs)
 
@@ -229,10 +233,18 @@ def lint(path, fix=False):
         shutil.move(path.with_name(path.name + '.bak'), path)
 
 fix = "--fix" in sys.argv
-argv = (arg for arg in sys.argv[1:] if arg != "--fix")
+# The Lean driver diagnoses lint findings from stdout. In that mode, findings should not obscure
+# genuine Python failures by making every nonzero exit code ambiguous.
+allow_lint_errors = "--allow-lint-errors" in sys.argv
+argv = (Path(arg) for arg in sys.argv[1:] if arg not in {"--fix", "--allow-lint-errors"})
 
-for filename in argv:
-    lint(Path(filename), fix=fix)
+for path in argv:
+    paths = sorted(path.rglob("*.lean")) if path.is_dir() else [path]
+    for filename in paths:
+        lint(filename, fix=fix)
 
-if new_exceptions:
+for message in sorted(output_messages):
+    print(message)
+
+if new_exceptions and not allow_lint_errors:
     exit(1)

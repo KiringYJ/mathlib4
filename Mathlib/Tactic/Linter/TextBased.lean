@@ -544,11 +544,18 @@ def lintModules (opts : LinterOptions) (nolints : Array String) (moduleNames : A
     -- Run the remaining python linters. It is easier to just run on all files.
     -- If this poses an issue, I can either filter the output
     -- or wait until lint-style.py is fully rewritten in Lean.
-    let args := if fix then #["--fix"] else #[]
-    let output ← IO.Process.output { cmd := "./scripts/print-style-errors.sh", args := args }
+    let python := if System.Platform.isWindows then "python" else "python3"
+    let args := #["./scripts/lint-style.py", "--allow-lint-errors"] ++
+      (if fix then #["--fix"] else #[]) ++ #["Mathlib", "Archive", "Counterexamples"]
+    let output ← IO.Process.output {
+      cmd := python
+      args := args
+      env := #[("PYTHONUTF8", some "1")]
+    }
     if output.exitCode != 0 then
       numberErrorFiles := numberErrorFiles + 1
-      IO.eprintln s!"error: `print-style-error.sh` exited with code {output.exitCode}"
+      IO.eprintln s!"error: `lint-style.py` exited with code {output.exitCode}"
+      IO.eprint output.stdout
       IO.eprint output.stderr
     else if output.stdout != "" then
       numberErrorFiles := numberErrorFiles + 1
