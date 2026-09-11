@@ -5,8 +5,10 @@
 > mathlib. It does not use an open pull-request contribution model and its
 > fork-only changes are not prepared for submission to upstream. See
 > [Fork Design Philosophy and Roadmap](FORK_DESIGN.md) for the mathematical and
-> API principles, and [Source Repository Registry](UPSTREAMS.md) for external
-> source, license, provenance, and integration records. The upstream setup and
+> API principles, [External Formalization Recovery Backlog](MIGRATION_BACKLOG.md)
+> for planned ports and reconstructions, and [Source Repository
+> Registry](UPSTREAMS.md) for external source, license, provenance, and
+> integration records. The upstream setup and
 > contribution information retained below describes
 > `leanprover-community/mathlib4`, not this fork's governance.
 

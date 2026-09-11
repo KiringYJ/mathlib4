@@ -74,6 +74,38 @@ manual work around them.
   them as settled. A facade is worthwhile when it restores a natural concept
   without creating a competing theorem ecosystem.
 
+### Abstract but semantically exact
+
+Faithfulness protects mathematical distinctions; it does not require a
+set-theoretically literal implementation. Preserve domains, hypotheses,
+partiality, canonical versus merely chosen data, quotient or equivalence-class
+nature, uniqueness, and naturality when they are part of the intended object or
+statement. Do not unfold a group into a carrier set and operations, a morphism
+into graph data, or a quotient into representatives merely to look closer to a
+foundation.
+
+Bundled structures, morphisms, quotients, abstract types, and typeclass
+interfaces are faithful when explicit, proved correspondences show that they
+preserve the intended mathematical structure, distinctions, and operations.
+An objectwise equivalence alone does not establish compatibility with the
+relevant operations or naturality, and existence does not turn a chosen witness
+into canonical data.
+
+No single encoding is mandatory for partiality. Use a constrained input type
+when the domain is itself a stable mathematical object, a proof argument when
+the condition is local to one use, and an explicit partial-map object when its
+domain and composition are part of the mathematics. Choose the interface that
+keeps the semantic obligation visible without exporting incidental dependent
+plumbing.
+
+When reviewing a representation, ask first whether it creates a value,
+proposition, or canonical choice that the mathematics does not provide. If it
+does, repair the semantic boundary. If it merely hides a lower-level
+set-theoretic construction while preserving the intended structure through a
+proved interface, retain the abstraction. The target is abstract but
+semantically exact, not convenience-driven totalization or
+faithfulness-driven foundationalization.
+
 ### Mathematical vocabulary first; mechanical fallback second
 
 A public declaration name is part of the library's mathematical language.
@@ -192,6 +224,42 @@ semantically loose." It is a faithful mathematical API whose routine
 well-definedness work is handled by the library and whose genuine obligations
 remain explicit.
 
+When several proofs establish the same proposition, choose the canonical proof
+by mathematical and architectural evidence rather than source length or raw
+dependency counts:
+
+1. Preserve the intended statement and make the mathematical explanation for
+   the result visible in the dependency graph.
+2. Reuse the closest conceptually appropriate established public abstraction.
+   Do not unfold to definitions or reprove an established result merely to
+   lower a dependency count, and do not invoke a remote classification theorem
+   when a nearer structural result is the actual reason.
+3. Avoid gratuitous logical strength, such as classical reasoning or choice
+   when the intended statement and a usable proof do not need it. Treat
+   `#print axioms` as a diagnostic, not an objective to optimize at the expense
+   of the mathematical interface.
+4. Prefer stable public APIs and proofs robust under refactoring over internal
+   representations or broad, opaque automation searches.
+5. Compare imports, elaboration and kernel cost, proof-term size, and
+   readability after the preceding criteria are satisfied.
+
+An alternative proof of the same proposition does not ordinarily justify a
+duplicate public theorem. Retain the reusable intermediate theorem or
+structure that the alternative proof exposes instead. Established
+formulations, useful specializations, and exact aliases admitted by the naming
+policy remain legitimate semantic entry points; historical or pedagogical
+alternative proofs belong in exposition unless they add reusable mathematics.
+
+Generality and abstraction are likewise evidence-driven. A proof using fewer
+assumptions establishes a candidate generalization; it does not by itself show
+that an ad hoc interface belongs in the public hierarchy. Generalize promptly
+when the weaker setting is an established, recognizable mathematical
+abstraction and the result remains usable. Otherwise wait for independent
+downstream cases before adding new structure. Keep a specialization when it
+provides a natural statement, namespace, or theorem-search entry point. The
+goal is the most reusable natural theorem, not the weakest imaginable
+assumptions or the highest possible abstraction level.
+
 ## Curated Intake and Canonicalization
 
 This is a maintainer-curated library, not an open pull-request project. External
@@ -235,6 +303,33 @@ interface. The policy is:
 > eligibility for admission; repository consistency determines migration, not
 > rejection. Actual admission remains a discretionary, evidence-based
 > curatorial decision.
+
+### Recovery modes for older formalizations
+
+Classify recovery work by what must be preserved rather than calling every
+project transfer a port:
+
+- A **port** translates a development within the Lean ecosystem when its
+  mathematical organization and principal abstractions remain suitable.
+- A **reconstruction** rebuilds selected, audited theorem coverage on current
+  foundations and APIs when the old architecture has been superseded. This is
+  a mathematical rebase, not a Git-history rewrite.
+- A **reformalization** reproduces mathematics from another prover or a
+  materially different foundation and therefore requires a new trusted-boundary
+  and foundation audit, not merely syntax translation.
+
+For a reconstruction, the preservation invariant is an explicit mapping of
+selected statements, hypotheses, constructions, and proof status to their
+current counterparts. It is not the old directory tree, API, commit count, or
+an unqualified promise to recover every theorem. Search for maintained
+descendants and current-library overlap before starting; reuse sound modern
+infrastructure and reprove only the unmatched mathematical layer. Completion
+requires theorem-level correspondence evidence and end-to-end acceptance
+targets, not a count of translated files.
+
+Planning priorities and their still-open evidence gates live in
+[`MIGRATION_BACKLOG.md`](MIGRATION_BACKLOG.md). Candidate presence there does
+not admit a source or authorize intake.
 
 ## Source Repositories and Provenance
 

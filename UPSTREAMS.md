@@ -52,6 +52,21 @@ and complete the required intake record below. Work through this list at the
 maintainer's discretion; its presence creates no completeness or schedule
 commitment.
 
+### Lean 3 preservation and reconstruction leads
+
+These projects require theorem-level comparison with the current library before
+any source transfer. Their provisional recovery modes and priorities are
+tracked in `MIGRATION_BACKLOG.md`; the rows here record source identity only.
+
+| Candidate | Scope to investigate | Observed default ref |
+| --- | --- | --- |
+| [adamtopaz/lean-acl-pairs](https://github.com/adamtopaz/lean-acl-pairs) | alternating pairs and valuation rings; possible small Lean 3 port pilot | `master` |
+| [leanprover-community/lean-liquid](https://github.com/leanprover-community/lean-liquid) | Liquid Tensor Experiment theorem coverage on current condensed and homological-algebra APIs | `master` |
+| [leanprover-community/lean-perfectoid-spaces](https://github.com/leanprover-community/lean-perfectoid-spaces) | perfectoid-space, adic-space, and Huber infrastructure requiring current-Mathlib overlap analysis | `master` |
+| [dagurtomas/lean-solid](https://github.com/dagurtomas/lean-solid) | solid-abelian-group results requiring semantic comparison with `Mathlib.Condensed.Solid` | `master` |
+| [b-mehta/topos](https://github.com/b-mehta/topos) | topos, Lawvere--Tierney topology, and sheafification results requiring overlap analysis | `master` |
+| [ianklatzco/flypitch](https://github.com/ianklatzco/flypitch) | existing Lean 4 Flypitch descendant to audit rather than reconstruct from scratch | `master` |
+
 ### Established mathlib-downstream leads
 
 These were named in the source conversation and are also identifiable in the
@@ -130,6 +145,10 @@ revision, and scope before promoting them to candidate rows:
 - LeanProject and Lean Reservoir project catalogues;
 - repositories using `formalization.yaml` or the Palomar template as discovery
   feeds.
+- cross-prover versions of Flyspeck, the computation of
+  `pi_4(S^3)`, and the Four Color Theorem; identify the exact maintained source
+  and audit foundation compatibility before treating any as a Lean migration
+  candidate.
 
 Discovery feeds are indexes, not trusted proof sources. Follow each pointer to
 the underlying repository and perform the ordinary intake audit.
