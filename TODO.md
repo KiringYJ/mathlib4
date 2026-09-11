@@ -20,7 +20,7 @@ prototype.  Effort does not measure mathematical importance:
 - **L**: a cross-module API with notation, instances, or many downstream consumers; stage the work.
 - **XL**: foundational hierarchy or ubiquitous notation; prototype first and migrate in slices.
 
-For every migration below:
+For every strict-partiality migration in the S--XL sections below:
 
 1. expose definedness through an input type, proof argument, or explicit partiality;
 2. give any retained total extension a name that identifies its fallback;
@@ -74,12 +74,27 @@ For every migration below:
   `Mathlib/Data/Nat/MaxPrimeFac.lean:39` returns zero at zero and one at one, neither of which is a
   greatest prime divisor.  Require `1 < n` or return explicit failure.
 
+- [ ] **Require nonzero mass for `FiniteMeasure.normalize`.**
+  `FiniteMeasure.normalize` in
+  `Mathlib/MeasureTheory/Measure/ProbabilityMeasure.lean:468` returns an arbitrary Dirac probability
+  measure when the input measure has mass zero.  Put `μ ≠ 0` at the ordinary normalization boundary;
+  retain any arbitrary-Dirac extension under an explicit name.
+
+- [ ] **Require primitivity for `DirichletCharacter.rootNumber`.**
+  `Mathlib/NumberTheory/LSeries/DirichletContinuation.lean:272` exposes the primitive-character
+  Gauss-sum formula for every character and documents the nonprimitive result as junk.  Require
+  `IsPrimitive χ` for the ordinary root number, or name the unrestricted expression as a formula.
+  Do not conflate it with the separate root number obtained from an induced primitive character.
+
 ## M -- subsystem migrations
 
 - [ ] **Make finite multiplicity a checked projection.**
   `Mathlib/RingTheory/Multiplicity.lean:47` defines `multiplicity` as
   `(emultiplicity a b).toNat`, so infinite multiplicity becomes zero.  Keep `emultiplicity` as the
-  faithful invariant and require `FiniteMultiplicity` for a natural-valued projection.
+  faithful invariant and require `FiniteMultiplicity` for a natural-valued projection.  Migrate
+  derived natural-valued consumers such as `padicValNat`, identified with `multiplicity` in
+  `Mathlib/NumberTheory/Padics/PadicVal/Defs.lean:49`; in particular,
+  `padicValNat_zero_right` in `Mathlib/Data/Nat/MaxPowDiv.lean:106` is the same infinite-to-zero case.
 
 - [ ] **Require monicity for polynomial division-by-monic notation.**
   `Polynomial.divByMonic` and `Polynomial.modByMonic` in
@@ -87,9 +102,12 @@ For every migration below:
   zero and the original dividend.  Thread `q.Monic` through `/ₘ` and `%ₘ`, reusing
   `divModByMonicAux`.
 
-- [ ] **Exclude the zero polynomial from `Polynomial.rootMultiplicity`.**
-  `Mathlib/Algebra/Polynomial/Div.lean:498` returns zero for the zero polynomial even though a
-  largest dividing power does not exist.  Require `p ≠ 0` or retain infinity in the result.
+- [ ] **Exclude the zero polynomial from finite root multisets and multiplicities.**
+  `Polynomial.roots` in `Mathlib/Algebra/Polynomial/Roots.lean:58` gives the empty multiset at zero
+  (line 71), while `Polynomial.rootMultiplicity` in
+  `Mathlib/Algebra/Polynomial/Div.lean:498` returns zero even though a largest dividing power does
+  not exist.  Require `p ≠ 0` for finite root multisets and finite multiplicities, retaining infinity
+  where appropriate.  Ordinary set-valued root loci may remain defined for arbitrary polynomials.
 
 - [ ] **Make scheme order of vanishing carry its point and function domains.**
   `AlgebraicGeometry.Scheme.ord` in `Mathlib/AlgebraicGeometry/OrderOfVanishing.lean:52` returns
@@ -254,11 +272,15 @@ For every migration below:
   consequently fails ring laws there.  Require regularity/denominator nonzeroness at the point, while
   respecting reduced-rational-function rather than source-expression semantics.
 
-- [ ] **Put natural factorization on nonzero inputs.**
+- [ ] **Put finite factorization data on nonzero inputs.**
   `Nat.factorization` in `Mathlib/Data/Nat/Factorization/Defs.lean:50` gives zero multiplicities at
   zero, and `Nat.primeFactors` in `Mathlib/Data/Nat/PrimeFin.lean:37` gives the empty set although
-  every prime divides zero.  Use a positive/nonzero carrier or explicit failure and migrate the
-  arithmetic infrastructure as a unit.
+  every prime divides zero.  The generic `factorization` and `normalizedFactors` in
+  `Mathlib/RingTheory/UniqueFactorizationDomain/Finsupp.lean:32` and
+  `Mathlib/RingTheory/UniqueFactorizationDomain/NormalizedFactors.lean:35` likewise return empty data
+  at zero.  Use a nonzero carrier or explicit failure for finite lists/counts; keep units admissible
+  with empty factorization.  `Associates.factors` already supplies a faithful extended precedent by
+  returning `⊤` at zero (`Mathlib/RingTheory/UniqueFactorizationDomain/FactorSet.lean:223`).
 
 - [ ] **Migrate natural cardinalities away from infinity-to-zero.**
   `Nat.card` in `Mathlib/SetTheory/Cardinal/Finite.lean:41` and `Set.ncard` in
@@ -271,10 +293,15 @@ For every migration below:
   (`Mathlib/Basic/ENNReal/Basic.lean:225`) send infinity to zero.  Provide proof-bearing finite
   conversions and reserve `...OrZero`-style names for the current maps.
 
-- [ ] **Separate chosen preimages from true inverse functions.**
+- [ ] **Separate chosen preimages from true inverses and true extensions.**
   `Function.invFun` in `Mathlib/Logic/Function/Basic.lean:526` picks an arbitrary element outside
   the range and a chosen preimage for noninjective maps.  Use equivalences/bijections for inverse
   functions and a range-indexed chosen-preimage operation for the weaker construction.
+  `Function.extend` in the same file at line 835 explicitly takes an outside-range fallback, which is
+  legitimate, but without `g.FactorsThrough f` it chooses one representative's `g`-value for a
+  fiber and cannot agree with every original `g`-value on that fiber.  Require `FactorsThrough` for
+  the ordinary extension name; keep an unrestricted chosen-representative construction under a
+  descriptive name.
 
 - [ ] **Make subgroup indices finite only with evidence.**
   `Subgroup.index` and `Subgroup.relIndex` in `Mathlib/GroupTheory/Index.lean:57` and `:64` return
@@ -416,7 +443,20 @@ For every migration below:
   inverse/division by zero, negative powers, rational casts, simplifier/tactic behavior, and
   `Matrix.inv` in `Mathlib/LinearAlgebra/Matrix/NonsingularInverse.lean:169`, which returns zero when
   the determinant is not a unit.  Ordinary operations require nonzero/unit evidence; useful total
-  extensions remain explicitly named.
+  extensions remain explicitly named.  Treat Euclidean quotient/remainder as a separate design
+  slice within this epic: `EuclideanDomain` requires `a / 0 = 0` and derives `a % 0 = a` in
+  `Mathlib/Algebra/EuclideanDomain/Defs.lean:159` and `:152`, respectively, while a nonzero Euclidean
+  divisor need not be a unit and its quotient is not exact field division.
+
+- [ ] **Make natural subtraction and predecessor expose their domains.**
+  `Nat.sub` returns zero when the subtrahend is larger, and `Nat.pred 0 = 0`; the current source calls
+  these results garbage values in `Mathlib/Data/Nat/PSub.lean:15`.  Promote the existing
+  `Nat.psub`/`Nat.ppred` operations, defined at lines 44 and 32, or proof-bearing wrappers requiring
+  `b ≤ a`/`0 < a`, to the mathematician-facing boundary.  A separately named truncated
+  subtraction/monus may remain total, but ordinary subtraction and predecessor must not silently use
+  those invalid-domain zeros.  This is an XL theorem/notation migration even though the faithful
+  primitives already exist; a strict public layer may bridge the Lean-core operations only after
+  proving their domains.
 
 - [ ] **Introduce strict conditional suprema and infima.**
   `ConditionallyCompleteLattice` in
@@ -466,6 +506,45 @@ For every migration below:
   trigonometric, entropy, logarithm, and power theorems whose unrestricted statements use fallback
   coincidences.
 
+## Representation fidelity lint -- total objects whose representation changes the semantics
+
+These are not undefined-operation-to-junk-value defects.  The represented object is mathematically
+legitimate, but its inherited instances, indexing convention, or container shape can differ from
+the standard object suggested by informal notation.  Keep this lint separate from strict-partiality
+migrations: require names, types, documentation, and theorem statements to identify which object is
+actually formalized, and provide a conventional facade when downstream mathematics uses another
+standard representation.
+
+- [ ] **[S] Distinguish finite product metric spaces from Euclidean space.**
+  The instance for `Fin n → ℝ` is the finite Pi metric with sup distance, as documented and defined
+  in `Mathlib/Topology/MetricSpace/Pseudo/Pi.lean:16` and `:30`.  Thus the distance between
+  `![1, 0]` and `![0, 1]` is one.  The usual Euclidean metric is carried by
+  `EuclideanSpace ℝ (Fin n)`, defined as `PiLp 2` in
+  `Mathlib/Analysis/InnerProductSpace/PiL2.lean:114`, where the same distance is `√2`.  In metric or
+  inner-product contexts, do not treat a bare Pi type as an unqualified Euclidean space, Euclidean
+  ball, or orthonormal geometry.  It remains a faithful coordinate-vector representation of `ℝⁿ`
+  when no norm or metric semantics are asserted.  Use `EuclideanSpace` for L2 geometry, or explicitly
+  say that the product/sup metric is intended.  A future lint should inspect suspicious declarations
+  and docstrings without rejecting genuine product-metric uses.
+
+- [ ] **[S--M] Distinguish the zero-padded singular-value sequence from a finite singular-value
+  family.**
+  `LinearMap.singularValues` in
+  `Mathlib/Analysis/InnerProductSpace/SingularValues.lean:94` is a countably infinite sequence whose
+  finite-dimensional tail is zero.  The module documentation at lines 18--19 and 36--51 explicitly
+  chooses this valid convention to avoid dependent indexing.  Keep the sequence when it is useful,
+  but do not describe it without qualification as the usual finite list/family of singular values.
+  Provide a finite/rank-indexed facade when a theorem or paper uses that convention, and audit
+  downstream cardinality, positivity, product, and ordering statements for the intended index set.
+
+- [ ] **[L] Distinguish zero-encoded element order from an extended order.**
+  `orderOf` and `addOrderOf` in `Mathlib/GroupTheory/OrderOfElement.lean:178` encode infinite order as
+  zero.  This convention is lossless because every finite order is positive and
+  `orderOf_eq_zero_iff` at line 211 characterizes the sentinel; it is not an arbitrary junk value.
+  Provide an extended-valued ordinary invariant and require `IsOfFinOrder`/`IsOfFinAddOrder` for a
+  natural-valued projection when theorem statements perform ordinary comparisons or arithmetic that
+  would misread zero.  Keep explicitly identified zero-encoding APIs where useful.
+
 ## Classification audits before adding more migration tasks
 
 The following families contain total implementation values but are not yet established as public
@@ -482,9 +561,6 @@ backlog:
 - [ ] **Local bundle representatives:** distinguish globally defined representatives whose values are
   explicitly irrelevant outside a base set from exported coordinate operations that allow those
   values to affect statements.
-- [ ] **Zero-extended singular-value sequences:** determine whether zeros after the finite-dimensional
-  range are the canonical sequence convention or whether the public indexing domain should be
-  finite-rank data.
 - [ ] **Natural-valued projections of extended invariants:** review operations such as
   `Polynomial.natDegree` in `Mathlib/Algebra/Polynomial/Degree/Defs.lean:52`, which maps the zero
   polynomial's faithful `WithBot` degree to zero.  A codomain-indicating name makes the projection
