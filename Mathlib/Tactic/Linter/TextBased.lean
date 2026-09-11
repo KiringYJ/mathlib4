@@ -140,7 +140,12 @@ structure ErrorContext where
   lineNumber : ℕ
   /-- The path to the file which was linted -/
   path : FilePath
-deriving BEq
+
+/-- Error contexts compare paths componentwise so parsing a path round-trips across operating
+systems with different path separators. -/
+instance : BEq ErrorContext where
+  beq a b :=
+    a.error == b.error && a.lineNumber == b.lineNumber && a.path.components == b.path.components
 
 /-- Possible results of comparing an `ErrorContext` to an `existing` entry:
 most often, they are different --- if the existing entry covers the new exception,
