@@ -8,8 +8,9 @@ independent, mathematician-facing library whose public API prioritizes
 mathematical fidelity and quality of life.
 
 Fork-only changes are not intended for submission to upstream. Do not preserve,
-split, or rewrite them for pull-request acceptability. Upstream remains a source
-of useful code and updates, not the target design authority for this fork.
+split, or rewrite them merely for upstream pull-request acceptability. Upstream
+remains a source of useful code and updates, not the target design authority for
+this fork.
 
 `FORK_DESIGN.md` is the human-facing source of truth for the fork's design
 philosophy and deferred foundational roadmap. In particular, it records the
@@ -37,8 +38,9 @@ tracked directly as `upstream/master`; this fork does not keep a local
   wholesale into `main` merely to synchronize branch history.
 - `exp/<slug>` may be used for work whose mathematical or API direction is not
   yet settled.
-- No `pr/<slug>` branch category is part of this project's workflow. Do not
-  prepare or export fork changes for upstream pull requests.
+- External pull requests target `main` from contributor-owned branches.
+  Contributor branch names are not part of this repository's maintained branch
+  taxonomy.
 
 Do not infer authorization to push from a fetch, sync, or local branch update.
 All pushes go to `origin`; never push to `upstream`.
@@ -62,13 +64,19 @@ auditable even when the personal branch has accumulated many changes.
 After an explicitly authorized publication, push only to `origin`. Never open
 or prepare an upstream pull request, and never push to `upstream`.
 
-## Curated External Source Intake
+## Contributions and Curated External Source Intake
 
-This repository does not use an open pull-request contribution model. The
-maintainer may discover and select material from multiple external
-formalization repositories. Suggestions are pointers, not admission promises;
-there is no contributor entitlement, completeness promise, review deadline, or
-permanent backlog obligation.
+This repository accepts external pull requests that follow its mathematical,
+API, provenance, licensing, testing, and review policies. Policy compliance
+makes a contribution eligible for review; it does not guarantee merger. The
+maintainer may request revisions or decline a contribution because of scope,
+duplication, maintenance cost, or conflict with the fork's design direction.
+
+External formalizations may be proposed through a pull request or selected by
+the maintainer from other repositories. A suggestion, public repository, or
+valid result does not by itself create a review deadline or permanent backlog.
+Intake may slow or stop when the available audit and migration capacity is
+exhausted.
 
 Do not reject mathematically valid and legally ingestible content merely because
 it is small, niche, or presently uses a poor API. Separate admission from
@@ -255,12 +263,13 @@ and documentation checks when they remain applicable to the affected area.
 
 ## Important Files and Directories
 
-- `README.md`: fork notice followed by retained upstream setup, build, and
-  contribution information.
+- `README.md`: fork overview, branch model, setup, contribution policy, and
+  upstream resource links.
 - `FORK_DESIGN.md`: fork purpose, API commitments, and deferred foundational
   migration plans.
 - `UPSTREAMS.md`: canonical source-repository and provenance registry.
-- `.github/CONTRIBUTING.md`: link to the current upstream contribution guide.
+- `.github/CONTRIBUTING.md`: contribution requirements for pull requests to
+  this fork and the separate upstream boundary.
 - `lakefile.lean` and `lean-toolchain`: project and Lean toolchain definitions.
 - `.agent-workbench.yaml`: human-owned desired workbench configuration.
 - `.agent-workbench.lock.json`: generated sync provenance and checksum ledger.

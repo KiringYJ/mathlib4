@@ -6,10 +6,11 @@ mathlib's implementation and theorem base while developing an independent,
 mathematician-facing library whose public API prioritizes mathematical fidelity
 and quality of life.
 
-This repository does not use an open pull-request contribution model.
-Fork-only changes are developed for this distribution and are not prepared for
-submission to upstream. Upstream remains a source of sound implementation,
-theorems, and updates, but it is not the design authority for this fork.
+External contributions to this fork are welcome through pull requests that
+target `main` and follow the repository policy. Fork-only changes are developed
+for this distribution and are not prepared for submission to upstream.
+Upstream remains a source of sound implementation, theorems, and updates, but
+it is not the design authority for this fork.
 
 ## Design priorities
 
@@ -81,6 +82,19 @@ require mathlib from git
 The upstream
 [dependency guide](https://github.com/leanprover-community/mathlib4/wiki/Using-mathlib4-as-a-dependency)
 still applies to the surrounding Lake project setup.
+
+## Contributing
+
+Pull requests to this fork are welcome when they follow the mathematical
+fidelity, API, source, licensing, provenance, testing, and review requirements
+in the [contribution guide](.github/CONTRIBUTING.md). Meeting those requirements
+makes a contribution eligible for review but does not guarantee merger;
+maintainers may request revisions or decline work because of scope,
+duplication, maintenance cost, or design direction.
+
+External formalizations may arrive either through a pull request or through
+maintainer-led curated intake. Contributions to this fork are not automatically
+prepared, submitted, or forwarded as upstream mathlib pull requests.
 
 ## Project records
 

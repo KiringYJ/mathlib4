@@ -324,14 +324,20 @@ provides a natural statement, namespace, or theorem-search entry point. The
 goal is the most reusable natural theorem, not the weakest imaginable
 assumptions or the highest possible abstraction level.
 
-## Curated Intake and Canonicalization
+## Contributions, Curated Intake, and Canonicalization
 
-This is a maintainer-curated library, not an open pull-request project. External
-formalizations are candidate sources from which the maintainer may choose to
-integrate material. A suggestion, a public repository, or even a valid result
-does not create an entitlement to admission, a review deadline, or a permanent
-backlog. Intake may slow or stop when the available audit and migration capacity
-is exhausted.
+This is a maintainer-curated library that accepts external pull requests which
+follow the repository's mathematical, API, provenance, licensing, testing, and
+review policies. Policy compliance makes a contribution eligible for review;
+it does not guarantee merger. The maintainer may request revisions or decline a
+contribution because of scope, duplication, maintenance cost, or conflict with
+the fork's design direction.
+
+External formalizations may be proposed through a pull request or selected by
+the maintainer from other repositories. A suggestion, public repository, or
+valid result does not by itself create a review deadline or permanent backlog.
+Intake may slow or stop when the available audit and migration capacity is
+exhausted.
 
 Project scale, popularity, and subject fashion are not admission criteria. A
 small paper, a single theorem, or an obscure but reusable construction may be a
