@@ -217,6 +217,7 @@ lemma buffon_integral :
       (Measure.restrict ℙ (Set.Icc 0 π))] at h_int
     simpa only [MeasureTheory.IntegrableOn, Measure.volume_eq_productBySections,
       ← Measure.productBySections_restrict] using h_int
+  rw [Measure.volume_eq_productBySections] at this
   rw [Measure.volume_eq_productBySections, MeasureTheory.setIntegral_prod _ this,
     MeasureTheory.integral_integral_swap ?integrable]
   case integrable =>

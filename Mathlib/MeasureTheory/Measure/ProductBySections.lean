@@ -26,8 +26,9 @@ We also prove Tonelli's theorem. These results concern the iterated construction
 s-finiteness does not assert uniqueness from rectangle values. The ordinary
 `Measure.prod` requires `HasUniqueProduct` and is developed in `Measure.UniqueProd`.
 
-The default volume on a product of measure spaces uses this ordered construction,
-with an s-finite second factor. `volume_eq_productBySections` exposes that convention.
+This construction does not install a global product `MeasureSpace` instance. Use
+`MeasureSpace.productBySections` explicitly to select it as a local ambient measure.
+The canonical sigma-finite product instance is provided by `Measure.UniqueProd`.
 
 ## Main definition
 
@@ -92,19 +93,22 @@ namespace MeasureTheory
 
 namespace Measure
 
-instance productBySections.measureSpace {α β} [MeasureSpace α] [MeasureSpace β]
-    [SFinite (volume : Measure β)] : MeasureSpace (α × β) where
-  volume := volume.productBySections volume
-
-theorem volume_eq_productBySections (α β) [MeasureSpace α] [MeasureSpace β]
-    [SFinite (volume : Measure β)] :
-    (volume : Measure (α × β)) = (volume : Measure α).productBySections (volume : Measure β) :=
-  rfl
+/-- Equip a product with the measure defined by section integrals. This is an explicit
+constructor, not a global instance; use `letI` when selecting this ambient measure. -/
+@[instance_reducible]
+def _root_.MeasureTheory.MeasureSpace.productBySections (α β) [MeasureSpace α] [MeasureSpace β]
+    (h : HasAEMeasurableSectionMeasures (volume : Measure α) (volume : Measure β) := by
+      first
+      | assumption
+      | exact MeasureTheory.hasAEMeasurableSectionMeasures_zero_left _
+      | exact MeasureTheory.hasAEMeasurableSectionMeasures_of_sfinite _ _) :
+    MeasureSpace (α × β) where
+  volume := volume.productBySections volume h
 
 /-- The iterated measure is bounded by its section integral on measurable sets. -/
 theorem productBySections_apply_le {s : Set (α × β)} (hs : MeasurableSet s)
-    (h : HasMeasurableSections μ ν := by
-      first | assumption | exact MeasureTheory.hasMeasurableSections_of_sfinite _ _) :
+    (h : HasAEMeasurableSectionMeasures μ ν := by
+      first | assumption | exact MeasureTheory.hasAEMeasurableSectionMeasures_of_sfinite _ _) :
     (μ.productBySections ν h) s ≤ ∫⁻ x, ν (Prod.mk x ⁻¹' s) ∂μ :=
   (productBySections_apply hs h).le
 
@@ -204,12 +208,6 @@ instance productBySections.instIsOpenPosMeasure {X Y : Type*} [TopologicalSpace 
   · exact u_open.measure_pos μ ⟨x, xu⟩
   · exact v_open.measure_pos ν ⟨y, yv⟩
 
-instance {X Y : Type*}
-    [TopologicalSpace X] [MeasureSpace X] [IsOpenPosMeasure (volume : Measure X)]
-    [TopologicalSpace Y] [MeasureSpace Y] [IsOpenPosMeasure (volume : Measure Y)]
-    [SFinite (volume : Measure Y)] : IsOpenPosMeasure (volume : Measure (X × Y)) :=
-  productBySections.instIsOpenPosMeasure
-
 protected theorem FiniteAtFilter.prod {X Y : Type*} {m : SigmaAlgebra X} {μ : Measure X}
     {m' : SigmaAlgebra Y} {ν : Measure Y} [SFinite ν] {l : Filter X} {l' : Filter Y}
     (hμ : μ.FiniteAtFilter l) (hν : ν.FiniteAtFilter l') :
@@ -229,13 +227,6 @@ instance productBySections.instIsLocallyFiniteMeasure {X Y : Type*}
     rw [nhds_prod_eq]
     exact μ.finiteAt_nhds _ |>.prod <| ν.finiteAt_nhds _
 
-instance {X Y : Type*} [TopologicalSpace X] [TopologicalSpace Y]
-    {m : MeasureSpace X} [IsLocallyFiniteMeasure (volume : Measure X)]
-    {m' : MeasureSpace Y} [IsLocallyFiniteMeasure (volume : Measure Y)]
-    [SFinite (volume : Measure Y)] :
-    IsLocallyFiniteMeasure (volume : Measure (X × Y)) :=
-  productBySections.instIsLocallyFiniteMeasure
-
 instance productBySections.instIsFiniteMeasure {α β : Type*} {mα : SigmaAlgebra α}
     {mβ : SigmaAlgebra β}
     (μ : Measure α) (ν : Measure β) [IsFiniteMeasure μ] [IsFiniteMeasure ν] :
@@ -244,19 +235,10 @@ instance productBySections.instIsFiniteMeasure {α β : Type*} {mα : SigmaAlgeb
   rw [← univ_prod_univ, productBySections_prod]
   finiteness
 
-instance {α β : Type*} [MeasureSpace α] [MeasureSpace β] [IsFiniteMeasure (volume : Measure α)]
-    [IsFiniteMeasure (volume : Measure β)] : IsFiniteMeasure (volume : Measure (α × β)) :=
-  productBySections.instIsFiniteMeasure _ _
-
 instance productBySections.instIsProbabilityMeasure {α β : Type*} {mα : SigmaAlgebra α}
     {mβ : SigmaAlgebra β} (μ : Measure α) (ν : Measure β) [IsProbabilityMeasure μ]
     [IsProbabilityMeasure ν] : IsProbabilityMeasure (μ.productBySections ν) :=
   ⟨by rw [← univ_prod_univ, productBySections_prod, measure_univ, measure_univ, mul_one]⟩
-
-instance {α β : Type*} [MeasureSpace α] [MeasureSpace β]
-    [IsProbabilityMeasure (volume : Measure α)] [IsProbabilityMeasure (volume : Measure β)] :
-    IsProbabilityMeasure (volume : Measure (α × β)) :=
-  productBySections.instIsProbabilityMeasure _ _
 
 instance productBySections.instIsFiniteMeasureOnCompacts {α β : Type*}
     [TopologicalSpace α] [TopologicalSpace β]
@@ -269,13 +251,6 @@ instance productBySections.instIsFiniteMeasureOnCompacts {α β : Type*}
     _ ≤ μ (Prod.fst '' K) * ν (Prod.snd '' K) := productBySections_prod_le _ _
     _ < ∞ :=
       mul_lt_top (hK.image continuous_fst).measure_lt_top (hK.image continuous_snd).measure_lt_top
-
-instance {X Y : Type*}
-    [TopologicalSpace X] [MeasureSpace X] [IsFiniteMeasureOnCompacts (volume : Measure X)]
-    [TopologicalSpace Y] [MeasureSpace Y] [IsFiniteMeasureOnCompacts (volume : Measure Y)]
-    [SFinite (volume : Measure Y)] :
-    IsFiniteMeasureOnCompacts (volume : Measure (X × Y)) :=
-  productBySections.instIsFiniteMeasureOnCompacts _ _
 
 
 open IsUnifLocDoublingMeasure in
@@ -296,13 +271,6 @@ instance _root_.IsUnifLocDoublingMeasure.prod {X Y : Type*}
     productBySections_prod]
   grw [hμr, hνr, ENNReal.coe_mul, mul_mul_mul_comm]
 
-instance IsUnifLocDoublingMeasure.volume_prod {X Y : Type*} [PseudoMetricSpace X] [MeasureSpace X]
-    [PseudoMetricSpace Y] [MeasureSpace Y] [SFinite (volume : Measure Y)]
-    [IsUnifLocDoublingMeasure (volume : Measure X)]
-    [IsUnifLocDoublingMeasure (volume : Measure Y)] :
-    IsUnifLocDoublingMeasure (volume : Measure (X × Y)) :=
-  .prod _ _
-
 theorem ae_measure_lt_top {s : Set (α × β)} (hs : MeasurableSet s)
     (h2s : (μ.productBySections ν) s ≠ ∞) :
     ∀ᵐ x ∂μ, ν (Prod.mk x ⁻¹' s) < ∞ := by
@@ -317,8 +285,8 @@ This implication requires `s` to be measurable but does not require `ν` to be s
 See also `measure_prod_null` and `measure_ae_null_of_prod_null` below. -/
 theorem measure_prod_null_of_ae_null {s : Set (α × β)} (hsm : MeasurableSet s)
     (hs : (fun x => ν (Prod.mk x ⁻¹' s)) =ᵐ[μ] 0)
-    (hprod : HasMeasurableSections μ ν := by
-      first | assumption | exact MeasureTheory.hasMeasurableSections_of_sfinite _ _) :
+    (hprod : HasAEMeasurableSectionMeasures μ ν := by
+      first | assumption | exact MeasureTheory.hasAEMeasurableSectionMeasures_of_sfinite _ _) :
     (μ.productBySections ν hprod) s = 0 := by
   rw [← nonpos_iff_eq_zero]
   calc
@@ -460,7 +428,7 @@ noncomputable def FiniteSpanningSetsIn.prod {ν : Measure β} {C : Set (Set α)}
     (hμ : μ.FiniteSpanningSetsIn C) (hν : ν.FiniteSpanningSetsIn D) :
     (μ.productBySections ν (by
       let _ : SigmaFinite ν := hν.sigmaFinite
-      exact MeasureTheory.hasMeasurableSections_of_sfinite _ _)).FiniteSpanningSetsIn
+      exact MeasureTheory.hasAEMeasurableSectionMeasures_of_sfinite _ _)).FiniteSpanningSetsIn
         (image2 (· ×ˢ ·) C D) := by
   let _ : SigmaFinite ν := hν.sigmaFinite
   refine
@@ -505,14 +473,6 @@ instance productBySections.instSFinite {α β : Type*} {_ : SigmaAlgebra α} {μ
   rw [this]
   infer_instance
 
-instance {α β} [MeasureSpace α] [SigmaFinite (volume : Measure α)]
-    [MeasureSpace β] [SigmaFinite (volume : Measure β)] : SigmaFinite (volume : Measure (α × β)) :=
-  productBySections.instSigmaFinite
-
-instance {α β} [MeasureSpace α] [SFinite (volume : Measure α)]
-    [MeasureSpace β] [SFinite (volume : Measure β)] : SFinite (volume : Measure (α × β)) :=
-  productBySections.instSFinite
-
 /-- A measure on a product space equals the product measure if they are equal on rectangles
   with as sides sets that generate the corresponding σ-algebras. -/
 theorem productBySections_eq_generateFrom {μ : Measure α} {ν : Measure β}
@@ -523,7 +483,7 @@ theorem productBySections_eq_generateFrom {μ : Measure α} {ν : Measure β}
     (h₁ : ∀ s ∈ C, ∀ t ∈ D, μν (s ×ˢ t) = μ s * ν t) :
     μ.productBySections ν (by
       let _ : SigmaFinite ν := h3D.sigmaFinite
-      exact MeasureTheory.hasMeasurableSections_of_sfinite _ _) = μν := by
+      exact MeasureTheory.hasAEMeasurableSectionMeasures_of_sfinite _ _) = μν := by
   let _ : SigmaFinite ν := h3D.sigmaFinite
   refine
     (h3C.prod h3D).ext
@@ -891,7 +851,7 @@ theorem skew_product [SFinite μa] [SFinite μc] {f : α → β} (hf : MeasurePr
     {g : α → γ → δ} (hgm : Measurable (uncurry g))
     (hg : ∀ᵐ a ∂μa, map (g a) μc hgm.of_uncurry_left.aemeasurable = μd) :
     MeasurePreserving (fun p : α × γ => (f p.1, g p.1 p.2)) (μa.productBySections μc)
-      (μb.productBySections μd (HasMeasurableSections.of_aemeasurable
+      (μb.productBySections μd (HasAEMeasurableSectionMeasures.of_aemeasurable
         (aemeasurable_prodMk_of_skew hf hgm hg))) := by
   have : Measurable fun p : α × γ => (f p.1, g p.1 p.2) := (hf.1.comp measurable_fst).prodMk hgm
   use this
@@ -906,7 +866,7 @@ theorem skew_product [SFinite μa] [SFinite μc] {f : α → β} (hf : MeasurePr
   -- Thus we can use the integral formula for the product measure, and compute things explicitly
   ext s hs
   rw [map_apply hs this.aemeasurable, Measure.productBySections_apply (this hs),
-    Measure.productBySections_apply hs (HasMeasurableSections.of_aemeasurable
+    Measure.productBySections_apply hs (HasAEMeasurableSectionMeasures.of_aemeasurable
       (aemeasurable_prodMk_of_skew hf hgm hg)),
     ← hf.lintegral_comp (measurable_measure_prodMk_left hs)]
   apply lintegral_congr_ae
@@ -921,7 +881,7 @@ protected theorem prod [SFinite μa] [SFinite μc] {f : α → β} {g : γ → �
     (hf : MeasurePreserving f μa μb) (hg : MeasurePreserving g μc μd) :
     MeasurePreserving (Prod.map f g) (μa.productBySections μc)
       (μb.productBySections μd
-        (HasMeasurableSections.of_aemeasurable (aemeasurable_prodMk_of_skew hf
+        (HasAEMeasurableSectionMeasures.of_aemeasurable (aemeasurable_prodMk_of_skew hf
         (show Measurable (uncurry fun _ : α => g) from hg.1.comp measurable_snd)
         (ae_of_all _ fun _ => hg.map_eq)))) :=
   have : Measurable (uncurry fun _ : α => g) := hg.1.comp measurable_snd
@@ -950,7 +910,7 @@ theorem prod_of_left {α β γ} [SigmaAlgebra α] [SigmaAlgebra β] [SigmaAlgebr
   convert!
     (QuasiMeasurePreserving.prod_of_right (hf.comp measurable_swap) h2f).comp
       ((measurable_swap.measurePreserving
-        (ν.productBySections μ (hasMeasurableSections_of_sfinite ν μ))).symm
+        (ν.productBySections μ (hasAEMeasurableSectionMeasures_of_sfinite ν μ))).symm
           MeasurableEquiv.prodComm).quasiMeasurePreserving
 
 @[fun_prop]
@@ -1319,12 +1279,6 @@ theorem _root_.MeasureTheory.measurePreserving_prodAssoc (μa : Measure α) (μb
       lintegral_productBySections _ (measurable_measure_prodMk_left B).aemeasurable]
     simp only [Measure.productBySections_apply, A]
     rfl
-
-theorem _root_.MeasureTheory.volume_preserving_prodAssoc {α₁ β₁ γ₁ : Type*} [MeasureSpace α₁]
-    [MeasureSpace β₁] [MeasureSpace γ₁] [SFinite (volume : Measure β₁)]
-    [SFinite (volume : Measure γ₁)] :
-    MeasurePreserving (MeasurableEquiv.prodAssoc : (α₁ × β₁) × γ₁ ≃ᵐ α₁ × β₁ × γ₁) :=
-  MeasureTheory.measurePreserving_prodAssoc volume volume volume
 
 end MeasurePreserving
 

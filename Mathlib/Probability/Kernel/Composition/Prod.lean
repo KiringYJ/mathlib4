@@ -81,7 +81,7 @@ theorem prod_apply' (κ : Kernel α β) [IsSFiniteKernel κ] (η : Kernel α γ)
 
 lemma prod_apply (κ : Kernel α β) [IsSFiniteKernel κ] (η : Kernel α γ) [IsSFiniteKernel η]
     (a : α) :
-    (κ ×ₖ η) a = (κ a).productBySections (η a) (hasMeasurableSections_of_sfinite _ _) := by
+    (κ ×ₖ η) a = (κ a).productBySections (η a) (hasAEMeasurableSectionMeasures_of_sfinite _ _) := by
   ext s hs
   rw [prod_apply' _ _ _ hs,
     Measure.productBySections_apply (ν := η a) hs]

@@ -81,13 +81,15 @@ variable [NumberField K]
 
 open scoped Classical in
 theorem volume_preserving_mixedSpaceToRealMixedSpace_symm :
-    MeasurePreserving (mixedSpaceToRealMixedSpace K).symm :=
-  (MeasurePreserving.id _).prod <|
+    MeasurePreserving (mixedSpaceToRealMixedSpace K).symm := by
+  simp only [volume_eq_productBySections]
+  exact (MeasurePreserving.id _).prod <|
     volume_preserving_pi fun _ ↦ Complex.volume_preserving_equiv_real_prod.symm
 
 open scoped Classical in
-instance : IsAddHaarMeasure (volume : Measure (realMixedSpace K)) :=
-  productBySections.instIsAddHaarMeasure _ _
+instance : IsAddHaarMeasure (volume : Measure (realMixedSpace K)) := by
+  rw [volume_eq_productBySections]
+  exact productBySections.instIsAddHaarMeasure _ _
 
 /--
 The polar coordinate open partial homeomorphism of `ℝ^r₁ × (ℝ × ℝ)^r₂` defined as the identity on
@@ -289,14 +291,22 @@ theorem homeoRealMixedSpacePolarSpace_symm_apply (x : polarSpace K) :
 
 open scoped Classical in
 theorem volume_preserving_homeoRealMixedSpacePolarSpace [NumberField K] :
-    MeasurePreserving (homeoRealMixedSpacePolarSpace K) :=
-  ((MeasurePreserving.id volume).prod
+    MeasurePreserving (homeoRealMixedSpacePolarSpace K) := by
+  have hprod {α β γ δ : Type _} [MeasureSpace α] [MeasureSpace β]
+      [MeasureSpace γ] [MeasureSpace δ] [SigmaFinite (volume : Measure α)]
+      [SigmaFinite (volume : Measure β)] [SigmaFinite (volume : Measure γ)]
+      [SigmaFinite (volume : Measure δ)] {f : α → β} {g : γ → δ}
+      (hf : MeasurePreserving f) (hg : MeasurePreserving g) :
+      MeasurePreserving (Prod.map f g) := by
+    simp only [volume_eq_productBySections]
+    exact hf.prod hg
+  exact (hprod (MeasurePreserving.id volume)
     (volume_measurePreserving_arrowProdEquivProdArrow ℝ ℝ _)).trans <|
       (volume_preserving_prodAssoc.symm).trans <|
-        (((MeasurePreserving.id volume).prod (volume_preserving_arrowCongr' _
-          (MeasurableEquiv.refl ℝ) (.id volume))).prod (.id volume)).trans <|
-            ((volume_preserving_piEquivPiSubtypeProd
-              (fun _ : InfinitePlace K ↦ ℝ) (fun w ↦ IsReal w)).symm).prod (.id volume)
+        (hprod (hprod (MeasurePreserving.id volume) (volume_preserving_arrowCongr' _
+          (MeasurableEquiv.refl ℝ) (.id volume))) (.id volume)).trans <|
+            hprod ((volume_preserving_piEquivPiSubtypeProd
+              (fun _ : InfinitePlace K ↦ ℝ) (fun w ↦ IsReal w)).symm) (.id volume)
 
 /--
 The polar coordinate open partial homeomorphism between the mixed space `ℝ^r₁ × ℂ^r₂` and the polar

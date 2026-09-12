@@ -722,16 +722,18 @@ theorem prod_withDensity_right {g : β → ℝ≥0∞} (hg : Measurable g) :
 
 theorem prod_withDensity₀ {f : α → ℝ≥0∞} {g : β → ℝ≥0∞}
     (hf : AEMeasurable f μ) (hg : AEMeasurable g ν) :
-    (μ.withDensity f).productBySections (ν.withDensity g) (hasMeasurableSections_of_sfinite _ _) =
-      (μ.productBySections ν (hasMeasurableSections_of_sfinite _ _)).withDensity
+    (μ.withDensity f).productBySections (ν.withDensity g)
+      (hasAEMeasurableSectionMeasures_of_sfinite _ _) =
+      (μ.productBySections ν (hasAEMeasurableSectionMeasures_of_sfinite _ _)).withDensity
         (fun z ↦ f z.1 * g z.2) := by
   rw [prod_withDensity_left₀ hf, prod_withDensity_right₀ hg, ← withDensity_mul₀, mul_comm]
   · rfl
   all_goals fun_prop (disch := intro _ hs; simp [hs])
 
 theorem prod_withDensity {f : α → ℝ≥0∞} {g : β → ℝ≥0∞} (hf : Measurable f) (hg : Measurable g) :
-    (μ.withDensity f).productBySections (ν.withDensity g) (hasMeasurableSections_of_sfinite _ _) =
-      (μ.productBySections ν (hasMeasurableSections_of_sfinite _ _)).withDensity
+    (μ.withDensity f).productBySections (ν.withDensity g)
+      (hasAEMeasurableSectionMeasures_of_sfinite _ _) =
+      (μ.productBySections ν (hasAEMeasurableSectionMeasures_of_sfinite _ _)).withDensity
         (fun z ↦ f z.1 * g z.2) := by
   simpa using prod_withDensity₀ (μ := μ) (ν := ν) hf.aemeasurable hg.aemeasurable
 
@@ -740,8 +742,9 @@ theorem prod_withDensity {f : α → ℝ≥0∞} {g : β → ℝ≥0∞} (hf : M
 -- the instance that gives `SFinite (c • ν)`.
 lemma Measure.productBySections_smul_right {R : Type*} [SMul R ℝ≥0∞]
     [IsScalarTower R ℝ≥0∞ ℝ≥0∞] (c : R) :
-    μ.productBySections (c • ν) (hasMeasurableSections_of_sfinite _ _) =
-      c • (μ.productBySections ν (hasMeasurableSections_of_sfinite _ _)) := by
+    μ.productBySections (c • ν)
+      (hasAEMeasurableSectionMeasures_of_sfinite _ _) =
+      c • (μ.productBySections ν (hasAEMeasurableSectionMeasures_of_sfinite _ _)) := by
   ext s hs
   have A (s : Set β) : c • ν s = (c • 1) * ν s := by simp
   simp only [Measure.productBySections_apply, hs, Measure.smul_apply, A]

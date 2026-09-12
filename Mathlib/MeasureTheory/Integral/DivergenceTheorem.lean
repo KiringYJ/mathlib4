@@ -528,7 +528,9 @@ theorem integral2_divergence_prod_of_hasFDerivAt_off_countable (f g : ℝ × ℝ
         ∫ x in Icc a₁ b₁, ∫ y in Icc a₂ b₂, f' (x, y) (1, 0) + g' (x, y) (0, 1) := by
       simp only [intervalIntegral.integral_of_le, h₁, h₂,
         setIntegral_congr_set (Ioc_ae_eq_Icc (α := ℝ) (μ := volume))]
-    _ = ∫ x in Icc a₁ b₁ ×ˢ Icc a₂ b₂, f' x (1, 0) + g' x (0, 1) := (setIntegral_prod _ Hi).symm
+    _ = ∫ x in Icc a₁ b₁ ×ˢ Icc a₂ b₂, f' x (1, 0) + g' x (0, 1) := by
+      rw [Measure.volume_eq_productBySections] at Hi ⊢
+      exact (setIntegral_prod _ Hi).symm
     _ = (((∫ x in a₁..b₁, g (x, b₂)) - ∫ x in a₁..b₁, g (x, a₂)) + ∫ y in a₂..b₂, f (b₁, y)) -
           ∫ y in a₂..b₂, f (a₁, y) := by
       rw [Icc_prod_Icc] at *

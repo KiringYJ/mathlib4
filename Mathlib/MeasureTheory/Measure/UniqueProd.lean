@@ -16,6 +16,11 @@ satisfies the rectangle formula. Sigma-finite factors supply this evidence autom
 does a zero factor or a subsingleton carrier. The definition uses the primitive product, and
 uniqueness identifies it with every other product measure, including the iterated construction
 whenever its section functions are almost everywhere measurable.
+
+The global product `MeasureSpace` instance uses this unique product and requires both factor
+volumes to be sigma-finite. `MeasureSpace.prod` permits an explicit local instance
+on any uniqueness domain; `MeasureSpace.productBySections` explicitly selects the
+section-integral construction.
 -/
 
 @[expose] public section
@@ -127,11 +132,11 @@ theorem prod_eq (hρ : ∀ s t, MeasurableSet s → MeasurableSet t →
 
 /-- On the common domain, the unique product agrees with integration of vertical sections. -/
 theorem prod_eq_productBySections (μ : Measure α) (ν : Measure β)
-    (hsections : HasMeasurableSections μ ν := by
+    (hsections : HasAEMeasurableSectionMeasures μ ν := by
       first
       | assumption
-      | exact MeasureTheory.hasMeasurableSections_zero_left _
-      | exact MeasureTheory.hasMeasurableSections_of_sfinite _ _)
+      | exact MeasureTheory.hasAEMeasurableSectionMeasures_zero_left _
+      | exact MeasureTheory.hasAEMeasurableSectionMeasures_of_sfinite _ _)
     (h : HasUniqueProduct μ ν := by
       first
       | assumption
@@ -145,11 +150,11 @@ theorem prod_eq_productBySections (μ : Measure α) (ν : Measure β)
 
 /-- The section-integral formula for the unique product, with its measurability obligation. -/
 theorem prod_apply {s : Set (α × β)} (hs : MeasurableSet s)
-    (hsections : HasMeasurableSections μ ν := by
+    (hsections : HasAEMeasurableSectionMeasures μ ν := by
       first
       | assumption
-      | exact MeasureTheory.hasMeasurableSections_zero_left _
-      | exact MeasureTheory.hasMeasurableSections_of_sfinite _ _)
+      | exact MeasureTheory.hasAEMeasurableSectionMeasures_zero_left _
+      | exact MeasureTheory.hasAEMeasurableSectionMeasures_of_sfinite _ _)
     (h : HasUniqueProduct μ ν := by
       first
       | assumption
@@ -238,11 +243,11 @@ theorem measurePreserving_swap
 
 /-- The symmetric section-integral formula for the unique product. -/
 theorem prod_apply_symm {s : Set (α × β)} (hs : MeasurableSet s)
-    (hsections : HasMeasurableSections ν μ := by
+    (hsections : HasAEMeasurableSectionMeasures ν μ := by
       first
       | assumption
-      | exact MeasureTheory.hasMeasurableSections_zero_left _
-      | exact MeasureTheory.hasMeasurableSections_of_sfinite _ _)
+      | exact MeasureTheory.hasAEMeasurableSectionMeasures_zero_left _
+      | exact MeasureTheory.hasAEMeasurableSectionMeasures_of_sfinite _ _)
     (h : HasUniqueProduct μ ν := by
       first
       | assumption
@@ -350,6 +355,90 @@ theorem map_prod_map {f : α → γ} {g : β → δ} (μ : Measure α) (ν : Mea
   htarget.eq (prod_isProductMeasure _ _ htarget)
     ((prod_isProductMeasure μ ν hsource).map hf hg)
 
+/-! ### The canonical ambient product measure -/
+
+/-- Equip a product with its uniquely determined product measure. This explicit constructor
+also covers uniqueness domains beyond sigma-finiteness, such as a zero measure or a subsingleton
+carrier. It is not a global instance. -/
+@[instance_reducible]
+def _root_.MeasureTheory.MeasureSpace.prod (α β) [MeasureSpace α] [MeasureSpace β]
+    (h : HasUniqueProduct (volume : Measure α) (volume : Measure β) := by
+      first
+      | assumption
+      | exact MeasureTheory.hasUniqueProduct_zero_left _
+      | exact MeasureTheory.hasUniqueProduct_zero_right _
+      | exact MeasureTheory.hasUniqueProduct_of_subsingleton_left _ _
+      | exact MeasureTheory.hasUniqueProduct_of_subsingleton_right _ _
+      | exact MeasureTheory.hasUniqueProduct_of_sigmaFinite _ _) : MeasureSpace (α × β) where
+  volume := volume.prod volume h
+
+/-- The ambient product of sigma-finite measure spaces uses their unique product measure. -/
+instance prod.measureSpace {α β} [MeasureSpace α] [MeasureSpace β]
+    [SigmaFinite (volume : Measure α)] [SigmaFinite (volume : Measure β)] :
+    MeasureSpace (α × β) :=
+  MeasureSpace.prod α β (hasUniqueProduct_of_sigmaFinite _ _)
+
+/-- The canonical ambient product measure is the unique product of the factor volumes. -/
+theorem volume_eq_prod (α β) [MeasureSpace α] [MeasureSpace β]
+    [SigmaFinite (volume : Measure α)] [SigmaFinite (volume : Measure β)] :
+    (volume : Measure (α × β)) = (volume : Measure α).prod (volume : Measure β) := rfl
+
+/-- For sigma-finite factors, the ambient product also admits the section-integral formula. -/
+theorem volume_eq_productBySections (α β) [MeasureSpace α] [MeasureSpace β]
+    [SigmaFinite (volume : Measure α)] [SigmaFinite (volume : Measure β)] :
+    (volume : Measure (α × β)) = (volume : Measure α).productBySections (volume : Measure β) :=
+  prod_eq_productBySections _ _
+
+instance {X Y : Type*}
+    [TopologicalSpace X] [MeasureSpace X] [IsOpenPosMeasure (volume : Measure X)]
+    [TopologicalSpace Y] [MeasureSpace Y] [IsOpenPosMeasure (volume : Measure Y)]
+    [SigmaFinite (volume : Measure X)] [SigmaFinite (volume : Measure Y)] :
+    IsOpenPosMeasure (volume : Measure (X × Y)) := by
+  rw [volume_eq_productBySections]
+  exact productBySections.instIsOpenPosMeasure
+
+instance {X Y : Type*} [TopologicalSpace X] [TopologicalSpace Y]
+    {m : MeasureSpace X} [IsLocallyFiniteMeasure (volume : Measure X)]
+    {m' : MeasureSpace Y} [IsLocallyFiniteMeasure (volume : Measure Y)]
+    [SigmaFinite (volume : Measure X)] [SigmaFinite (volume : Measure Y)] :
+    IsLocallyFiniteMeasure (volume : Measure (X × Y)) := by
+  rw [volume_eq_productBySections]
+  exact productBySections.instIsLocallyFiniteMeasure
+
+instance {α β : Type*} [MeasureSpace α] [MeasureSpace β] [IsFiniteMeasure (volume : Measure α)]
+    [IsFiniteMeasure (volume : Measure β)] : IsFiniteMeasure (volume : Measure (α × β)) := by
+  rw [volume_eq_productBySections]
+  exact productBySections.instIsFiniteMeasure _ _
+
+instance {α β : Type*} [MeasureSpace α] [MeasureSpace β]
+    [IsProbabilityMeasure (volume : Measure α)] [IsProbabilityMeasure (volume : Measure β)] :
+    IsProbabilityMeasure (volume : Measure (α × β)) := by
+  rw [volume_eq_productBySections]
+  exact productBySections.instIsProbabilityMeasure _ _
+
+instance {X Y : Type*}
+    [TopologicalSpace X] [MeasureSpace X] [IsFiniteMeasureOnCompacts (volume : Measure X)]
+    [TopologicalSpace Y] [MeasureSpace Y] [IsFiniteMeasureOnCompacts (volume : Measure Y)]
+    [SigmaFinite (volume : Measure X)] [SigmaFinite (volume : Measure Y)] :
+    IsFiniteMeasureOnCompacts (volume : Measure (X × Y)) := by
+  rw [volume_eq_productBySections]
+  exact productBySections.instIsFiniteMeasureOnCompacts _ _
+
+instance IsUnifLocDoublingMeasure.volume_prod {X Y : Type*} [PseudoMetricSpace X] [MeasureSpace X]
+    [PseudoMetricSpace Y] [MeasureSpace Y]
+    [SigmaFinite (volume : Measure X)] [SigmaFinite (volume : Measure Y)]
+    [IsUnifLocDoublingMeasure (volume : Measure X)]
+    [IsUnifLocDoublingMeasure (volume : Measure Y)] :
+    IsUnifLocDoublingMeasure (volume : Measure (X × Y)) := by
+  rw [volume_eq_productBySections]
+  exact .prod _ _
+
+instance {α β} [MeasureSpace α] [SigmaFinite (volume : Measure α)]
+    [MeasureSpace β] [SigmaFinite (volume : Measure β)] :
+    SigmaFinite (volume : Measure (α × β)) := by
+  rw [volume_eq_productBySections]
+  exact productBySections.instSigmaFinite
+
 end Measure
 
 /-- Tonelli's theorem for the unique product of sigma-finite measures. -/
@@ -365,5 +454,13 @@ theorem lintegral_prod_symm [SigmaFinite μ] [SigmaFinite ν] (f : α × β → 
     ∫⁻ z, f z ∂μ.prod ν = ∫⁻ y, ∫⁻ x, f (x, y) ∂μ ∂ν := by
   rw [Measure.prod_eq_productBySections μ ν] at hf ⊢
   exact lintegral_productBySections_symm f hf
+
+theorem volume_preserving_prodAssoc {α₁ β₁ γ₁ : Type*} [MeasureSpace α₁]
+    [MeasureSpace β₁] [MeasureSpace γ₁] [SigmaFinite (volume : Measure α₁)]
+    [SigmaFinite (volume : Measure β₁)]
+    [SigmaFinite (volume : Measure γ₁)] :
+    MeasurePreserving (MeasurableEquiv.prodAssoc : (α₁ × β₁) × γ₁ ≃ᵐ α₁ × β₁ × γ₁) := by
+  simp only [Measure.volume_eq_productBySections]
+  exact MeasureTheory.measurePreserving_prodAssoc volume volume volume
 
 end MeasureTheory

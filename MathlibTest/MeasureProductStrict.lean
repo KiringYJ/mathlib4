@@ -106,7 +106,7 @@ example (μ : Measure α) (ν : Measure β) : True := by
   trivial
 
 set_option linter.unusedVariables false in
-example (μ : Measure α) (ν : Measure β) (h : HasMeasurableSections μ ν) : True := by
+example (μ : Measure α) (ν : Measure β) (h : HasAEMeasurableSectionMeasures μ ν) : True := by
   fail_if_success
     let _ρ : Measure (α × β) := μ.prod ν
   trivial
@@ -115,14 +115,14 @@ example (μ : Measure α) (ν : Measure β) [SFinite ν] :
     IsProductMeasure μ ν (μ.productBySections ν) :=
   Measure.productBySections_isProductMeasure μ ν
 
-example (μ : Measure α) (ν : Measure β) (h : HasMeasurableSections μ ν) :
+example (μ : Measure α) (ν : Measure β) (h : HasAEMeasurableSectionMeasures μ ν) :
     IsProductMeasure μ ν (μ.productBySections ν) :=
   Measure.productBySections_isProductMeasure μ ν
 
-example (μ : Measure α) (ν : Measure β) (h₁ h₂ : HasMeasurableSections μ ν) :
+example (μ : Measure α) (ν : Measure β) (h₁ h₂ : HasAEMeasurableSectionMeasures μ ν) :
     μ.productBySections ν h₁ = μ.productBySections ν h₂ := rfl
 
-example (μ : Measure α) (ν : Measure β) (h : HasMeasurableSections μ ν)
+example (μ : Measure α) (ν : Measure β) (h : HasAEMeasurableSectionMeasures μ ν)
     {s : Set (α × β)} (hs : MeasurableSet s) :
     (μ.productBySections ν) s = ∫⁻ x, ν (Prod.mk x ⁻¹' s) ∂μ :=
   Measure.productBySections_apply hs
@@ -130,13 +130,13 @@ example (μ : Measure α) (ν : Measure β) (h : HasMeasurableSections μ ν)
 example (μ : Measure α) (ν : Measure β)
     (hprod : AEMeasurable
       (fun x : α => Measure.map (Prod.mk x) ν measurable_prodMk_left.aemeasurable) μ) :
-    HasMeasurableSections μ ν :=
-  HasMeasurableSections.of_aemeasurable hprod
+    HasAEMeasurableSectionMeasures μ ν :=
+  HasAEMeasurableSectionMeasures.of_aemeasurable hprod
 
 example (μ : Measure α) (ν : Measure β)
     (hprod : AEMeasurable
       (fun x : α => Measure.map (Prod.mk x) ν measurable_prodMk_left.aemeasurable) μ) :
-    μ.productBySections ν (HasMeasurableSections.of_aemeasurable hprod) =
+    μ.productBySections ν (HasAEMeasurableSectionMeasures.of_aemeasurable hprod) =
       μ.bind (fun x : α => Measure.map (Prod.mk x) ν measurable_prodMk_left.aemeasurable) hprod :=
   Measure.productBySections_eq_bind hprod
 
@@ -150,3 +150,33 @@ example (μ : Measure α) (ν : Measure β) : Measure (α × β) := μ.primitive
 
 example (μ : Measure α) (ν : Measure β) : IsProductMeasure μ ν (μ.primitiveProd ν) :=
   Measure.primitiveProd_isProductMeasure μ ν
+
+section Ambient
+
+variable {X Y : Type*} [MeasureSpace X] [MeasureSpace Y]
+
+-- S-finiteness does not choose an ambient product measure.
+example [SFinite (volume : Measure X)] [SFinite (volume : Measure Y)] : True := by
+  fail_if_success
+    let _m : MeasureSpace (X × Y) := inferInstance
+  trivial
+
+example [SigmaFinite (volume : Measure X)] [SigmaFinite (volume : Measure Y)] :
+    (volume : Measure (X × Y)) = (volume : Measure X).prod (volume : Measure Y) := rfl
+
+-- Explicit local choices retain the product sigma-algebra and the chosen measure.
+example (h : HasUniqueProduct (volume : Measure X) (volume : Measure Y)) :
+    letI := MeasureSpace.prod X Y h
+    (volume : Measure (X × Y)) = (volume : Measure X).prod (volume : Measure Y) h := rfl
+
+example (h : HasAEMeasurableSectionMeasures (volume : Measure X) (volume : Measure Y)) :
+    letI := MeasureSpace.productBySections X Y h
+    (volume : Measure (X × Y)) =
+      (volume : Measure X).productBySections (volume : Measure Y) h := rfl
+
+example [Subsingleton X] : MeasureSpace (X × Y) := MeasureSpace.prod X Y
+
+example [SFinite (volume : Measure Y)] : MeasureSpace (X × Y) :=
+  MeasureSpace.productBySections X Y
+
+end Ambient

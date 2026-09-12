@@ -185,7 +185,7 @@ theorem integral_gaussian_sq_complex {b : ℂ} (hb : 0 < b.re) :
   calc
     (∫ x : ℝ, cexp (-b * (x : ℂ) ^ 2)) ^ 2 =
         ∫ p : ℝ × ℝ, cexp (-b * (p.1 : ℂ) ^ 2) * cexp (-b * (p.2 : ℂ) ^ 2) := by
-      rw [pow_two, ← integral_prod_mul]; rfl
+      rw [pow_two, ← integral_prod_mul, Measure.volume_eq_productBySections]
     _ = ∫ p : ℝ × ℝ, cexp (-b * ((p.1 : ℂ) ^ 2 + (p.2 : ℂ) ^ 2)) := by
       congr
       ext1 p
@@ -195,7 +195,7 @@ theorem integral_gaussian_sq_complex {b : ℂ} (hb : 0 < b.re) :
       rw [← integral_comp_polarCoord_symm]
       simp only [polarCoord_symm_apply, ofReal_mul, ofReal_cos, ofReal_sin]
     _ = (∫ r in Ioi (0 : ℝ), r * cexp (-b * (r : ℂ) ^ 2)) * ∫ θ in Ioo (-π) π, 1 := by
-      rw [← setIntegral_prod_mul]
+      rw [← setIntegral_prod_mul, Measure.volume_eq_productBySections]
       congr with p : 1
       rw [mul_one]
       congr

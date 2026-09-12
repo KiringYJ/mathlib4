@@ -116,10 +116,10 @@ theorem det_fderivPolarCoordSymm (p : ℝ × ℝ) :
     Matrix.det_fin_two_of, sub_neg_eq_add]
   ring
 
-/-- This instance is required to see through the defeq
-    `volume = volume.productBySections volume`. -/
-instance : Measure.IsAddHaarMeasure volume (G := ℝ × ℝ) :=
-  Measure.productBySections.instIsAddHaarMeasure _ _
+/-- The canonical product volume on the plane is an additive Haar measure. -/
+instance : Measure.IsAddHaarMeasure volume (G := ℝ × ℝ) := by
+  rw [Measure.volume_eq_productBySections]
+  exact Measure.productBySections.instIsAddHaarMeasure _ _
 
 theorem polarCoord_source_ae_eq_univ : polarCoord.source =ᵐ[volume] univ := by
   have A : polarCoord.sourceᶜ ⊆ LinearMap.ker (LinearMap.snd ℝ ℝ ℝ) := by

@@ -15,7 +15,7 @@ A product measure satisfies the product formula on measurable rectangles. The pr
 and uniqueness of a measure satisfying it.
 
 The ordered construction `Measure.productBySections μ ν` integrates the measures of vertical
-sections against `μ`. Its domain `HasMeasurableSections μ ν` requires almost-everywhere
+sections against `μ`. Its domain `HasAEMeasurableSectionMeasures μ ν` requires almost-everywhere
 measurability of each scalar section-measure function. This holds whenever `ν` is s-finite.
 The result is a product measure, but this construction does not assert uniqueness.
 The API name is descriptive: it refers to construction through iterated integration, not to an
@@ -146,7 +146,7 @@ theorem HasUniqueProduct.eq {ρ κ : Measure (α × β)} (h : HasUniqueProduct �
 
 /-- For every measurable subset of the product, its vertical section measures form a scalar
 function that is almost everywhere measurable with respect to the first measure. -/
-def HasMeasurableSections (μ : Measure α) (ν : Measure β) : Prop :=
+def HasAEMeasurableSectionMeasures (μ : Measure α) (ν : Measure β) : Prop :=
   ∀ ⦃s : Set (α × β)⦄, MeasurableSet s →
     AEMeasurable (fun x => ν (Prod.mk x ⁻¹' s)) μ
 
@@ -186,23 +186,23 @@ theorem hasUniqueProduct_swap_iff : HasUniqueProduct ν μ ↔ HasUniqueProduct 
 
 /-- Almost-everywhere measurability of the measure-valued section family implies scalar
 almost-everywhere measurability of every measurable section evaluation. -/
-theorem HasMeasurableSections.of_aemeasurable
+theorem HasAEMeasurableSectionMeasures.of_aemeasurable
     (h : AEMeasurable
       (fun x : α => Measure.map (Prod.mk x) ν measurable_prodMk_left.aemeasurable) μ) :
-    HasMeasurableSections μ ν := by
+    HasAEMeasurableSectionMeasures μ ν := by
   intro s hs
   simpa only [Function.comp_def, Measure.map_apply hs measurable_prodMk_left.aemeasurable]
     using (Measure.measurable_coe hs).comp_aemeasurable h
 
 /-- An s-finite second measure has measurable section-measure functions. -/
-theorem hasMeasurableSections_of_sfinite (μ : Measure α) (ν : Measure β) [SFinite ν] :
-    HasMeasurableSections μ ν :=
+theorem hasAEMeasurableSectionMeasures_of_sfinite (μ : Measure α) (ν : Measure β) [SFinite ν] :
+    HasAEMeasurableSectionMeasures μ ν :=
   fun _ hs => (measurable_measure_prodMk_left hs).aemeasurable
 
 /-- Every section-measure function is almost everywhere measurable for the zero first measure. -/
 @[simp]
-theorem hasMeasurableSections_zero_left (ν : Measure β) :
-    HasMeasurableSections (0 : Measure α) ν :=
+theorem hasAEMeasurableSectionMeasures_zero_left (ν : Measure β) :
+    HasAEMeasurableSectionMeasures (0 : Measure α) ν :=
   fun _ _ => aemeasurable_zero_measure
 
 /-- The zero measure satisfies the product formula when the first factor is zero. -/
@@ -239,11 +239,11 @@ namespace Measure
 Scalar almost-everywhere measurability of every measurable section is sufficient for this
 construction; in particular, it is defined whenever the second measure is s-finite. -/
 protected def productBySections (μ : Measure α) (ν : Measure β)
-    (h : HasMeasurableSections μ ν := by
+    (h : HasAEMeasurableSectionMeasures μ ν := by
       first
       | assumption
-      | exact MeasureTheory.hasMeasurableSections_zero_left _
-      | exact MeasureTheory.hasMeasurableSections_of_sfinite _ _) : Measure (α × β) :=
+      | exact MeasureTheory.hasAEMeasurableSectionMeasures_zero_left _
+      | exact MeasureTheory.hasAEMeasurableSectionMeasures_of_sfinite _ _) : Measure (α × β) :=
   Measure.ofMeasurable (fun s _ => ∫⁻ x, ν (Prod.mk x ⁻¹' s) ∂μ)
     (by simp)
     (by
@@ -258,22 +258,22 @@ protected def productBySections (μ : Measure α) (ν : Measure β)
 /-- On a measurable set, the measure constructed by section integrals is the integral of its
 section measures. -/
 theorem productBySections_apply {s : Set (α × β)} (hs : MeasurableSet s)
-    (h : HasMeasurableSections μ ν := by
+    (h : HasAEMeasurableSectionMeasures μ ν := by
       first
       | assumption
-      | exact MeasureTheory.hasMeasurableSections_zero_left _
-      | exact MeasureTheory.hasMeasurableSections_of_sfinite _ _) :
+      | exact MeasureTheory.hasAEMeasurableSectionMeasures_zero_left _
+      | exact MeasureTheory.hasAEMeasurableSectionMeasures_of_sfinite _ _) :
     (μ.productBySections ν h) s = ∫⁻ x, ν (Prod.mk x ⁻¹' s) ∂μ :=
   Measure.ofMeasurable_apply s hs
 
 /-- A measure constructed by section integrals satisfies the product formula on measurable
 rectangles. -/
 theorem productBySections_isProductMeasure (μ : Measure α) (ν : Measure β)
-    (h : HasMeasurableSections μ ν := by
+    (h : HasAEMeasurableSectionMeasures μ ν := by
       first
       | assumption
-      | exact MeasureTheory.hasMeasurableSections_zero_left _
-      | exact MeasureTheory.hasMeasurableSections_of_sfinite _ _) :
+      | exact MeasureTheory.hasAEMeasurableSectionMeasures_zero_left _
+      | exact MeasureTheory.hasAEMeasurableSectionMeasures_of_sfinite _ _) :
     IsProductMeasure μ ν (μ.productBySections ν h) := by
   intro s t hs ht
   rw [productBySections_apply (hs.prod ht) h]
@@ -286,10 +286,11 @@ construction agrees with monadic bind. -/
 theorem productBySections_eq_bind
     (hprod : AEMeasurable
       (fun x : α => map (Prod.mk x) ν measurable_prodMk_left.aemeasurable) μ) :
-    μ.productBySections ν (HasMeasurableSections.of_aemeasurable hprod) =
+    μ.productBySections ν (HasAEMeasurableSectionMeasures.of_aemeasurable hprod) =
       μ.bind (fun x : α => map (Prod.mk x) ν measurable_prodMk_left.aemeasurable) hprod := by
   ext s hs
-  rw [productBySections_apply hs (HasMeasurableSections.of_aemeasurable hprod), bind_apply hs hprod]
+  rw [productBySections_apply hs (HasAEMeasurableSectionMeasures.of_aemeasurable hprod),
+    bind_apply hs hprod]
   simp_rw [map_apply hs measurable_prodMk_left.aemeasurable]
 
 @[simp]

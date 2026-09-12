@@ -228,11 +228,13 @@ open MeasureTheory.Measure MeasureTheory
 variable [NumberField K]
 
 open scoped Classical in
-instance : IsAddHaarMeasure (volume : Measure (mixedSpace K)) :=
-  productBySections.instIsAddHaarMeasure volume volume
+instance : IsAddHaarMeasure (volume : Measure (mixedSpace K)) := by
+  rw [volume_eq_productBySections]
+  exact productBySections.instIsAddHaarMeasure volume volume
 
 open scoped Classical in
 instance : NullSingletonClass (volume : Measure (mixedSpace K)) := by
+  rw [volume_eq_productBySections]
   obtain ⟨w⟩ := (inferInstance : Nonempty (InfinitePlace K))
   by_cases hw : IsReal w
   · have : NullSingletonClass (volume : Measure ({w : InfinitePlace K // IsReal w} → ℝ)) :=
@@ -927,6 +929,7 @@ open MeasureTheory Classical in
 /-- `negAt` preserves the volume . -/
 theorem volume_preserving_negAt [NumberField K] :
     MeasurePreserving (negAt s) := by
+  simp only [Measure.volume_eq_productBySections]
   refine MeasurePreserving.prod (volume_preserving_pi fun w ↦ ?_) (MeasurePreserving.id _)
   by_cases hw : w ∈ s
   · simp_rw [ite_eq_left hw]

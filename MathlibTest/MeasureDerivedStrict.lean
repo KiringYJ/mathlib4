@@ -53,25 +53,25 @@ example (μ : Measure α) (ν : Measure β)
     (hprod : AEMeasurable
       (fun x : α => Measure.map (Prod.mk x) ν measurable_prodMk_left.aemeasurable) μ) :
     Measure (α × β) :=
-  μ.productBySections ν (HasMeasurableSections.of_aemeasurable hprod)
+  μ.productBySections ν (HasAEMeasurableSectionMeasures.of_aemeasurable hprod)
 
 example (μ : Measure α) (ν : Measure β)
     (hprod₁ hprod₂ : AEMeasurable
       (fun x : α => Measure.map (Prod.mk x) ν measurable_prodMk_left.aemeasurable) μ) :
-    μ.productBySections ν (HasMeasurableSections.of_aemeasurable hprod₁) =
-      μ.productBySections ν (HasMeasurableSections.of_aemeasurable hprod₂) := rfl
+    μ.productBySections ν (HasAEMeasurableSectionMeasures.of_aemeasurable hprod₁) =
+      μ.productBySections ν (HasAEMeasurableSectionMeasures.of_aemeasurable hprod₂) := rfl
 
 example (μ : Measure α) (ν : Measure β) {s : Set (α × β)} (hs : MeasurableSet s)
     (hprod : AEMeasurable
       (fun x : α => Measure.map (Prod.mk x) ν measurable_prodMk_left.aemeasurable) μ) :
-    (μ.productBySections ν (HasMeasurableSections.of_aemeasurable hprod)) s =
+    (μ.productBySections ν (HasAEMeasurableSectionMeasures.of_aemeasurable hprod)) s =
       ∫⁻ x, ν (Prod.mk x ⁻¹' s) ∂μ :=
-  Measure.productBySections_apply hs (HasMeasurableSections.of_aemeasurable hprod)
+  Measure.productBySections_apply hs (HasAEMeasurableSectionMeasures.of_aemeasurable hprod)
 
 example (μ : Measure α) (ν : Measure β) (hν : SFinite ν) : Measure (α × β) :=
   μ.productBySections ν (by
     let _ : SFinite ν := hν
-    exact hasMeasurableSections_of_sfinite _ _)
+    exact hasAEMeasurableSectionMeasures_of_sfinite _ _)
 
 set_option linter.unusedVariables false in
 example (κ : Kernel α β) (f : β → γ) : True := by

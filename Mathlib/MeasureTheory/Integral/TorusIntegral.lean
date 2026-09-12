@@ -231,7 +231,8 @@ theorem torusIntegral_succAbove
     simp only [funext_iff, i.forall_iff_succAbove, circleMap, Fin.insertNth_apply_same,
       Fin.insertNth_apply_succAbove, imp_true_iff, and_self_iff]
   · have := hf.function_integrable
-    rwa [← hem.integrableOn_comp_preimage e.measurableEmbedding, heπ] at this
+    rwa [← hem.integrableOn_comp_preimage e.measurableEmbedding, heπ,
+      Measure.volume_eq_productBySections] at this
 
 /-- Recurrent formula for `torusIntegral`, see also `torusIntegral_succAbove`. -/
 theorem torusIntegral_succ

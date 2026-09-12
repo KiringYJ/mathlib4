@@ -47,7 +47,8 @@ irreducible_def parallelComp (κ : Kernel α β) (η : Kernel γ δ) : Kernel (�
   if h : IsSFiniteKernel κ ∧ IsSFiniteKernel η then
   letI : IsSFiniteKernel κ := h.1
   letI : IsSFiniteKernel η := h.2
-  { toFun := fun x ↦ (κ x.1).productBySections (η x.2) (hasMeasurableSections_of_sfinite _ _)
+  { toFun := fun x ↦ (κ x.1).productBySections (η x.2)
+      (hasAEMeasurableSectionMeasures_of_sfinite _ _)
     measurable' := by
       refine Measure.measurable_of_measurable_coe _ fun s hs ↦ ?_
       simp only [Measure.productBySections_apply, hs]
