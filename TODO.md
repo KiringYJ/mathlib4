@@ -1,7 +1,8 @@
 # Mathematical fidelity and API hygiene backlog
 
 This file records public mathematical interfaces that should be audited or migrated under the
-strict-domain, representation, and public-notation policies in `FORK_DESIGN.md`.  It is an
+strict-domain, representation, public-notation, and function-presentation policies in
+`FORK_DESIGN.md`.  It is an
 implementation backlog, not a claim that Lean is unsound and not a claim that every total
 implementation or custom notation is defective.  A documented fallback is still non-strict when
 the ordinary public operation erases its mathematical domain.  An explicitly named/default-taking
@@ -641,6 +642,86 @@ have stable roles and a searchable named declaration remains available.
   compositional mechanism for synthesizing routine model arguments; preserve their improved
   diagnostics without making an alternate identifier language the primary public syntax.
 
+## Function-presentation hygiene -- one fact with curried and tuple views
+
+These entries are not objections to `Function.curry`, `Function.uncurry`, `↿f`, or the
+normalization lemmas that make them usable.  They track cases where beta/eta-equivalent
+presentation has produced manually maintained declarations that appear to be separate
+mathematical facts.  Keep a product or dependent-sum argument when it is the actual mathematical
+domain, and keep structured curry/uncurry results when topology, measurability, boundedness,
+linearity, or another invariant adds hypotheses or preservation content.
+
+- [ ] **[M] Canonicalize tuple/curried duplicates for finite and infinite big operators.**
+  `Mathlib/Algebra/BigOperators/Group/Finset/Sigma.lean:51`--`:101` maintains four adjacent
+  `prod_*`/`prod_*'` pairs whose primed proofs are direct applications of the tuple-function
+  versions; `@[to_additive]` generates the corresponding sum families.  The pattern continues in
+  `Mathlib/Data/Fintype/BigOperators.lean:267`--`:293`, while
+  `Mathlib/Algebra/BigOperators/Expect.lean:258`--`:270` proves `expect_product` and
+  `expect_product'` separately, and
+  `Mathlib/Topology/Algebra/InfiniteSum/Constructions.lean:162`--`:172` gives both
+  `Multipliable.tprod_prod'` and `Multipliable.tprod_prod_uncurry` together with their additive
+  versions.  Retain one theorem per product/sum/expectation fact and transport the integrand at the
+  call site; correct docstrings that currently call a curried argument "uncurried."  Classify
+  `prod_sigma`/`prod_sigma'` separately because the `Sigma` value may be the genuine dependent
+  indexing domain rather than a presentation tuple.
+
+- [ ] **[M] Reduce hand-written bare bridge families to a minimal generated normalization layer.**
+  `Set.image_prod`, `Set.image_uncurry_prod`, and `Set.image2_curry` in
+  `Mathlib/Data/Set/NAry.lean:73`--`:85` state one image computation through three spellings.
+  `Mathlib/Data/Finset/NAry.lean:276`--`:281` gives both directions definitionally, and
+  `Mathlib/Order/Filter/NAry.lean:53`--`:59` and `:159`--`:166` chains four manually named views of
+  the same `map`/`map₂` bridge.  Audit the similarly mechanical
+  `uniformContinuous₂_curry` bridge in `Mathlib/Topology/UniformSpace/Basic.lean:923`--`:936`,
+  `Primrec₂.uncurry`/`Primrec₂.curry` in
+  `Mathlib/Computability/Primrec/Basic.lean:325`--`:388`, and the paired pointwise-algebra
+  simplification lemmas in `Mathlib/Algebra/Group/Pi/Lemmas.lean:480`--`:518` and
+  `Mathlib/Algebra/Notation/Pi/Basic.lean:121`--`:129`.  Select the curried normal form where these
+  are ordinary multiargument functions, retain only the `[simp]` directions needed to normalize
+  boundary expressions, and generate any unavoidable compatibility names mechanically.  Do not
+  remove `Primrec₂` itself merely because its implementation encodes two arguments by a product,
+  and do not merge `Option.map₂_curry` with `Option.map_uncurry`: independent optional arguments
+  and one optional pair are different semantic inputs.
+
+- [ ] **[L] Prototype one product-measure and iterated-integral theorem layer, then collapse
+  duplicate presentations.**
+  `Mathlib/MeasureTheory/Measure/ProductBySections.lean:55`--`:60` explicitly says that many results
+  are proved twice for `α → β → γ` and `α × β → γ`, with both spellings justified there by
+  elaboration convenience.  Concrete pairs include `ae_ae_eq_curry_of_prod` and
+  `ae_ae_eq_of_ae_eq_uncurry` at lines 342--348, the a.e.-measurable inner-integral families at
+  lines 967--987, and `lintegral_productBySections`/`lintegral_lintegral` plus their symmetric
+  versions at lines 1004--1078.  The same duplication occurs for measurable inner integrals in
+  `Mathlib/MeasureTheory/Measure/ProductMeasure.lean:92`--`:129`, Bochner inner integrals and
+  Fubini statements in `Mathlib/MeasureTheory/Integral/Prod.lean:69`--`:93` and `:461`--`:497`, and
+  vector-measure inner integrals in `Mathlib/MeasureTheory/VectorMeasure/Prod.lean:229`--`:256`.
+  Prototype the canonical statement for each family against current elaboration-sensitive
+  consumers, taking account of whether the product is the actual domain and which equality
+  orientation is the useful rewrite normal form.  Make the other spelling a documentation/search
+  view or an inline transport through `Function.curry`/`Function.uncurry`, not another hand-written
+  proof.  If compatibility still requires a named entry, generate the exact transport mechanically
+  under the compatibility policy.  Preserve genuine Tonelli, Fubini, measurability, integrability,
+  and change-of-order results; migrate consumers together and negative-scan only the hand-maintained
+  duplicate proofs and any names the prototype actually retires.
+
+- [ ] **[L] Add an elaborated-statement lint for redundant presentation declarations.**
+  A 2026-09-12 source scan found 621 curry/uncurry-named declaration lines in 114 files among all
+  9,108 tracked Lean files.  Here a named line begins with an optional `protected`, `private`, or
+  `noncomputable` modifier followed by `def`, `abbrev`, `theorem`, or `lemma`, and its declared
+  identifier contains case-insensitive `curry`, `curried`, `currying`, or `uncurr*`; this lexical
+  query was rerun at the final documentation state.  Suffixes and textual call counts alone were too
+  noisy to classify the matches.
+  Prototype a lint that normalizes only the bare `Function.curry`/`Function.uncurry`,
+  `Sigma.curry`/`Sigma.uncurry`, and recursive `↿f` transports, compares theorem propositions
+  modulo beta/eta conversion, and reports a candidate only when an existing declaration supplies
+  the same mathematical fact.  Use the measure/integral and big-operator pairs above as positive
+  controls.  Negative controls include `ContinuousMap.uncurry` and `Homeomorph.curry` in
+  `Mathlib/Topology/CompactOpen.lean:430`--`:471` and `:556`, the multilinear and continuous
+  multilinear equivalences in `Mathlib/LinearAlgebra/Multilinear/Curry.lean` and
+  `Mathlib/Analysis/Normed/Module/Multilinear/Curry.lean`, categorical closed-structure currying,
+  and genuine product, tensor, direct-sum, finite-support, or dependent-sum domains.  Companion
+  normalization lemmas for an admitted structured construction inherit that construction's
+  exclusion.  Run the lint in audit mode over the inherited tree and as a diff-scoped warning for
+  new declarations before considering repository-wide enforcement.
+
 ## Proof and API-boundary hygiene -- rewrites that depend on extra transparency
 
 `erw` is logically sound, but its success where `rw` fails can expose a missing public rewrite
@@ -752,3 +833,15 @@ promotes only families with a hidden ordinary/instance argument, a missing or am
 head, or a concrete parser collision.  Conventional polynomial, algebraic-adjoin, tensor, valuation,
 expectation, variance, and literal notations were screened rather than added automatically when
 their operands and named APIs remained compositional and discoverable.
+
+A 2026-09-12 function-presentation pass scanned all 9,108 tracked Lean files, including the 9,076
+files in `Mathlib/`, `MathlibTest/`, `Archive/`, `Counterexamples/`, and `Wanted/`.  The pass
+inspected 621 curry/uncurry-named declaration lines in 114 files, together with tuple-function
+versus curried-function binders, primed theorem pairs, and source comments that explicitly describe
+duplicated presentations.  The only named hit outside `Mathlib/` was the unfolding fixture at
+`MathlibTest/FunPropMinimal.lean`; no non-`Mathlib/` public theorem family was promoted.  The scan
+manually separated beta/eta transport from structured topology, measurability, multilinearity,
+category theory, finite-support, and genuine product or dependent-sum mathematics.  It cannot prove
+the absence of arbitrarily named equivalent theorems with no presentation marker; the proposed
+elaborated-statement lint is the
+required next probe for that boundary.

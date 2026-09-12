@@ -119,6 +119,53 @@ ambient sigma-algebra; `s ∈ 𝓐` exposes an explicit sigma-algebra; and
 or theorem search specifically needs it. The former `MeasurableSet[𝓐] s`
 escape hatch is deliberately not a fourth spelling.
 
+#### Canonical multiargument functions and tuple presentation
+
+Use the curried dependent-function type as the semantic normal form for an
+ordinary multiargument function. The form
+`(x : A) → (y : B x) → C x y` extends directly to dependent arguments;
+forcing the same data into a one-argument tuple function instead requires a
+dependent pair. In the nondependent case, `A → B → C` and `A × B → C`
+are equivalent views of one function, not two mathematical APIs.
+
+Classify the arguments by their mathematical role, not by a type isomorphism
+alone. If the input is genuinely a point of a product, dependent sum, or
+bundled pair, then the tuple is the mathematical domain rather than an
+uncurried presentation of separate arguments.
+
+- State definitions and theorems once in curried form when curry/uncurry is
+  only computational transport. At a boundary that accepts a tuple function,
+  use `↿f` for recursive uncurrying or `Function.uncurry f`; use
+  `Function.curry g` in the other direction.
+- Keep tuple-pattern syntax such as `fun (x, y) ↦ ...` available as a
+  mathematician-facing presentation. Documentation should explain `↿f` in
+  ordinary language as regarding the same multivariable function as a function
+  of one tuple; users need not learn currying terminology to use the view.
+- Do not add a parallel `foo_uncurry`, `foo_prod`, or similar theorem family
+  merely because another spelling may help discovery. Prefer docstrings,
+  generated documentation entries, editor support, normalization lemmas, or a
+  small tactic that routes users to the canonical declaration. A documentation
+  index may expose both spellings without adding a second kernel declaration.
+- If an external compatibility boundary requires a named transported theorem,
+  generate it mechanically as an attribute-free compatibility declaration or
+  place it in a dedicated compatibility namespace. It must remain visibly
+  derived and must not acquire its own theorem ecosystem.
+
+This rule applies only when the passage is beta/eta-equivalent presentation.
+Separate curry or uncurry definitions and theorems are legitimate when the
+passage carries mathematical content: for example, when bundled morphisms,
+function-space topology, measurability, boundedness, or another structure adds
+hypotheses or a nontrivial preservation statement. The compact-open interface
+is a boundary example: `ContinuousMap.uncurry` and `Homeomorph.curry` require
+local compactness assumptions, so they are not redundant spellings of the bare
+function operations.
+
+A prospective linter may flag a transported theorem when normalization reduces
+its proof and statement to an existing declaration. Such a check must exclude
+the structured cases above and report duplication evidence rather than infer
+from an `_uncurry` suffix alone. The goal is one mathematical node with multiple
+usable presentations, not multiple constants mistaken for independent facts.
+
 #### Predicates, membership, and proof-carrying domains
 
 Choose public syntax only after distinguishing the mathematical roles involved:
