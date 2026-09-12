@@ -235,23 +235,25 @@ lemma condDistrib_map {γ : Type*} {mγ : SigmaAlgebra γ}
 lemma condDistrib_fst_prod {γ : Type*} {mγ : SigmaAlgebra γ}
     (hX : AEMeasurable X μ) (hY : AEMeasurable Y μ) (ν : Measure γ) [IsProbabilityMeasure ν] :
     condDistrib (fun ω ↦ Y ω.1) (fun ω ↦ X ω.1) (μ.prod ν) =ᵐ[μ.map X] condDistrib Y X μ := by
+  simp only [Measure.prod_eq_productBySections μ ν]
   have h_map := condDistrib_map (X := X) (Y := Y) (f := Prod.fst (α := α) (β := γ))
-      (ν := μ.prod ν Measurable.map_prodMk_left.aemeasurable)
+      (ν := μ.productBySections ν (hasMeasurableSections_of_sfinite _ _))
       (mα := inferInstance) (mβ := inferInstance)
       (by fun_prop) (by simpa) (by simpa)
   rw [← Measure.map_map (by fun_prop) (by simpa)] at h_map
-  simp only [Measure.map_fst_prod, measure_univ, one_smul] at h_map
+  simp only [Measure.map_fst_productBySections, measure_univ, one_smul] at h_map
   exact h_map.symm
 
 lemma condDistrib_snd_prod {γ : Type*} {mγ : SigmaAlgebra γ}
     (hX : AEMeasurable X μ) (hY : AEMeasurable Y μ) (ν : Measure γ) [IsProbabilityMeasure ν] :
     condDistrib (fun ω ↦ Y ω.2) (fun ω ↦ X ω.2) (ν.prod μ) =ᵐ[μ.map X] condDistrib Y X μ := by
+  simp only [Measure.prod_eq_productBySections ν μ]
   have h_map := condDistrib_map (X := X) (Y := Y) (f := Prod.snd (β := α) (α := γ))
-      (ν := ν.prod μ Measurable.map_prodMk_left.aemeasurable)
+      (ν := ν.productBySections μ (hasMeasurableSections_of_sfinite _ _))
       (mα := inferInstance) (mβ := inferInstance)
       (by fun_prop) (by simpa) (by simpa)
   rw [← Measure.map_map (by fun_prop) (by simpa)] at h_map
-  simp only [Measure.map_snd_prod, measure_univ, one_smul] at h_map
+  simp only [Measure.map_snd_productBySections, measure_univ, one_smul] at h_map
   exact h_map.symm
 
 section Integrability

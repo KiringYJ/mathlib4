@@ -52,11 +52,11 @@ variable (μ : FiniteMeasure α) (ν : FiniteMeasure β)
 
 lemma prod_apply (s : Set (α × β)) (s_mble : MeasurableSet s) :
     μ.prod ν s = ENNReal.toNNReal (∫⁻ x, ν.toMeasure (Prod.mk x ⁻¹' s) ∂μ) := by
-  simp [coeFn_def, Measure.prod_apply s_mble Measurable.map_prodMk_left.aemeasurable]
+  simp [coeFn_def, Measure.prod_apply (μ := μ.toMeasure) (ν := ν.toMeasure) s_mble]
 
 lemma prod_apply_symm (s : Set (α × β)) (s_mble : MeasurableSet s) :
     μ.prod ν s = ENNReal.toNNReal (∫⁻ y, μ.toMeasure ((fun x ↦ ⟨x, y⟩) ⁻¹' s) ∂ν) := by
-  simp [coeFn_def, Measure.prod_apply_symm s_mble]
+  simp [coeFn_def, Measure.prod_apply_symm (μ := μ.toMeasure) (ν := ν.toMeasure) s_mble]
 
 @[simp] lemma prod_prod (s : Set α) (t : Set β) : μ.prod ν (s ×ˢ t) = μ s * ν t := by
   simp [coeFn_def]
@@ -64,7 +64,7 @@ lemma prod_apply_symm (s : Set (α × β)) (s_mble : MeasurableSet s) :
 @[simp] lemma mass_prod : (μ.prod ν).mass = μ.mass * ν.mass := by
   simp only [coeFn_def, mass, univ_prod_univ.symm, toMeasure_prod]
   rw [← ENNReal.toNNReal_mul]
-  exact congr_arg ENNReal.toNNReal (Measure.prod_prod univ univ)
+  exact congr_arg ENNReal.toNNReal (Measure.prod_prod_of_sigmaFinite univ univ)
 
 @[simp] lemma zero_prod : (0 : FiniteMeasure α).prod ν = 0 := by
   rw [← mass_zero_iff, mass_prod, zero_mass, zero_mul]
@@ -107,11 +107,11 @@ variable (μ : ProbabilityMeasure α) (ν : ProbabilityMeasure β)
 
 lemma prod_apply (s : Set (α × β)) (s_mble : MeasurableSet s) :
     μ.prod ν s = ENNReal.toNNReal (∫⁻ x, ν.toMeasure (Prod.mk x ⁻¹' s) ∂μ) := by
-  simp [coeFn_def, Measure.prod_apply s_mble Measurable.map_prodMk_left.aemeasurable]
+  simp [coeFn_def, Measure.prod_apply (μ := μ.toMeasure) (ν := ν.toMeasure) s_mble]
 
 lemma prod_apply_symm (s : Set (α × β)) (s_mble : MeasurableSet s) :
     μ.prod ν s = ENNReal.toNNReal (∫⁻ y, μ.toMeasure ((fun x ↦ ⟨x, y⟩) ⁻¹' s) ∂ν) := by
-  simp [coeFn_def, Measure.prod_apply_symm s_mble]
+  simp [coeFn_def, Measure.prod_apply_symm (μ := μ.toMeasure) (ν := ν.toMeasure) s_mble]
 
 @[simp] lemma prod_prod (s : Set α) (t : Set β) : μ.prod ν (s ×ˢ t) = μ s * ν t := by
   simp [coeFn_def]

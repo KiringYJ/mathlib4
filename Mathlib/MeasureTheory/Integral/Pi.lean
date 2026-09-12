@@ -46,7 +46,11 @@ theorem fin_nat_prod {n : ℕ} {E : Fin n → Type*}
       have : Integrable (fun (x : (j : Fin n) → E (Fin.succ j)) ↦ ∏ j, f (Fin.succ j) (x j))
           (Measure.pi (fun i ↦ μ i.succ)) :=
         n_ih (fun i ↦ hf _)
-      exact Integrable.mul_prod (hf 0) this
+      have h := Integrable.mul_prod (hf 0) this
+      rw [← Measure.prod_eq_productBySections (μ 0)
+        (Measure.pi (fun i : Fin n ↦ μ (Fin.succ i)) :
+          Measure ((i : Fin n) → E (Fin.succ i)))] at h
+      exact h
 
 /-- On a finite product space, a product of integrable functions depending on each coordinate is
 integrable. Version with dependent target. -/
@@ -93,7 +97,9 @@ theorem integral_fin_nat_prod_eq_prod {n : ℕ} {E : Fin n → Type*}
             Fin.zero_succAbove, cast_eq, Fin.cons_zero]
         _ = (∫ x, f 0 x ∂μ 0)
             * ∏ i : Fin n, ∫ (x : E (Fin.succ i)), f (Fin.succ i) x ∂(μ i.succ) := by
-          rw [← n_ih, ← integral_prod_mul]
+          rw [Measure.prod_eq_productBySections (μ 0)
+            (Measure.pi (fun i : Fin n ↦ μ (Fin.succ i)) :
+              Measure ((i : Fin n) → E (Fin.succ i))), ← n_ih, ← integral_prod_mul]
         _ = ∏ i, ∫ x, f i x ∂(μ i) := by rw [Fin.prod_univ_succ]
 
 /-- A version of **Fubini's theorem** in `n` variables, for a natural number `n`. -/

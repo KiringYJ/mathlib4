@@ -329,18 +329,25 @@ theorem indepFun_iff_pdf_prod_eq_pdf_mul_pdf
           z.1 * pdf Y ℙ ν
             (HasPDF.aemeasurable (fun ω ↦ (X ω, Y ω)) ℙ (μ.prod ν)).snd z.2 := by
   have : HasPDF X ℙ μ := quasiMeasurePreserving_hasPDF'
-    (μ := μ.prod ν Measurable.map_prodMk_left.aemeasurable) (fun ω ↦ (X ω, Y ω))
-    quasiMeasurePreserving_fst
+    (μ := μ.prod ν (hasUniqueProduct_of_sigmaFinite μ ν)) (ν := μ) (g := Prod.fst)
+    (fun ω ↦ (X ω, Y ω))
+    (by rw [Measure.prod_eq_productBySections μ ν (h := hasUniqueProduct_of_sigmaFinite μ ν)]
+        exact quasiMeasurePreserving_fst)
   have : HasPDF Y ℙ ν := quasiMeasurePreserving_hasPDF'
-    (μ := μ.prod ν Measurable.map_prodMk_left.aemeasurable) (fun ω ↦ (X ω, Y ω))
-    quasiMeasurePreserving_snd
+    (μ := μ.prod ν (hasUniqueProduct_of_sigmaFinite μ ν)) (ν := ν) (g := Prod.snd)
+    (fun ω ↦ (X ω, Y ω))
+    (by rw [Measure.prod_eq_productBySections μ ν (h := hasUniqueProduct_of_sigmaFinite μ ν)]
+        exact quasiMeasurePreserving_snd)
   have h₀ : (ℙ.map X (HasPDF.aemeasurable X ℙ μ)).prod
       (ℙ.map Y (HasPDF.aemeasurable Y ℙ ν)) =
       (μ.prod ν).withDensity fun z ↦
         pdf X ℙ μ (HasPDF.aemeasurable X ℙ μ) z.1 *
-          pdf Y ℙ ν (HasPDF.aemeasurable Y ℙ ν) z.2 :=
-    prod_eq fun s t hs ht ↦ by rw [withDensity_apply _ (hs.prod ht), ← prod_restrict,
-      lintegral_prod_mul
+          pdf Y ℙ ν (HasPDF.aemeasurable Y ℙ ν) z.2 := by
+    rw [Measure.prod_eq_productBySections (ℙ.map X (HasPDF.aemeasurable X ℙ μ))
+      (ℙ.map Y (HasPDF.aemeasurable Y ℙ ν)), Measure.prod_eq_productBySections μ ν]
+    exact productBySections_eq fun s t hs ht ↦ by
+      rw [withDensity_apply _ (hs.prod ht), ← productBySections_restrict,
+        lintegral_productBySections_mul
         (measurable_pdf X ℙ μ (HasPDF.aemeasurable X ℙ μ)).aemeasurable
         (measurable_pdf Y ℙ ν (HasPDF.aemeasurable Y ℙ ν)).aemeasurable,
       map_eq_setLIntegral_pdf X ℙ μ hs, map_eq_setLIntegral_pdf Y ℙ ν ht]

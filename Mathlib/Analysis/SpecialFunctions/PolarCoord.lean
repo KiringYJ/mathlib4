@@ -116,9 +116,10 @@ theorem det_fderivPolarCoordSymm (p : ℝ × ℝ) :
     Matrix.det_fin_two_of, sub_neg_eq_add]
   ring
 
-/-- This instance is required to see through the defeq `volume = volume.prod volume`. -/
+/-- This instance is required to see through the defeq
+    `volume = volume.productBySections volume`. -/
 instance : Measure.IsAddHaarMeasure volume (G := ℝ × ℝ) :=
-  Measure.prod.instIsAddHaarMeasure _ _
+  Measure.productBySections.instIsAddHaarMeasure _ _
 
 theorem polarCoord_source_ae_eq_univ : polarCoord.source =ᵐ[volume] univ := by
   have A : polarCoord.sourceᶜ ⊆ LinearMap.ker (LinearMap.snd ℝ ℝ ℝ) := by

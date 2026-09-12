@@ -281,6 +281,7 @@ variable [SigmaAlgebra F] [BorelSpace F] [SecondCountableTopologyEither E F]
 
 theorem prod_addHaar (v : Basis ι ℝ E) (w : Basis ι' ℝ F) :
     (v.prod w).addHaar = v.addHaar.prod w.addHaar := by
+  rw [Measure.prod_eq_productBySections v.addHaar w.addHaar]
   have : FiniteDimensional ℝ E := v.finiteDimensional_of_finite
   have : FiniteDimensional ℝ F := w.finiteDimensional_of_finite
   simp [(v.prod w).addHaar_eq_iff, Basis.prod_parallelepiped, Basis.addHaar_self]

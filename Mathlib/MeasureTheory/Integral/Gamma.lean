@@ -83,7 +83,7 @@ theorem Complex.integral_rpow_mul_exp_neg_rpow {p q : ℝ} (hp : 1 ≤ p) (hq : 
       rw [← Complex.integral_comp_polarCoord_symm, polarCoord_target]
       simp_rw [Complex.norm_polarCoord_symm, smul_eq_mul]
     _ = (∫ x in Ioi (0 : ℝ), x * |x| ^ q * rexp (-|x| ^ p)) * ∫ _ in Ioo (-π) π, 1 := by
-      rw [← setIntegral_prod_mul, volume_eq_prod]
+      rw [← setIntegral_prod_mul, volume_eq_productBySections]
       simp_rw [mul_one]
       congr! 2; ring
     _ = 2 * π * ∫ x in Ioi (0 : ℝ), x * |x| ^ q * rexp (-|x| ^ p) := by
@@ -110,7 +110,7 @@ theorem Complex.integral_rpow_mul_exp_neg_mul_rpow {p q b : ℝ} (hp : 1 ≤ p) 
       rw [← Complex.integral_comp_polarCoord_symm, polarCoord_target]
       simp_rw [Complex.norm_polarCoord_symm, smul_eq_mul]
     _ = (∫ x in Ioi (0 : ℝ), x * |x| ^ q * rexp (-b * |x| ^ p)) * ∫ _ in Ioo (-π) π, 1 := by
-      rw [← setIntegral_prod_mul, volume_eq_prod]
+      rw [← setIntegral_prod_mul, volume_eq_productBySections]
       simp_rw [mul_one]
       congr! 2; ring
     _ = 2 * π * ∫ x in Ioi (0 : ℝ), x * |x| ^ q * rexp (-b * |x| ^ p) := by

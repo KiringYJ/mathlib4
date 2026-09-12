@@ -92,7 +92,7 @@ theorem compProd_apply (hs : MeasurableSet s) (κ : Kernel α β) [IsSFiniteKern
   rw [compProd, comp_apply' _ _ _ hs, copy_apply,
     lintegral_dirac' _ (Kernel.measurable_coe _ hs), comp_apply' _ _ _ hs,
     parallelComp_apply,
-    lintegral_prod _ (Kernel.measurable_coe _ hs).aemeasurable, Kernel.id_apply,
+    lintegral_productBySections _ (Kernel.measurable_coe _ hs).aemeasurable, Kernel.id_apply,
     lintegral_dirac']
   swap
   · suffices Measurable fun p : α × β ↦

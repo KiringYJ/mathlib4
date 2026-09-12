@@ -59,6 +59,7 @@ lemma map_rotation_eq_self_of_forall_strongDual_eq_zero
     [SecondCountableTopology E] [CompleteSpace E]
     (hμ : ∀ L : StrongDual ℝ E, μ[L] = 0) (θ : ℝ) :
     (μ.prod μ).map (ContinuousLinearMap.rotation θ) = μ.prod μ := by
+  simp only [Measure.prod_eq_productBySections μ μ]
   refine Measure.ext_of_charFunDual ?_
   ext L
   simp_rw [charFunDual_map, charFunDual_prod, charFunDual_eq_of_forall_strongDual_eq_zero hμ,

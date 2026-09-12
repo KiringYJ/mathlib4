@@ -126,7 +126,7 @@ the two variables `α` and `β`.
 -/
 theorem integrableOn_cartanKernel (h : Meromorphic f) :
     IntegrableOn (fun p ↦ cartanKernel f R p.1 p.2) (uIoc 0 (2 * π) ×ˢ uIoc 0 (2 * π)) := by
-  rw [IntegrableOn, Measure.volume_eq_prod, ← Measure.prod_restrict]
+  rw [IntegrableOn, Measure.volume_eq_productBySections, ← Measure.productBySections_restrict]
   have := h.measurable
   simpa [uIoc_of_le two_pi_pos.le] using (integrable_prod_iff' (by fun_prop)).2
     ⟨Eventually.of_forall (integrableOn_cartanKernel_left f R),
@@ -139,7 +139,8 @@ Corollary of `integrableOn_cartanKernel`: If `f : ℂ → ℂ` is meromorphic, t
 lemma integrableOn_intervalIntegral_cartanKernel_left (h : Meromorphic f) :
     IntegrableOn (∫ α in 0..2 * π, Cartan.cartanKernel f R α ·) (Ioc 0 (2 * π)) := by
   have h_int := Cartan.integrableOn_cartanKernel (R := R) h
-  rw [uIoc_of_le two_pi_pos.le, IntegrableOn, Measure.volume_eq_prod, ← Measure.prod_restrict]
+  rw [uIoc_of_le two_pi_pos.le, IntegrableOn, Measure.volume_eq_productBySections,
+    ← Measure.productBySections_restrict]
     at h_int
   simpa [IntegrableOn, intervalIntegral.integral_of_le two_pi_pos.le, Cartan.cartanKernel]
     using h_int.integral_prod_right
@@ -151,7 +152,8 @@ Corollary of `integrableOn_cartanKernel`: If `f : ℂ → ℂ` is meromorphic, t
 lemma integrableOn_intervalIntegral_cartanKernel_right (h : Meromorphic f) :
     IntegrableOn (∫ β in 0..2 * π, Cartan.cartanKernel f R · β) (Ioc 0 (2 * π)) := by
   have h_int := Cartan.integrableOn_cartanKernel (R := R) h
-  rw [uIoc_of_le two_pi_pos.le, IntegrableOn, Measure.volume_eq_prod, ← Measure.prod_restrict]
+  rw [uIoc_of_le two_pi_pos.le, IntegrableOn, Measure.volume_eq_productBySections,
+    ← Measure.productBySections_restrict]
     at h_int
   simpa [IntegrableOn, intervalIntegral.integral_of_le two_pi_pos.le, Cartan.cartanKernel]
     using h_int.integral_prod_left

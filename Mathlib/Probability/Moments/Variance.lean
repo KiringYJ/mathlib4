@@ -514,9 +514,12 @@ variable {Ω' : Type*} {mΩ' : SigmaAlgebra Ω'} {ν : Measure Ω'}
 
 lemma variance_add_prod (hfμ : MemLp X 2 μ) (hgν : MemLp Y 2 ν) :
     Var[fun p ↦ X p.1 + Y p.2; μ.prod ν] = Var[X; μ] + Var[Y; ν] := by
-  refine (IndepFun.variance_fun_add (hfμ.comp_fst ν) (hgν.comp_snd μ) ?_).trans ?_
-  · exact indepFun_prod₀ hfμ.aemeasurable hgν.aemeasurable
-  · rw [measurePreserving_fst.variance_fun_comp hfμ.aemeasurable,
+  refine (IndepFun.variance_fun_add ?_ ?_
+    (indepFun_prod₀ hfμ.aemeasurable hgν.aemeasurable)).trans ?_
+  · simpa only [Measure.prod_eq_productBySections μ ν] using hfμ.comp_fst ν
+  · simpa only [Measure.prod_eq_productBySections μ ν] using hgν.comp_snd μ
+  · rw [Measure.prod_eq_productBySections μ ν,
+      measurePreserving_fst.variance_fun_comp hfμ.aemeasurable,
       measurePreserving_snd.variance_fun_comp hgν.aemeasurable]
 
 end Prod

@@ -23,18 +23,18 @@ variable {α β ε : Type*} {mα : SigmaAlgebra α} {mβ : SigmaAlgebra β}
   {μ : Measure α} {ν : Measure β} {p : ℝ≥0∞}
 
 lemma MemLp.comp_fst {f : α → ε} (hf : MemLp f p μ) (ν : Measure β) [IsFiniteMeasure ν] :
-    MemLp (fun x ↦ f x.1) p (μ.prod ν) := by
+    MemLp (fun x ↦ f x.1) p (μ.productBySections ν) := by
   have hf' : MemLp f p (ν .univ • μ) := hf.smul_measure (by simp)
-  change MemLp (f ∘ Prod.fst) p (μ.prod ν)
+  change MemLp (f ∘ Prod.fst) p (μ.productBySections ν)
   rw [← memLp_map_measure_iff (by fun_prop) ?_]
   · simpa using hf'
   · simpa using hf'.1
 
 lemma MemLp.comp_snd {f : β → ε} (hf : MemLp f p ν) (μ : Measure α) [IsFiniteMeasure μ]
     [SFinite ν] :
-    MemLp (fun x ↦ f x.2) p (μ.prod ν) := by
+    MemLp (fun x ↦ f x.2) p (μ.productBySections ν) := by
   have hf' : MemLp f p (μ .univ • ν) := hf.smul_measure (by simp)
-  change MemLp (f ∘ Prod.snd) p (μ.prod ν)
+  change MemLp (f ∘ Prod.snd) p (μ.productBySections ν)
   rw [← memLp_map_measure_iff (by fun_prop) ?_]
   · simpa using hf'
   · simpa using hf'.1

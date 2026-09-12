@@ -229,7 +229,7 @@ variable [NumberField K]
 
 open scoped Classical in
 instance : IsAddHaarMeasure (volume : Measure (mixedSpace K)) :=
-  prod.instIsAddHaarMeasure volume volume
+  productBySections.instIsAddHaarMeasure volume volume
 
 open scoped Classical in
 instance : NullSingletonClass (volume : Measure (mixedSpace K)) := by
@@ -237,10 +237,10 @@ instance : NullSingletonClass (volume : Measure (mixedSpace K)) := by
   by_cases hw : IsReal w
   · have : NullSingletonClass (volume : Measure ({w : InfinitePlace K // IsReal w} → ℝ)) :=
       pi_nullSingletonClass ⟨w, hw⟩
-    exact prod.instNullSingletonClass_fst
+    exact productBySections.instNullSingletonClass_fst
   · have : NullSingletonClass (volume : Measure ({w : InfinitePlace K // IsComplex w} → ℂ)) :=
       pi_nullSingletonClass ⟨w, not_isReal_iff_isComplex.mp hw⟩
-    exact prod.instNullSingletonClass_snd
+    exact productBySections.instNullSingletonClass_snd
 
 variable {K} in
 open scoped Classical in
@@ -521,7 +521,8 @@ theorem fundamentalDomain_stdBasis :
 open scoped Classical in
 theorem volume_fundamentalDomain_stdBasis :
     volume (fundamentalDomain (stdBasis K)) = 1 := by
-  rw [fundamentalDomain_stdBasis, volume_eq_prod, prod_prod, volume_pi, volume_pi, pi_pi, pi_pi,
+  rw [fundamentalDomain_stdBasis, volume_eq_productBySections, productBySections_prod, volume_pi,
+    volume_pi, pi_pi, pi_pi,
     Complex.volume_preserving_equiv_pi.measure_preimage ?_, volume_pi, pi_pi, Real.volume_Ico,
     sub_zero, ENNReal.ofReal_one, prod_const_one, prod_const_one, prod_const_one, one_mul]
   exact (MeasurableSet.pi Set.countable_univ (fun _ _ => measurableSet_Ico)).nullMeasurableSet

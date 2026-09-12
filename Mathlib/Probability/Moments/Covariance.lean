@@ -339,9 +339,10 @@ variable {Ω' : Type*} {mΩ' : SigmaAlgebra Ω'} {ν : Measure Ω'}
   [IsProbabilityMeasure μ] [IsProbabilityMeasure ν] {X : Ω → ℝ} {Y : Ω' → ℝ}
 
 lemma covariance_fst_snd_prod (hfμ : MemLp X 2 μ) (hgν : MemLp Y 2 ν) :
-    cov[fun p ↦ X p.1, fun p ↦ Y p.2; μ.prod ν] = 0 :=
-  (indepFun_prod₀ hfμ.aemeasurable hgν.aemeasurable).covariance_eq_zero
-    (hfμ.comp_fst ν) (hgν.comp_snd μ)
+    cov[fun p ↦ X p.1, fun p ↦ Y p.2; μ.prod ν] = 0 := by
+  apply (indepFun_prod₀ hfμ.aemeasurable hgν.aemeasurable).covariance_eq_zero
+  · simpa only [Measure.prod_eq_productBySections μ ν] using hfμ.comp_fst ν
+  · simpa only [Measure.prod_eq_productBySections μ ν] using hgν.comp_snd μ
 
 end Prod
 

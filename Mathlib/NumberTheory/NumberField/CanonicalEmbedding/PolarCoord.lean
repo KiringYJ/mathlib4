@@ -86,7 +86,8 @@ theorem volume_preserving_mixedSpaceToRealMixedSpace_symm :
     volume_preserving_pi fun _ ↦ Complex.volume_preserving_equiv_real_prod.symm
 
 open scoped Classical in
-instance : IsAddHaarMeasure (volume : Measure (realMixedSpace K)) := prod.instIsAddHaarMeasure _ _
+instance : IsAddHaarMeasure (volume : Measure (realMixedSpace K)) :=
+  productBySections.instIsAddHaarMeasure _ _
 
 /--
 The polar coordinate open partial homeomorphism of `ℝ^r₁ × (ℝ × ℝ)^r₂` defined as the identity on
@@ -132,7 +133,8 @@ theorem det_fderivPolarCoordRealSymm (x : realMixedSpace K) :
 open scoped Classical in
 theorem polarCoordReal_symm_target_ae_eq_univ :
     (polarCoordReal K).symm '' (polarCoordReal K).target =ᵐ[volume] Set.univ := by
-  rw [← Set.univ_prod_univ, volume_eq_prod, (polarCoordReal K).symm_image_target_eq_source,
+  rw [← Set.univ_prod_univ, volume_eq_productBySections,
+    (polarCoordReal K).symm_image_target_eq_source,
     polarCoordReal_source, ← polarCoord.symm_image_target_eq_source, ← Set.piMap_image_univ_pi]
   exact set_prod_ae_eq .rfl pi_polarCoord_symm_target_ae_eq_univ
 
@@ -394,7 +396,7 @@ theorem volume_eq_two_pi_pow_mul_integral [NumberField K]
       (normAtComplexPlaces '' A).indicator 1 (normAtComplexPlaces x) := by
     simp_rw [← Set.indicator_comp_right, Function.comp_def, Pi.one_def, hA]
   rw [← lintegral_indicator_one hm, ← lintegral_comp_polarSpaceCoord_symm, polarSpaceCoord_target',
-    Measure.volume_eq_prod, setLIntegral_prod]
+    Measure.volume_eq_productBySections, setLIntegral_productBySections]
   · simp_rw [hA', normAtComplexPlaces_polarSpaceCoord_symm, lintegral_const, restrict_apply
       MeasurableSet.univ, Set.univ_inter, volume_pi, Measure.pi_pi, volume_Ioo, sub_neg_eq_add,
       ← two_mul, Finset.prod_const, Finset.card_univ, ← Set.indicator_const_mul,

@@ -54,8 +54,8 @@ lemma IndepFun.charFun_map_fun_add_eq_mul {Y : Ω → E}
 lemma charFun_map_add_prod_eq_mul {μ ν : Measure E}
     [IsProbabilityMeasure μ] [IsProbabilityMeasure ν] :
     charFun ((μ.prod ν).map (fun p ↦ p.1 + p.2)) = charFun μ * charFun ν := by
-  rw [IndepFun.charFun_map_fun_add_eq_mul, measurePreserving_fst.map_eq,
-    measurePreserving_snd.map_eq]
+  rw [IndepFun.charFun_map_fun_add_eq_mul, Measure.map_fst_prod, Measure.map_snd_prod]
+  · simp only [measure_univ, one_smul]
   any_goals fun_prop
   exact indepFun_prod (X := id) (Y := id) measurable_id measurable_id
 
@@ -89,8 +89,8 @@ lemma IndepFun.charFunDual_map_fun_add_eq_mul {Y : Ω → E}
 lemma charFunDual_map_add_prod_eq_mul {μ ν : Measure E}
     [IsProbabilityMeasure μ] [IsProbabilityMeasure ν] :
     charFunDual ((μ.prod ν).map (fun p ↦ p.1 + p.2)) = charFunDual μ * charFunDual ν := by
-  rw [IndepFun.charFunDual_map_fun_add_eq_mul, measurePreserving_fst.map_eq,
-    measurePreserving_snd.map_eq]
+  rw [IndepFun.charFunDual_map_fun_add_eq_mul, Measure.map_fst_prod, Measure.map_snd_prod]
+  · simp only [measure_univ, one_smul]
   any_goals fun_prop
   exact indepFun_prod (X := id) (Y := id) measurable_id measurable_id
 

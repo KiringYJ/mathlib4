@@ -81,7 +81,8 @@ There, the map in this lemma is called `S`. -/
 @[to_additive measurePreserving_prod_add
 /-- The shear mapping `(x, y) ↦ (x, x + y)` preserves the measure `μ × ν`. -/]
 theorem measurePreserving_prod_mul [IsMulLeftInvariant ν] :
-    MeasurePreserving (fun z : G × G => (z.1, z.1 * z.2)) (μ.prod ν) (μ.prod ν) :=
+    MeasurePreserving (fun z : G × G => (z.1, z.1 * z.2))
+      (μ.productBySections ν) (μ.productBySections ν) :=
   (MeasurePreserving.id μ).skew_product measurable_mul <|
     Filter.Eventually.of_forall <| map_mul_left_eq_self ν
 
@@ -91,8 +92,9 @@ This is the map `SR` in [Halmos, §59].
 @[to_additive measurePreserving_prod_add_swap
 /-- The map `(x, y) ↦ (y, y + x)` sends the measure `μ × ν` to `ν × μ`. -/]
 theorem measurePreserving_prod_mul_swap [IsMulLeftInvariant μ] :
-    MeasurePreserving (fun z : G × G => (z.2, z.2 * z.1)) (μ.prod ν) (ν.prod μ) :=
-  (measurePreserving_prod_mul ν μ).comp measurePreserving_swap
+    MeasurePreserving (fun z : G × G => (z.2, z.2 * z.1))
+      (μ.productBySections ν) (ν.productBySections μ) :=
+  (measurePreserving_prod_mul ν μ).comp measurePreserving_swap_productBySections
 
 @[to_additive]
 theorem measurable_measure_mul_right (hs : MeasurableSet s) :
@@ -113,7 +115,8 @@ where `S` is the map `(x, y) ↦ (x, xy)`. -/
 @[to_additive measurePreserving_prod_neg_add
 /-- The map `(x, y) ↦ (x, - x + y)` is measure-preserving. -/]
 theorem measurePreserving_prod_inv_mul [IsMulLeftInvariant ν] :
-    MeasurePreserving (fun z : G × G => (z.1, z.1⁻¹ * z.2)) (μ.prod ν) (μ.prod ν) :=
+    MeasurePreserving (fun z : G × G => (z.1, z.1⁻¹ * z.2))
+      (μ.productBySections ν) (μ.productBySections ν) :=
   (measurePreserving_prod_mul μ ν).symm <| MeasurableEquiv.shearMulRight G
 
 variable [IsMulLeftInvariant μ]
@@ -124,8 +127,9 @@ where `S` is the map `(x, y) ↦ (x, xy)` and `R` is `Prod.swap`. -/
 @[to_additive measurePreserving_prod_neg_add_swap
 /-- The map `(x, y) ↦ (y, - y + x)` sends `μ × ν` to `ν × μ`. -/]
 theorem measurePreserving_prod_inv_mul_swap :
-    MeasurePreserving (fun z : G × G => (z.2, z.2⁻¹ * z.1)) (μ.prod ν) (ν.prod μ) :=
-  (measurePreserving_prod_inv_mul ν μ).comp measurePreserving_swap
+    MeasurePreserving (fun z : G × G => (z.2, z.2⁻¹ * z.1))
+      (μ.productBySections ν) (ν.productBySections μ) :=
+  (measurePreserving_prod_inv_mul ν μ).comp measurePreserving_swap_productBySections
 
 /-- The map `(x, y) ↦ (yx, x⁻¹)` is measure-preserving.
 This is the function `S⁻¹RSR` in [Halmos, §59],
@@ -133,7 +137,8 @@ where `S` is the map `(x, y) ↦ (x, xy)` and `R` is `Prod.swap`. -/
 @[to_additive measurePreserving_add_prod_neg
 /-- The map `(x, y) ↦ (y + x, - x)` is measure-preserving. -/]
 theorem measurePreserving_mul_prod_inv [IsMulLeftInvariant ν] :
-    MeasurePreserving (fun z : G × G => (z.2 * z.1, z.1⁻¹)) (μ.prod ν) (μ.prod ν) := by
+    MeasurePreserving (fun z : G × G => (z.2 * z.1, z.1⁻¹))
+      (μ.productBySections ν) (μ.productBySections ν) := by
   convert!
     (measurePreserving_prod_inv_mul_swap ν μ).comp (measurePreserving_prod_mul_swap μ ν) using 1
   ext1 ⟨x, y⟩
@@ -145,12 +150,13 @@ theorem quasiMeasurePreserving_inv : QuasiMeasurePreserving (Inv.inv : G → G) 
   rw [map_apply hsm measurable_inv.aemeasurable, inv_preimage]
   have hf : Measurable fun z : G × G => (z.2 * z.1, z.1⁻¹) :=
     (measurable_snd.mul measurable_fst).prodMk measurable_fst.inv
-  suffices (map (fun z : G × G => (z.2 * z.1, z.1⁻¹)) (μ.prod μ) hf.aemeasurable)
+  suffices (map (fun z : G × G => (z.2 * z.1, z.1⁻¹)) (μ.productBySections μ) hf.aemeasurable)
       (s⁻¹ ×ˢ s⁻¹) = 0 by
-    simpa only [(measurePreserving_mul_prod_inv μ μ).map_eq, prod_prod, mul_eq_zero (M₀ := ℝ≥0∞),
+    simpa only [(measurePreserving_mul_prod_inv μ μ).map_eq, productBySections_prod,
+      mul_eq_zero (M₀ := ℝ≥0∞),
       or_self_iff] using this
   have hsm' : MeasurableSet (s⁻¹ ×ˢ s⁻¹) := hsm.inv.prod hsm.inv
-  simp_rw [map_apply hsm' hf.aemeasurable, prod_apply_symm (μ := μ) (ν := μ) (hf hsm'),
+  simp_rw [map_apply hsm' hf.aemeasurable, productBySections_apply_symm (μ := μ) (ν := μ) (hf hsm'),
     preimage_preimage,
     mk_preimage_prod, inv_preimage, inv_inv, measure_mono_null inter_subset_right hμs,
     lintegral_zero]
@@ -183,11 +189,11 @@ theorem absolutelyContinuous_inv : μ ≪ μ.inv := by
 
 @[to_additive]
 theorem lintegral_lintegral_mul_inv [IsMulLeftInvariant ν] (f : G → G → ℝ≥0∞)
-    (hf : AEMeasurable (uncurry f) (μ.prod ν)) :
+    (hf : AEMeasurable (uncurry f) (μ.productBySections ν)) :
     (∫⁻ x, ∫⁻ y, f (y * x) x⁻¹ ∂ν ∂μ) = ∫⁻ x, ∫⁻ y, f x y ∂ν ∂μ := by
   have h : Measurable fun z : G × G => (z.2 * z.1, z.1⁻¹) :=
     (measurable_snd.mul measurable_fst).prodMk measurable_fst.inv
-  have h2f : AEMeasurable (uncurry fun x y => f (y * x) x⁻¹) (μ.prod ν) :=
+  have h2f : AEMeasurable (uncurry fun x y => f (y * x) x⁻¹) (μ.productBySections ν) :=
     hf.comp_quasiMeasurePreserving (measurePreserving_mul_prod_inv μ ν).quasiMeasurePreserving
   simp_rw [lintegral_lintegral h2f, lintegral_lintegral hf]
   conv_rhs => rw [← (measurePreserving_mul_prod_inv μ ν).map_eq]
@@ -345,7 +351,8 @@ section RightInvariant
 
 @[to_additive measurePreserving_prod_add_right]
 theorem measurePreserving_prod_mul_right [IsMulRightInvariant ν] :
-    MeasurePreserving (fun z : G × G => (z.1, z.2 * z.1)) (μ.prod ν) (μ.prod ν) :=
+    MeasurePreserving (fun z : G × G => (z.1, z.2 * z.1))
+      (μ.productBySections ν) (μ.productBySections ν) :=
   MeasurePreserving.skew_product (g := fun x y => y * x) (MeasurePreserving.id μ)
     (measurable_snd.mul measurable_fst) <| Filter.Eventually.of_forall <| map_mul_right_eq_self ν
 
@@ -353,15 +360,17 @@ theorem measurePreserving_prod_mul_right [IsMulRightInvariant ν] :
 @[to_additive measurePreserving_prod_add_swap_right
 /-- The map `(x, y) ↦ (y, x + y)` sends the measure `μ × ν` to `ν × μ`. -/]
 theorem measurePreserving_prod_mul_swap_right [IsMulRightInvariant μ] :
-    MeasurePreserving (fun z : G × G => (z.2, z.1 * z.2)) (μ.prod ν) (ν.prod μ) :=
-  (measurePreserving_prod_mul_right ν μ).comp measurePreserving_swap
+    MeasurePreserving (fun z : G × G => (z.2, z.1 * z.2))
+      (μ.productBySections ν) (ν.productBySections μ) :=
+  (measurePreserving_prod_mul_right ν μ).comp measurePreserving_swap_productBySections
 
 /-- The map `(x, y) ↦ (xy, y)` preserves the measure `μ × ν`. -/
 @[to_additive measurePreserving_add_prod
 /-- The map `(x, y) ↦ (x + y, y)` preserves the measure `μ × ν`. -/]
 theorem measurePreserving_mul_prod [IsMulRightInvariant μ] :
-    MeasurePreserving (fun z : G × G => (z.1 * z.2, z.2)) (μ.prod ν) (μ.prod ν) :=
-  measurePreserving_swap.comp (measurePreserving_prod_mul_swap_right μ ν)
+    MeasurePreserving (fun z : G × G => (z.1 * z.2, z.2))
+      (μ.productBySections ν) (μ.productBySections ν) :=
+  measurePreserving_swap_productBySections.comp (measurePreserving_prod_mul_swap_right μ ν)
 
 variable [MeasurableInv G]
 
@@ -369,28 +378,32 @@ variable [MeasurableInv G]
 @[to_additive measurePreserving_prod_sub
 /-- The map `(x, y) ↦ (x, y - x)` is measure-preserving. -/]
 theorem measurePreserving_prod_div [IsMulRightInvariant ν] :
-    MeasurePreserving (fun z : G × G => (z.1, z.2 / z.1)) (μ.prod ν) (μ.prod ν) :=
+    MeasurePreserving (fun z : G × G => (z.1, z.2 / z.1))
+      (μ.productBySections ν) (μ.productBySections ν) :=
   (measurePreserving_prod_mul_right μ ν).symm (MeasurableEquiv.shearDivRight G).symm
 
 /-- The map `(x, y) ↦ (y, x / y)` sends `μ × ν` to `ν × μ`. -/
 @[to_additive measurePreserving_prod_sub_swap
 /-- The map `(x, y) ↦ (y, x - y)` sends `μ × ν` to `ν × μ`. -/]
 theorem measurePreserving_prod_div_swap [IsMulRightInvariant μ] :
-    MeasurePreserving (fun z : G × G => (z.2, z.1 / z.2)) (μ.prod ν) (ν.prod μ) :=
-  (measurePreserving_prod_div ν μ).comp measurePreserving_swap
+    MeasurePreserving (fun z : G × G => (z.2, z.1 / z.2))
+      (μ.productBySections ν) (ν.productBySections μ) :=
+  (measurePreserving_prod_div ν μ).comp measurePreserving_swap_productBySections
 
 /-- The map `(x, y) ↦ (x / y, y)` preserves the measure `μ × ν`. -/
 @[to_additive measurePreserving_sub_prod
 /-- The map `(x, y) ↦ (x - y, y)` preserves the measure `μ × ν`. -/]
 theorem measurePreserving_div_prod [IsMulRightInvariant μ] :
-    MeasurePreserving (fun z : G × G => (z.1 / z.2, z.2)) (μ.prod ν) (μ.prod ν) :=
-  measurePreserving_swap.comp (measurePreserving_prod_div_swap μ ν)
+    MeasurePreserving (fun z : G × G => (z.1 / z.2, z.2))
+      (μ.productBySections ν) (μ.productBySections ν) :=
+  measurePreserving_swap_productBySections.comp (measurePreserving_prod_div_swap μ ν)
 
 /-- The map `(x, y) ↦ (xy, x⁻¹)` is measure-preserving. -/
 @[to_additive measurePreserving_add_prod_neg_right
 /-- The map `(x, y) ↦ (x + y, - x)` is measure-preserving. -/]
 theorem measurePreserving_mul_prod_inv_right [IsMulRightInvariant μ] [IsMulRightInvariant ν] :
-    MeasurePreserving (fun z : G × G => (z.1 * z.2, z.1⁻¹)) (μ.prod ν) (μ.prod ν) := by
+    MeasurePreserving (fun z : G × G => (z.1 * z.2, z.1⁻¹))
+      (μ.productBySections ν) (μ.productBySections ν) := by
   convert!
     (measurePreserving_prod_div_swap ν μ).comp (measurePreserving_prod_mul_swap_right μ ν) using 1
   ext1 ⟨x, y⟩
@@ -403,13 +416,13 @@ section QuasiMeasurePreserving
 /-- The map `(x, y) ↦ x * y` is quasi-measure-preserving. -/
 @[to_additive (attr := fun_prop) /-- The map `(x, y) ↦ x + y` is quasi-measure-preserving. -/]
 theorem quasiMeasurePreserving_mul [IsMulLeftInvariant ν] :
-    QuasiMeasurePreserving (fun p ↦ p.1 * p.2) (μ.prod ν) ν :=
+    QuasiMeasurePreserving (fun p ↦ p.1 * p.2) (μ.productBySections ν) ν :=
   quasiMeasurePreserving_snd.comp (measurePreserving_prod_mul _ _).quasiMeasurePreserving
 
 /-- The map `(x, y) ↦ y * x` is quasi-measure-preserving. -/
 @[to_additive (attr := fun_prop) /-- The map `(x, y) ↦ y + x` is quasi-measure-preserving. -/]
 theorem quasiMeasurePreserving_mul_swap [IsMulLeftInvariant μ] :
-    QuasiMeasurePreserving (fun p ↦ p.2 * p.1) (μ.prod ν) μ :=
+    QuasiMeasurePreserving (fun p ↦ p.2 * p.1) (μ.productBySections ν) μ :=
   quasiMeasurePreserving_snd.comp (measurePreserving_prod_mul_swap _ _).quasiMeasurePreserving
 
 section MeasurableInv
@@ -419,13 +432,13 @@ variable [MeasurableInv G]
 /-- The map `(x, y) ↦ x⁻¹ * y` is quasi-measure-preserving. -/
 @[to_additive (attr := fun_prop) /-- The map `(x, y) ↦ -x + y` is quasi-measure-preserving. -/]
 theorem quasiMeasurePreserving_inv_mul [IsMulLeftInvariant ν] :
-    QuasiMeasurePreserving (fun p ↦ p.1⁻¹ * p.2) (μ.prod ν) ν :=
+    QuasiMeasurePreserving (fun p ↦ p.1⁻¹ * p.2) (μ.productBySections ν) ν :=
   quasiMeasurePreserving_snd.comp (measurePreserving_prod_inv_mul _ _).quasiMeasurePreserving
 
 /-- The map `(x, y) ↦ y⁻¹ * x` is quasi-measure-preserving. -/
 @[to_additive (attr := fun_prop) /-- The map `(x, y) ↦ -y + x` is quasi-measure-preserving. -/]
 theorem quasiMeasurePreserving_inv_mul_swap [IsMulLeftInvariant μ] :
-    QuasiMeasurePreserving (fun p ↦ p.2⁻¹ * p.1) (μ.prod ν) μ :=
+    QuasiMeasurePreserving (fun p ↦ p.2⁻¹ * p.1) (μ.productBySections ν) μ :=
   quasiMeasurePreserving_snd.comp (measurePreserving_prod_inv_mul_swap _ _).quasiMeasurePreserving
 
 @[to_additive (attr := fun_prop)]
@@ -453,13 +466,13 @@ theorem quasiMeasurePreserving_div_left_of_right_invariant [IsMulRightInvariant 
 
 @[to_additive]
 theorem quasiMeasurePreserving_div_of_right_invariant [IsMulRightInvariant μ] :
-    QuasiMeasurePreserving (fun p : G × G => p.1 / p.2) (μ.prod ν) μ := by
+    QuasiMeasurePreserving (fun p : G × G => p.1 / p.2) (μ.productBySections ν) μ := by
   refine QuasiMeasurePreserving.prod_of_left measurable_div (Eventually.of_forall fun y => ?_)
   exact (measurePreserving_div_right μ y).quasiMeasurePreserving
 
 @[to_additive]
 theorem quasiMeasurePreserving_div [IsMulLeftInvariant μ] :
-    QuasiMeasurePreserving (fun p : G × G => p.1 / p.2) (μ.prod ν) μ :=
+    QuasiMeasurePreserving (fun p : G × G => p.1 / p.2) (μ.productBySections ν) μ :=
   (quasiMeasurePreserving_div_of_right_invariant μ.inv ν).mono
     ((absolutelyContinuous_inv μ).prod AbsolutelyContinuous.rfl) (inv_absolutelyContinuous μ)
 

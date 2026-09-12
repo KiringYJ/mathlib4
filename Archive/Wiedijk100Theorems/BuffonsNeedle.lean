@@ -10,6 +10,7 @@ public import Mathlib.MeasureTheory.Integral.Prod
 public import Mathlib.Probability.Density
 public import Mathlib.Probability.Distributions.Uniform
 public import Mathlib.Probability.Notation
+public import Mathlib.MeasureTheory.Measure.Prod
 
 /-!
 
@@ -127,8 +128,8 @@ noncomputable abbrev needleSpace : Set (ℝ × ℝ) := Set.Icc (-d / 2) (d / 2) 
 
 include hd in
 lemma volume_needleSpace : ℙ (needleSpace d) = ENNReal.ofReal (d * π) := by
-  simp_rw [MeasureTheory.Measure.volume_eq_prod, MeasureTheory.Measure.prod_prod, Real.volume_Icc,
-    ENNReal.ofReal_mul hd.le]
+  simp_rw [MeasureTheory.Measure.volume_eq_productBySections,
+    MeasureTheory.Measure.productBySections_prod, Real.volume_Icc, ENNReal.ofReal_mul hd.le]
   ring_nf
 
 lemma measurable_needleCrossesIndicator : Measurable (needleCrossesIndicator l) := by
@@ -177,10 +178,14 @@ lemma integrable_needleCrossesIndicator :
       ENNReal.ofReal_le_one, Pi.one_apply]
     exact needleCrossesIndicator_le_one p
   case lt_top =>
-    simp_rw [Pi.one_apply, MeasureTheory.lintegral_const, one_mul, Measure.prod_restrict,
-      Measure.restrict_apply MeasurableSet.univ, Set.univ_inter, Measure.prod_prod, Real.volume_Icc,
-      neg_div, sub_neg_eq_add, add_halves, sub_zero, ← ENNReal.ofReal_mul hd.le,
-      ENNReal.ofReal_lt_top]
+    rw [Measure.prod_eq_productBySections
+      (Measure.restrict ℙ (Set.Icc (-d / 2) (d / 2)))
+      (Measure.restrict ℙ (Set.Icc 0 π))]
+    simp_rw [Pi.one_apply, MeasureTheory.lintegral_const, one_mul,
+      Measure.productBySections_restrict,
+      Measure.restrict_apply MeasurableSet.univ, Set.univ_inter, Measure.productBySections_prod,
+      Real.volume_Icc, neg_div, sub_neg_eq_add, add_halves, sub_zero,
+      ← ENNReal.ofReal_mul hd.le, ENNReal.ofReal_lt_top]
 
 include hd hB hBₘ in
 /--
@@ -206,12 +211,20 @@ lemma buffon_integral :
   refine mul_eq_mul_left_iff.mpr (Or.inl ?_)
   have : MeasureTheory.IntegrableOn (needleCrossesIndicator l)
       (Set.Icc (-d / 2) (d / 2) ×ˢ Set.Icc 0 π) := by
-    simp_rw [MeasureTheory.IntegrableOn, Measure.volume_eq_prod, ← Measure.prod_restrict,
-      integrable_needleCrossesIndicator d l hd]
-  rw [Measure.volume_eq_prod, MeasureTheory.setIntegral_prod _ this,
+    have h_int := integrable_needleCrossesIndicator d l hd
+    rw [Measure.prod_eq_productBySections
+      (Measure.restrict ℙ (Set.Icc (-d / 2) (d / 2)))
+      (Measure.restrict ℙ (Set.Icc 0 π))] at h_int
+    simpa only [MeasureTheory.IntegrableOn, Measure.volume_eq_productBySections,
+      ← Measure.productBySections_restrict] using h_int
+  rw [Measure.volume_eq_productBySections, MeasureTheory.setIntegral_prod _ this,
     MeasureTheory.integral_integral_swap ?integrable]
-  case integrable => simp_rw [Function.uncurry_def, Prod.mk.eta,
-    integrable_needleCrossesIndicator d l hd]
+  case integrable =>
+    have h_int := integrable_needleCrossesIndicator d l hd
+    rw [Measure.prod_eq_productBySections
+      (Measure.restrict ℙ (Set.Icc (-d / 2) (d / 2)))
+      (Measure.restrict ℙ (Set.Icc 0 π))] at h_int
+    simpa only [Function.uncurry_def, Prod.mk.eta] using h_int
   simp only [needleCrossesIndicator, needleProjX]
   have indicator_eq (x θ : ℝ) :
       Set.indicator (Set.Icc (x - θ.sin * l / 2) (x + θ.sin * l / 2)) 1 0 =

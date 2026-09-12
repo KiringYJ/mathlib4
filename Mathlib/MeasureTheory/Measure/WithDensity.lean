@@ -690,57 +690,61 @@ section Prod
 variable {β : Type*} {mβ : SigmaAlgebra β} {ν : Measure β} [SFinite ν]
 
 theorem prod_withDensity_left₀ {f : α → ℝ≥0∞} (hf : AEMeasurable f μ) :
-    (μ.withDensity f).prod ν = (μ.prod ν).withDensity (fun z ↦ f z.1) := by
+    (μ.withDensity f).productBySections ν =
+      (μ.productBySections ν).withDensity (fun z ↦ f z.1) := by
   refine ext_of_lintegral _ fun φ hφ ↦ ?_
-  rw [lintegral_prod _ hφ.aemeasurable, lintegral_withDensity_eq_lintegral_mul₀ hf,
-    lintegral_withDensity_eq_lintegral_mul₀ _ hφ.aemeasurable, lintegral_prod]
+  rw [lintegral_productBySections _ hφ.aemeasurable, lintegral_withDensity_eq_lintegral_mul₀ hf,
+    lintegral_withDensity_eq_lintegral_mul₀ _ hφ.aemeasurable, lintegral_productBySections]
   · refine lintegral_congr (fun x ↦ ?_)
     rw [Pi.mul_apply, ← lintegral_const_mul'' _ (by fun_prop)]
     simp
   all_goals fun_prop (disch := intro _ hs; simp [hs])
 
 theorem prod_withDensity_left {f : α → ℝ≥0∞} (hf : Measurable f) :
-    (μ.withDensity f).prod ν = (μ.prod ν).withDensity (fun z ↦ f z.1) :=
+    (μ.withDensity f).productBySections ν = (μ.productBySections ν).withDensity (fun z ↦ f z.1) :=
   prod_withDensity_left₀ hf.aemeasurable
 
 theorem prod_withDensity_right₀ {g : β → ℝ≥0∞} (hg : AEMeasurable g ν) :
-    μ.prod (ν.withDensity g) = (μ.prod ν).withDensity (fun z ↦ g z.2) := by
+    μ.productBySections (ν.withDensity g) =
+      (μ.productBySections ν).withDensity (fun z ↦ g z.2) := by
   refine ext_of_lintegral _ fun φ hφ ↦ ?_
-  rw [lintegral_prod _ hφ.aemeasurable, lintegral_withDensity_eq_lintegral_mul₀ _ hφ.aemeasurable,
-    lintegral_prod]
+  rw [lintegral_productBySections _ hφ.aemeasurable,
+    lintegral_withDensity_eq_lintegral_mul₀ _ hφ.aemeasurable,
+    lintegral_productBySections]
   · refine lintegral_congr (fun x ↦ ?_)
     rw [lintegral_withDensity_eq_lintegral_mul₀ hg (by fun_prop)]
     simp
   all_goals fun_prop (disch := intro _ hs; simp [hs])
 
 theorem prod_withDensity_right {g : β → ℝ≥0∞} (hg : Measurable g) :
-    μ.prod (ν.withDensity g) = (μ.prod ν).withDensity (fun z ↦ g z.2) :=
+    μ.productBySections (ν.withDensity g) = (μ.productBySections ν).withDensity (fun z ↦ g z.2) :=
   prod_withDensity_right₀ hg.aemeasurable
 
 theorem prod_withDensity₀ {f : α → ℝ≥0∞} {g : β → ℝ≥0∞}
     (hf : AEMeasurable f μ) (hg : AEMeasurable g ν) :
-    (μ.withDensity f).prod (ν.withDensity g) Measurable.map_prodMk_left.aemeasurable =
-      (μ.prod ν Measurable.map_prodMk_left.aemeasurable).withDensity
+    (μ.withDensity f).productBySections (ν.withDensity g) (hasMeasurableSections_of_sfinite _ _) =
+      (μ.productBySections ν (hasMeasurableSections_of_sfinite _ _)).withDensity
         (fun z ↦ f z.1 * g z.2) := by
   rw [prod_withDensity_left₀ hf, prod_withDensity_right₀ hg, ← withDensity_mul₀, mul_comm]
   · rfl
   all_goals fun_prop (disch := intro _ hs; simp [hs])
 
 theorem prod_withDensity {f : α → ℝ≥0∞} {g : β → ℝ≥0∞} (hf : Measurable f) (hg : Measurable g) :
-    (μ.withDensity f).prod (ν.withDensity g) Measurable.map_prodMk_left.aemeasurable =
-      (μ.prod ν Measurable.map_prodMk_left.aemeasurable).withDensity
+    (μ.withDensity f).productBySections (ν.withDensity g) (hasMeasurableSections_of_sfinite _ _) =
+      (μ.productBySections ν (hasMeasurableSections_of_sfinite _ _)).withDensity
         (fun z ↦ f z.1 * g z.2) := by
   simpa using prod_withDensity₀ (μ := μ) (ν := ν) hf.aemeasurable hg.aemeasurable
 
--- `prod_smul_left` is in the `Prod` file. This lemma is here because this is the file in which
--- we prove the instance that gives `SFinite (c • ν)`.
-lemma Measure.prod_smul_right {R : Type*} [SMul R ℝ≥0∞] [IsScalarTower R ℝ≥0∞ ℝ≥0∞] (c : R) :
-    μ.prod (c • ν) Measurable.map_prodMk_left.aemeasurable =
-      c • (μ.prod ν Measurable.map_prodMk_left.aemeasurable) := by
+-- `productBySections_smul_left` is in `ProductBySections`. This lemma is here because
+-- this file proves
+-- the instance that gives `SFinite (c • ν)`.
+lemma Measure.productBySections_smul_right {R : Type*} [SMul R ℝ≥0∞]
+    [IsScalarTower R ℝ≥0∞ ℝ≥0∞] (c : R) :
+    μ.productBySections (c • ν) (hasMeasurableSections_of_sfinite _ _) =
+      c • (μ.productBySections ν (hasMeasurableSections_of_sfinite _ _)) := by
   ext s hs
   have A (s : Set β) : c • ν s = (c • 1) * ν s := by simp
-  simp_rw [Measure.prod_apply hs Measurable.map_prodMk_left.aemeasurable, Measure.smul_apply,
-    Measure.prod_apply hs Measurable.map_prodMk_left.aemeasurable, A]
+  simp only [Measure.productBySections_apply, hs, Measure.smul_apply, A]
   rw [lintegral_const_mul, smul_one_mul]
   exact measurable_measure_prodMk_left hs
 
@@ -774,9 +778,9 @@ theorem Measure.mconv_smul_right [MeasurableMul₂ M] (μ : Measure M) (ν : Mea
   unfold mconv
   ext t ht
   rw [Measure.map_apply ht measurable_mul.aemeasurable,
-    Measure.prod_apply (measurable_mul ht) Measurable.map_prodMk_left.aemeasurable,
+    Measure.productBySections_apply (ν := s • ν) (measurable_mul ht),
     Measure.smul_apply, Measure.map_apply ht measurable_mul.aemeasurable,
-    Measure.prod_apply (measurable_mul ht) Measurable.map_prodMk_left.aemeasurable]
+    Measure.productBySections_apply (ν := ν) (measurable_mul ht)]
   simp_rw [Measure.smul_apply, smul_eq_mul]
   rw [lintegral_const_mul]
   exact measurable_measure_prodMk_left (measurable_mul ht)
@@ -791,7 +795,7 @@ theorem mconv_withDensity_eq_mlconvolution₀ {f g : G → ℝ≥0∞}
   refine ext_of_lintegral _ fun φ hφ ↦ ?_
   rw [lintegral_mconv_eq_lintegral_prod hφ, prod_withDensity₀ hf hg,
     lintegral_withDensity_eq_lintegral_mul₀,
-    lintegral_withDensity_eq_lintegral_mul₀, lintegral_prod,
+    lintegral_withDensity_eq_lintegral_mul₀, lintegral_productBySections,
     lintegral_congr (fun x ↦ by apply (lintegral_mul_left_eq_self _ x⁻¹).symm),
     lintegral_lintegral_swap]
   · simp only [Pi.mul_apply, mul_inv_cancel_left, mlconvolution_def]

@@ -519,9 +519,10 @@ theorem measurableSet_graph (hf : Measurable f) :
 
 theorem volume_regionBetween_eq_lintegral' (hf : Measurable f) (hg : Measurable g)
     (hs : MeasurableSet s) :
-    (μ.prod volume) (regionBetween f g s) = ∫⁻ y in s, ENNReal.ofReal ((g - f) y) ∂μ := by
+    (μ.productBySections volume) (regionBetween f g s) =
+      ∫⁻ y in s, ENNReal.ofReal ((g - f) y) ∂μ := by
   classical
-    rw [Measure.prod_apply]
+    rw [Measure.productBySections_apply]
     · have h :
         (fun x => volume { a | x ∈ s ∧ a ∈ Ioo (f x) (g x) }) =
           s.indicator fun x => ENNReal.ofReal (g x - f x) := by
@@ -540,14 +541,15 @@ theorem volume_regionBetween_eq_lintegral' (hf : Measurable f) (hg : Measurable 
 can be represented as a Lebesgue integral. -/
 theorem volume_regionBetween_eq_lintegral [SFinite μ] (hf : AEMeasurable f (μ.restrict s))
     (hg : AEMeasurable g (μ.restrict s)) (hs : MeasurableSet s) :
-    (μ.prod volume) (regionBetween f g s) = ∫⁻ y in s, ENNReal.ofReal ((g - f) y) ∂μ := by
+    (μ.productBySections volume) (regionBetween f g s) =
+      ∫⁻ y in s, ENNReal.ofReal ((g - f) y) ∂μ := by
   have h₁ :
     (fun y => ENNReal.ofReal ((g - f) y)) =ᵐ[μ.restrict s] fun y =>
       ENNReal.ofReal ((AEMeasurable.mk g hg - AEMeasurable.mk f hf) y) :=
     (hg.ae_eq_mk.sub hf.ae_eq_mk).fun_comp ENNReal.ofReal
   have h₂ :
-    ((μ.restrict s).prod volume) (regionBetween f g s) =
-      ((μ.restrict s).prod volume)
+    ((μ.restrict s).productBySections volume) (regionBetween f g s) =
+      ((μ.restrict s).productBySections volume)
         (regionBetween (AEMeasurable.mk f hf) (AEMeasurable.mk g hg) s) := by
     apply measure_congr
     apply Filter.Eventually.set_eq
@@ -558,9 +560,9 @@ theorem volume_regionBetween_eq_lintegral [SFinite μ] (hf : AEMeasurable f (μ.
   rw [lintegral_congr_ae h₁, ←
     volume_regionBetween_eq_lintegral' hf.measurable_mk hg.measurable_mk hs]
   convert! h₂ using 1
-  · rw [Measure.restrict_prod_eq_prod_univ]
+  · rw [Measure.restrict_productBySections_eq_productBySections_univ]
     exact (Measure.restrict_eq_self _ (regionBetween_subset f g s)).symm
-  · rw [Measure.restrict_prod_eq_prod_univ]
+  · rw [Measure.restrict_productBySections_eq_productBySections_univ]
     exact
       (Measure.restrict_eq_self _
           (regionBetween_subset (AEMeasurable.mk f hf) (AEMeasurable.mk g hg) s)).symm
@@ -569,7 +571,8 @@ theorem volume_regionBetween_eq_lintegral [SFinite μ] (hf : AEMeasurable f (μ.
 lemma nullMeasurableSet_regionBetween (μ : Measure α)
     {f g : α → ℝ} (f_mble : AEMeasurable f μ) (g_mble : AEMeasurable g μ)
     {s : Set α} (s_mble : NullMeasurableSet s μ) :
-    NullMeasurableSet {p : α × ℝ | p.1 ∈ s ∧ p.snd ∈ Ioo (f p.fst) (g p.fst)} (μ.prod volume) := by
+    NullMeasurableSet {p : α × ℝ | p.1 ∈ s ∧ p.snd ∈ Ioo (f p.fst) (g p.fst)}
+      (μ.productBySections volume) := by
   refine NullMeasurableSet.inter
           (s_mble.preimage quasiMeasurePreserving_fst) (NullMeasurableSet.inter ?_ ?_)
   · exact nullMeasurableSet_lt (by fun_prop) measurable_snd.aemeasurable
@@ -580,11 +583,12 @@ a version for the region together with the graph of the upper function. -/
 lemma nullMeasurableSet_region_between_oc (μ : Measure α)
     {f g : α → ℝ} (f_mble : AEMeasurable f μ) (g_mble : AEMeasurable g μ)
     {s : Set α} (s_mble : NullMeasurableSet s μ) :
-    NullMeasurableSet {p : α × ℝ | p.1 ∈ s ∧ p.snd ∈ Ioc (f p.fst) (g p.fst)} (μ.prod volume) := by
+    NullMeasurableSet {p : α × ℝ | p.1 ∈ s ∧ p.snd ∈ Ioc (f p.fst) (g p.fst)}
+      (μ.productBySections volume) := by
   refine NullMeasurableSet.inter
           (s_mble.preimage quasiMeasurePreserving_fst) (NullMeasurableSet.inter ?_ ?_)
   · exact nullMeasurableSet_lt (by fun_prop) measurable_snd.aemeasurable
-  · change NullMeasurableSet {p : α × ℝ | p.snd ≤ g p.fst} (μ.prod volume)
+  · change NullMeasurableSet {p : α × ℝ | p.snd ≤ g p.fst} (μ.productBySections volume)
     rw [show {p : α × ℝ | p.snd ≤ g p.fst} = {p : α × ℝ | g p.fst < p.snd}ᶜ by
           ext p
           simp]
@@ -595,10 +599,11 @@ a version for the region together with the graph of the lower function. -/
 lemma nullMeasurableSet_region_between_co (μ : Measure α)
     {f g : α → ℝ} (f_mble : AEMeasurable f μ) (g_mble : AEMeasurable g μ)
     {s : Set α} (s_mble : NullMeasurableSet s μ) :
-    NullMeasurableSet {p : α × ℝ | p.1 ∈ s ∧ p.snd ∈ Ico (f p.fst) (g p.fst)} (μ.prod volume) := by
+    NullMeasurableSet {p : α × ℝ | p.1 ∈ s ∧ p.snd ∈ Ico (f p.fst) (g p.fst)}
+      (μ.productBySections volume) := by
   refine NullMeasurableSet.inter
           (s_mble.preimage quasiMeasurePreserving_fst) (NullMeasurableSet.inter ?_ ?_)
-  · change NullMeasurableSet {p : α × ℝ | f p.fst ≤ p.snd} (μ.prod volume)
+  · change NullMeasurableSet {p : α × ℝ | f p.fst ≤ p.snd} (μ.productBySections volume)
     rw [show {p : α × ℝ | f p.fst ≤ p.snd} = {p : α × ℝ | p.snd < f p.fst}ᶜ by
           ext p
           simp]
@@ -610,15 +615,16 @@ a version for the region together with the graphs of both functions. -/
 lemma nullMeasurableSet_region_between_cc (μ : Measure α)
     {f g : α → ℝ} (f_mble : AEMeasurable f μ) (g_mble : AEMeasurable g μ)
     {s : Set α} (s_mble : NullMeasurableSet s μ) :
-    NullMeasurableSet {p : α × ℝ | p.1 ∈ s ∧ p.snd ∈ Icc (f p.fst) (g p.fst)} (μ.prod volume) := by
+    NullMeasurableSet {p : α × ℝ | p.1 ∈ s ∧ p.snd ∈ Icc (f p.fst) (g p.fst)}
+      (μ.productBySections volume) := by
   refine NullMeasurableSet.inter
           (s_mble.preimage quasiMeasurePreserving_fst) (NullMeasurableSet.inter ?_ ?_)
-  · change NullMeasurableSet {p : α × ℝ | f p.fst ≤ p.snd} (μ.prod volume)
+  · change NullMeasurableSet {p : α × ℝ | f p.fst ≤ p.snd} (μ.productBySections volume)
     rw [show {p : α × ℝ | f p.fst ≤ p.snd} = {p : α × ℝ | p.snd < f p.fst}ᶜ by
           ext p
           simp]
     exact (nullMeasurableSet_lt measurable_snd.aemeasurable (by fun_prop)).compl
-  · change NullMeasurableSet {p : α × ℝ | p.snd ≤ g p.fst} (μ.prod volume)
+  · change NullMeasurableSet {p : α × ℝ | p.snd ≤ g p.fst} (μ.productBySections volume)
     rw [show {p : α × ℝ | p.snd ≤ g p.fst} = {p : α × ℝ | g p.fst < p.snd}ᶜ by
           ext p
           simp]

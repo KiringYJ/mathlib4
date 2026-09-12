@@ -142,7 +142,7 @@ noncomputable def tprodBundled (l : List δ) (μ : ∀ i, Measure (X i))
   | cons i l ih =>
     letI : SigmaFinite ih.1 := ih.2
     refine ⟨(μ i).prod (α := X i) ih.1, ?_⟩
-    exact @prod.instSigmaFinite (X i) (TProd X l) _ (μ i) (inferInstance) _ ih.1 ih.2
+    exact @prod.instSigmaFinite (X i) (TProd X l) _ _ (μ i) ih.1 (inferInstance) ih.2
 
 /-- A product of sigma-finite measures in `tprod α l`. -/
 protected def tprod (l : List δ) (μ : ∀ i, Measure (X i)) [∀ i, SigmaFinite (μ i)] :
@@ -163,7 +163,9 @@ theorem tprod_nil (μ : ∀ i, Measure (X i)) [∀ i, SigmaFinite (μ i)] :
 theorem tprod_cons (i : δ) (l : List δ) (μ : ∀ i, Measure (X i))
     [∀ i, SigmaFinite (μ i)] :
     Measure.tprod (i :: l) μ = (μ i).prod (Measure.tprod l μ) :=
-  rfl
+  by
+    unfold Measure.tprod tprodBundled
+    congr
 
 set_option backward.isDefEq.respectTransparency false in
 theorem tprod_tprod (l : List δ) (μ : ∀ i, Measure (X i)) [∀ i, SigmaFinite (μ i)]
@@ -174,7 +176,7 @@ theorem tprod_tprod (l : List δ) (μ : ∀ i, Measure (X i)) [∀ i, SigmaFinit
   | cons a l ih =>
     rw [tprod_cons, Set.tprod]
     simp only [foldr_cons, prod_cons, map_cons]
-    rw [prod_prod, ih]
+    rw [prod_prod_of_sigmaFinite, ih]
 
 end Tprod
 
@@ -489,7 +491,7 @@ lemma pi_map_piOptionEquivProd {β : Option ι → Type*} [∀ i, SigmaAlgebra (
     refine ⟨by tauto, fun _ i ↦ ?_⟩
     rcases i <;> tauto
   simp only [e_meas, me.map_apply, univ_option, Finset.prod_insertNone, this,
-    prod_prod, pi_pi, mul_comm]
+    prod_prod_of_sigmaFinite, pi_pi, mul_comm]
 
 section Intervals
 
@@ -751,13 +753,17 @@ theorem measurePreserving_piEquivPiSubtypeProd (p : ι → Prop) [DecidablePred 
   have : e ⁻¹' pi univ s =
       (pi univ fun i : { i // p i } => s i) ×ˢ pi univ fun i : { i // ¬p i } => s i :=
     Equiv.preimage_piEquivPiSubtypeProd_symm_pi p s
-  rw [e.map_apply, this, prod_prod, pi_pi, pi_pi]
+  rw [e.map_apply, this, prod_prod_of_sigmaFinite, pi_pi, pi_pi]
   exact Fintype.prod_subtype_mul_prod_subtype p fun i => μ i (s i)
 
 theorem volume_preserving_piEquivPiSubtypeProd (α : ι → Type*)
     [∀ i, MeasureSpace (α i)] [∀ i, SigmaFinite (volume : Measure (α i))] (p : ι → Prop)
     [DecidablePred p] : MeasurePreserving (MeasurableEquiv.piEquivPiSubtypeProd α p) :=
-  measurePreserving_piEquivPiSubtypeProd (fun _ => volume) p
+  by
+    have h := measurePreserving_piEquivPiSubtypeProd
+      (fun i : ι ↦ (volume : Measure (α i))) p
+    rw [Measure.prod_eq_productBySections _ _] at h
+    exact h
 
 theorem measurePreserving_piCongrLeft (f : ι' ≃ ι) :
     MeasurePreserving (MeasurableEquiv.piCongrLeft α f)
@@ -787,6 +793,12 @@ theorem measurePreserving_arrowProdEquivProdArrow (α β γ : Type*) [SigmaAlgeb
         ((Measure.pi fun i ↦ μ i).prod (Measure.pi fun i ↦ ν i)) where
   measurable := (MeasurableEquiv.arrowProdEquivProdArrow α β γ).measurable
   map_eq := by
+    rw [show (Measure.pi fun i ↦ (μ i).prod (ν i)) =
+        Measure.pi fun i ↦ (μ i).productBySections (ν i) by
+      congr 1
+      funext i
+      exact Measure.prod_eq_productBySections _ _]
+    rw [Measure.prod_eq_productBySections _ _]
     refine (FiniteSpanningSetsIn.ext ?_ (isPiSystem_pi.prod isPiSystem_pi)
       ((FiniteSpanningSetsIn.pi fun i ↦ (μ i).toFiniteSpanningSetsIn).prod
       (FiniteSpanningSetsIn.pi (fun i ↦ (ν i).toFiniteSpanningSetsIn))) ?_).symm
@@ -799,13 +811,22 @@ theorem measurePreserving_arrowProdEquivProdArrow (α β γ : Type*) [SigmaAlgeb
       rw [show Equiv.arrowProdEquivProdArrow γ _ _ ⁻¹' (univ.pi s ×ˢ univ.pi t) =
           (univ.pi fun i ↦ s i ×ˢ t i) by
           ext; simp [Set.mem_pi, forall_and]]
-      simp_rw [pi_pi, prod_prod, pi_pi, Finset.prod_mul_distrib]
+      simp_rw [pi_pi, productBySections_prod, pi_pi, Finset.prod_mul_distrib]
 
 theorem volume_measurePreserving_arrowProdEquivProdArrow (α β γ : Type*) [MeasureSpace α]
     [MeasureSpace β] [Fintype γ] [SigmaFinite (volume : Measure α)]
     [SigmaFinite (volume : Measure β)] :
     MeasurePreserving (MeasurableEquiv.arrowProdEquivProdArrow α β γ) :=
-  measurePreserving_arrowProdEquivProdArrow α β γ (fun _ ↦ volume) (fun _ ↦ volume)
+  by
+    have h := measurePreserving_arrowProdEquivProdArrow α β γ
+      (fun _ : γ ↦ (volume : Measure α)) (fun _ : γ ↦ (volume : Measure β))
+    rw [show (Measure.pi fun _ : γ ↦ (volume : Measure α).prod (volume : Measure β)) =
+        Measure.pi fun _ : γ ↦ (volume : Measure (α × β)) by
+      congr 1
+      funext i
+      rw [Measure.prod_eq_productBySections _ _, ← Measure.volume_eq_productBySections]] at h
+    rw [Measure.prod_eq_productBySections _ _] at h
+    exact h
 
 theorem measurePreserving_sumPiEquivProdPi_symm {X : ι ⊕ ι' → Type*}
     {m : ∀ i, SigmaAlgebra (X i)} (μ : ∀ i, Measure (X i)) [∀ i, SigmaFinite (μ i)] :
@@ -815,13 +836,17 @@ theorem measurePreserving_sumPiEquivProdPi_symm {X : ι ⊕ ι' → Type*}
   map_eq := by
     refine (pi_eq fun s _ => ?_).symm
     simp_rw [MeasurableEquiv.map_apply, MeasurableEquiv.coe_sumPiEquivProdPi_symm,
-      Equiv.sumPiEquivProdPi_symm_preimage_univ_pi, Measure.prod_prod, Measure.pi_pi,
+      Equiv.sumPiEquivProdPi_symm_preimage_univ_pi, Measure.prod_prod_of_sigmaFinite, Measure.pi_pi,
       Fintype.prod_sum_type]
 
 theorem volume_measurePreserving_sumPiEquivProdPi_symm (X : ι ⊕ ι' → Type*)
     [∀ i, MeasureSpace (X i)] [∀ i, SigmaFinite (volume : Measure (X i))] :
     MeasurePreserving (MeasurableEquiv.sumPiEquivProdPi X).symm volume volume :=
-  measurePreserving_sumPiEquivProdPi_symm (fun _ ↦ volume)
+  by
+    have h := measurePreserving_sumPiEquivProdPi_symm
+      (fun i : ι ⊕ ι' ↦ (volume : Measure (X i)))
+    rw [Measure.prod_eq_productBySections _ _] at h
+    exact h
 
 theorem measurePreserving_sumPiEquivProdPi {X : ι ⊕ ι' → Type*} {_m : ∀ i, SigmaAlgebra (X i)}
     (μ : ∀ i, Measure (X i)) [∀ i, SigmaFinite (μ i)] :
@@ -832,7 +857,11 @@ theorem measurePreserving_sumPiEquivProdPi {X : ι ⊕ ι' → Type*} {_m : ∀ 
 theorem volume_measurePreserving_sumPiEquivProdPi (X : ι ⊕ ι' → Type*)
     [∀ i, MeasureSpace (X i)] [∀ i, SigmaFinite (volume : Measure (X i))] :
     MeasurePreserving (MeasurableEquiv.sumPiEquivProdPi X) volume volume :=
-  measurePreserving_sumPiEquivProdPi (fun _ ↦ volume)
+  by
+    have h := measurePreserving_sumPiEquivProdPi
+      (fun i : ι ⊕ ι' ↦ (volume : Measure (X i)))
+    rw [Measure.prod_eq_productBySections _ _] at h
+    exact h
 
 theorem measurePreserving_piFinSuccAbove {n : ℕ} {α : Fin (n + 1) → Type u}
     {m : ∀ i, SigmaAlgebra (α i)} (μ : ∀ i, Measure (α i)) [∀ i, SigmaFinite (μ i)]
@@ -842,14 +871,18 @@ theorem measurePreserving_piFinSuccAbove {n : ℕ} {α : Fin (n + 1) → Type u}
   set e := (MeasurableEquiv.piFinSuccAbove α i).symm
   refine MeasurePreserving.symm e ?_
   refine ⟨e.measurable, (pi_eq fun s _ => ?_).symm⟩
-  rw [e.map_apply, i.prod_univ_succAbove _, ← pi_pi, ← prod_prod]
+  rw [e.map_apply, i.prod_univ_succAbove _, ← pi_pi, ← prod_prod_of_sigmaFinite]
   congr 1 with ⟨x, f⟩
   simp [e, i.forall_iff_succAbove]
 
 theorem volume_preserving_piFinSuccAbove {n : ℕ} (α : Fin (n + 1) → Type u)
     [∀ i, MeasureSpace (α i)] [∀ i, SigmaFinite (volume : Measure (α i))] (i : Fin (n + 1)) :
     MeasurePreserving (MeasurableEquiv.piFinSuccAbove α i) :=
-  measurePreserving_piFinSuccAbove (fun _ => volume) i
+  by
+    have h := measurePreserving_piFinSuccAbove
+      (fun j : Fin (n + 1) ↦ (volume : Measure (α j))) i
+    rw [Measure.prod_eq_productBySections _ _] at h
+    exact h
 
 theorem measurePreserving_piUnique {X : ι → Type*} [Unique ι] {m : ∀ i, SigmaAlgebra (X i)}
     (μ : ∀ i, Measure (X i)) :
@@ -888,7 +921,10 @@ theorem measurePreserving_piFinTwo {α : Fin 2 → Type u} {m : ∀ i, SigmaAlge
 theorem volume_preserving_piFinTwo (α : Fin 2 → Type u) [∀ i, MeasureSpace (α i)]
     [∀ i, SigmaFinite (volume : Measure (α i))] :
     MeasurePreserving (MeasurableEquiv.piFinTwo α) volume volume :=
-  measurePreserving_piFinTwo _
+  by
+    have h := measurePreserving_piFinTwo (fun i : Fin 2 ↦ (volume : Measure (α i)))
+    rw [Measure.prod_eq_productBySections _ _, ← Measure.volume_eq_productBySections] at h
+    exact h
 
 theorem measurePreserving_finTwoArrow_vec {α : Type u} {_ : SigmaAlgebra α} (μ ν : Measure α)
     [SigmaFinite μ] [SigmaFinite ν] :
@@ -905,7 +941,10 @@ theorem measurePreserving_finTwoArrow {α : Type u} {m : SigmaAlgebra α} (μ : 
 theorem volume_preserving_finTwoArrow (α : Type u) [MeasureSpace α]
     [SigmaFinite (volume : Measure α)] :
     MeasurePreserving (@MeasurableEquiv.finTwoArrow α _) volume volume :=
-  measurePreserving_finTwoArrow volume
+  by
+    have h := measurePreserving_finTwoArrow (volume : Measure α)
+    rw [Measure.prod_eq_productBySections _ _, ← Measure.volume_eq_productBySections] at h
+    exact h
 
 theorem measurePreserving_pi_empty {ι : Type u} {α : ι → Type v} [Fintype ι] [IsEmpty ι]
     {m : ∀ i, SigmaAlgebra (α i)} (μ : ∀ i, Measure (α i)) :
@@ -933,7 +972,10 @@ theorem measurePreserving_piFinsetUnion {ι : Type*} {α : ι → Type*}
 theorem volume_preserving_piFinsetUnion {ι : Type*} [DecidableEq ι] (α : ι → Type*) {s t : Finset ι}
     (h : Disjoint s t) [∀ i, MeasureSpace (α i)] [∀ i, SigmaFinite (volume : Measure (α i))] :
     MeasurePreserving (MeasurableEquiv.piFinsetUnion α h) volume volume :=
-  measurePreserving_piFinsetUnion h (fun _ ↦ volume)
+  by
+    have h' := measurePreserving_piFinsetUnion h (fun i : ι ↦ (volume : Measure (α i)))
+    rw [Measure.prod_eq_productBySections _ _] at h'
+    exact h'
 
 theorem measurePreserving_pi {ι : Type*} [Fintype ι] {α : ι → Type v} {β : ι → Type*}
     [∀ i, SigmaAlgebra (α i)] [∀ i, SigmaAlgebra (β i)]

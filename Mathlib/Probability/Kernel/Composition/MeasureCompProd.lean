@@ -140,10 +140,10 @@ lemma ae_eq_compProd_of_ae_eq_fst {γ : Type*} {mγ : SigmaAlgebra γ} [Measurab
 measures. -/
 @[simp]
 lemma compProd_const {ν : Measure β} [SFinite μ] [SFinite ν] :
-    μ ⊗ₘ (Kernel.const α ν) = μ.prod ν := by
+    μ ⊗ₘ (Kernel.const α ν) = μ.productBySections ν := by
   ext s hs
-  simp_rw [compProd_apply hs,
-    prod_apply hs Measurable.map_prodMk_left.aemeasurable, Kernel.const_apply]
+  simp only [compProd_apply hs,
+    productBySections_apply, hs, Kernel.const_apply]
 
 lemma compProd_add_left (μ ν : Measure α) [SFinite μ] [SFinite ν] (κ : Kernel α β) :
     (μ + ν) ⊗ₘ κ = μ ⊗ₘ κ + ν ⊗ₘ κ := by

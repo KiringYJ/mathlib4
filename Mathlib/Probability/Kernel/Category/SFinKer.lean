@@ -155,9 +155,10 @@ instance : MonoidalCategory SFinKer.{u} where
     ext _ _ hs
     rw [Kernel.map_apply' _ _ hs (by fun_prop), Kernel.comap_apply' _ (by fun_prop)]
     simp only [Kernel.parallelComp_apply]
-    rw [Measure.prod_apply hs, Measure.prod_apply (by measurability), lintegral_prod]
+    rw [Measure.productBySections_apply hs, Measure.productBySections_apply (by measurability),
+      lintegral_productBySections]
     · congr with a
-      rw [Measure.prod_apply (measurable_prodMk_left hs)]
+      rw [Measure.productBySections_apply (measurable_prodMk_left hs)]
       rfl
     · refine Measurable.aemeasurable ?_
       exact measurable_measure_prodMk_left (by measurability)

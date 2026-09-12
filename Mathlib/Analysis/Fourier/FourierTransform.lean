@@ -13,6 +13,7 @@ public import Mathlib.MeasureTheory.Integral.Prod
 public import Mathlib.MeasureTheory.Integral.Bochner.Set
 public import Mathlib.MeasureTheory.Measure.Haar.InnerProductSpace
 public import Mathlib.MeasureTheory.Measure.Haar.OfBasis
+public import Mathlib.MeasureTheory.Measure.Prod
 
 /-!
 # The Fourier transform
@@ -191,15 +192,22 @@ theorem integral_fourierIntegral_swap
     ∫ ξ, (∫ x, M (g ξ) (e (-L x ξ) • f x) ∂μ) ∂ν =
     ∫ x, (∫ ξ, M (g ξ) (e (-L x ξ) • f x) ∂ν) ∂μ := by
   rw [integral_integral_swap]
-  have : Integrable (fun (p : W × V) ↦ ‖M‖ * (‖g p.1‖ * ‖f p.2‖)) (ν.prod μ) :=
-    (hg.norm.mul_prod hf.norm).const_mul _
+  rw [← Measure.prod_eq_productBySections ν μ]
+  have : Integrable (fun (p : W × V) ↦ ‖M‖ * (‖g p.1‖ * ‖f p.2‖)) (ν.prod μ) := by
+    rw [Measure.prod_eq_productBySections ν μ]
+    exact (hg.norm.mul_prod hf.norm).const_mul _
   apply this.mono
   · change AEStronglyMeasurable (fun p : W × V ↦ (M (g p.1) (e (-(L p.2) p.1) • f p.2))) _
     have A : AEStronglyMeasurable (fun (p : W × V) ↦ e (-L p.2 p.1) • f p.2) (ν.prod μ) := by
+      rw [Measure.prod_eq_productBySections ν μ]
       refine (Continuous.aestronglyMeasurable ?_).fun_smul hf.1.comp_snd
       exact he.comp (hL.comp continuous_swap).neg
+    have A_iterated := A
+    rw [Measure.prod_eq_productBySections ν μ] at A_iterated
     have A' : AEStronglyMeasurable (fun p ↦ (g p.1, e (-(L p.2) p.1) • f p.2) : W × V → F × E)
-      (Measure.prod ν μ) := hg.1.comp_fst.prodMk A
+      (Measure.prod ν μ) := by
+      rw [Measure.prod_eq_productBySections ν μ]
+      exact hg.1.comp_fst.prodMk A_iterated
     have hM : Continuous (fun q ↦ M q.1 q.2 : F × E → G) :=
       -- There is no `Continuous.clm_apply` for semilinear continuous maps
       (M.flip.cont.comp continuous_snd).clm_apply continuous_fst
@@ -207,7 +215,7 @@ theorem integral_fourierIntegral_swap
   · filter_upwards with ⟨ξ, x⟩
     simp only [Function.uncurry_apply_pair, norm_mul, norm_norm, ge_iff_le, ← mul_assoc]
     convert! M.le_opNorm₂ (g ξ) (e (-L x ξ) • f x) using 2
-    simp
+    all_goals simp [Circle.norm_smul]
 
 variable [CompleteSpace E] [CompleteSpace F]
 

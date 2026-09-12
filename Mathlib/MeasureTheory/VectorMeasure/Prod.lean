@@ -18,7 +18,8 @@ We show that it exists when either `μ` or `ν` has finite variation.
 
 When both measures have finite variation, we prove stronger results, notably versions
 of the Fubini theorem. We give general versions for arbitrary pairing functions, and
-specialized versions for scalar multiplication.
+specialized versions for scalar multiplication. Their integrability hypotheses use the
+unique product of the two finite variation measures.
 
 The API is modelled on the one for the product of positive measures.
 -/
@@ -113,7 +114,7 @@ theorem integrable_vectorMeasure_prodMk_left [IsFiniteMeasure μ.variation]
   · exact Eventually.of_forall (fun x ↦ norm_apply_le_bound)
 
 /-- The product of two vector measures when the first one has finite variation, obtained by
-integrating the measure of the fibers, as in the definition of the product of positive measures.
+integrating the measure of the fibers, as in the iterated product of positive measures.
 *Do not use*: This is only used to instantiate the typeclass `HasProd`. Instead, use `μ.prod ν B`,
 which uses the typeclass instance. -/
 private noncomputable def prodOfIsFiniteMeasureLeft
@@ -193,19 +194,17 @@ lemma prod_flip_apply_eq_integral [CompleteSpace G] [IsFiniteMeasure μ.variatio
   simp [prod_apply_eq_integral hs]
 
 lemma variation_prod_le [CompleteSpace G] [IsFiniteMeasure μ.variation] [SFinite ν.variation] :
-    (μ.prod ν B).variation ≤ ‖B‖ₑ • μ.variation.prod ν.variation
-      Measurable.map_prodMk_left.aemeasurable := by
+    (μ.prod ν B).variation ≤ ‖B‖ₑ • μ.variation.productBySections ν.variation := by
   apply variation_le_of_forall_enorm_le (fun s hs ↦ ?_)
   rw [prod_apply_eq_integral hs]
   simp only [Measure.smul_apply, smul_eq_mul,
-    Measure.prod_apply hs Measurable.map_prodMk_left.aemeasurable]
+    Measure.productBySections_apply (μ := μ.variation) (ν := ν.variation) hs]
   grw [enorm_integral_le_lintegral_enorm, ContinuousLinearMap.opENorm_flip,
     enorm_measure_le_variation]
 
 instance [CompleteSpace G] [IsFiniteMeasure μ.variation] [IsFiniteMeasure ν.variation] :
     IsFiniteMeasure (μ.prod ν B).variation := by
-  have : IsFiniteMeasure (‖B‖ₑ • μ.variation.prod ν.variation
-      Measurable.map_prodMk_left.aemeasurable) := by
+  have : IsFiniteMeasure (‖B‖ₑ • μ.variation.productBySections ν.variation) := by
     simp only [enorm_eq_nnnorm, Measure.coe_nnreal_smul]
     infer_instance
   exact isFiniteMeasure_of_le _ variation_prod_le
@@ -213,10 +212,10 @@ instance [CompleteSpace G] [IsFiniteMeasure μ.variation] [IsFiniteMeasure ν.va
 omit [NormedSpace ℝ H] in
 lemma _root_.MeasureTheory.Integrable.prod_vectorMeasure
     [CompleteSpace G] [IsFiniteMeasure μ.variation] [IsFiniteMeasure ν.variation]
-    {f : X × Y → H} (hf : Integrable f (μ.variation.prod ν.variation
-      Measurable.map_prodMk_left.aemeasurable)) :
-    (μ.prod ν B).Integrable f :=
-  Integrable.of_measure_le_smul (by simp) variation_prod_le hf
+    {f : X × Y → H} (hf : Integrable f (μ.variation.prod ν.variation)) :
+    (μ.prod ν B).Integrable f := by
+  rw [Measure.prod_eq_productBySections μ.variation ν.variation] at hf
+  exact Integrable.of_measure_le_smul (by simp) variation_prod_le hf
 
 theorem integral_prod_swap (f : X × Y → H) {A : E →L[ℝ] F →L[ℝ] G} {B : H →L[ℝ] G →L[ℝ] I} :
     ∫ᵛ z, f z.swap ∂[B; ν.prod μ A.flip] = ∫ᵛ z, f z ∂[B; μ.prod ν A] := by
@@ -260,7 +259,7 @@ theorem _root_.MeasureTheory.StronglyMeasurable.integral_vectorMeasure_prod_left
 This shows that the integrand of (the right-hand-side of) Fubini's theorem is a.e.-measurable. -/
 theorem _root_.MeasureTheory.AEStronglyMeasurable.integral_vectorMeasure_prod_right'
     {B : G →L[ℝ] F →L[ℝ] H} [SFinite ν.variation] {μ : Measure X}
-    ⦃f : X × Y → G⦄ (hf : AEStronglyMeasurable f (μ.prod ν.variation)) :
+    ⦃f : X × Y → G⦄ (hf : AEStronglyMeasurable f (μ.productBySections ν.variation)) :
     AEStronglyMeasurable (fun x ↦ ∫ᵛ y, f (x, y) ∂[B; ν]) μ :=
   ⟨fun x ↦ ∫ᵛ y, hf.mk f (x, y) ∂[B; ν],
     hf.stronglyMeasurable_mk.integral_vectorMeasure_prod_right',
@@ -268,7 +267,7 @@ theorem _root_.MeasureTheory.AEStronglyMeasurable.integral_vectorMeasure_prod_ri
 
 theorem _root_.MeasureTheory.Integrable.integral_vectorMeasure_prod_left {B : G →L[ℝ] F →L[ℝ] H}
     [SFinite ν.variation]
-    {μ : Measure X} ⦃f : X × Y → G⦄ (hf : Integrable f (μ.prod ν.variation)) :
+    {μ : Measure X} ⦃f : X × Y → G⦄ (hf : Integrable f (μ.productBySections ν.variation)) :
     Integrable (fun x ↦ ∫ᵛ y, f (x, y) ∂[B; ν]) μ := by
   apply Integrable.mono (hf.integral_norm_prod_left.const_mul ‖B‖)
     (hf.aestronglyMeasurable.integral_vectorMeasure_prod_right')
@@ -279,8 +278,8 @@ theorem _root_.MeasureTheory.Integrable.integral_vectorMeasure_prod_left {B : G 
 /-- Vector measure integrals commute with subtraction inside a lower Lebesgue integral. -/
 theorem lintegral_fn_integral_sub ⦃f g : X × Y → G⦄ {μ : Measure X}
     {B : G →L[ℝ] F →L[ℝ] H} [SFinite μ] [SFinite ν.variation]
-    (φ : H → ℝ≥0∞) (hf : Integrable f (μ.prod ν.variation))
-    (hg : Integrable g (μ.prod ν.variation)) :
+    (φ : H → ℝ≥0∞) (hf : Integrable f (μ.productBySections ν.variation))
+    (hg : Integrable g (μ.productBySections ν.variation)) :
     (∫⁻ x, φ (∫ᵛ y, f (x, y) - g (x, y) ∂[B; ν]) ∂μ) =
       ∫⁻ x, φ ((∫ᵛ y, f (x, y) ∂[B; ν]) - ∫ᵛ y, g (x, y) ∂[B; ν]) ∂μ := by
   refine lintegral_congr_ae ?_
@@ -290,7 +289,7 @@ theorem lintegral_fn_integral_sub ⦃f g : X × Y → G⦄ {μ : Measure X}
 /-- The map that sends an L¹-function `f : X × Y → G` to `∫∫f` is continuous. -/
 theorem continuous_integral_integral {B : G →L[ℝ] F →L[ℝ] H} {C : H →L[ℝ] E →L[ℝ] I}
     [SFinite ν.variation] [SFinite μ.variation] :
-    Continuous fun f : X × Y →₁[μ.variation.prod ν.variation] G ↦
+    Continuous fun f : X × Y →₁[μ.variation.productBySections ν.variation] G ↦
       ∫ᵛ x, (∫ᵛ y, f (x, y) ∂[B; ν]) ∂[C; μ] := by
   apply continuous_iff_continuousAt.2 (fun g ↦ ?_)
   apply tendsto_integral_of_L1
@@ -302,10 +301,12 @@ theorem continuous_integral_integral {B : G →L[ℝ] F →L[ℝ] H} {C : H →L
     (h := fun i ↦ ∫⁻ x, ‖B‖ₑ * ∫⁻ y,
       ‖i (x, y) - g (x, y)‖ₑ ∂ν.variation ∂μ.variation); swap
   · exact fun i ↦ lintegral_mono fun x ↦ enorm_integral_le_lintegral_enorm
-  have A (i : X × Y →₁[μ.variation.prod ν.variation] G) : Measurable fun z ↦ ‖i z - g z‖ₑ :=
+  have A (i : X × Y →₁[μ.variation.productBySections ν.variation] G) :
+      Measurable fun z ↦ ‖i z - g z‖ₑ :=
     ((Lp.stronglyMeasurable i).sub (Lp.stronglyMeasurable g)).enorm
   simp_rw [lintegral_const_mul' ‖B‖ₑ _ (by simp),
-    ← lintegral_prod _ (A _).aemeasurable, ← L1.ofReal_norm_sub_eq_lintegral, ofReal_norm]
+    ← lintegral_productBySections _ (A _).aemeasurable,
+    ← L1.ofReal_norm_sub_eq_lintegral, ofReal_norm]
   suffices Tendsto (fun i ↦ ‖B‖ₑ * ‖i - g‖ₑ) (𝓝 g) (𝓝 (‖B‖ₑ * 0)) by simpa
   apply ENNReal.Tendsto.const_mul _ (by simp)
   rw [← tendsto_iff_enorm_sub_tendsto_zero]
@@ -324,6 +325,7 @@ theorem integral_prod {B : G →L[ℝ] F →L[ℝ] J} {C : J →L[ℝ] E →L[�
     ∫ᵛ z, f z ∂[D; μ.prod ν A] = ∫ᵛ x, (∫ᵛ y, f (x, y) ∂[B; ν]) ∂[C; μ] := by
   by_cases hI : CompleteSpace I; swap
   · simp only [integral_of_not_completeSpace hI]
+  rw [Measure.prod_eq_productBySections μ.variation ν.variation] at hf
   revert f
   apply Integrable.induction
   · intro c s hs h2s
@@ -337,23 +339,27 @@ theorem integral_prod {B : G →L[ℝ] F →L[ℝ] J} {C : J →L[ℝ] E →L[�
     intro s t hs ht
     simp [h]
   · intro f g hfg fint gint hf hg
-    rw [integral_add fint.prod_vectorMeasure gint.prod_vectorMeasure, hf, hg,
+    have fint' := fint
+    have gint' := gint
+    rw [← Measure.prod_eq_productBySections μ.variation ν.variation] at fint' gint'
+    rw [integral_add fint'.prod_vectorMeasure gint'.prod_vectorMeasure, hf, hg,
       ← integral_add fint.integral_vectorMeasure_prod_left gint.integral_vectorMeasure_prod_left]
     apply integral_congr_ae
     filter_upwards [fint.prod_right_ae, gint.prod_right_ae] with x hx h'x
     simp only [Pi.add_apply]
     rw [integral_fun_add hx h'x]
   · apply isClosed_eq ?_  continuous_integral_integral
-    let P : Lp G 1 (μ.variation.prod ν.variation) →L[ℝ] Lp G 1 (μ.prod ν A).variation :=
+    let P : Lp G 1 (μ.variation.productBySections ν.variation) →L[ℝ] Lp G 1
+        (μ.prod ν A).variation :=
       Lp.LpToLpOfMeasureLeSMul (by simp) variation_prod_le
-    have M (f : Lp G 1 (μ.variation.prod ν.variation)) :
+    have M (f : Lp G 1 (μ.variation.productBySections ν.variation)) :
         ∫ᵛ z, f z ∂[D; μ.prod ν A] = ∫ᵛ z, (P f) z ∂[D; μ.prod ν A] := by
       apply integral_congr_ae
       grw [Lp.coeFn_LpToLpOfMeasureLeSMul]
     simp_rw [M]
     exact Continuous.comp continuous_integral P.continuous
   · intro f g hfg hf h'f
-    have ac : (μ.prod ν A).variation ≪ μ.variation.prod ν.variation :=
+    have ac : (μ.prod ν A).variation ≪ μ.variation.productBySections ν.variation :=
       Measure.absolutelyContinuous_of_le_smul variation_prod_le
     rw [← integral_congr_ae (ac.ae_eq hfg), h'f]
     apply integral_congr_ae
@@ -384,7 +390,10 @@ theorem integral_prod_symm {B : G →L[ℝ] E →L[ℝ] J} {C : J →L[ℝ] F �
     (h : ∀ x y z, (D x) (A z y) = C (B x z) y) :
     ∫ᵛ z, f z ∂[D; μ.prod ν A] = ∫ᵛ y, (∫ᵛ x, f (x, y) ∂[B; μ]) ∂[C; ν] := by
   rw [← integral_prod_swap f]
-  exact integral_prod hf.swap h
+  apply integral_prod ?_ h
+  rw [Measure.prod_eq_productBySections ν.variation μ.variation]
+  apply Integrable.swap
+  rwa [← Measure.prod_eq_productBySections μ.variation ν.variation]
 
 /-- **Fubini's Theorem**: For integrable functions on `X × Y`,
 the vector measure integral of `f` for the product vector measure is equal to the iterated vector

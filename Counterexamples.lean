@@ -24,6 +24,7 @@ public import Counterexamples.OrderedCancelAddCommMonoidWithBounds
 public import Counterexamples.PeanoCurve
 public import Counterexamples.Phillips
 public import Counterexamples.PolynomialIsDomain
+public import Counterexamples.ProductMeasure
 public import Counterexamples.Pseudoelement
 public import Counterexamples.QuadraticForm
 public import Counterexamples.SeminormLatticeNotDistrib

@@ -698,7 +698,7 @@ theorem indepFun_iff_map_prod_eq_prod_map_map' {mβ : SigmaAlgebra β} {mβ' : S
   · refine fun h ↦ (Measure.prod_eq fun s t hs ht ↦ ?_).symm
     rw [← (h₀ hs ht).1, ← (h₀ hs ht).2, h s t hs ht]
   · intro h s t hs ht
-    rw [(h₀ hs ht).1, (h₀ hs ht).2, h, Measure.prod_prod]
+    rw [(h₀ hs ht).1, (h₀ hs ht).2, h, Measure.prod_prod s t hs ht]
 
 theorem indepFun_iff_map_prod_eq_prod_map_map {mβ : SigmaAlgebra β} {mβ' : SigmaAlgebra β'}
     [IsFiniteMeasure μ] (hf : AEMeasurable f μ) (hg : AEMeasurable g μ) :
@@ -745,9 +745,11 @@ lemma indepFun_prod₀ (mX : AEMeasurable X μ) (mY : AEMeasurable Y ν) :
     indepFun_prod mX.measurable_mk mY.measurable_mk
   refine this.congr ?_ ?_
   · exact ae_eq_comp' measurable_fst.aemeasurable mX.ae_eq_mk.symm (by
-      simpa only [measurePreserving_fst.map_eq] using (Measure.AbsolutelyContinuous.rfl : μ ≪ μ))
+      simpa only [Measure.map_fst_prod, measure_univ, one_smul] using
+        (Measure.AbsolutelyContinuous.rfl : μ ≪ μ))
   · exact ae_eq_comp' measurable_snd.aemeasurable mY.ae_eq_mk.symm (by
-      simpa only [measurePreserving_snd.map_eq] using (Measure.AbsolutelyContinuous.rfl : ν ≪ ν))
+      simpa only [Measure.map_snd_prod, measure_univ, one_smul] using
+        (Measure.AbsolutelyContinuous.rfl : ν ≪ ν))
 
 end Prod
 
@@ -1116,7 +1118,8 @@ theorem IndepFun.map_mul_eq_map_mconv_map₀'
     μ.map (f * g) = (μ.map f) ∗ₘ (μ.map g) := by
   conv in f * g => change (fun x ↦ x.1 * x.2) ∘ (fun ω ↦ (f ω, g ω))
   rw [← Measure.map_map (hf.prodMk hg) measurable_mul.aemeasurable,
-    (indepFun_iff_map_prod_eq_prod_map_map' hf hg σf σg).mp hfg, Measure.mconv]
+    (indepFun_iff_map_prod_eq_prod_map_map' hf hg σf σg).mp hfg, Measure.mconv,
+    Measure.prod_eq_productBySections (μ.map f) (μ.map g)]
 
 @[to_additive]
 theorem IndepFun.map_mul_eq_map_mconv_map'

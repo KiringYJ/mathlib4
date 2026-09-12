@@ -284,7 +284,7 @@ theorem measurable_fun_prod {α β : Type*} [SigmaAlgebra α] [SigmaAlgebra β] 
     isPiSystem_prod _
   simp only [mem_image2, forall_exists_index, and_imp]
   intro _ u Hu v Hv Heq
-  simp_rw [← Heq, Measure.prod_prod]
+  simp_rw [← Heq, Measure.prod_prod_of_sigmaFinite]
   apply Measurable.mul
   · exact (Measure.measurable_coe Hu).comp (measurable_subtype_coe.comp measurable_fst)
   · exact (Measure.measurable_coe Hv).comp (measurable_subtype_coe.comp measurable_snd)

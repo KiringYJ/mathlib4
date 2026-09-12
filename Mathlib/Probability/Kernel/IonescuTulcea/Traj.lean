@@ -651,8 +651,9 @@ theorem traj_map_updateFinset {n : ℕ} (x : Π i : Iic n, X i) :
       have hp' : Measure.map (IicProdIoi n)
           ((Kernel.id ×ₖ (traj κ n).map (Set.Ioi n).domRestrict) x) =
           Measure.map (IicProdIoi n)
-            ((Kernel.id x).prod (((traj κ n).map (Set.Ioi n).domRestrict) x)) := by
-        simpa only [Measure.mapₗ_apply_of_measurable] using hp
+            ((Measure.dirac x).prod (((traj κ n).map (Set.Ioi n).domRestrict) x)) := by
+        simpa only [Measure.mapₗ_apply_of_measurable, id_apply, Measure.prod_eq_productBySections
+          (Measure.dirac x) (((traj κ n).map (Set.Ioi n).domRestrict) x)] using hp
       have hk := map_apply (traj κ n) x (Set.measurable_restrict (Set.Ioi n))
       have hkl := congrArg
         (fun ρ => Measure.mapₗ (IicProdIoi n) (IicProdIoi n).measurable
@@ -663,7 +664,7 @@ theorem traj_map_updateFinset {n : ℕ} (x : Π i : Iic n, X i) :
             (Measure.map (Prod.mk x)
               (Measure.map (Set.Ioi n).domRestrict ((traj κ n) x))) := by
         simpa only [Measure.mapₗ_apply_of_measurable] using hkl
-      rw [hp', id_apply, Measure.dirac_prod, hkl',
+      rw [hp', Measure.dirac_prod, hkl',
         Measure.map_map, Measure.map_map]
       all_goals rfl
 

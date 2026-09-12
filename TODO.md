@@ -351,6 +351,16 @@ For every strict-partiality migration in the S--XL sections below:
   arbitrary functions cannot recover the former behavior, while proof-indexed congruence,
   measurable-set-first `map_apply`, and a.e.-measurable `map_map` preserve routine ergonomics.
 
+- [x] **Separate unique product measures from iterated and primitive constructions.**
+  `IsProductMeasure` records the measurable rectangle law; ordinary `Measure.prod` requires
+  `HasUniqueProduct`. Sigma-finite, zero, and singleton cases supply routine evidence.
+  `Measure.primitiveProd` constructs the maximal product for arbitrary factors, while
+  `Measure.productBySections` uses scalar section measurability and retains the s-finite Tonelli theory.
+  Finite/probability interfaces use the unique product, and genuinely s-finite consumers select
+  the iterated construction explicitly. The formal infinity-scaled Lebesgue counterexample
+  separates the constructions and disproves uniqueness from s-finiteness alone.
+  See [`docs/measure-products.md`](docs/measure-products.md) for domains and migration details.
+
 - [ ] **Make `NormedSpace.exp` require its algebra and convergence context.**
   `Mathlib/Analysis/Normed/Algebra/Exponential.lean:127` returns one if no `Algebra ℚ 𝔸`
   exists and otherwise delegates to a power-series sum without encoding summability in the

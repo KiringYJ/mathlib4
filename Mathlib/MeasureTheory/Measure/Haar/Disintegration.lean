@@ -56,6 +56,7 @@ theorem LinearMap.exists_map_addHaar_eq_smul_addHaar' (h : Function.Surjective L
   follows from these two and linear algebra, as `L` can be interpreted as the composition of the
   projection `P` on a complement `T` to its kernel `S`, together with a linear equivalence. -/
   have : FiniteDimensional 𝕜 E := .of_locallyCompactSpace 𝕜
+  have : ProperSpace E := .of_locallyCompactSpace 𝕜
   have : ProperSpace F := by
     rcases subsingleton_or_nontrivial E with hE | hE
     · have : Subsingleton F := Function.Surjective.subsingleton h
@@ -97,13 +98,13 @@ theorem LinearMap.exists_map_addHaar_eq_smul_addHaar' (h : Function.Surjective L
     have : IsAddHaarMeasure (μ.map M.symm M_cont.measurable.aemeasurable) :=
       M.toContinuousLinearEquiv.symm.isAddHaarMeasure_map μ
     refine ⟨addHaarScalarFactor (μ.map M.symm M_cont.measurable.aemeasurable)
-      (μS.prod μT Measurable.map_prodMk_left.aemeasurable),
+      (μS.prod μT (hasUniqueProduct_of_sigmaFinite _ _)),
       ?_, ENNReal.coe_ne_top,
       isAddLeftInvariant_eq_smul _ _⟩
     simpa only [ne_eq, ENNReal.coe_eq_zero] using
       (addHaarScalarFactor_pos_of_isAddHaarMeasure
         (μ.map M.symm M_cont.measurable.aemeasurable)
-          (μS.prod μT Measurable.map_prodMk_left.aemeasurable)).ne'
+          (μS.prod μT (hasUniqueProduct_of_sigmaFinite _ _))).ne'
   have J : (μS.prod μT).map P P_cont.measurable.aemeasurable = (μS univ) • μT := map_snd_prod
   obtain ⟨c₁, c₁_pos, c₁_fin, h₁⟩ :
       ∃ c₁ : ℝ≥0∞, c₁ ≠ 0 ∧ c₁ ≠ ∞ ∧
@@ -159,8 +160,8 @@ lemma ae_ae_add_linearMap_mem_iff [LocallyCompactSpace F] {s : Set F} (hs : Meas
     simp [M, ← LinearMap.range_eq_top (f := _), LinearMap.range_coprod]
   have A : ∀ x, M x ∈ s ↔ x ∈ M ⁻¹' s := fun x ↦ Iff.rfl
   simp_rw [← ae_comp_linearMap_mem_iff M
-    (ν.prod μ Measurable.map_prodMk_left.aemeasurable) ν hM hs, A]
-  rw [Measure.ae_prod_mem_iff_ae_ae_mem]
+    (ν.prod μ (hasUniqueProduct_of_sigmaFinite _ _)) ν hM hs, A]
+  rw [Measure.prod_eq_productBySections ν μ, Measure.ae_prod_mem_iff_ae_ae_mem]
   · simp only [M, mem_preimage, LinearMap.coprod_apply, LinearMap.id_coe, id_eq]
   · exact M_cont.measurable hs
 

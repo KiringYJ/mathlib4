@@ -83,37 +83,38 @@ lemma compProd_eq_parallelComp_comp_copy_comp [SFinite μ] :
   swap; · simp [FunLike.coe_zero, hκ]
   simp only [compProd_eq_comp_prod, ← Kernel.parallelComp_comp_copy, Measure.comp_assoc]
 
-lemma prod_comp_right [SFinite ν] {κ : Kernel β γ} [IsSFiniteKernel κ] :
-    μ.prod (κ ∘ₘ ν) = (Kernel.id ∥ₖ κ) ∘ₘ (μ.prod ν) := by
+lemma productBySections_comp_right [SFinite ν] {κ : Kernel β γ} [IsSFiniteKernel κ] :
+    μ.productBySections (κ ∘ₘ ν) = (Kernel.id ∥ₖ κ) ∘ₘ (μ.productBySections ν) := by
   ext s hs
-  rw [Measure.prod_apply hs, Measure.bind_apply hs (Kernel.aemeasurable _)]
+  rw [Measure.productBySections_apply hs, Measure.bind_apply hs (Kernel.aemeasurable _)]
   simp_rw [Measure.bind_apply (measurable_prodMk_left hs) (Kernel.aemeasurable _)]
-  rw [MeasureTheory.lintegral_prod]
+  rw [MeasureTheory.lintegral_productBySections]
   swap; · exact (Kernel.measurable_coe _ hs).aemeasurable
   congr with a
   congr with b
   rw [Kernel.parallelComp_apply,
-    Measure.prod_apply hs Measurable.map_prodMk_left.aemeasurable, Kernel.id_apply,
+    Measure.productBySections_apply (ν := κ b) hs, Kernel.id_apply,
     lintegral_dirac']
   exact measurable_measure_prodMk_left hs
 
-lemma prod_comp_left [SFinite μ] [SFinite ν] {κ : Kernel α γ} [IsSFiniteKernel κ] :
-    (κ ∘ₘ μ).prod ν = (κ ∥ₖ Kernel.id) ∘ₘ (μ.prod ν) := by
-  have h1 : (Measure.bind μ κ κ.aemeasurable).prod ν =
-      (ν.prod (Measure.bind μ κ κ.aemeasurable)).map Prod.swap
+lemma productBySections_comp_left [SFinite μ] [SFinite ν] {κ : Kernel α γ} [IsSFiniteKernel κ] :
+    (κ ∘ₘ μ).productBySections ν = (κ ∥ₖ Kernel.id) ∘ₘ (μ.productBySections ν) := by
+  have h1 : (Measure.bind μ κ κ.aemeasurable).productBySections ν =
+      (ν.productBySections (Measure.bind μ κ κ.aemeasurable)).map Prod.swap
         measurable_swap.aemeasurable := by
-    rw [Measure.prod_swap]
-  have h2 : (κ ∥ₖ Kernel.id) ∘ₘ (μ.prod ν) =
-      ((Kernel.id ∥ₖ κ) ∘ₘ (ν.prod μ)).map Prod.swap measurable_swap.aemeasurable := by
-    calc (κ ∥ₖ Kernel.id) ∘ₘ (μ.prod ν)
-    _ = (κ ∥ₖ Kernel.id) ∘ₘ ((ν.prod μ).map Prod.swap) := by rw [Measure.prod_swap]
-    _ = (κ ∥ₖ Kernel.id) ∘ₘ ((Kernel.swap _ _) ∘ₘ (ν.prod μ)) := by
+    rw [Measure.productBySections_swap]
+  have h2 : (κ ∥ₖ Kernel.id) ∘ₘ (μ.productBySections ν) =
+      ((Kernel.id ∥ₖ κ) ∘ₘ (ν.productBySections μ)).map Prod.swap measurable_swap.aemeasurable := by
+    calc (κ ∥ₖ Kernel.id) ∘ₘ (μ.productBySections ν)
+    _ = (κ ∥ₖ Kernel.id) ∘ₘ ((ν.productBySections μ).map Prod.swap) := by
+      rw [Measure.productBySections_swap]
+    _ = (κ ∥ₖ Kernel.id) ∘ₘ ((Kernel.swap _ _) ∘ₘ (ν.productBySections μ)) := by
       rw [Kernel.swap, Measure.deterministic_comp_eq_map]
-    _ = (Kernel.swap _ _) ∘ₘ ((Kernel.id ∥ₖ κ) ∘ₘ (ν.prod μ)) := by
+    _ = (Kernel.swap _ _) ∘ₘ ((Kernel.id ∥ₖ κ) ∘ₘ (ν.productBySections μ)) := by
       simp only [Measure.comp_assoc, Kernel.swap_parallelComp]
-    _ = ((Kernel.id ∥ₖ κ) ∘ₘ (ν.prod μ)).map Prod.swap := by
+    _ = ((Kernel.id ∥ₖ κ) ∘ₘ (ν.productBySections μ)).map Prod.swap := by
       rw [Kernel.swap, Measure.deterministic_comp_eq_map]
-  rw [← Measure.prod_comp_right, ← h1] at h2
+  rw [← Measure.productBySections_comp_right, ← h1] at h2
   exact h2.symm
 
 lemma parallelComp_comp_compProd [IsSFiniteKernel κ] {η : Kernel β γ} [IsSFiniteKernel η] :

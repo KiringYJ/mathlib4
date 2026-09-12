@@ -91,9 +91,11 @@ theorem area_disc : volume (disc r) = NNReal.pi * r ^ 2 := by
     calc
       volume (disc r) = volume (regionBetween (fun x => -f x) f (Ioc (-r) r)) := by
         rw [disc_eq_regionBetween]
-      _ = ENNReal.ofReal (∫ x in Ioc (-r : ℝ) r, (f - Neg.neg ∘ f) x) :=
-        (volume_regionBetween_eq_integral h.neg h measurableSet_Ioc fun x _ =>
-          neg_le_self (sqrt_nonneg _))
+      _ = ENNReal.ofReal (∫ x in Ioc (-r : ℝ) r, (f - Neg.neg ∘ f) x) := by
+        simpa only [Measure.prod_eq_productBySections (volume : Measure ℝ) (volume : Measure ℝ),
+          ← Measure.volume_eq_productBySections ℝ ℝ, Function.comp_def, Pi.neg_def]
+          using (volume_regionBetween_eq_integral h.neg h measurableSet_Ioc fun x _ =>
+            neg_le_self (sqrt_nonneg _))
       _ = ENNReal.ofReal (∫ x in (-r : ℝ)..r, 2 * f x) := by
         rw [integral_of_le] <;> simp [two_mul]
       _ = NNReal.pi * r ^ 2 := by rw_mod_cast [this, ← ENNReal.coe_nnreal_eq]

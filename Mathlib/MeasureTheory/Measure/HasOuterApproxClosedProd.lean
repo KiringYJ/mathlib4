@@ -201,8 +201,10 @@ lemma eq_prod_of_integral_prod_mul_prod_boundedContinuousFunction {μ : Measure 
     (h : ∀ (f : (i : ι) → X i →ᵇ ℝ) (g : (j : κ) → Y j →ᵇ ℝ),
       ∫ p, (∏ i, f i (p.1 i)) * (∏ j, g j (p.2 j)) ∂ξ =
       (∫ x, ∏ i, f i (x i) ∂μ) * (∫ y, ∏ j, g j (y j) ∂ν)) :
-    ξ = μ.prod ν :=
-  ext_of_integral_prod_mul_prod_boundedContinuousFunction fun f g ↦ by rw [h, ← integral_prod_mul]
+    ξ = μ.prod ν := by
+  rw [Measure.prod_eq_productBySections μ ν]
+  exact ext_of_integral_prod_mul_prod_boundedContinuousFunction fun f g ↦ by
+    rw [h, ← integral_prod_mul]
 
 lemma ext_of_integral_prod_mul_boundedContinuousFunction {μ ν : Measure ((Π i, X i) × T)}
     [IsFiniteMeasure μ] [IsFiniteMeasure ν]
@@ -224,8 +226,9 @@ lemma eq_prod_of_integral_prod_mul_boundedContinuousFunction {μ : Measure (Π i
     [IsFiniteMeasure μ] [IsFiniteMeasure ν] [IsFiniteMeasure ξ]
     (h : ∀ (f : (i : ι) → X i →ᵇ ℝ) (g : T →ᵇ ℝ),
       ∫ p, (∏ i, f i (p.1 i)) * g p.2 ∂ξ = (∫ x, ∏ i, f i (x i) ∂μ) * (∫ t, g t ∂ν)) :
-    ξ = μ.prod ν :=
-  ext_of_integral_prod_mul_boundedContinuousFunction fun f g ↦ by rw [h, ← integral_prod_mul]
+    ξ = μ.prod ν := by
+  rw [Measure.prod_eq_productBySections μ ν]
+  exact ext_of_integral_prod_mul_boundedContinuousFunction fun f g ↦ by rw [h, ← integral_prod_mul]
 
 lemma ext_of_integral_mul_prod_boundedContinuousFunction {μ ν : Measure (Z × (Π j, Y j))}
     [IsFiniteMeasure μ] [IsFiniteMeasure ν]
@@ -243,8 +246,9 @@ lemma eq_prod_of_integral_mul_prod_boundedContinuousFunction {μ : Measure Z}
     [IsFiniteMeasure μ] [IsFiniteMeasure ν] [IsFiniteMeasure ξ]
     (h : ∀ (f : Z →ᵇ ℝ) (g : (j : κ) → Y j →ᵇ ℝ),
       ∫ p, f p.1 * (∏ j, g j (p.2 j)) ∂ξ = (∫ z, f z ∂μ) * (∫ y, ∏ j, g j (y j) ∂ν)) :
-    ξ = μ.prod ν :=
-  ext_of_integral_mul_prod_boundedContinuousFunction fun f g ↦ by rw [h, ← integral_prod_mul]
+    ξ = μ.prod ν := by
+  rw [Measure.prod_eq_productBySections μ ν]
+  exact ext_of_integral_mul_prod_boundedContinuousFunction fun f g ↦ by rw [h, ← integral_prod_mul]
 
 /-- A finite measure `μ` over `X × Y` is determined by the values `∫ p, f p.1 * g p.2 ∂μ`,
 for `f : X → ℝ` and `g : Y → ℝ` any bounded continuous functions. -/
@@ -266,8 +270,9 @@ lemma eq_prod_of_integral_mul_boundedContinuousFunction {μ : Measure Z}
     {ν : Measure T} {ξ : Measure (Z × T)}
     [IsFiniteMeasure μ] [IsFiniteMeasure ν] [IsFiniteMeasure ξ]
     (h : ∀ (f : Z →ᵇ ℝ) (g : T →ᵇ ℝ), ∫ p, f p.1 * g p.2 ∂ξ = (∫ z, f z ∂μ) * (∫ t, g t ∂ν)) :
-    ξ = μ.prod ν :=
-  ext_of_integral_mul_boundedContinuousFunction fun f g ↦ by rw [h, ← integral_prod_mul]
+    ξ = μ.prod ν := by
+  rw [Measure.prod_eq_productBySections μ ν]
+  exact ext_of_integral_mul_boundedContinuousFunction fun f g ↦ by rw [h, ← integral_prod_mul]
 
 end fintype
 
@@ -291,8 +296,10 @@ lemma eq_prod_of_integral_prod_mul_prod_boundedContinuousFunction' {μ : Measure
     [IsFiniteMeasure μ] [IsFiniteMeasure ν] [IsFiniteMeasure ξ]
     (h : ∀ (f : (Π i, X i) →ᵇ ℝ) (g : (Π j, Y j) →ᵇ ℝ),
       ∫ p, f p.1 * g p.2 ∂ξ = (∫ x, f x ∂μ) * (∫ y, g y ∂ν)) :
-    ξ = μ.prod ν :=
-  ext_of_integral_prod_mul_prod_boundedContinuousFunction' fun f g ↦ by rw [h, ← integral_prod_mul]
+    ξ = μ.prod ν := by
+  rw [Measure.prod_eq_productBySections μ ν]
+  exact ext_of_integral_prod_mul_prod_boundedContinuousFunction' fun f g ↦ by
+    rw [h, ← integral_prod_mul]
 
 lemma ext_of_integral_prod_mul_boundedContinuousFunction' {μ ν : Measure ((Π i, X i) × T)}
     [IsFiniteMeasure μ] [IsFiniteMeasure ν]
@@ -308,8 +315,9 @@ lemma eq_prod_of_integral_prod_mul_boundedContinuousFunction' {μ : Measure (Π 
     [IsFiniteMeasure μ] [IsFiniteMeasure ν] [IsFiniteMeasure ξ]
     (h : ∀ (f : (Π i, X i) →ᵇ ℝ) (g : T →ᵇ ℝ),
       ∫ p, f p.1 * g p.2 ∂ξ = (∫ x, f x ∂μ) * (∫ t, g t ∂ν)) :
-    ξ = μ.prod ν :=
-  ext_of_integral_prod_mul_boundedContinuousFunction' fun f g ↦ by rw [h, ← integral_prod_mul]
+    ξ = μ.prod ν := by
+  rw [Measure.prod_eq_productBySections μ ν]
+  exact ext_of_integral_prod_mul_boundedContinuousFunction' fun f g ↦ by rw [h, ← integral_prod_mul]
 
 lemma ext_of_integral_mul_prod_boundedContinuousFunction' {μ ν : Measure (Z × (Π i, Y i))}
     [IsFiniteMeasure μ] [IsFiniteMeasure ν]
@@ -324,8 +332,9 @@ lemma eq_prod_of_integral_mul_prod_boundedContinuousFunction' {μ : Measure Z}
     [IsFiniteMeasure μ] [IsFiniteMeasure ν] [IsFiniteMeasure ξ]
     (h : ∀ (f : Z →ᵇ ℝ) (g : (Π j, Y j) →ᵇ ℝ),
       ∫ p, f p.1 * g p.2 ∂ξ = (∫ z, f z ∂μ) * (∫ y, g y ∂ν)) :
-    ξ = μ.prod ν :=
-  ext_of_integral_mul_prod_boundedContinuousFunction' fun f g ↦ by rw [h, ← integral_prod_mul]
+    ξ = μ.prod ν := by
+  rw [Measure.prod_eq_productBySections μ ν]
+  exact ext_of_integral_mul_prod_boundedContinuousFunction' fun f g ↦ by rw [h, ← integral_prod_mul]
 
 end finite
 

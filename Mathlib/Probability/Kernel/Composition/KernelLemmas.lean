@@ -65,7 +65,7 @@ lemma swap_parallelComp : swap Y T ∘ₖ (κ ∥ₖ η) = η ∥ₖ κ ∘ₖ s
   simp_rw [comp_apply, parallelComp_apply, Measure.bind_apply hs (Kernel.aemeasurable _),
     swap_apply, lintegral_dirac' _ (Kernel.measurable_coe _ hs), parallelComp_apply' hs,
     Prod.fst_swap, Prod.snd_swap]
-  rw [MeasureTheory.lintegral_prod_symm]
+  rw [MeasureTheory.lintegral_productBySections_symm]
   swap; · exact ((Kernel.id.measurable_coe hs).comp measurable_swap).aemeasurable
   congr with d
   simp_rw [Prod.swap_prod_mk, Measure.dirac_apply' _ hs, ← Set.indicator_comp_right,
@@ -84,8 +84,8 @@ lemma parallelComp_id_left_comp_parallelComp
   swap; · simp [hκ]
   ext a s hs
   rw [comp_apply' _ _ _ hs, parallelComp_apply,
-    MeasureTheory.lintegral_prod _ (Kernel.measurable_coe _ hs).aemeasurable]
-  rw [parallelComp_apply, Measure.prod_apply hs]
+    MeasureTheory.lintegral_productBySections _ (Kernel.measurable_coe _ hs).aemeasurable]
+  rw [parallelComp_apply, Measure.productBySections_apply hs]
   congr with x
   rw [comp_apply' _ _ _ (measurable_prodMk_left hs)]
   congr with y

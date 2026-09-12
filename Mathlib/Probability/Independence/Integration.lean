@@ -258,9 +258,9 @@ theorem IndepFun.integral_bilin_comp_comp
     (Integrable.comp_aemeasurable hX hf).isProbabilityMeasure_of_indepFun (f ∘ X) (g ∘ Y) h
       (hXY.comp₀ hX hY hf.1.aemeasurable hg.1.aemeasurable)
   rw [← integral_map (f := fun z ↦ B (f z.1) (g z.2)) (φ := fun ω ↦ (X ω, Y ω)) (by fun_prop),
-    hXY.map_prod_eq_prod_map_map hX hY, integral_prod_bilin _ hf hg, integral_map hX hf.1,
-    integral_map hY hg.1]
-  rw [hXY.map_prod_eq_prod_map_map hX hY]
+    hXY.map_prod_eq_prod_map_map hX hY, Measure.prod_eq_productBySections (μ.map X) (μ.map Y),
+    integral_prod_bilin _ hf hg, integral_map hX hf.1, integral_map hY hg.1]
+  rw [hXY.map_prod_eq_prod_map_map hX hY, Measure.prod_eq_productBySections (μ.map X) (μ.map Y)]
   exact Continuous.comp_aestronglyMeasurable₂ (g := (B · ·)) (by fun_prop)
     hf.1.comp_fst hg.1.comp_snd
 

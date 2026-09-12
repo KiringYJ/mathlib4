@@ -285,7 +285,7 @@ characteristic functions. This is the version for Hilbert spaces, see `charFunDu
 for the Banach space version. -/
 lemma charFun_prod {μ : Measure E} {ν : Measure F} [SFinite μ] [SFinite ν]
     (t : WithLp 2 (E × F)) :
-    charFun ((μ.prod ν).map (toLp 2)) t =
+    charFun ((μ.productBySections ν).map (toLp 2)) t =
       charFun μ (ofLp t).1 * charFun ν (ofLp t).2 := by
   simp_rw [charFun, prod_inner_apply, ← MeasurableEquiv.coe_toLp, ← integral_prod_mul,
     integral_map_equiv]
@@ -303,6 +303,7 @@ lemma charFun_eq_prod_iff {μ : Measure E} {ν : Measure F} {ξ : Measure (E × 
     (∀ t, charFun (ξ.map (toLp 2)) t = charFun μ (ofLp t).1 * charFun ν (ofLp t).2) ↔
     ξ = μ.prod ν where
   mp h := by
+    rw [Measure.prod_eq_productBySections μ ν]
     let e := MeasurableEquiv.toLp 2 (E × F)
     refine e.map_measurableEquiv_injective
       <| Measure.ext_of_charFun <| funext fun t ↦ ?_
@@ -312,9 +313,9 @@ lemma charFun_eq_prod_iff {μ : Measure E} {ν : Measure F} {ξ : Measure (E × 
       filter_upwards with x
       rfl
     change charFun (ξ.map e e.measurable.aemeasurable) t =
-      charFun ((μ.prod ν).map e e.measurable.aemeasurable) t
-    rw [he ξ, he (μ.prod ν), h, charFun_prod]
-  mpr h := by rw [h]; exact charFun_prod
+      charFun ((μ.productBySections ν).map e e.measurable.aemeasurable) t
+    rw [he ξ, he (μ.productBySections ν), h, charFun_prod]
+  mpr h := by rw [h, Measure.prod_eq_productBySections μ ν]; exact charFun_prod
 
 variable {ι : Type*} [Fintype ι] {E : ι → Type*} [∀ i, NormedAddCommGroup (E i)]
     [∀ i, InnerProductSpace ℝ (E i)] {mE : ∀ i, SigmaAlgebra (E i)}
@@ -427,7 +428,7 @@ lemma charFunDual_map_const_add [BorelSpace E] (r : E) (L : StrongDual ℝ E) :
 characteristic functions. This is the version for Banach spaces, see `charFun_prod`
 for the Hilbert space version. -/
 lemma charFunDual_prod [SFinite μ] [SFinite ν] (L : StrongDual ℝ (E × F)) :
-    charFunDual (μ.prod ν) L
+    charFunDual (μ.productBySections ν) L
       = charFunDual μ (L.comp (.inl ℝ E F)) * charFunDual ν (L.comp (.inr ℝ E F)) := by
   simp_rw [charFunDual_apply, ← L.comp_inl_add_comp_inr, ofReal_add, add_mul,
     Complex.exp_add, ← integral_prod_mul]
@@ -437,7 +438,7 @@ characteristic functions. This is `charFunDual_prod` for `WithLp`.
 See `charFun_prod` for the Hilbert space version. -/
 lemma charFunDual_prod' (p : ℝ≥0∞) [Fact (1 ≤ p)] [SFinite μ] [SFinite ν]
     (L : StrongDual ℝ (WithLp p (E × F))) :
-    charFunDual ((μ.prod ν).map (toLp p)) L =
+    charFunDual ((μ.productBySections ν).map (toLp p)) L =
       charFunDual μ (L.comp
         ((prodContinuousLinearEquiv p ℝ E F).symm.toContinuousLinearMap.comp
           (.inl ℝ E F))) *
@@ -447,8 +448,8 @@ lemma charFunDual_prod' (p : ℝ≥0∞) [Fact (1 ≤ p)] [SFinite μ] [SFinite 
   simp_rw [charFunDual_apply, ← integral_prod_mul, ← Complex.exp_add, ← add_mul, ← ofReal_add,
     L.comp_apply, ← map_add, ContinuousLinearMap.comp_inl_add_comp_inr]
   let e := MeasurableEquiv.toLp p (E × F)
-  have hmap : (μ.prod ν).map (toLp p) (by fun_prop) =
-      (μ.prod ν).map e e.measurable.aemeasurable := by
+  have hmap : (μ.productBySections ν).map (toLp p) (by fun_prop) =
+      (μ.productBySections ν).map e e.measurable.aemeasurable := by
     apply Measure.map_congr (hf := by fun_prop)
     filter_upwards with x
     rfl
@@ -514,9 +515,10 @@ lemma charFunDual_eq_prod_iff [BorelSpace F] [SecondCountableTopology F] [Comple
       charFunDual μ (L.comp (.inl ℝ E F)) * charFunDual ν (L.comp (.inr ℝ E F))) ↔
     ξ = μ.prod ν where
   mp h := by
+    rw [Measure.prod_eq_productBySections μ ν]
     refine Measure.ext_of_charFunDual <| funext fun t ↦ ?_
     rw [h, charFunDual_prod]
-  mpr h := by rw [h]; exact charFunDual_prod
+  mpr h := by rw [h, Measure.prod_eq_productBySections μ ν]; exact charFunDual_prod
 
 /-- The characteristic function of a measure is a product of
 characteristic functions if and only if it is a product measure.
@@ -534,6 +536,7 @@ lemma charFunDual_eq_prod_iff' (p : ℝ≥0∞) [Fact (1 ≤ p)] [BorelSpace F]
           (.inr ℝ E F)))) ↔
     ξ = μ.prod ν where
   mp h := by
+    rw [Measure.prod_eq_productBySections μ ν]
     let e := MeasurableEquiv.toLp p (E × F)
     refine e.map_measurableEquiv_injective
       <| Measure.ext_of_charFunDual <| funext fun L ↦ ?_
@@ -543,9 +546,9 @@ lemma charFunDual_eq_prod_iff' (p : ℝ≥0∞) [Fact (1 ≤ p)] [BorelSpace F]
       filter_upwards with x
       rfl
     change charFunDual (ξ.map e e.measurable.aemeasurable) L =
-      charFunDual ((μ.prod ν).map e e.measurable.aemeasurable) L
-    rw [he ξ, he (μ.prod ν), h, charFunDual_prod']
-  mpr h := by rw [h]; exact charFunDual_prod' p
+      charFunDual ((μ.productBySections ν).map e e.measurable.aemeasurable) L
+    rw [he ξ, he (μ.productBySections ν), h, charFunDual_prod']
+  mpr h := by rw [h, Measure.prod_eq_productBySections μ ν]; exact charFunDual_prod' p
 
 /-- The characteristic function of a measure is a product of
 characteristic functions if and only if it is a product measure.

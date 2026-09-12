@@ -86,7 +86,7 @@ lemma avgRisk_eq_lintegral_lintegral_lintegral
     avgRisk ℓ P κ π = ∫⁻ x, ∫⁻ y, ∫⁻ θ, ℓ θ y ∂(P†π) x ∂κ x ∂(P ∘ₘ π) := by
   rw [avgRisk_eq_lintegral_posterior_prod hl, Measure.lintegral_bind (by fun_prop) (by fun_prop)]
   congr with x
-  rw [Kernel.prod_apply, lintegral_prod_symm' _ (by fun_prop)]
+  rw [Kernel.prod_apply, lintegral_productBySections_symm' _ (by fun_prop)]
 
 lemma lintegral_iInf_posterior_le_avgRisk
     (hl : Measurable (Function.uncurry ℓ)) (P : Kernel Θ 𝓧) [IsFiniteKernel P]

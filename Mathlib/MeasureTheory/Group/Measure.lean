@@ -135,28 +135,46 @@ theorem forall_measure_preimage_mul_right_iff (μ : Measure G) :
       h.map_mul_right_eq_self g (measurable_mul_const g)]
 
 @[to_additive]
-instance Measure.prod.instIsMulLeftInvariant [IsMulLeftInvariant μ] [SFinite μ] {H : Type*}
+instance Measure.productBySections.instIsMulLeftInvariant [IsMulLeftInvariant μ] [SFinite μ]
+    {H : Type*}
     [Mul H] {mH : SigmaAlgebra H} {ν : Measure H} [MeasurableMul H] [IsMulLeftInvariant ν]
-    [SFinite ν] : IsMulLeftInvariant (μ.prod ν) := by
+    [SFinite ν] : IsMulLeftInvariant (μ.productBySections ν) := by
   constructor
   rintro ⟨g, h⟩ hgh
-  change map (Prod.map (g * ·) (h * ·)) (μ.prod ν) hgh.aemeasurable = μ.prod ν
-  rw [← map_prod_map _ _ (measurable_const_mul g) (measurable_const_mul h)]
+  change map (Prod.map (g * ·) (h * ·)) (μ.productBySections ν) hgh.aemeasurable =
+    μ.productBySections ν
+  rw [← map_productBySections_map _ _ (measurable_const_mul g) (measurable_const_mul h)]
   simp only [
     map_mul_left_eq_self μ g (measurable_const_mul g),
     map_mul_left_eq_self ν h (measurable_const_mul h)]
 
 @[to_additive]
-instance Measure.prod.instIsMulRightInvariant [IsMulRightInvariant μ] [SFinite μ] {H : Type*}
+instance Measure.productBySections.instIsMulRightInvariant [IsMulRightInvariant μ] [SFinite μ]
+    {H : Type*}
     [Mul H] {mH : SigmaAlgebra H} {ν : Measure H} [MeasurableMul H] [IsMulRightInvariant ν]
-    [SFinite ν] : IsMulRightInvariant (μ.prod ν) := by
+    [SFinite ν] : IsMulRightInvariant (μ.productBySections ν) := by
   constructor
   rintro ⟨g, h⟩ hgh
-  change map (Prod.map (· * g) (· * h)) (μ.prod ν) hgh.aemeasurable = μ.prod ν
-  rw [← map_prod_map _ _ (measurable_mul_const g) (measurable_mul_const h)]
+  change map (Prod.map (· * g) (· * h)) (μ.productBySections ν) hgh.aemeasurable =
+    μ.productBySections ν
+  rw [← map_productBySections_map _ _ (measurable_mul_const g) (measurable_mul_const h)]
   simp only [
     map_mul_right_eq_self μ g (measurable_mul_const g),
     map_mul_right_eq_self ν h (measurable_mul_const h)]
+
+@[to_additive]
+instance Measure.prod.instIsMulLeftInvariant [IsMulLeftInvariant μ] [SigmaFinite μ] {H : Type*}
+    [Mul H] {mH : SigmaAlgebra H} {ν : Measure H} [MeasurableMul H] [IsMulLeftInvariant ν]
+    [SigmaFinite ν] : IsMulLeftInvariant (μ.prod ν) := by
+  rw [Measure.prod_eq_productBySections μ ν]
+  infer_instance
+
+@[to_additive]
+instance Measure.prod.instIsMulRightInvariant [IsMulRightInvariant μ] [SigmaFinite μ] {H : Type*}
+    [Mul H] {mH : SigmaAlgebra H} {ν : Measure H} [MeasurableMul H] [IsMulRightInvariant ν]
+    [SigmaFinite ν] : IsMulRightInvariant (μ.prod ν) := by
+  rw [Measure.prod_eq_productBySections μ ν]
+  infer_instance
 
 @[to_additive]
 theorem isMulLeftInvariant_map {H : Type*} [SigmaAlgebra H] [Mul H] [MeasurableMul H]
@@ -955,10 +973,19 @@ instance (priority := 100) IsHaarMeasure.sigmaFinite [SigmaCompactSpace G] : Sig
         spanning := iUnion_compactCovering G }⟩⟩
 
 @[to_additive]
-instance prod.instIsHaarMeasure {G : Type*} [Group G] [TopologicalSpace G] {_ : SigmaAlgebra G}
+instance productBySections.instIsHaarMeasure {G : Type*} [Group G] [TopologicalSpace G]
+    {_ : SigmaAlgebra G}
     {H : Type*} [Group H] [TopologicalSpace H] {_ : SigmaAlgebra H} (μ : Measure G)
     (ν : Measure H) [IsHaarMeasure μ] [IsHaarMeasure ν] [SFinite μ] [SFinite ν]
-    [MeasurableMul G] [MeasurableMul H] : IsHaarMeasure (μ.prod ν) where
+    [MeasurableMul G] [MeasurableMul H] : IsHaarMeasure (μ.productBySections ν) where
+
+@[to_additive]
+instance prod.instIsHaarMeasure {G : Type*} [Group G] [TopologicalSpace G] {_ : SigmaAlgebra G}
+    {H : Type*} [Group H] [TopologicalSpace H] {_ : SigmaAlgebra H} (μ : Measure G)
+    (ν : Measure H) [IsHaarMeasure μ] [IsHaarMeasure ν] [SigmaFinite μ] [SigmaFinite ν]
+    [MeasurableMul G] [MeasurableMul H] : IsHaarMeasure (μ.prod ν) := by
+  rw [Measure.prod_eq_productBySections μ ν]
+  infer_instance
 
 /-- If the neutral element of a group is not isolated, then a Haar measure on this group has value
 zero on singletons.

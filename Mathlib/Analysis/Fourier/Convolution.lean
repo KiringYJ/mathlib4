@@ -7,6 +7,7 @@ module
 
 public import Mathlib.Analysis.Convolution
 public import Mathlib.Analysis.Distribution.SchwartzSpace.Fourier
+public import Mathlib.MeasureTheory.Measure.Prod
 
 /-! # The Fourier transform of the convolution
 
@@ -47,6 +48,7 @@ variable [NontriviallyNormedField 𝕜] [NormedAddCommGroup E]
 theorem integrable_prod_sub (B : F₁ →L[𝕜] F₂ →L[𝕜] F₃) {f₁ : E → F₁} {f₂ : E → F₂}
     (hf₁ : Integrable f₁) (hf₂ : Integrable f₂) :
     Integrable (fun (p : E × E) ↦ ‖B‖ * (‖f₁ (p.1 - p.2)‖ * ‖f₂ p.2‖)) (volume.prod volume) := by
+  rw [Measure.prod_eq_productBySections (volume : Measure E) volume]
   simpa [mul_comm] using (hf₂.norm.convolution_integrand (.mul ℝ ℝ) hf₁.norm).const_mul ‖B‖
 
 open FourierTransform

@@ -7,6 +7,7 @@ module
 
 public import Mathlib.MeasureTheory.Function.SpecialFunctions.Sinc
 public import Mathlib.MeasureTheory.Measure.CharacteristicFunction.Basic
+public import Mathlib.MeasureTheory.Measure.Prod
 
 /-!
 # Integrals of characteristic functions
@@ -56,10 +57,12 @@ lemma integral_charFun_Icc [IsFiniteMeasure μ] (hr : 0 < r) :
     rw [← Prod.mk.eta (p := p)]
     norm_cast
     simp only [Function.uncurry_apply_pair, norm_exp_ofReal_mul_I]
+  have h_int_iterated := h_int
+  rw [Measure.prod_eq_productBySections (volume.restrict (Set.uIoc (-r) r)) μ] at h_int_iterated
   calc ∫ t in -r..r, charFun μ t
   _ = ∫ x in -r..r, ∫ y, cexp (x * y * I) ∂μ := by simp_rw [charFun_apply_real]
   _ = ∫ y, ∫ x in -r..r, cexp (x * y * I) ∂volume ∂μ := by
-    rw [intervalIntegral_integral_swap h_int]
+    rw [intervalIntegral_integral_swap h_int_iterated]
   _ = ∫ y, if r * y = 0 then 2 * (r : ℂ)
       else y⁻¹ * ∫ x in -(y * r)..y * r, cexp (x * I) ∂volume ∂μ := by
     congr with y

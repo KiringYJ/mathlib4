@@ -100,7 +100,8 @@ theorem convexBodyLT_volume :
   calc
     _ = (∏ x : {w // InfinitePlace.IsReal w}, ENNReal.ofReal (2 * (f x.val))) *
           ∏ x : {w // InfinitePlace.IsComplex w}, ENNReal.ofReal (f x.val) ^ 2 * NNReal.pi := by
-      simp_rw [volume_eq_prod, prod_prod, volume_pi, pi_pi, Real.volume_ball, Complex.volume_ball]
+      simp_rw [volume_eq_productBySections, productBySections_prod, volume_pi, pi_pi,
+        Real.volume_ball, Complex.volume_ball]
     _ = ((2 : ℝ≥0) ^ nrRealPlaces K
           * (∏ x : {w // InfinitePlace.IsReal w}, ENNReal.ofReal (f x.val)))
           * ((∏ x : {w // IsComplex w}, ENNReal.ofReal (f x.val) ^ 2) *
@@ -215,7 +216,8 @@ theorem convexBodyLT'_volume :
       rw [show {a : ℝ × ℝ | |a.1| < 1 ∧ |a.2| < B ^ 2} =
         Set.Ioo (-1 : ℝ) (1 : ℝ) ×ˢ Set.Ioo (-(B : ℝ) ^ 2) ((B : ℝ) ^ 2) by
           ext; simp_rw [Set.mem_ofPred_eq, Set.mem_prod, Set.mem_Ioo, abs_lt]]
-      simp_rw [volume_eq_prod, prod_prod, Real.volume_Ioo, sub_neg_eq_add, one_add_one_eq_two,
+      simp_rw [volume_eq_productBySections, productBySections_prod, Real.volume_Ioo, sub_neg_eq_add,
+        one_add_one_eq_two,
         ← two_mul, ofReal_mul zero_le_two, ofReal_pow (coe_nonneg B), ofReal_ofNat,
         ofReal_coe_nnreal, ← mul_assoc, show (2 : ℝ≥0∞) * 2 = 4 by norm_num]
     · refine (MeasurableSet.inter ?_ ?_).nullMeasurableSet
@@ -225,7 +227,8 @@ theorem convexBodyLT'_volume :
     _ = (∏ x : {w // InfinitePlace.IsReal w}, ENNReal.ofReal (2 * (f x.val))) *
           ((∏ x ∈ Finset.univ.erase w₀, ENNReal.ofReal (f x.val) ^ 2 * pi) *
           (4 * (f w₀) ^ 2)) := by
-      simp_rw [volume_eq_prod, prod_prod, volume_pi, pi_pi, Real.volume_ball]
+      simp_rw [volume_eq_productBySections, productBySections_prod, volume_pi, pi_pi,
+        Real.volume_ball]
       rw [← Finset.prod_erase_mul _ _ (Finset.mem_univ w₀)]
       congr 2
       · refine Finset.prod_congr rfl (fun w' hw' ↦ ?_)
@@ -409,7 +412,8 @@ theorem convexBodySum_volume :
       _ = (∫ x : {w : InfinitePlace K // IsReal w} → ℝ, ∏ w, exp (-‖x w‖)) *
               (∫ x : {w : InfinitePlace K // IsComplex w} → ℂ, ∏ w, exp (-2 * ‖x w‖)) := by
         simp_rw [convexBodySumFun_apply', neg_add, ← neg_mul, Finset.mul_sum,
-          ← Finset.sum_neg_distrib, exp_add, exp_sum, ← integral_prod_mul, volume_eq_prod]
+          ← Finset.sum_neg_distrib, exp_add, exp_sum, ← integral_prod_mul,
+            volume_eq_productBySections]
       _ = (∫ x : ℝ, exp (-|x|)) ^ nrRealPlaces K *
               (∫ x : ℂ, Real.exp (-2 * ‖x‖)) ^ nrComplexPlaces K := by
         rw [integral_fintype_prod_volume_eq_pow (fun x => exp (-‖x‖)),

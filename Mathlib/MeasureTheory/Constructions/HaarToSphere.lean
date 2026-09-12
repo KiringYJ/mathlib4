@@ -142,9 +142,10 @@ where `dim E = Module.finrank ℝ E` is the dimension of `E`. -/
 theorem measurePreserving_homeomorphUnitSphereProd :
     MeasurePreserving (homeomorphUnitSphereProd E) (μ.comap (↑))
       (μ.toSphere.prod (volumeIoiPow (dim E - 1))) := by
+  rw [prod_eq_productBySections μ.toSphere (volumeIoiPow (dim E - 1))]
   nontriviality E
   refine ⟨(homeomorphUnitSphereProd E).measurable, .symm ?_⟩
-  refine prod_eq_generateFrom (SigmaAlgebra.generateFrom_self _)
+  refine productBySections_eq_generateFrom (SigmaAlgebra.generateFrom_self _)
     ((borel_eq_generateFrom_Iio _).symm.trans BorelSpace.sigmaAlgebra_eq.symm)
     (SigmaAlgebra.isPiSystem _) isPiSystem_Iio
     μ.toSphere.toFiniteSpanningSetsIn (finiteSpanningSetsIn_volumeIoiPow_range_Iio _)
@@ -256,6 +257,7 @@ lemma integrable_fun_norm_addHaar {f : ℝ → F} :
     Integrable (f ‖·‖) μ ↔ IntegrableOn (fun y : ℝ ↦ y ^ (dim E - 1) • f y) (Ioi 0) := by
   have := μ.measurePreserving_homeomorphUnitSphereProd.integrable_comp_emb (g := f ∘ (↑) ∘ Prod.snd)
     (Homeomorph.measurableEmbedding _)
+  rw [Measure.prod_eq_productBySections μ.toSphere (.volumeIoiPow (dim E - 1))] at this
   simp only [comp_def, homeomorphUnitSphereProd_apply_snd_coe] at this
   rw [← restrict_compl_singleton (μ := μ) 0, ← IntegrableOn,
     integrableOn_iff_comap_subtypeVal (by measurability), comp_def, this,
@@ -302,8 +304,9 @@ lemma integral_fun_norm_addHaar (f : ℝ → F) :
     _ = ∫ x, f x.2 ∂μ.toSphere.prod (.volumeIoiPow (dim E - 1)) := by
       simpa using μ.measurePreserving_homeomorphUnitSphereProd.integral_comp
         (Homeomorph.measurableEmbedding _) (f ∘ Subtype.val ∘ Prod.snd)
-    _ = μ.toSphere.real univ • ∫ x : Ioi (0 : ℝ), f x ∂.volumeIoiPow (dim E - 1) :=
-      integral_fun_snd (f ∘ Subtype.val)
+    _ = μ.toSphere.real univ • ∫ x : Ioi (0 : ℝ), f x ∂.volumeIoiPow (dim E - 1) := by
+      rw [Measure.prod_eq_productBySections μ.toSphere (.volumeIoiPow (dim E - 1))]
+      exact integral_fun_snd (f ∘ Subtype.val)
     _ = _ := by
       simp only [Measure.volumeIoiPow, ENNReal.ofReal]
       rw [integral_withDensity_eq_integral_smul, μ.toSphere_real_apply_univ,

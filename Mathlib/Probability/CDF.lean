@@ -55,7 +55,7 @@ for probability measures. In that case, it satisfies `cdf μ x = μ.real (Iic x)
 @[wikidata Q386228]
 noncomputable
 def cdf (μ : Measure ℝ) [SFinite μ] : StieltjesFunction ℝ :=
-  condCDF ((dirac Unit.unit).prod μ Measurable.map_prodMk_left.aemeasurable) Unit.unit
+  condCDF ((dirac Unit.unit).prod μ) Unit.unit
 
 section ExplicitMeasureArg
 variable (μ : Measure ℝ) [SFinite μ]
@@ -76,9 +76,11 @@ lemma tendsto_cdf_atBot : Tendsto (cdf μ) atBot (𝓝 0) := tendsto_condCDF_atB
 lemma tendsto_cdf_atTop : Tendsto (cdf μ) atTop (𝓝 1) := tendsto_condCDF_atTop _ _
 
 lemma ofReal_cdf [IsProbabilityMeasure μ] (x : ℝ) : ENNReal.ofReal (cdf μ x) = μ (Iic x) := by
+  rw [cdf, prod_eq_productBySections (dirac Unit.unit) μ]
   have h := lintegral_condCDF
-    ((dirac Unit.unit).prod μ Measurable.map_prodMk_left.aemeasurable) x
-  simpa only [fst_prod, prod_prod, measure_univ, one_mul, lintegral_dirac] using! h
+    ((dirac Unit.unit).productBySections μ (hasMeasurableSections_of_sfinite _ _)) x
+  simpa only [fst_productBySections, productBySections_prod, measure_univ, one_mul,
+    lintegral_dirac] using! h
 
 lemma cdf_eq_real [IsProbabilityMeasure μ] (x : ℝ) : cdf μ x = μ.real (Iic x) := by
   rw [measureReal_def, ← ofReal_cdf μ x, ENNReal.toReal_ofReal (cdf_nonneg μ x)]

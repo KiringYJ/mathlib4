@@ -175,8 +175,8 @@ variable [AddGroup G]
 
 theorem AEStronglyMeasurable.convolution_integrand' [SFinite ν] [MeasurableAdd₂ G]
     [MeasurableNeg G] (hf : AEStronglyMeasurable f ν)
-    (hg : AEStronglyMeasurable g <| map (fun p : G × G => p.1 - p.2) (μ.prod ν)) :
-    AEStronglyMeasurable (fun p : G × G => L (f p.2) (g (p.1 - p.2))) (μ.prod ν) :=
+    (hg : AEStronglyMeasurable g <| map (fun p : G × G => p.1 - p.2) (μ.productBySections ν)) :
+    AEStronglyMeasurable (fun p : G × G => L (f p.2) (g (p.1 - p.2))) (μ.productBySections ν) :=
   L.aestronglyMeasurable_comp₂ hf.comp_snd <| hg.comp_measurable measurable_sub
 
 section
@@ -264,13 +264,14 @@ variable [MeasurableAdd₂ G] [MeasurableNeg G] [SFinite μ] [IsAddRightInvarian
 
 theorem AEStronglyMeasurable.convolution_integrand (hf : AEStronglyMeasurable f ν)
     (hg : AEStronglyMeasurable g μ) :
-    AEStronglyMeasurable (fun p : G × G => L (f p.2) (g (p.1 - p.2))) (μ.prod ν) :=
+    AEStronglyMeasurable (fun p : G × G => L (f p.2) (g (p.1 - p.2))) (μ.productBySections ν) :=
   hf.convolution_integrand' L <|
     hg.mono_ac (quasiMeasurePreserving_sub_of_right_invariant μ ν).absolutelyContinuous
 
 theorem Integrable.convolution_integrand (hf : Integrable f ν) (hg : Integrable g μ) :
-    Integrable (fun p : G × G => L (f p.2) (g (p.1 - p.2))) (μ.prod ν) := by
-  have h_meas : AEStronglyMeasurable (fun p : G × G => L (f p.2) (g (p.1 - p.2))) (μ.prod ν) :=
+    Integrable (fun p : G × G => L (f p.2) (g (p.1 - p.2))) (μ.productBySections ν) := by
+  have h_meas :
+      AEStronglyMeasurable (fun p : G × G => L (f p.2) (g (p.1 - p.2))) (μ.productBySections ν) :=
     hf.aestronglyMeasurable.convolution_integrand L hg.aestronglyMeasurable
   have h2_meas : AEStronglyMeasurable (fun y : G => ∫ x : G, ‖L (f y) (g (x - y))‖ ∂μ) ν :=
     h_meas.prod_swap.norm.integral_prod_right'
@@ -520,7 +521,7 @@ variable [MeasurableAdd₂ G] [MeasurableNeg G] [SFinite μ] [IsAddRightInvarian
 @[fun_prop]
 protected theorem AEStronglyMeasurable.convolution (hf : AEStronglyMeasurable f μ)
     (hg : AEStronglyMeasurable g μ) : AEStronglyMeasurable (f ⋆[L, μ] g) μ := by
-  suffices AEStronglyMeasurable (fun ⟨x, t⟩ ↦ g (x - t)) (μ.prod μ) from
+  suffices AEStronglyMeasurable (fun ⟨x, t⟩ ↦ g (x - t)) (μ.productBySections μ) from
     (L.aestronglyMeasurable_comp₂ hf.comp_snd this).integral_prod_right'
   exact hg.comp_quasiMeasurePreserving (quasiMeasurePreserving_sub_of_right_invariant μ μ)
 
@@ -900,7 +901,9 @@ See also `MeasureTheory.convolution_assoc`. -/
 theorem convolution_assoc' (hL : ∀ (x : E) (y : E') (z : E''), L₂ (L x y) z = L₃ x (L₄ y z))
     {x₀ : G} (hfg : ∀ᵐ y ∂μ, ConvolutionExistsAt f g y L ν)
     (hgk : ∀ᵐ x ∂ν, ConvolutionExistsAt g k x L₄ μ)
-    (hi : Integrable (uncurry fun x y => (L₃ (f y)) ((L₄ (g (x - y))) (k (x₀ - x)))) (μ.prod ν)) :
+    (hi :
+      Integrable (uncurry fun x y => (L₃ (f y)) ((L₄ (g (x - y))) (k (x₀ - x))))
+        (μ.productBySections ν)) :
     ((f ⋆[L, ν] g) ⋆[L₂, μ] k) x₀ = (f ⋆[L₃, ν] g ⋆[L₄, μ] k) x₀ :=
   calc
     ((f ⋆[L, ν] g) ⋆[L₂, μ] k) x₀ = ∫ t, L₂ (∫ s, L (f s) (g (t - s)) ∂ν) (k (x₀ - t)) ∂μ := rfl
@@ -935,7 +938,7 @@ theorem convolution_assoc (hL : ∀ (x : E) (y : E') (z : E''), L₂ (L x y) z =
   -- the following is similar to `Integrable.convolution_integrand`
   have h_meas :
     AEStronglyMeasurable (uncurry fun x y => L₃ (f y) (L₄ (g x) (k (x₀ - y - x))))
-      (μ.prod ν) := by
+      (μ.productBySections ν) := by
     refine L₃.aestronglyMeasurable_comp₂ hf.comp_snd ?_
     refine L₄.aestronglyMeasurable_comp₂ hg.comp_fst ?_
     refine (hk.mono_ac ?_).comp_measurable (by fun_prop)
@@ -946,9 +949,11 @@ theorem convolution_assoc (hL : ∀ (x : E) (y : E') (z : E''), L₂ (L x y) z =
   have h2_meas :
       AEStronglyMeasurable (fun y => ∫ x, ‖L₃ (f y) (L₄ (g x) (k (x₀ - y - x)))‖ ∂μ) ν :=
     h_meas.prod_swap.norm.integral_prod_right'
-  have h3 : map (fun z : G × G => (z.1 - z.2, z.2)) (μ.prod ν) = μ.prod ν :=
+  have h3 : map (fun z : G × G => (z.1 - z.2, z.2)) (μ.productBySections ν) =
+      μ.productBySections ν :=
     (measurePreserving_sub_prod μ ν).map_eq
-  suffices Integrable (uncurry fun x y => L₃ (f y) (L₄ (g x) (k (x₀ - y - x)))) (μ.prod ν) by
+  suffices Integrable
+      (uncurry fun x y => L₃ (f y) (L₄ (g x) (k (x₀ - y - x)))) (μ.productBySections ν) by
     rw [← h3] at this
     convert! this.comp_measurable (measurable_sub.prodMk measurable_snd)
     ext ⟨x, y⟩

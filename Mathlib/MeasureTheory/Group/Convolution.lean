@@ -34,7 +34,7 @@ variable {M : Type*} [Monoid M] [SigmaAlgebra M]
 @[to_additive /-- Additive convolution of measures. -/]
 noncomputable def mconv [MeasurableMul₂ M] (μ : Measure M) (ν : Measure M) [SFinite ν] :
     Measure M :=
-  Measure.map (fun x : M × M ↦ x.1 * x.2) (μ.prod ν) measurable_mul.aemeasurable
+  Measure.map (fun x : M × M ↦ x.1 * x.2) (μ.productBySections ν) measurable_mul.aemeasurable
 
 /-- Scoped notation for the multiplicative convolution of measures. -/
 scoped[MeasureTheory] infixr:80 " ∗ₘ " => MeasureTheory.Measure.mconv
@@ -45,25 +45,25 @@ scoped[MeasureTheory] infixr:80 " ∗ " => MeasureTheory.Measure.conv
 @[to_additive]
 theorem lintegral_mconv_eq_lintegral_prod [MeasurableMul₂ M] {μ ν : Measure M} [SFinite ν]
     {f : M → ℝ≥0∞} (hf : Measurable f) :
-    ∫⁻ z, f z ∂(μ ∗ₘ ν) = ∫⁻ z, f (z.1 * z.2) ∂(μ.prod ν) := by
+    ∫⁻ z, f z ∂(μ ∗ₘ ν) = ∫⁻ z, f (z.1 * z.2) ∂(μ.productBySections ν) := by
   rw [mconv, lintegral_map hf measurable_mul]
 
 @[to_additive]
 theorem lintegral_mconv [MeasurableMul₂ M] {μ ν : Measure M} [SFinite ν]
     {f : M → ℝ≥0∞} (hf : Measurable f) :
     ∫⁻ z, f z ∂(μ ∗ₘ ν) = ∫⁻ x, ∫⁻ y, f (x * y) ∂ν ∂μ := by
-  rw [lintegral_mconv_eq_lintegral_prod hf, lintegral_prod _ (by fun_prop)]
+  rw [lintegral_mconv_eq_lintegral_prod hf, lintegral_productBySections _ (by fun_prop)]
 
 @[to_additive]
 lemma dirac_mconv [MeasurableMul₂ M] (x : M) (μ : Measure M) [SFinite μ] :
     (dirac x) ∗ₘ μ = μ.map (fun y ↦ x * y) := by
   unfold mconv
   calc
-    map (fun x : M × M ↦ x.1 * x.2) ((dirac x).prod μ) measurable_mul.aemeasurable =
+    map (fun x : M × M ↦ x.1 * x.2) ((dirac x).productBySections μ) measurable_mul.aemeasurable =
         map (fun x : M × M ↦ x.1 * x.2)
           (map (Prod.mk x) μ measurable_prodMk_left.aemeasurable) measurable_mul.aemeasurable :=
       congrArg (fun ρ ↦ map (fun p : M × M ↦ p.1 * p.2) ρ measurable_mul.aemeasurable)
-        (dirac_prod x)
+        (dirac_productBySections x)
     _ = μ.map (fun y ↦ x * y) (by fun_prop) := by
       rw [map_map (by fun_prop) (by fun_prop)]
       simp [Function.comp_def]
@@ -73,12 +73,12 @@ lemma mconv_dirac [MeasurableMul₂ M] (μ : Measure M) [SFinite μ] (x : M) :
     μ ∗ₘ (dirac x) = μ.map (fun y ↦ y * x) := by
   unfold mconv
   calc
-    map (fun x : M × M ↦ x.1 * x.2) (μ.prod (dirac x)) measurable_mul.aemeasurable =
+    map (fun x : M × M ↦ x.1 * x.2) (μ.productBySections (dirac x)) measurable_mul.aemeasurable =
         map (fun x : M × M ↦ x.1 * x.2)
           (map (fun y ↦ (y, x)) μ measurable_prodMk_right.aemeasurable)
           measurable_mul.aemeasurable :=
       congrArg (fun ρ ↦ map (fun p : M × M ↦ p.1 * p.2) ρ measurable_mul.aemeasurable)
-        (prod_dirac x)
+        (productBySections_dirac x)
     _ = μ.map (fun y ↦ y * x) (by fun_prop) := by
       rw [map_map (by fun_prop) (by fun_prop)]
       simp [Function.comp_def]
@@ -125,11 +125,11 @@ theorem mconv_smul_left [MeasurableMul₂ M] (μ : Measure M) (ν : Measure M) [
     (s • μ) ∗ₘ ν = s • (μ ∗ₘ ν) := by
   unfold mconv
   calc
-    map (fun x : M × M ↦ x.1 * x.2) ((s • μ).prod ν) measurable_mul.aemeasurable =
-        map (fun x : M × M ↦ x.1 * x.2) (s • μ.prod ν) measurable_mul.aemeasurable :=
+    map (fun x : M × M ↦ x.1 * x.2) ((s • μ).productBySections ν) measurable_mul.aemeasurable =
+        map (fun x : M × M ↦ x.1 * x.2) (s • μ.productBySections ν) measurable_mul.aemeasurable :=
       congrArg (fun ρ ↦ map (fun p : M × M ↦ p.1 * p.2) ρ measurable_mul.aemeasurable)
-        (Measure.prod_smul_left s)
-    _ = s • map (fun x : M × M ↦ x.1 * x.2) (μ.prod ν) measurable_mul.aemeasurable :=
+        (Measure.productBySections_smul_left s)
+    _ = s • map (fun x : M × M ↦ x.1 * x.2) (μ.productBySections ν) measurable_mul.aemeasurable :=
       Measure.map_smul s measurable_mul.aemeasurable
 
 @[to_additive]
@@ -137,12 +137,13 @@ theorem mconv_add [MeasurableMul₂ M] (μ : Measure M) (ν : Measure M) (ρ : M
     [SFinite ν] [SFinite ρ] : μ ∗ₘ (ν + ρ) = μ ∗ₘ ν + μ ∗ₘ ρ := by
   unfold mconv
   calc
-    map (fun x : M × M ↦ x.1 * x.2) (μ.prod (ν + ρ)) measurable_mul.aemeasurable =
-        map (fun x : M × M ↦ x.1 * x.2) (μ.prod ν + μ.prod ρ) measurable_mul.aemeasurable :=
+    map (fun x : M × M ↦ x.1 * x.2) (μ.productBySections (ν + ρ)) measurable_mul.aemeasurable =
+        map (fun x : M × M ↦ x.1 * x.2) (μ.productBySections ν + μ.productBySections ρ)
+          measurable_mul.aemeasurable :=
       congrArg (fun τ ↦ map (fun p : M × M ↦ p.1 * p.2) τ measurable_mul.aemeasurable)
-        (prod_add ρ)
-    _ = map (fun x : M × M ↦ x.1 * x.2) (μ.prod ν) measurable_mul.aemeasurable +
-        map (fun x : M × M ↦ x.1 * x.2) (μ.prod ρ) measurable_mul.aemeasurable :=
+        (productBySections_add ρ)
+    _ = map (fun x : M × M ↦ x.1 * x.2) (μ.productBySections ν) measurable_mul.aemeasurable +
+        map (fun x : M × M ↦ x.1 * x.2) (μ.productBySections ρ) measurable_mul.aemeasurable :=
       Measure.map_add _ _ measurable_mul
 
 @[to_additive]
@@ -150,12 +151,13 @@ theorem add_mconv [MeasurableMul₂ M] (μ : Measure M) (ν : Measure M) (ρ : M
     [SFinite ν] [SFinite ρ] : (μ + ν) ∗ₘ ρ = μ ∗ₘ ρ + ν ∗ₘ ρ := by
   unfold mconv
   calc
-    map (fun x : M × M ↦ x.1 * x.2) ((μ + ν).prod ρ) measurable_mul.aemeasurable =
-        map (fun x : M × M ↦ x.1 * x.2) (μ.prod ρ + ν.prod ρ) measurable_mul.aemeasurable :=
+    map (fun x : M × M ↦ x.1 * x.2) ((μ + ν).productBySections ρ) measurable_mul.aemeasurable =
+        map (fun x : M × M ↦ x.1 * x.2) (μ.productBySections ρ + ν.productBySections ρ)
+          measurable_mul.aemeasurable :=
       congrArg (fun τ ↦ map (fun p : M × M ↦ p.1 * p.2) τ measurable_mul.aemeasurable)
-        (add_prod ν)
-    _ = map (fun x : M × M ↦ x.1 * x.2) (μ.prod ρ) measurable_mul.aemeasurable +
-        map (fun x : M × M ↦ x.1 * x.2) (ν.prod ρ) measurable_mul.aemeasurable :=
+        (add_productBySections ν)
+    _ = map (fun x : M × M ↦ x.1 * x.2) (μ.productBySections ρ) measurable_mul.aemeasurable +
+        map (fun x : M × M ↦ x.1 * x.2) (ν.productBySections ρ) measurable_mul.aemeasurable :=
       Measure.map_add _ _ measurable_mul
 
 /-- To get commutativity, we need the underlying multiplication to be commutative. -/
@@ -164,14 +166,15 @@ theorem mconv_comm {M : Type*} [CommMonoid M] [SigmaAlgebra M] [MeasurableMul₂
     (ν : Measure M) [SFinite μ] [SFinite ν] : μ ∗ₘ ν = ν ∗ₘ μ := by
   unfold mconv
   calc
-    map (fun x : M × M ↦ x.1 * x.2) (μ.prod ν) measurable_mul.aemeasurable =
+    map (fun x : M × M ↦ x.1 * x.2) (μ.productBySections ν) measurable_mul.aemeasurable =
         map (fun x : M × M ↦ x.1 * x.2)
-          (map Prod.swap (ν.prod μ) measurable_swap.aemeasurable) measurable_mul.aemeasurable :=
+          (map Prod.swap (ν.productBySections μ) measurable_swap.aemeasurable)
+          measurable_mul.aemeasurable :=
       congrArg (fun ρ ↦ map (fun p : M × M ↦ p.1 * p.2) ρ measurable_mul.aemeasurable)
-        prod_swap.symm
-    _ = map ((fun x : M × M ↦ x.1 * x.2) ∘ Prod.swap) (ν.prod μ) (by fun_prop) :=
+        productBySections_swap.symm
+    _ = map ((fun x : M × M ↦ x.1 * x.2) ∘ Prod.swap) (ν.productBySections μ) (by fun_prop) :=
       map_map (by fun_prop) (by fun_prop)
-    _ = map (fun x : M × M ↦ x.1 * x.2) (ν.prod μ) measurable_mul.aemeasurable := by
+    _ = map (fun x : M × M ↦ x.1 * x.2) (ν.productBySections μ) measurable_mul.aemeasurable := by
       congr 1
       funext x
       simp [mul_comm]
@@ -181,7 +184,7 @@ theorem mconv_comm {M : Type*} [CommMonoid M] [SigmaAlgebra M] [MeasurableMul₂
 instance sfinite_mconv_of_sfinite [MeasurableMul₂ M] (μ : Measure M) (ν : Measure M)
     [SFinite μ] [SFinite ν] : SFinite (μ ∗ₘ ν) :=
   inferInstanceAs <|
-    SFinite ((μ.prod ν).map (fun (x : M × M) ↦ x.1 * x.2) measurable_mul.aemeasurable)
+    SFinite ((μ.productBySections ν).map (fun (x : M × M) ↦ x.1 * x.2) measurable_mul.aemeasurable)
 
 @[to_additive]
 instance finite_of_finite_mconv [MeasurableMul₂ M] (μ : Measure M) (ν : Measure M)
@@ -236,21 +239,21 @@ lemma map_mconv_monoidHom {M M' : Type*} {mM : SigmaAlgebra M} [Monoid M] [Measu
   have : (L ∘ fun p : M × M ↦ p.1 * p.2) = (fun p : M' × M' ↦ p.1 * p.2) ∘ (Prod.map L L) := by
     ext; simp
   calc
-    map L (map (fun p : M × M ↦ p.1 * p.2) (μ.prod ν) measurable_mul.aemeasurable)
+    map L (map (fun p : M × M ↦ p.1 * p.2) (μ.productBySections ν) measurable_mul.aemeasurable)
         hL.aemeasurable =
-      map (L ∘ fun p : M × M ↦ p.1 * p.2) (μ.prod ν) (by fun_prop) :=
+      map (L ∘ fun p : M × M ↦ p.1 * p.2) (μ.productBySections ν) (by fun_prop) :=
         map_map (by fun_prop) hL.aemeasurable
-    _ = map ((fun p : M' × M' ↦ p.1 * p.2) ∘ Prod.map L L) (μ.prod ν)
+    _ = map ((fun p : M' × M' ↦ p.1 * p.2) ∘ Prod.map L L) (μ.productBySections ν)
         (by fun_prop) := by
       congr 1
     _ = map (fun p : M' × M' ↦ p.1 * p.2)
-        (map (Prod.map L L) (μ.prod ν) (by fun_prop)) measurable_mul.aemeasurable :=
+        (map (Prod.map L L) (μ.productBySections ν) (by fun_prop)) measurable_mul.aemeasurable :=
       (map_map (by fun_prop) measurable_mul.aemeasurable).symm
     _ = map (fun p : M' × M' ↦ p.1 * p.2)
-        ((map L μ hL.aemeasurable).prod (map L ν hL.aemeasurable))
+        ((map L μ hL.aemeasurable).productBySections (map L ν hL.aemeasurable))
         measurable_mul.aemeasurable := by
       congr 1
-      exact (map_prod_map μ ν hL hL).symm
+      exact (map_productBySections_map μ ν hL hL).symm
 
 lemma map_conv_continuousLinearMap {E F : Type*} [AddCommMonoid E] [AddCommMonoid F]
     [Module ℝ E] [Module ℝ F] [TopologicalSpace E] [TopologicalSpace F]

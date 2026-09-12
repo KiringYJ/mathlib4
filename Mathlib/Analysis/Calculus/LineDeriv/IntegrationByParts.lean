@@ -7,6 +7,7 @@ module
 
 public import Mathlib.Analysis.Calculus.LineDeriv.Basic
 public import Mathlib.MeasureTheory.Integral.IntegralEqImproper
+public import Mathlib.MeasureTheory.Measure.Prod
 
 /-!
 # Integration by parts for line derivatives
@@ -61,26 +62,29 @@ lemma integral_bilinear_hasLineDerivAt_right_eq_neg_left_of_integrable_aux1 [Sig
     (hfg : Integrable (fun x ↦ B (f x) (g x)) (μ.prod volume))
     (hf : ∀ x ∈ tsupport g, HasLineDerivAt ℝ f (f' x) x (0, 1))
     (hg : ∀ x ∈ tsupport f, HasLineDerivAt ℝ g (g' x) x (0, 1)) :
-    ∫ x, B (f x) (g' x) ∂(μ.prod volume) = - ∫ x, B (f' x) (g x) ∂(μ.prod volume) := calc
-  ∫ x, B (f x) (g' x) ∂(μ.prod volume)
-    = ∫ x, (∫ t, B (f (x, t)) (g' (x, t))) ∂μ := integral_prod _ hfg'
-  _ = ∫ x, (- ∫ t, B (f' (x, t)) (g (x, t))) ∂μ := by
-    apply integral_congr_ae
-    filter_upwards [hf'g.prod_right_ae, hfg'.prod_right_ae, hfg.prod_right_ae]
-      with x hf'gx hfg'x hfgx
-    apply integral_bilinear_hasDerivAt_right_eq_neg_left_of_integrable ?_ ?_ hfg'x hf'gx hfgx
-    · intro t ht
-      have : (x, t) ∈ tsupport g :=
-        tsupport_comp_subset_preimage (f := fun y ↦ (x, y)) g (by fun_prop) ht
-      convert! (hf (x, t) this).scomp_of_eq t ((hasDerivAt_id t).add (hasDerivAt_const t (-t)))
-        (by simp) <;> simp
-    · intro t ht
-      have : (x, t) ∈ tsupport f :=
-        tsupport_comp_subset_preimage (f := fun y ↦ (x, y)) f (by fun_prop) ht
-      convert!
-        (hg (x, t) this).scomp_of_eq t ((hasDerivAt_id t).add (hasDerivAt_const t (-t)))
+    ∫ x, B (f x) (g' x) ∂(μ.prod volume) = - ∫ x, B (f' x) (g x) ∂(μ.prod volume) := by
+  rw [Measure.prod_eq_productBySections μ volume] at hf'g hfg' hfg ⊢
+  calc
+    ∫ x, B (f x) (g' x) ∂(μ.productBySections volume)
+      = ∫ x, (∫ t, B (f (x, t)) (g' (x, t))) ∂μ := integral_prod _ hfg'
+    _ = ∫ x, (- ∫ t, B (f' (x, t)) (g (x, t))) ∂μ := by
+      apply integral_congr_ae
+      filter_upwards [hf'g.prod_right_ae, hfg'.prod_right_ae, hfg.prod_right_ae]
+        with x hf'gx hfg'x hfgx
+      apply integral_bilinear_hasDerivAt_right_eq_neg_left_of_integrable ?_ ?_ hfg'x hf'gx hfgx
+      · intro t ht
+        have : (x, t) ∈ tsupport g :=
+          tsupport_comp_subset_preimage (f := fun y ↦ (x, y)) g (by fun_prop) ht
+        convert! (hf (x, t) this).scomp_of_eq t ((hasDerivAt_id t).add (hasDerivAt_const t (-t)))
           (by simp) <;> simp
-  _ = - ∫ x, B (f' x) (g x) ∂(μ.prod volume) := by rw [integral_neg, integral_prod _ hf'g]
+      · intro t ht
+        have : (x, t) ∈ tsupport f :=
+          tsupport_comp_subset_preimage (f := fun y ↦ (x, y)) f (by fun_prop) ht
+        convert!
+          (hg (x, t) this).scomp_of_eq t ((hasDerivAt_id t).add (hasDerivAt_const t (-t)))
+            (by simp) <;> simp
+    _ = - ∫ x, B (f' x) (g x) ∂(μ.productBySections volume) := by
+      rw [integral_neg, integral_prod _ hf'g]
 
 variable [BorelSpace E]
 
@@ -94,19 +98,18 @@ lemma integral_bilinear_hasLineDerivAt_right_eq_neg_left_of_integrable_aux2
     (hg : ∀ x ∈ tsupport f, HasLineDerivAt ℝ g (g' x) x (0, 1)) :
     ∫ x, B (f x) (g' x) ∂μ = - ∫ x, B (f' x) (g x) ∂μ := by
   let ν : Measure E := addHaar
-  have hprod : AEMeasurable
-      (fun x : E ↦ Measure.map (Prod.mk x) (volume : Measure ℝ)
-        measurable_prodMk_left.aemeasurable) ν :=
-    Measurable.map_prodMk_left.aemeasurable
-  have A : ν.prod volume hprod = (addHaarScalarFactor (ν.prod volume hprod) μ) • μ :=
+  have huniq : HasUniqueProduct ν (volume : Measure ℝ) :=
+    hasUniqueProduct_of_sigmaFinite _ _
+  have A : ν.prod (volume : Measure ℝ) huniq =
+      (addHaarScalarFactor (ν.prod (volume : Measure ℝ) huniq) μ) • μ :=
     isAddLeftInvariant_eq_smul _ _
-  have Hf'g : Integrable (fun x ↦ B (f' x) (g x)) (ν.prod volume hprod) := by
+  have Hf'g : Integrable (fun x ↦ B (f' x) (g x)) (ν.prod (volume : Measure ℝ) huniq) := by
     rw [A]; exact hf'g.smul_measure_nnreal
-  have Hfg' : Integrable (fun x ↦ B (f x) (g' x)) (ν.prod volume hprod) := by
+  have Hfg' : Integrable (fun x ↦ B (f x) (g' x)) (ν.prod (volume : Measure ℝ) huniq) := by
     rw [A]; exact hfg'.smul_measure_nnreal
-  have Hfg : Integrable (fun x ↦ B (f x) (g x)) (ν.prod volume hprod) := by
+  have Hfg : Integrable (fun x ↦ B (f x) (g x)) (ν.prod (volume : Measure ℝ) huniq) := by
     rw [A]; exact hfg.smul_measure_nnreal
-  rw [isAddLeftInvariant_eq_smul μ (ν.prod volume hprod)]
+  rw [isAddLeftInvariant_eq_smul μ (ν.prod (volume : Measure ℝ) huniq)]
   simp [integral_bilinear_hasLineDerivAt_right_eq_neg_left_of_integrable_aux1 Hf'g Hfg' Hfg hf hg]
 
 variable [FiniteDimensional ℝ E] [IsAddHaarMeasure μ]

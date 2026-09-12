@@ -96,7 +96,7 @@ lemma isDeterministic_iff_isZeroOneMeasure (κ : Kernel α β) [IsFiniteKernel �
     refine ⟨?_⟩
     ext : 1
     rw [parallelComp_comp_copy, prod_apply]
-    refine Measure.prod_eq fun s t hs ht ↦ ?_
+    refine Measure.productBySections_eq fun s t hs ht ↦ ?_
     rw [copy_comp_apply_prod _ _ hs ht]
     exact measure_inter_eq_prod hs ht
 
@@ -130,7 +130,7 @@ lemma comp_parallelComp_comp_copy {γ : Type*} [SigmaAlgebra γ] {κ : Kernel α
   simp only [parallelComp_comp_copy]
   ext a : 1
   rw [prod_apply]
-  refine Measure.prod_eq fun s t hs ht ↦ ?_
+  refine Measure.productBySections_eq fun s t hs ht ↦ ?_
   rw [comp_apply' _ _ _ (hs.prod ht)]
   simp_rw [prod_apply_prod, Kernel.id_apply, Measure.dirac_apply' _ ht]
   have (b : β) : (η b) s * t.indicator 1 b = t.indicator (fun b ↦ η b s) b := by

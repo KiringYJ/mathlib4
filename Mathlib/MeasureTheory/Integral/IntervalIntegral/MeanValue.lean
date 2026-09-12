@@ -5,6 +5,8 @@ Authors: Louis (Yiyang) Liu, Joris Roos
 -/
 module
 
+public import Mathlib.MeasureTheory.Measure.Prod
+
 public import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
 public import Mathlib.MeasureTheory.Integral.MeanValue
 
@@ -122,13 +124,20 @@ theorem exists_eq_const_mul_intervalIntegral_of_nonneg_of_antitoneOn
   let H := fun r ↦ ∫ x in a..b, ({x | r ≤ f x}.indicator g) x
   -- The region under the graph of `f` is null measurable because `f` is antitone
   have hmeas : NullMeasurableSet {p : ℝ × ℝ | p.2 ≤ f p.1}
-      ((volume.restrict (uIoc a b)).prod (volume.restrict (uIoc 0 (f a)))) :=
-    nullMeasurableSet_le measurable_snd.aemeasurable
+      ((volume.restrict (uIoc a b)).prod (volume.restrict (uIoc 0 (f a)))) := by
+    rw [Measure.prod_eq_productBySections (volume.restrict (uIoc a b))
+      (volume.restrict (uIoc 0 (f a)))]
+    exact nullMeasurableSet_le measurable_snd.aemeasurable
       (aemeasurable_restrict_of_antitoneOn measurableSet_uIoc (hf_mon.mono hsub)).comp_fst
   have : IsFiniteMeasure (volume.restrict (uIoc 0 (f a))) := Real.isFiniteMeasure_restrict_Ioc _ _
   have h_int : Integrable ({p : ℝ × ℝ | p.2 ≤ f p.1}.indicator fun p ↦ g p.1)
-      ((volume.restrict (uIoc a b)).prod (volume.restrict (uIoc 0 (f a)))) :=
-    (hg.def'.comp_fst _).indicator₀ hmeas
+      ((volume.restrict (uIoc a b)).prod (volume.restrict (uIoc 0 (f a)))) := by
+    rw [Measure.prod_eq_productBySections (volume.restrict (uIoc a b))
+      (volume.restrict (uIoc 0 (f a)))] at hmeas ⊢
+    exact (hg.def'.comp_fst _).indicator₀ hmeas
+  have h_int_iterated := h_int
+  rw [Measure.prod_eq_productBySections (volume.restrict (uIoc a b))
+    (volume.restrict (uIoc 0 (f a)))] at h_int_iterated
   -- Layer cake representation of `f x * g x`, valid for every `x` in the interval
   have hlayer (x : ℝ) (hx : x ∈ Ι a b) :
       f x * g x = ∫ r in 0..f a, ({y | r ≤ f y}.indicator g) x := by
@@ -140,8 +149,8 @@ theorem exists_eq_const_mul_intervalIntegral_of_nonneg_of_antitoneOn
     rw [intervalIntegral.integral_congr_ae_restrict
       (ae_restrict_of_forall_mem measurableSet_uIoc hlayer)]
     refine intervalIntegral_intervalIntegral_swap ?_
-    rw [IntegrableOn, Measure.volume_eq_prod ℝ ℝ, ← Measure.prod_restrict]
-    exact h_int
+    rw [IntegrableOn, Measure.volume_eq_productBySections ℝ ℝ, ← Measure.productBySections_restrict]
+    exact h_int_iterated
   -- The case `f a = 0` is trivial because then `f` is zero on the whole interval
   rcases (hf_nonneg a ⟨le_rfl, hab⟩).eq_or_lt with hfa | hfa
   · exact ⟨a, ⟨le_rfl, hab⟩, by simpa [hfa.symm] using hfub⟩
@@ -153,7 +162,7 @@ theorem exists_eq_const_mul_intervalIntegral_of_nonneg_of_antitoneOn
   have hH_int : IntervalIntegrable H volume 0 (f a) := by
     rw [intervalIntegrable_iff, IntegrableOn]
     simp_rw [H, intervalIntegral_eq_integral_uIoc]
-    exact (h_int.swap.integral_prod_left).const_mul _
+    exact (h_int_iterated.swap.integral_prod_left).const_mul _
   -- Since `f` is nonincreasing, the superlevel sets are intervals and `H r` is in the range of `G`.
   have hH_bounds r (hr : r ∈ Icc 0 (f a)) : G ξmin ≤ H r ∧ H r ≤ G ξmax := by
     let S := {x | x ∈ Icc a b ∧ r ≤ f x}

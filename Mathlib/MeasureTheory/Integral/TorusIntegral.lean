@@ -219,7 +219,7 @@ theorem torusIntegral_succAbove
     (volume_preserving_piFinSuccAbove (fun _ : Fin (n + 1) => ℝ) i).symm _
   have heπ : (e ⁻¹' Icc 0 fun _ => 2 * π) = Icc 0 (2 * π) ×ˢ Icc (0 : ℝⁿ) fun _ => 2 * π :=
     ((Fin.insertNthOrderIso (fun _ => ℝ) i).preimage_Icc _ _).trans (Icc_prod_eq _ _)
-  rw [torusIntegral, ← hem.map_eq, setIntegral_map_equiv, heπ, Measure.volume_eq_prod,
+  rw [torusIntegral, ← hem.map_eq, setIntegral_map_equiv, heπ, Measure.volume_eq_productBySections,
     setIntegral_prod, circleIntegral_def_Icc]
   · refine setIntegral_congr_fun measurableSet_Icc fun θ _ => ?_
     simp +unfoldPartialApp only [e, torusIntegral, ← integral_smul,

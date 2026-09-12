@@ -354,10 +354,11 @@ theorem measurable_fun_prod {α β : Type*} [SigmaAlgebra α] [SigmaAlgebra β] 
       ((Measure.measurable_coe Hu).comp (measurable_subtype_coe.comp measurable_fst))
       ((Measure.measurable_coe Hv).comp (measurable_subtype_coe.comp measurable_snd))
   apply Measurable.measure_of_isPiSystem generateFrom_prod.symm isPiSystem_prod _
-  · simp_rw [← Set.univ_prod_univ, Measure.prod_prod, Heval MeasurableSet.univ MeasurableSet.univ]
+  · simp_rw [← Set.univ_prod_univ, Measure.prod_prod_of_sigmaFinite,
+      Heval MeasurableSet.univ MeasurableSet.univ]
   simp only [mem_image2, forall_exists_index, and_imp]
   intro _ _ Hu _ Hv Heq
-  simp_rw [← Heq, Measure.prod_prod, Heval Hu Hv]
+  simp_rw [← Heq, Measure.prod_prod_of_sigmaFinite, Heval Hu Hv]
 
 lemma apply_iUnion_le {μ : FiniteMeasure Ω} {f : ℕ → Set Ω}
     (hf : Summable fun n ↦ μ (f n)) :

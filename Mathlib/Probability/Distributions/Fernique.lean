@@ -112,20 +112,24 @@ lemma _root_.ContinuousLinearMap.rotation_apply (θ : ℝ) (x : E × E) :
 
 variable [SecondCountableTopology E] [SigmaAlgebra E] [BorelSpace E] {μ : Measure E} {a : ℝ}
 
-/-- If a measure `μ` is such that `μ.prod μ` is invariant by rotation of angle `-π/4` then
+/-- If a measure `μ` is such that `μ.productBySections μ` is invariant by rotation
+of angle `-π/4` then
 `μ {x | ‖x‖ ≤ a} * μ {x | b < ‖x‖} ≤ μ {x | (b - a) / √2 < ‖x‖} ^ 2`. -/
 lemma measure_le_mul_measure_gt_le_of_map_rotation_eq_self [SFinite μ]
-    (h : (μ.prod μ).map (ContinuousLinearMap.rotation (-(π / 4))) = μ.prod μ)
+    (h : (μ.productBySections μ).map (ContinuousLinearMap.rotation (-(π / 4))) =
+      μ.productBySections μ)
     (a b : ℝ) :
     μ {x | ‖x‖ ≤ a} * μ {x | b < ‖x‖} ≤ μ {x | (b - a) / √2 < ‖x‖} ^ 2 := by
   calc μ {x | ‖x‖ ≤ a} * μ {x | b < ‖x‖}
-  _ = (μ.prod μ) ({x | ‖x‖ ≤ a} ×ˢ {y | b < ‖y‖}) := by rw [Measure.prod_prod]
+  _ = (μ.productBySections μ) ({x | ‖x‖ ≤ a} ×ˢ {y | b < ‖y‖}) := by
+    rw [Measure.productBySections_prod]
     -- This is the measure of two bands in the plane (draw a picture!)
-  _ = (μ.prod μ) {p | ‖p.1‖ ≤ a ∧ b < ‖p.2‖} := rfl
-  _ = ((μ.prod μ).map (ContinuousLinearMap.rotation (-(π / 4)))) {p | ‖p.1‖ ≤ a ∧ b < ‖p.2‖} := by
-    -- We can rotate the bands since `μ.prod μ` is invariant under rotation
+  _ = (μ.productBySections μ) {p | ‖p.1‖ ≤ a ∧ b < ‖p.2‖} := rfl
+  _ = ((μ.productBySections μ).map (ContinuousLinearMap.rotation (-(π / 4))))
+      {p | ‖p.1‖ ≤ a ∧ b < ‖p.2‖} := by
+    -- We can rotate the bands since `μ.productBySections μ` is invariant under rotation
     rw [h]
-  _ = (μ.prod μ) {p | ‖p.1 - p.2‖ / √2 ≤ a ∧ b < ‖p.1 + p.2‖ / √2} := by
+  _ = (μ.productBySections μ) {p | ‖p.1 - p.2‖ / √2 ≤ a ∧ b < ‖p.1 + p.2‖ / √2} := by
     rw [Measure.map_apply (by
       refine MeasurableSet.inter ?_ ?_
       · change MeasurableSet {p : E × E | ‖p.1‖ ≤ a}
@@ -143,7 +147,7 @@ lemma measure_le_mul_measure_gt_le_of_map_rotation_eq_self [SFinite μ]
     congr! with p
     · rw [← sub_eq_add_neg, ← smul_sub, norm_smul, div_eq_inv_mul, div_eq_inv_mul, h_twos]
     · rw [← smul_add, norm_smul, div_eq_inv_mul, div_eq_inv_mul, h_twos]
-  _ ≤ (μ.prod μ) {p | (b - a) / √2 < ‖p.1‖ ∧ (b - a) / √2 < ‖p.2‖} := by
+  _ ≤ (μ.productBySections μ) {p | (b - a) / √2 < ‖p.1‖ ∧ (b - a) / √2 < ‖p.2‖} := by
     -- The rotated bands are contained in quadrants.
     refine measure_mono fun p ↦ ?_
     simp only [Set.mem_ofPred_eq, and_imp]
@@ -160,8 +164,8 @@ lemma measure_le_mul_measure_gt_le_of_map_rotation_eq_self [SFinite μ]
     _ ≤ min ‖p.1‖ ‖p.2‖ := by
       have := norm_add_sub_norm_sub_le_two_mul_min p.1 p.2
       linarith
-  _ = (μ.prod μ) ({x | (b - a) / √2 < ‖x‖} ×ˢ {y | (b - a) / √2 < ‖y‖}) := rfl
-  _ ≤ μ {x | (b - a) / √2 < ‖x‖} ^ 2 := by rw [Measure.prod_prod, pow_two]
+  _ = (μ.productBySections μ) ({x | (b - a) / √2 < ‖x‖} ×ˢ {y | (b - a) / √2 < ‖y‖}) := rfl
+  _ ≤ μ {x | (b - a) / √2 < ‖x‖} ^ 2 := by rw [Measure.productBySections_prod, pow_two]
 
 namespace Fernique
 
@@ -176,7 +180,9 @@ lemma normThreshold_zero : normThreshold a 0 = a := rfl
 lemma normThreshold_add_one (n : ℕ) : normThreshold a (n + 1) = √2 * normThreshold a n + a := rfl
 
 lemma measure_le_mul_measure_gt_normThreshold_le_of_map_rotation_eq_self [SFinite μ]
-    (h_rot : (μ.prod μ).map (ContinuousLinearMap.rotation (-(π / 4))) = μ.prod μ) (a : ℝ) (n : ℕ) :
+    (h_rot : (μ.productBySections μ).map (ContinuousLinearMap.rotation (-(π / 4))) =
+      μ.productBySections μ)
+    (a : ℝ) (n : ℕ) :
     μ {x | ‖x‖ ≤ a} * μ {x | normThreshold a (n + 1) < ‖x‖}
       ≤ μ {x | normThreshold a n < ‖x‖} ^ 2 := by
   convert! measure_le_mul_measure_gt_le_of_map_rotation_eq_self h_rot _ _
@@ -230,7 +236,8 @@ lemma measure_gt_normThreshold_le_rpow [IsProbabilityMeasure μ]
   | succ n hn =>
     have h_mul_le : c * μ {x | normThreshold a (n + 1) < ‖x‖}
         ≤ μ {x | normThreshold a n < ‖x‖} ^ 2 :=
-      measure_le_mul_measure_gt_normThreshold_le_of_map_rotation_eq_self h_rot _ _
+      measure_le_mul_measure_gt_normThreshold_le_of_map_rotation_eq_self
+        (by simpa only [Measure.prod_eq_productBySections μ μ] using h_rot) _ _
     calc μ {x | normThreshold a (n + 1) < ‖x‖}
     _ = c⁻¹ * (c * μ {x | normThreshold a (n + 1) < ‖x‖}) := by
       rw [← mul_assoc, ENNReal.inv_mul_cancel hc_pos.ne' hc_lt_top.ne, one_mul]
@@ -606,11 +613,15 @@ theorem exists_integrable_exp_sq_of_map_rotation_eq_self [IsFiniteMeasure μ]
     calc (μ'.prod μ').map (ContinuousLinearMap.rotation (-(π / 4)))
     _ = ((μ Set.univ)⁻¹ * (μ Set.univ)⁻¹)
         • (μ.prod μ).map (ContinuousLinearMap.rotation (-(π / 4))) := by
-      simp [hμ'_eq, Measure.prod_smul_left, Measure.prod_smul_right, smul_smul,
+      rw [Measure.prod_eq_productBySections μ' μ', Measure.prod_eq_productBySections μ μ]
+      simp [hμ'_eq, Measure.productBySections_smul_left,
+        Measure.productBySections_smul_right, smul_smul,
         (ContinuousLinearMap.rotation (-(π / 4))).continuous.aemeasurable]
     _ = ((μ Set.univ)⁻¹ * (μ Set.univ)⁻¹) • (μ.prod μ) := by rw [h_rot]
     _ = μ'.prod μ' := by
-      simp [hμ'_eq, Measure.prod_smul_left, Measure.prod_smul_right, smul_smul]
+      rw [Measure.prod_eq_productBySections μ' μ', Measure.prod_eq_productBySections μ μ]
+      simp [hμ'_eq, Measure.productBySections_smul_left,
+        Measure.productBySections_smul_right, smul_smul]
   obtain ⟨C, hC_pos, hC⟩ :=
     exists_integrable_exp_sq_of_map_rotation_eq_self_of_isProbabilityMeasure (μ := μ') h_rot
   refine ⟨C, hC_pos, ?_⟩

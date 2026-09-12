@@ -141,7 +141,9 @@ theorem lmarginal_union (f : (∀ i, X i) → ℝ≥0∞) (hf : Measurable f)
         rw [measurePreserving_piFinsetUnion hst μ |>.lintegral_map_equiv]
     _ = ∫⁻ (y : (i : s) → X i), ∫⁻ (z : (j : t) → X j), f (updateFinset x (s ∪ t) (e (y, z)))
           ∂.pi fun j : t ↦ μ j ∂.pi fun i : s ↦ μ i := by
-        apply lintegral_prod
+        rw [Measure.prod_eq_productBySections (Measure.pi fun i : s ↦ μ i)
+          (.pi fun j : t ↦ μ j)]
+        apply lintegral_productBySections
         apply Measurable.aemeasurable
         exact hf.comp <| measurable_updateFinset.comp e.measurable
     _ = (∫⋯∫⁻_s, ∫⋯∫⁻_t, f ∂μ ∂μ) x := by
