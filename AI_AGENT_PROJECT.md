@@ -30,13 +30,11 @@ tracked directly as `upstream/master`; this fork does not keep a local
 - `upstream/master` is the read-only remote-tracking reference for the official
   `leanprover-community/mathlib4:master` baseline. Do not recreate a local
   `master` mirror or publish an `origin/master` branch merely to mirror it.
-- `palomar/broughton-huff` is the retained delivery branch for the self-contained
-  Palomar Registry package formalizing the Broughton--Huff theorem on increasing
-  unions of sigma-fields. Its package uses the released Mathlib
-  `MeasurableSpace` API and remains independent of fork-only API development on
-  `main`. Treat it as a separately maintained submission artifact, not a second
-  default or general development branch; do not merge it wholesale into `main`
-  merely to synchronize branch history.
+- `palomar/<slug>` branches are separately maintained delivery branches for
+  Palomar Registry projects. Keep project-specific theorem, source, provenance,
+  and review records inside the corresponding branch. These branches are not
+  alternative defaults or general development branches; do not merge them
+  wholesale into `main` merely to synchronize branch history.
 - `exp/<slug>` may be used for work whose mathematical or API direction is not
   yet settled.
 - No `pr/<slug>` branch category is part of this project's workflow. Do not
