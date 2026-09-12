@@ -5791,6 +5791,7 @@ public import Mathlib.MeasureTheory.OuterMeasure.OfFunction
 public import Mathlib.MeasureTheory.OuterMeasure.Operations
 public import Mathlib.MeasureTheory.PiSystem
 public import Mathlib.MeasureTheory.SetAlgebra
+public import Mathlib.MeasureTheory.SetRing
 public import Mathlib.MeasureTheory.SetSemiring
 public import Mathlib.MeasureTheory.SigmaAlgebra.Atoms
 public import Mathlib.MeasureTheory.SigmaAlgebra.Basic
@@ -6124,7 +6125,9 @@ public import Mathlib.Order.Atoms
 public import Mathlib.Order.Atoms.Finite
 public import Mathlib.Order.Basic
 public import Mathlib.Order.Birkhoff
+public import Mathlib.Order.BooleanAlgebra.AlmostEqualPairs
 public import Mathlib.Order.BooleanAlgebra.Basic
+public import Mathlib.Order.BooleanAlgebra.Cofinality
 public import Mathlib.Order.BooleanAlgebra.Defs
 public import Mathlib.Order.BooleanAlgebra.Set
 public import Mathlib.Order.BooleanGenerators
