@@ -24,7 +24,7 @@ sources:
       - "Allen Broughton"
       - "Barthel W. Huff"
     id: "https://doi.org/10.2307/2320022"
-    type: "article"
+    type: "paper"
     location: >-
       The American Mathematical Monthly 84 (1977), no. 7, 553--554
     relationship: "formalizes"
