@@ -15,45 +15,49 @@ of useful code and updates, not the target design authority for this fork.
 philosophy and deferred foundational roadmap. In particular, it records the
 strict-totalization direction without authorizing the total-inverse migration.
 
-The policies below are project-local overrides. In particular, generic
-agent-workbench references to `main` as the workspace source of truth do not
-apply: this fork has no `main` branch.
+The policies below are project-local overrides. `main` is this fork's canonical
+workspace source of truth and default branch. The upstream `master` branch is
+tracked directly as `upstream/master`; this fork does not keep a local
+`master` mirror or publish `origin/master`.
 
 ## Branch Model
 
-- `master` is a protected mirror of `leanprover-community/mathlib4:master`.
-  It must contain no personal commits, workbench files, or other fork-only
-  changes. Update local `master` only by fetching `upstream` and fast-forwarding
-  it to `upstream/master`.
-- `dev` is the canonical personal branch and daily driver. It contains the
-  complete preferred working version: the reconciled upstream base plus all
-  fork-only improvements and research developments. The agent-workbench and
-  fork-design files are tracked only on this personal line of development.
+- `main` is the canonical personal branch, GitHub default branch, and daily
+  driver. It contains the complete preferred working version: the reconciled
+  upstream base plus all fork-only improvements and research developments. The
+  agent-workbench and fork-design files are tracked only on this personal line
+  of development.
+- `upstream/master` is the read-only remote-tracking reference for the official
+  `leanprover-community/mathlib4:master` baseline. Do not recreate a local
+  `master` mirror or publish an `origin/master` branch merely to mirror it.
+- `palomar/broughton-huff` is the retained delivery branch for the self-contained
+  Palomar Registry package formalizing the Broughton--Huff theorem on increasing
+  unions of sigma-fields. Its package uses the released Mathlib
+  `MeasurableSpace` API and remains independent of fork-only API development on
+  `main`. Treat it as a separately maintained submission artifact, not a second
+  default or general development branch; do not merge it wholesale into `main`
+  merely to synchronize branch history.
 - `exp/<slug>` may be used for work whose mathematical or API direction is not
   yet settled.
 - No `pr/<slug>` branch category is part of this project's workflow. Do not
   prepare or export fork changes for upstream pull requests.
 
-After an explicitly authorized publication, `origin/master` should point to
-the same commit as `upstream/master`. Do not infer authorization to push from a
-fetch, sync, or local branch update. All pushes go to `origin`; never push to
-`upstream`.
+Do not infer authorization to push from a fetch, sync, or local branch update.
+All pushes go to `origin`; never push to `upstream`.
 
 Keep logically independent changes in separate, semantically coherent commits
-on `dev`. This makes long-term upstream reconciliation, review, and rollback
+on `main`. This makes long-term upstream reconciliation, review, and rollback
 auditable even when the personal branch has accumulated many changes.
 
 ## Mathlib Baseline Reconciliation Workflow
 
-1. Fetch `upstream`, switch to `master`, and run
-   `git merge --ff-only upstream/master`.
-2. Verify that `master` and `upstream/master` resolve to the same commit.
-3. Reconcile the updated base with `dev` only in an authorized sync task. Choose
-   merge or rebase from the current publication state and repository history;
-   do not rewrite published history implicitly.
-4. Resolve conflicts according to this fork's mathematical and API design,
+1. Fetch `upstream` and verify the updated `upstream/master` reference.
+2. Reconcile the updated baseline with `main` only in an authorized sync task.
+   Choose merge or rebase from the current publication state and repository
+   history; do not rewrite published history implicitly.
+3. Resolve conflicts according to this fork's mathematical and API design,
    while retaining sound upstream improvements when possible.
-5. Run checks proportional to every affected module at the final reconciled
+4. Run checks proportional to every affected module at the final reconciled
    state. Upstream's successful checks do not validate fork-specific conflict
    resolutions.
 
@@ -267,8 +271,9 @@ and documentation checks when they remain applicable to the affected area.
 
 - **mathlib baseline**: `leanprover-community/mathlib4`, tracked by the local
   remote named `upstream`.
-- **origin**: the personal fork `KiringYJ/mathlib4`.
-- **daily driver**: `dev`, the complete preferred working version.
+- **origin**: the personal fork `KiringYJ/mathlib-fidelity`.
+- **daily driver**: `main`, the complete preferred working version and default
+  branch.
 - **source repository**: an external repository considered for reference,
   dependency, or curated integration; it is not automatically an authority or
   admitted dependency.
@@ -284,9 +289,8 @@ and documentation checks when they remain applicable to the affected area.
 ## Workspace Configuration
 
 All agent-workbench managed paths are shared configuration for the personal
-`dev` branch and should be tracked there. Do not hide them through
-`.git/info/exclude` or `.gitignore`. Do not copy, merge, or cherry-pick them into
-the protected `master` mirror.
+`main` branch and should be tracked there. Do not hide them through
+`.git/info/exclude` or `.gitignore`.
 
 Personal settings, credentials, caches, absolute machine paths, and runtime
 state remain untracked. Future full syncs may update generated managed files
@@ -294,8 +298,9 @@ and the provenance ledger, but must never rewrite this project file.
 
 ## Project-Specific Constraints
 
-- Inspect the current branch before editing. Never make personal changes on
-  `master`.
+- Inspect the current branch before editing. Personal changes belong on `main`
+  or an explicitly selected topic branch; use `upstream/master` only as the
+  official baseline reference.
 - Keep hooks enabled and follow the fork's naming, style, documentation, and
   verification requirements. Upstream conventions are useful defaults only
   where they do not conflict with `FORK_DESIGN.md`.
