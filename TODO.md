@@ -359,7 +359,6 @@ For every strict-partiality migration in the S--XL sections below:
   Finite/probability interfaces use the unique product, and genuinely s-finite consumers select
   the iterated construction explicitly. The formal infinity-scaled Lebesgue counterexample
   separates the constructions and disproves uniqueness from s-finiteness alone.
-  See [`docs/measure-products.md`](docs/measure-products.md) for domains and migration details.
 
 - [ ] **Make `NormedSpace.exp` require its algebra and convergence context.**
   `Mathlib/Analysis/Normed/Algebra/Exponential.lean:127` returns one if no `Algebra ℚ 𝔸`

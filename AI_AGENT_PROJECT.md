@@ -360,6 +360,10 @@ and the provenance ledger, but must never rewrite this project file.
 
 ## Project-Specific Constraints
 
+- Follow mathlib's source documentation conventions: keep mathematical definitions,
+  API explanations, construction choices, and usage guidance in Lean module and
+  declaration docstrings. Do not add standalone API design or migration documents
+  under `docs/`, or create a parallel documentation tree for that purpose.
 - Inspect the current branch before editing. Personal changes belong on `main`
   or an explicitly selected topic branch; use `upstream/master` only as the
   official baseline reference.
