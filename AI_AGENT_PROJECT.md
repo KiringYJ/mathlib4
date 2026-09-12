@@ -228,6 +228,9 @@ concrete use cases before redesigning existing code.
   concealing a genuine unresolved obligation?
 - Can simplification, coercion insertion, or instance search erase a domain
   condition or silently select a totalized fallback?
+- Does a predicate name identify what is measurable and whether measurability
+  is ordinary or almost everywhere? Does order terminology distinguish a
+  greatest element from a merely maximal one when the stronger result is proved?
 - If a total extension is independently useful, does its name and documentation
   identify the extension rather than reuse the partial mathematical operation's
   name?
@@ -251,10 +254,18 @@ For an explicitly authorized public-API canonicalization:
 
 1. Inventory the existing representations, notation, theorem families,
    instances, automation, and structurally different downstream consumers.
+   Trace implicit entry points as well as named calls: inspect what bare
+   ambient notation such as `volume` selects. Apply the implicit-entry-point
+   contract in `FORK_DESIGN.md`; a strict named operation is not a completed
+   migration if a global instance still makes the excluded choice automatically.
 2. Separate ambient objects, propositions, and proof-carrying domains before
    choosing canonical syntax. State one normal form for each intended context
    and add regression tests for definitional equalities between retained
    surfaces.
+   Test that insufficient hypotheses fail both at the named operation and at
+   ambient instance inference. Also test explicit local constructors and routine
+   sufficient conditions. Keep exact mathematical domains distinct from the
+   narrower conditions used by automatic instances.
 3. Prototype the replacement in real consumers. Closure-heavy proofs should
    use the operations of the structure that owns the invariant; cross a
    predicate-membership bridge only at an interface that genuinely requires

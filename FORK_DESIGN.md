@@ -41,6 +41,15 @@ preference does not override the design commitments in this document.
 - Keep domain and other semantic obligations machine-visible. A theorem that
   happens to hold on a totalized fallback branch must not use that accident to
   hide a missing hypothesis in its intended mathematical statement.
+- Apply the same semantic contract to implicit entry points: global instances,
+  ambient structures, coercions, notation, and defaults must not bypass an
+  explicit API's domain or silently select a construction it requires users to
+  choose. When the ordinary API requires uniqueness, automatically supplied
+  ambient objects must respect that requirement too. A mathematically valid
+  nonunique construction may remain available through an explicit constructor
+  or a deliberately installed local instance; documenting a global convention
+  alone does not resolve this interface mismatch. This is an interface policy,
+  not a claim that choosing a nonunique construction is mathematically invalid.
 - Distinguish a strict public interface from a strict implementation. A proved
   bridge may initially reuse a totalized implementation on its valid domain;
   that does not establish that the implementation dependency has been removed.
