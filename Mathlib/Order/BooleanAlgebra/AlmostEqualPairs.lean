@@ -29,24 +29,13 @@ open scoped symmDiff
 namespace BooleanSubalgebra
 
 /-- The Boolean subalgebra of pairs of sets with finite symmetric difference. -/
-def almostEqualPairs (ι : Type*) : BooleanSubalgebra (Set ι × Set ι) where
-  carrier := {p | (p.1 ∆ p.2).Finite}
-  bot_mem' := by simp
-  compl_mem' := by
+def almostEqualPairs (ι : Type*) : BooleanSubalgebra (Set ι × Set ι) :=
+  BooleanSubalgebra.ofBotSupCompl {p | (p.1 ∆ p.2).Finite} (by simp) (by
+    intro p hp q hq
+    exact (hp.union hq).subset union_symmDiff_union_subset) (by
     intro p hp
     change (p.1ᶜ ∆ p.2ᶜ).Finite
-    rw [compl_symmDiff_compl]
-    exact hp
-  supClosed' := by
-    intro p hp q hq
-    exact (hp.union hq).subset union_symmDiff_union_subset
-  infClosed' := by
-    intro p hp q hq
-    refine (hp.union hq).subset ?_
-    intro i hi
-    change i ∈ (p.1 ∩ q.1) ∆ (p.2 ∩ q.2) at hi
-    simp only [mem_symmDiff, mem_inter_iff, mem_union] at hi ⊢
-    tauto
+    rwa [compl_symmDiff_compl])
 
 @[simp]
 theorem mem_almostEqualPairs {ι : Type*} {p : Set ι × Set ι} :
@@ -75,12 +64,12 @@ theorem isAtom_singletonLeft (i : ι) : IsAtom (singletonLeft i) := by
     · exact (hp.ne (Subtype.ext (Prod.ext hp₁ hp₂))).elim
 
 /-- The `k`-th stage consists of pairs whose coordinates agree at every `n ≥ k`. -/
-def stage (k : ℕ) : BooleanSubalgebra (almostEqualPairs ℕ) where
-  carrier := {p | ∀ n, k ≤ n → (n ∈ p.val.1 ↔ n ∈ p.val.2)}
-  bot_mem' := fun _ _ ↦ Iff.rfl
-  compl_mem' := fun hp n hn ↦ not_congr (hp n hn)
-  supClosed' := fun _ hp _ hq n hn ↦ or_congr (hp n hn) (hq n hn)
-  infClosed' := fun _ hp _ hq n hn ↦ and_congr (hp n hn) (hq n hn)
+def stage (k : ℕ) : BooleanSubalgebra (almostEqualPairs ℕ) :=
+  BooleanSubalgebra.ofBotSupCompl
+    {p | ∀ n, k ≤ n → (n ∈ p.val.1 ↔ n ∈ p.val.2)}
+    (fun _ _ ↦ Iff.rfl)
+    (fun _ hp _ hq n hn ↦ or_congr (hp n hn) (hq n hn))
+    (fun _ hp n hn ↦ not_congr (hp n hn))
 
 @[simp]
 theorem mem_stage {k : ℕ} {p : almostEqualPairs ℕ} :

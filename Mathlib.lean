@@ -6277,6 +6277,8 @@ public import Mathlib.Order.FixedPoints
 public import Mathlib.Order.GaloisConnection.Basic
 public import Mathlib.Order.GaloisConnection.Defs
 public import Mathlib.Order.GameAdd
+public import Mathlib.Order.GeneralizedBooleanAlgebra.Cofinality
+public import Mathlib.Order.GeneralizedBooleanSubalgebra
 public import Mathlib.Order.Grade
 public import Mathlib.Order.Height
 public import Mathlib.Order.Heyting.Basic

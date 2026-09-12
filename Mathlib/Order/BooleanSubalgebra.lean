@@ -5,12 +5,14 @@ Authors: Yaël Dillies
 -/
 module
 
-public import Mathlib.Order.Sublattice
+public import Mathlib.Order.GeneralizedBooleanSubalgebra
 
 /-!
 # Boolean subalgebras
 
-This file defines Boolean subalgebras.
+This file defines Boolean subalgebras. Each Boolean subalgebra determines a generalized Boolean
+subalgebra with the same carrier. Generated Boolean subalgebras use generalized Boolean closure
+after adjoining the ambient top element.
 -/
 
 @[expose] public section
@@ -20,8 +22,8 @@ open Function Set
 variable {ι : Sort*} {α β γ : Type*}
 
 variable (α) in
-/-- A Boolean subalgebra of a Boolean algebra is a set containing the bottom and top elements, and
-closed under suprema, infima and complements. -/
+/-- A Boolean subalgebra of a Boolean algebra is a set containing the bottom and top elements,
+and closed under binary suprema, binary infima, and complements. -/
 structure BooleanSubalgebra [BooleanAlgebra α] extends Sublattice α where
   compl_mem' {a} : a ∈ carrier → aᶜ ∈ carrier
   bot_mem' : ⊥ ∈ carrier
@@ -55,6 +57,38 @@ lemma sdiff_mem (ha : a ∈ L) (hb : b ∈ L) : a \ b ∈ L := by
 lemma himp_mem (ha : a ∈ L) (hb : b ∈ L) : a ⇨ b ∈ L := by
   rw [himp_eq]; exact L.supClosed hb (compl_mem ha)
 
+/-- Regard a Boolean subalgebra as a generalized Boolean subalgebra with the same carrier. -/
+def toGeneralizedBooleanSubalgebra (L : BooleanSubalgebra α) :
+    GeneralizedBooleanSubalgebra α where
+  toSublattice := L.toSublattice
+  bot_mem' := bot_mem
+  sdiff_mem' := fun ha hb ↦ sdiff_mem ha hb
+
+@[simp] lemma coe_toGeneralizedBooleanSubalgebra (L : BooleanSubalgebra α) :
+    (L.toGeneralizedBooleanSubalgebra : Set α) = L := rfl
+
+@[simp] lemma mem_toGeneralizedBooleanSubalgebra :
+    a ∈ L.toGeneralizedBooleanSubalgebra ↔ a ∈ L := .rfl
+
+@[simp] lemma toGeneralizedBooleanSubalgebra_toSublattice (L : BooleanSubalgebra α) :
+    L.toGeneralizedBooleanSubalgebra.toSublattice = L.toSublattice := rfl
+
+@[simp] lemma toGeneralizedBooleanSubalgebra_le_iff :
+    L.toGeneralizedBooleanSubalgebra ≤ M.toGeneralizedBooleanSubalgebra ↔ L ≤ M := .rfl
+
+@[simp] lemma toGeneralizedBooleanSubalgebra_lt_iff :
+    L.toGeneralizedBooleanSubalgebra < M.toGeneralizedBooleanSubalgebra ↔ L < M := .rfl
+
+lemma toGeneralizedBooleanSubalgebra_injective :
+    Injective (toGeneralizedBooleanSubalgebra (α := α)) := fun _ _ h ↦
+  SetLike.coe_injective <| congrArg (fun L : GeneralizedBooleanSubalgebra α ↦ (L : Set α)) h
+
+lemma toGeneralizedBooleanSubalgebra_mono :
+    Monotone (toGeneralizedBooleanSubalgebra (α := α)) := fun _ _ h ↦ h
+
+lemma toGeneralizedBooleanSubalgebra_strictMono :
+    StrictMono (toGeneralizedBooleanSubalgebra (α := α)) := fun _ _ h ↦ h
+
 lemma mem_carrier : a ∈ L.carrier ↔ a ∈ L := .rfl
 @[simp] lemma mem_toSublattice : a ∈ L.toSublattice ↔ a ∈ L := .rfl
 @[simp] lemma mem_mk {L : Sublattice α} (h_compl h_bot) : a ∈ mk L h_compl h_bot ↔ a ∈ L := .rfl
@@ -63,6 +97,22 @@ lemma mem_carrier : a ∈ L.carrier ↔ a ∈ L := .rfl
     mk L hL_compl hL_bot ≤ mk M hM_compl hM_bot ↔ L ≤ M := .rfl
 @[simp] lemma mk_lt_mk {L M : Sublattice α} (hL_compl hL_bot hM_compl hM_bot) :
     mk L hL_compl hL_bot < mk M hM_compl hM_bot ↔ L < M := .rfl
+
+/-- Construct a Boolean subalgebra from bottom, supremum, and complement closure. -/
+def ofBotSupCompl (s : Set α) (hbot : ⊥ ∈ s) (hsup : SupClosed s)
+    (hcompl : ∀ ⦃a⦄, a ∈ s → aᶜ ∈ s) : BooleanSubalgebra α where
+  toSublattice := (GeneralizedBooleanSubalgebra.ofBotSupSDiff s hbot hsup
+    fun {_ _} ha hb ↦ by
+      simpa only [compl_sup, compl_compl, _root_.sdiff_eq] using
+        hcompl (hsup (hcompl ha) hb)).toSublattice
+  compl_mem' := fun ha ↦ hcompl ha
+  bot_mem' := hbot
+
+@[simp, norm_cast] lemma coe_ofBotSupCompl (s : Set α) (hbot hsup hcompl) :
+    (ofBotSupCompl s hbot hsup hcompl : Set α) = s := rfl
+
+@[simp] lemma mem_ofBotSupCompl (hbot hsup hcompl) :
+    a ∈ ofBotSupCompl s hbot hsup hcompl ↔ a ∈ s := .rfl
 
 /-- Copy of a Boolean subalgebra with a new `carrier` equal to the old one. Useful to fix
 definitional equalities. -/
@@ -168,11 +218,8 @@ instance instTop : Top (BooleanSubalgebra α) where
 
 /-- The trivial Boolean subalgebra of a lattice. -/
 instance instBot : Bot (BooleanSubalgebra α) where
-  bot.carrier := {⊥, ⊤}
-  bot.bot_mem' := by simp
-  bot.compl_mem' := by simp
-  bot.supClosed' _ := by simp
-  bot.infClosed' _ := by simp
+  bot := ofBotSupCompl {⊥, ⊤} (by simp) (by rintro a (rfl | rfl) b (rfl | rfl) <;> simp)
+    (by simp)
 
 /-- The inf of two Boolean subalgebras is their intersection. -/
 instance instInf : Min (BooleanSubalgebra α) where
@@ -340,11 +387,33 @@ lemma map_top (f : BoundedLatticeHom α β) (h : Surjective f) : BooleanSubalgeb
   SetLike.coe_injective <| by simp [h.range_eq]
 
 /-- The minimum Boolean subalgebra containing a given set. -/
-def closure (s : Set α) : BooleanSubalgebra α := sInf {L | s ⊆ L}
+def closure (s : Set α) : BooleanSubalgebra α where
+  toSublattice := (GeneralizedBooleanSubalgebra.closure (insert ⊤ s)).toSublattice
+  bot_mem' := GeneralizedBooleanSubalgebra.bot_mem
+  compl_mem' := by
+    intro a ha
+    change aᶜ ∈ GeneralizedBooleanSubalgebra.closure (insert ⊤ s)
+    simpa only [top_sdiff] using GeneralizedBooleanSubalgebra.sdiff_mem
+      (GeneralizedBooleanSubalgebra.subset_closure (mem_insert ⊤ s)) ha
 
 variable {s : Set α}
 
-lemma mem_closure {x : α} : x ∈ closure s ↔ ∀ ⦃L : BooleanSubalgebra α⦄, s ⊆ L → x ∈ L := mem_sInf
+lemma mem_closure {x : α} : x ∈ closure s ↔ ∀ ⦃L : BooleanSubalgebra α⦄, s ⊆ L → x ∈ L := by
+  change x ∈ GeneralizedBooleanSubalgebra.closure (insert ⊤ s) ↔ _
+  rw [GeneralizedBooleanSubalgebra.mem_closure]
+  refine ⟨fun hx L hL ↦ hx (L := L.toGeneralizedBooleanSubalgebra) ?_, fun hx L hL ↦ ?_⟩
+  · rintro _ (rfl | ha)
+    · exact top_mem
+    · exact hL ha
+  · let K : BooleanSubalgebra α :=
+      { toSublattice := L.toSublattice
+        bot_mem' := GeneralizedBooleanSubalgebra.bot_mem
+        compl_mem' := by
+          intro a ha
+          change aᶜ ∈ L
+          simpa only [top_sdiff] using GeneralizedBooleanSubalgebra.sdiff_mem
+            (hL (mem_insert ⊤ s)) ha }
+    exact hx (L := K) ((subset_insert _ _).trans hL)
 
 @[simp, aesop safe 20 (rule_sets := [SetLike])]
 lemma subset_closure : s ⊆ closure s := fun _ hx ↦ mem_closure.2 fun _ hK ↦ hK hx
@@ -352,9 +421,11 @@ lemma subset_closure : s ⊆ closure s := fun _ hx ↦ mem_closure.2 fun _ hK �
 @[aesop 80% (rule_sets := [SetLike])]
 theorem mem_closure_of_mem {s : Set α} {x : α} (hx : x ∈ s) : x ∈ closure s := subset_closure hx
 
-@[simp] lemma closure_le : closure s ≤ L ↔ s ⊆ L := ⟨subset_closure.trans, fun h ↦ sInf_le h⟩
+@[simp] lemma closure_le : closure s ≤ L ↔ s ⊆ L :=
+  ⟨subset_closure.trans, fun h _ hx ↦ mem_closure.1 hx h⟩
 
-lemma closure_mono (hst : s ⊆ t) : closure s ≤ closure t := sInf_le_sInf fun _L ↦ hst.trans
+lemma closure_mono (hst : s ⊆ t) : closure s ≤ closure t :=
+  closure_le.2 (hst.trans subset_closure)
 
 lemma latticeClosure_subset_closure : latticeClosure s ⊆ closure s :=
   latticeClosure_min subset_closure (closure s).isSublattice
@@ -368,16 +439,15 @@ is preserved under suprema and complement, then `p` holds for all elements of th
 lemma closure_bot_sup_induction {p : ∀ g ∈ closure s, Prop} (mem : ∀ x hx, p x (subset_closure hx))
     (bot : p ⊥ bot_mem)
     (sup : ∀ x hx y hy, p x hx → p y hy → p (x ⊔ y) (supClosed _ hx hy))
-    (compl : ∀ x hx, p x hx → p xᶜ (compl_mem hx)) {x} (hx : x ∈ closure s) : p x hx :=
-  have inf ⦃x hx y hy⦄ (hx' : p x hx) (hy' : p y hy) : p (x ⊓ y) (infClosed _ hx hy) := by
-    simpa using compl _ _ <| sup _ _ _ _ (compl _ _ hx') (compl _ _ hy')
-  let L : BooleanSubalgebra α :=
-    { carrier := { x | ∃ hx, p x hx }
-      supClosed' := fun _a ⟨_, ha⟩ _b ⟨_, hb⟩ ↦ ⟨_, sup _ _ _ _ ha hb⟩
-      infClosed' := fun _a ⟨_, ha⟩ _b ⟨_, hb⟩ ↦ ⟨_, inf ha hb⟩
-      bot_mem' := ⟨_, bot⟩
-      compl_mem' := fun ⟨_, hb⟩ ↦ ⟨_, compl _ _ hb⟩ }
-  closure_le (L := L).mpr (fun y hy ↦ ⟨subset_closure hy, mem y hy⟩) hx |>.elim fun _ ↦ id
+    (compl : ∀ x hx, p x hx → p xᶜ (compl_mem hx)) {x} (hx : x ∈ closure s) : p x hx := by
+  refine GeneralizedBooleanSubalgebra.closure_bot_sup_sdiff_induction ?_ bot sup ?_ hx
+  · intro y hy
+    rcases hy with rfl | hy
+    · simpa only [compl_bot] using compl ⊥ bot_mem bot
+    · exact mem y hy
+  · intro y hy z hz hpy hpz
+    simpa only [compl_sup, compl_compl, _root_.sdiff_eq] using
+      compl _ _ (sup _ _ _ _ (compl _ _ hpy) hpz)
 
 lemma closure_eq_latticeClosure (hs1 : ⊥ ∈ s) (hs2 : compl '' s = s) :
     closure s = latticeClosure s := by
