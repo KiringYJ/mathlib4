@@ -1,0 +1,127 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/mathlib-initiative/formalization.yaml/main/schema/formalization.schema.json
+version: "v0.4"
+
+project:
+  name: "The Broughton--Huff theorem on increasing unions of sigma-fields"
+  description: >-
+    A Lean formalization of the Broughton--Huff theorem that the ordinary union
+    of a strictly increasing sequence of sigma-fields is not a sigma-field. The
+    proof also proves the existence of a set measurable in the lattice supremum but in none
+    of the individual sigma-fields.
+  authors:
+    - "Yi-Jing Tseng"
+  license: "Apache-2.0"
+  responsible_maintainers:
+    - "Yi-Jing Tseng"
+
+classification:
+  arxiv: ["math.PR"]
+  msc2020: ["28A05"]
+
+sources:
+  - title: "A Comment on Unions of Sigma-Fields"
+    authors:
+      - "Allen Broughton"
+      - "Barthel W. Huff"
+    id: "https://doi.org/10.2307/2320022"
+    type: "article"
+    location: >-
+      The American Mathematical Monthly 84 (1977), no. 7, 553--554
+    relationship: "formalizes"
+    note: >-
+      The Lean proof follows the article's disjoint-block lemma and diagonal
+      argument, reorganized around Mathlib's measurable-atom API rather than
+      transcribed line by line.
+    author_endorsement: "not-contacted"
+  - title: "Probability and Measure, Third Edition"
+    authors:
+      - "Patrick Billingsley"
+    type: "book"
+    location: "Notes on the Problems, Section 2, p. 553"
+    relationship: "background"
+    note: >-
+      This source states that a sequence with each sigma-field properly contained
+      in its successor has a union that necessarily fails to be a sigma-field,
+      and cites Broughton and Huff for the result.
+
+related_formalizations: []
+
+status:
+  scope: >-
+    The advertised theorem covers every strictly increasing sequence indexed by
+    the natural numbers. The proof development also establishes that the lattice
+    supremum contains a set belonging to none of the sequence terms. It does not
+    formalize the article's introductory textbook references, and the proof is
+    reorganized rather than presented as a line-by-line transcription.
+  sorry_count: 0
+  sorry_in_definitions: 0
+  axioms: ["propext", "Classical.choice", "Quot.sound"]
+  main_results:
+    - "BroughtonHuff.exists_measurableSet_iSup_not_measurableSet_of_strictMono"
+    - "BroughtonHuff.not_exists_measurableSpace_iUnion_of_strictMono"
+
+automation:
+  methods:
+    - method: "agent"
+      models: ["OpenAI Codex (GPT-5)"]
+      framework: "Codex desktop app"
+      tool_setup: >-
+        AI-assisted Lean porting and verification under human direction, using
+        the project toolchain, Mathlib cache, and ordinary Lean diagnostics.
+      cost:
+        wall_time: "Not fully tracked; the Palomar port used one working session"
+        spend_usd: "subscription-based"
+        hardware: "local Windows workstation"
+      prompting_notes: >-
+        The agent was asked to isolate the existing Broughton--Huff development
+        on a clean Palomar branch and port it away from fork-specific APIs.
+  spend_usd: "subscription-based"
+  notes: >-
+    The theorem scope and submission target were chosen by Yi-Jing Tseng. Codex
+    adapted the existing proof to released Mathlib's MeasurableSpace API,
+    prepared the Palomar statement/solution boundary, and ran local checks.
+
+fidelity:
+  divergences: >-
+    No theorem-level divergence. The article indexes its sequence from 1, while
+    Lean indexes it from 0; this is only a shift of indices. Mathlib's StrictMono
+    hypothesis is equivalent to the article's chain of proper successive
+    inclusions. The proof uses MeasurableSpace and measurableAtom terminology and
+    also exposes the equivalent lattice-supremum witness formulation.
+
+review:
+  status: "agent-reviewed"
+  reviewers:
+    - "OpenAI Codex proof-audit agent (GPT-6 Astra)"
+  notes: >-
+    A separate proof-audit agent checked the statement equivalence, order
+    direction, degenerate cases, disjoint-block reduction, measurable-tail
+    argument, and atom/parity diagonal and found no gap. The project was built
+    with the pinned toolchain, and Lean's axiom report was checked against the
+    Comparator allowlist. No independent human review has yet been recorded.
+    The original article's printed pages 553--554 were inspected from a local PDF
+    rendered at 350 dpi. Its theorem, hypotheses, disjoint-block lemma, and
+    diagonal proof structure were compared directly with the Lean development.
+
+alignment:
+  namespace: "BroughtonHuff"
+  statements:
+    - source: "Equivalent witness formulation derived from the Theorem on p. 554"
+      lean: "BroughtonHuff.exists_measurableSet_iSup_not_measurableSet_of_strictMono"
+      module: "Challenge"
+      status: "proved"
+      note: >-
+        The witness belongs to the lattice supremum but to no member of the
+        strictly increasing sequence.
+    - source: "Theorem, p. 554"
+      lean: "BroughtonHuff.not_exists_measurableSpace_iUnion_of_strictMono"
+      module: "Challenge"
+      status: "proved"
+      note: >-
+        Strict increase means each sigma-field is properly contained in its
+        successor; the conclusion denies the existence of a sigma-field whose
+        members are exactly the union.
+
+acknowledgements: >-
+  Built with Lean and Mathlib and organized using the Palomar submission
+  template and Comparator statement/solution convention.

@@ -1,0 +1,11 @@
+{
+  "challenge_module": "Challenge",
+  "solution_module": "Solution",
+  "theorem_names": [
+    "BroughtonHuff.exists_measurableSet_iSup_not_measurableSet_of_strictMono",
+    "BroughtonHuff.not_exists_measurableSpace_iUnion_of_strictMono"
+  ],
+  "definition_names": [],
+  "permitted_axioms": ["propext", "Quot.sound", "Classical.choice"],
+  "enable_nanoda": true
+}
