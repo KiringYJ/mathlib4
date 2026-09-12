@@ -185,6 +185,17 @@ For every strict-partiality migration in the S--XL sections below:
   the independence, closure, base, and membership hypotheses already repeated by their valid-case
   theorem families.
 
+- [ ] **Put bundle coordinate changes on chart overlaps.**
+  `Bundle.Trivialization.coordChange` in
+  `Mathlib/Topology/FiberBundle/Trivialization.lean:754` accepts every base point even though its
+  identity, composition, and continuity theorems require membership in the relevant base sets; the
+  proof-carrying `coordChangeHomeomorph` at line 795 is the existing strict substrate.  The analogous
+  `coordChangeL` in `Mathlib/Topology/VectorBundle/Basic.lean:266` returns the identity outside the
+  overlap.  Make the ordinary coordinate-change operations take overlap evidence or a point in the
+  overlap, and keep total representatives only under names that identify their implementation role.
+  Preserve technical local-map representatives such as trivialization inverses when all exported
+  statements prove that their values outside the base set are irrelevant.
+
 - [ ] **Make conditional probability require a normalizable event.**
   `ProbabilityTheory.cond` in `Mathlib/Probability/ConditionalProbability.lean:76` exposes
   `(μ s)⁻¹ • μ.restrict s` as `μ[· | s]` for every set.  Require measurability and
@@ -255,6 +266,16 @@ For every strict-partiality migration in the S--XL sections below:
   Require the germ hypothesis and retain infinity until finite order is proved.
 
 ## L -- staged cross-module migrations
+
+- [ ] **Put matroid closure on subsets of the ground set.**
+  `Matroid.closure` in `Mathlib/Combinatorics/Matroid/Closure.lean:135` deliberately extends closure
+  to every `Set α` by replacing `X` with `X ∩ M.E`; the module describes off-ground inputs as junk,
+  and the resulting operation is not extensive on all `Set α`.  Reuse `Matroid.subtypeClosure` at
+  line 116 to make the ordinary closure domain-bearing, or prototype an equally strict proof-last
+  interface.  Retain the intersection convention only under an explicit extension name if real
+  consumers still require it.  The current surface has roughly 258 `M.closure` matching lines across
+  nine maintained files, so migrate the closure theorem family and its rank, minor, circuit, and loop
+  consumers as one staged change.
 
 - [ ] **Require integrality for `minpoly`.**
   `Mathlib/FieldTheory/Minpoly/Basic.lean:41` assigns polynomial zero to a nonintegral element;
@@ -581,6 +602,14 @@ have stable roles and a searchable named declaration remains available.
   that an invalid list lookup is diagnosed as a lookup error rather than reconsidered as
   expectation syntax.
 
+- [ ] **[S] Remove the exported Diophantine proof-DSL surface.**
+  `Mathlib/NumberTheory/Dioph.lean:489`--`:631` exports `D∧`, `D∨`, `D∃`, `D+`, and related notation
+  for named `Dioph` closure theorems, but every maintained use is confined to that file and `D≠` and
+  `D/` have no consumer.  Prefer the named lemmas where they are at least as readable; if a compact
+  spelling materially helps the long internal constructions, keep it file-local rather than as a
+  public parser dialect.  Remove the unused forms and verify the elaborated logical grouping of the
+  subtraction, remainder, division, and Pell constructions.
+
 - [ ] **[M] Give `ordProj` and `ordCompl` searchable declaration heads.**
   `Mathlib/Data/Nat/Factorization/Defs.lean:326`--`:334` introduces only the notations
   `ordProj[p] n` and `ordCompl[p] n`, expanding to `p ^ n.factorization p` and
@@ -598,6 +627,16 @@ have stable roles and a searchable named declaration remains available.
   that declaration, and migrate canonical theorem statements to the named term.  Remove the bracket
   form unless a downstream comparison shows that it is materially clearer than ordinary
   application without reintroducing parser or discovery costs.
+
+- [ ] **[M] Make `RatFunc K` canonical over the colliding `K⟮X⟯` notation.**
+  `Mathlib/FieldTheory/RatFunc/Defs.lean:71` uses the same `⟮...⟯` delimiters as the generated-field
+  macro in `Mathlib/FieldTheory/IntermediateField/Adjoin/Defs.lean:529`.  With both scopes active,
+  `K⟮X⟯` selects the rational-function type, so adjoining an element literally named `X` requires a
+  type annotation; current workarounds include `F⟮(X : F⟮X⟯)⟯` in
+  `Mathlib/NumberTheory/FunctionField.lean:207`.  Migrate the roughly 337 textual `⟮X⟯` matching
+  lines across nine maintained files to the searchable `RatFunc K` head, checking each mixed nested
+  use.  Retain `F⟮x₁, ..., xₙ⟯` for `IntermediateField.adjoin`: it exposes all generators, has a
+  stable named expansion, and is materially clearer than spelling the generated finite set.
 
 - [ ] **[L] Replace expected-type-driven `↧X` category bundling with visible heads.**
   `Mathlib/CategoryTheory/ConcreteCategory/Notation.lean:18`--`:35` and `:82`--`:101` infer a
@@ -746,67 +785,55 @@ changing the tactic.
   invocations; documentation and the `erw?` diagnostic implementation are outside this migration
   unless their own APIs become obsolete.
 
-## Classification audits before adding more migration tasks
+## Resolved classification audits
 
-The following families contain total implementation values or suspicious public syntax but are not
-yet established as public fidelity or API-hygiene defects.  Resolve the stated distinction before
-promoting them into the effort-ranked backlog:
+The 2026-09-13 classification pass resolved the families below against the strict-domain and
+compositional-notation contracts.  A checked item records a classification decision, not completion
+of any open migration task that it references:
 
-- [ ] **`finsum`/`finprod`:** decide whether their names and finite-support contract already identify
-  the zero/one extension on infinite support.  Regardless of that decision, ordinary invariants such
-  as `eulerChar` must not expose the fallback silently.
-- [ ] **Matroid closure outside the ground set:**
-  `Mathlib/Combinatorics/Matroid/Closure.lean:134` intersects an arbitrary set with `M.E`.  Determine
-  whether this is the intended ambient-ground-set convention or whether ordinary closure should take
-  a ground-set subtype.
-- [ ] **Local bundle representatives:** distinguish globally defined representatives whose values are
-  explicitly irrelevant outside a base set from exported coordinate operations that allow those
-  values to affect statements.
-- [ ] **Natural-valued projections of extended invariants:** review operations such as
-  `Polynomial.natDegree` in `Mathlib/Algebra/Polynomial/Degree/Defs.lean:52`, which maps the zero
-  polynomial's faithful `WithBot` degree to zero.  A codomain-indicating name makes the projection
-  visible but does not by itself establish that a paper-facing API should omit the nonzero proof.
-- [ ] **Computational decoders and searches:** leave explicit `getD`, `headI`, tape blanks, parser
-  defaults, and noncanonical decoding out of the *silent-totalization* list, but still review any one
-  promoted as a mathematician-facing checked inverse or primary mathematical workflow.
-- [ ] **Chosen witnesses:** do not flag `Classical.choose` merely for noncanonicity when a public proof
-  establishes that a valid witness exists; flag it only when the invalid-domain branch is reachable
-  or the name asserts uniqueness/canonicity not supplied by the hypotheses.
-  `LinearIndependent.repr` in `Mathlib/LinearAlgebra/LinearIndependent/Defs.lean:462` is the positive
-  control: its input carries linear independence and lies in the span, and the implementation is the
-  inverse of a proved linear equivalence.
-- [ ] **Explicit default constructors:** do not infer fidelity merely from a `D` suffix or a visible
-  fallback argument.  Check whether the operation is only technical glue behind an invariant result,
-  or whether users are being asked to write a defaulted surrogate where ordinary mathematics uses a
-  domain-bearing object.  `ContinuousMap.mkD` is promoted above because its integration-facing use
-  falls in the latter category.
-- [ ] **Probability bracket grammar:** distinguish conventional, compositional conditional
-  expectation/probability notation from a parser mini-language.  In particular, audit the custom
-  macros and delaborators for `μ[f | 𝓐]` in
-  `Mathlib/MeasureTheory/Function/ConditionalExpectation/Basic.lean:95`--`:117` and for `μ[|s]` and
-  `μ[t | s]` in `Mathlib/Probability/ConditionalProbability.lean:79`--`:150`.  Do not remove a
-  standard mathematical surface merely because it has brackets, but compare it directly with the
-  named form: if the bracket-free API is at least as clear, migrate rather than preserving notation
-  by inertia.  Otherwise promote it if nesting, precedence, collision behavior, or the named API
-  fails the compositionality contract.  The concrete `P[X]`/`GetElem` collision is already promoted
-  above.
-- [ ] **Unicode and indexed shortcuts:** audit `πₓ`/`πₘ` in
-  `Mathlib/AlgebraicTopology/FundamentalGroupoid/Basic.lean:325`--`:334`, truncated simplex forms
-  based on `⦋m⦌ₙ` in `Mathlib/AlgebraicTopology/SimplexCategory/Defs.lean:176`--`:187`, generated
-  intermediate fields in `Mathlib/FieldTheory/IntermediateField/Adjoin/Defs.lean:515`--`:551`, and
-  `Mᵐ⁰` in `Mathlib/Algebra/GroupWithZero/WithZero.lean:352`--`:364`.  Check whether each notation
-  has a discoverable named head and whether it hides a proof, functor operation, set construction, or
-  representation change that theorem statements need to expose.  Their mathematical operands are
-  visible and several forms are conventional, so search inconvenience alone does not establish a
-  migration.
-- [ ] **Field-generation delimiters and local proof DSLs:** compare the generated-intermediate-field
-  macro in `Mathlib/FieldTheory/IntermediateField/Adjoin/Defs.lean:515`--`:551` with the independent
-  rational-function notation in `Mathlib/FieldTheory/RatFunc/Defs.lean:61`--`:72`, since both use
-  `⟮...⟯` around different hidden heads.  Separately review the `D∧`, `D∨`, `D∃`, and `D+`-style
-  notation cluster in `Mathlib/NumberTheory/Dioph.lean:489`--`:631`, whose current uses are confined
-  to that file and abbreviate named closure theorems.  Prefer `IntermediateField.adjoin`, `RatFunc`,
-  and the named `Dioph` lemmas whenever their ordinary applications are at least as readable; do not
-  preserve a parser dialect merely because it is already implemented.
+- [x] **`finsum`/`finprod` are explicit finite-support extensions.**  Their names, definition
+  docstrings, notation docstrings, and theorem families identify the zero/one result on infinite
+  support, so the core operations are excluded from the silent-totalization backlog.  The existing
+  `eulerChar` task remains open because an ordinary integer-valued invariant must not inherit either
+  that fallback or `finrank`'s infinite-to-zero convention.
+- [x] **Matroid closure needs a strict ordinary boundary.**  Intersecting with `M.E` is an intentional
+  implementation convention, but the ordinary `closure` name does not identify that extension and
+  the module already provides the domain-bearing `subtypeClosure`.  The L task above records the
+  canonical migration.
+- [x] **Local bundle representatives split at the exported coordinate API.**  Globally defined
+  trivialization representatives may retain irrelevant values outside their base sets when every
+  semantic statement proves independence from them.  Ordinary `coordChange` operations expose those
+  values under a mathematical name, so the M task above moves their overlap into the public domain.
+- [x] **`Polynomial.natDegree` is an explicit natural-valued projection.**  The faithful
+  `Polynomial.degree : WithBot ℕ` remains public, the zero convention is documented, and bridges to
+  `natDegree` require nonzeroness where it matters.  Do not promote the projection wholesale; audit a
+  paper-facing consumer only when it omits evidence needed by its intended statement.
+- [x] **Computational decoders and searches are excluded by default.**  Explicit `getD`, `headI`, tape
+  blanks, parser defaults, and noncanonical decoders belong to computational representation
+  contracts.  Reopen a case only when it is exported as a checked mathematical inverse or primary
+  mathematical workflow.
+- [x] **Witness choice alone is not a defect.**  `LinearIndependent.repr` in
+  `Mathlib/LinearAlgebra/LinearIndependent/Defs.lean:462` is the positive control: its input carries
+  both linear independence and span membership and the implementation is the inverse of a proved
+  linear equivalence.  Continue to flag reachable invalid branches or names asserting unsupported
+  uniqueness; the existing `Function.invFun`, `Function.extend`, and `LinearMap.leftInverse` tasks
+  are such separate cases.
+- [x] **An explicit default is neither automatically faithful nor automatically defective.**  Keep
+  technical representative constructors behind proved boundaries.  Promote a concrete operation
+  when users are asked to write the defaulted surrogate in place of the mathematical object;
+  integration-facing `ContinuousMap.mkD` remains the positive migration case above.
+- [x] **Conditional expectation and probability brackets are conventional secondary surfaces.**
+  `μ[f | 𝓐]`, `μ[|s]`, and `μ[t | s]` have stable named expansions, preserve nesting, and elaborate
+  correctly when both scopes are active.  Keep the notation; the domain defects in `condExp` and
+  `ProbabilityTheory.cond` remain separate strictness tasks.
+- [x] **The audited Unicode and indexed shortcuts remain admissible.**  `πₓ`/`πₘ`, `⦋m⦌ₙ`,
+  generated intermediate fields, and `Mᵐ⁰` expose stable operands and expand through documented
+  named structures or functor operations; the truncated-simplex proof is routine and can also be
+  supplied explicitly.  Search inconvenience alone does not justify migration.
+- [x] **The shared field delimiters and Diophantine DSL split into distinct outcomes.**  Keep
+  `F⟮x₁, ..., xₙ⟯` as the conventional secondary surface for `IntermediateField.adjoin`, migrate the
+  colliding rational-function `K⟮X⟯` surface to `RatFunc K`, and remove or localize the exported
+  `Dioph` proof dialect as recorded in the notation tasks above.
 
 ## Audit coverage and limits
 
