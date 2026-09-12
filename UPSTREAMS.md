@@ -16,9 +16,9 @@ distinct, stable remote names when a later task explicitly adds them.
 
 ### Destination
 
-- Repository: `KiringYJ/mathlib4`
+- Repository: `KiringYJ/mathlib-fidelity`
 - Local remote: `origin`
-- URL: `https://github.com/KiringYJ/mathlib4.git`
+- URL: `https://github.com/KiringYJ/mathlib-fidelity.git`
 - Role: publication destination for this curated fork
 - Push policy: push only with explicit authorization
 
