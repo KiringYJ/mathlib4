@@ -40,12 +40,14 @@ distinct, stable remote names when a later task explicitly adds them.
 ## Candidate Sources
 
 The following repositories are a future intake backlog, not accepted sources.
-Their repository URLs and default refs were checked with `git ls-remote
---symref` on 2026-09-11. That check establishes repository identity only. No
-license compatibility, per-file provenance, mathematical fidelity, proof,
-axiom, `sorry`, dependency, overlap, maintenance, or migration audit is implied.
-No local remotes have been added for them, and their moving default refs are not
-intake revision pins.
+The original registry's repository URLs and default refs were checked with
+`git ls-remote --symref` on 2026-09-11. Later additions are checked when they
+are recorded; `merely-true/merely-true`, `TauCetiProject/TauCeti`, and the
+existing `Vilin97/lean-pool` feed were checked on 2026-09-12. That check
+establishes repository identity only. No license compatibility, per-file
+provenance, mathematical fidelity, proof, axiom, `sorry`, dependency, overlap,
+maintenance, or migration audit is implied. No local remotes have been added
+for them, and their moving default refs are not intake revision pins.
 
 Before promoting any row to `accepted`, record its full immutable source commit
 and complete the required intake record below. Work through this list at the
@@ -126,6 +128,8 @@ a repository's own clean-status label is not an admission verdict.
 
 | Candidate | Scope to investigate | Observed default ref |
 | --- | --- | --- |
+| [merely-true/merely-true](https://github.com/merely-true/merely-true) | permissive AI-generated Lean library with automatic CI-based merging and no manual human review; independently audit statement and definition fidelity, provenance, maintenance stability, overlap, and reusable API before selecting material | `main` |
+| [TauCetiProject/TauCeti](https://github.com/TauCetiProject/TauCeti) | AI-authored integrated Lean library directed by human roadmaps and adversarial AI review; independently audit definitions, statements, review evidence, attribution, overlap, and adaptation to this fork's design | `main` |
 | [mattrobball/BridgelandStability](https://github.com/mattrobball/BridgelandStability) | AI-assisted Lean 4 formalization of Bridgeland stability conditions and claimed paper-result coverage; independently audit statement correspondence, trusted boundary, axioms, `sorry`s, and generated artifacts | `main` |
 | [marcmorningstar/lean4-ergodic-theory](https://github.com/marcmorningstar/lean4-ergodic-theory) | self-described smooth ergodic theory centered on Oseledets, with entropy and Livšic developments; audit theorem coverage and current-library overlap | `main` |
 | [will1491/RiemannDynamics](https://github.com/will1491/RiemannDynamics) | ongoing complex-dynamics, Riemann-surface, Teichmüller, and hyperbolic-geometry development; audit headline claims and vendored dependencies | `main` |
