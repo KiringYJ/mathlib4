@@ -28,10 +28,12 @@ distinct, stable remote names when a later task explicitly adds them.
 - Local remote: `upstream`
 - URL: `https://github.com/leanprover-community/mathlib4.git`
 - Tracked ref: `upstream/master`
-- Observed revision: `c4dc2c9444530979b651972c37e6bf9f105bc3d9`
-- Observation date: 2026-09-11; local `master` and `upstream/master` matched
-- History relationship: shared ancestry; `master` is the protected mirror
-- Integration mode: baseline reconciliation into `dev`
+- History relationship: shared ancestry; `main` is periodically rebased onto
+  `upstream/master` as a maintained Fidelity patch stack
+- Integration mode: batched rebase onto `upstream/master`, followed by API
+  repair and final-state validation
+- Reconciliation state: Git ancestry is authoritative; no separate
+  last-reconciled SHA is maintained
 - License evidence: the current source tree contains the Apache License 2.0 in
   `LICENSE`; recheck the exact source revision and any file-specific notices at
   each import boundary

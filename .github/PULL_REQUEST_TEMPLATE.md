@@ -1,57 +1,50 @@
+<!-- Use a Conventional Commit title, for example: feat(scope): explain intent. -->
 
----
-<!-- Your PR title will become the first line of the commit message.
+## Summary
 
-In this box, the text above the `---` (if not empty) will be appended
-to the commit message, and can be used to give additional context or
-details. Please leave a blank newline before the `---`, otherwise GitHub
-will format the text above it as a title.
+<!-- Explain the problem, intended outcome, and scope. -->
 
-For details on the "pull request lifecycle" in mathlib, please see:
-https://leanprover-community.github.io/contribute/index.html
+## Mathematical and API fidelity
 
-In particular, note that most reviewers will only notice your PR
-if it passes the continuous integration checks.
-Please ask for help on https://leanprover.zulipchat.com if needed.
-
-When merging, all the commits will be squashed into a single commit
-listing all co-authors.
-
-Co-authors in the squash commit are gathered from two sources:
-
-First, all authors of commits to this PR branch are included. Thus,
-one way to add co-authors is to include at least one commit authored by
-each co-author among the commits in the pull request. If necessary, you
-may create empty commits to indicate co-authorship, using commands like so:
-
-git commit --author="Author Name <author@email.com>" --allow-empty -m "add Author Name as coauthor"
-
-Second, co-authors can also be listed in lines at the very bottom of
-the commit message (that is, directly before the `---`) using the following format:
-
-Co-authored-by: Author Name <author@email.com>
-
-If you are moving or deleting declarations, please include these lines
-at the bottom of the commit message (before the `---`, and also before
-any "Co-authored-by" lines) using the following format:
-
-Moves:
-- Vector.* -> List.Vector.*
-- ...
-
-Deletions:
-- Nat.bit1_add_bit1
-- ...
-
-Any other comments you want to keep out of the PR commit should go
-below the `---`, and placed outside this HTML comment, or else they
-will be invisible to reviewers.
-
-If this PR depends on other PRs, please list them below this comment,
-using the following format:
-- [ ] depends on: #abc [optional extra text]
-- [ ] depends on: #xyz [optional extra text]
-
+<!--
+Describe the relevant mathematical objects, domains, hypotheses, and
+conclusions. Explain public-API choices and any migration from an existing
+interface. Write "Not applicable" if the change has no mathematical or API
+surface.
 -->
 
-[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/from-referrer/)
+## Sources and provenance
+
+<!--
+Identify exact sources, revisions, licensing, authorship, attribution, NOTICE
+requirements, axioms, sorry declarations, generated artifacts, and overlap
+when external material is involved. Write "No external material" otherwise.
+-->
+
+## Verification
+
+<!-- List the exact commands run, their results, and any checks not run. -->
+
+## Limitations and follow-up
+
+<!-- State known gaps or write "None". -->
+
+## Moving-base acknowledgement
+
+<!--
+The target branch `main` may be periodically rebased onto `upstream/master`.
+Maintainers batch these reconciliations and may help resolve repository-driven
+fallout when branch access is available. Enabling maintainer edits is optional;
+review GitHub's workflow-secret warning before granting that access on a fork
+containing GitHub Actions workflows.
+-->
+
+## Checklist
+
+- [ ] I read `.github/CONTRIBUTING.md` and the linked fork policies.
+- [ ] The PR targets `main` and contains one coherent change.
+- [ ] Repository artifacts, commits, and this description are in English.
+- [ ] Relevant source, license, provenance, and verification information is
+      included.
+- [ ] No credentials, private paths, generated noise, or unrelated changes are
+      included.

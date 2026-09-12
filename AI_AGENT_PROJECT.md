@@ -24,20 +24,23 @@ tracked directly as `upstream/master`; this fork does not keep a local
 ## Branch Model
 
 - `main` is the canonical personal branch, GitHub default branch, and daily
-  driver. It contains the complete preferred working version: the reconciled
-  upstream base plus all fork-only improvements and research developments. The
-  agent-workbench and fork-design files are tracked only on this personal line
-  of development.
+  driver. It is the latest reconciled upstream baseline plus a maintained stack
+  of Fidelity commits. Periodic upstream reconciliation may rewrite its
+  published history; `main` is not an append-only branch. The agent-workbench
+  and fork-design files are tracked only on this personal line of development.
 - `upstream/master` is the read-only remote-tracking reference for the official
   `leanprover-community/mathlib4:master` baseline. Do not recreate a local
   `master` mirror or publish an `origin/master` branch merely to mirror it.
 - `palomar/<slug>` branches are separately maintained delivery branches for
   Palomar Registry projects. Keep project-specific theorem, source, provenance,
   and review records inside the corresponding branch. These branches are not
-  alternative defaults or general development branches; do not merge them
-  wholesale into `main` merely to synchronize branch history.
+  part of the `main` Fidelity patch stack, alternative defaults, or general
+  development branches; do not merge them wholesale into `main` merely to
+  synchronize branch history.
 - `exp/<slug>` may be used for work whose mathematical or API direction is not
   yet settled.
+- Formal releases are published as tags. A published release tag is an
+  immutable snapshot and is not moved when `main` is rebased.
 - External pull requests target `main` from contributor-owned branches.
   Contributor branch names are not part of this repository's maintained branch
   taxonomy.
@@ -46,22 +49,42 @@ Do not infer authorization to push from a fetch, sync, or local branch update.
 All pushes go to `origin`; never push to `upstream`.
 
 Keep logically independent changes in separate, semantically coherent commits
-on `main`. This makes long-term upstream reconciliation, review, and rollback
-auditable even when the personal branch has accumulated many changes.
+on `main`. Those commits form the maintained Fidelity patch stack and must stay
+reviewable and replayable across upstream rebases.
 
 ## Mathlib Baseline Reconciliation Workflow
 
-1. Fetch `upstream` and verify the updated `upstream/master` reference.
-2. Reconcile the updated baseline with `main` only in an authorized sync task.
-   Choose merge or rebase from the current publication state and repository
-   history; do not rewrite published history implicitly.
-3. Resolve conflicts according to this fork's mathematical and API design,
-   while retaining sound upstream improvements when possible.
-4. Run checks proportional to every affected module at the final reconciled
-   state. Upstream's successful checks do not validate fork-specific conflict
-   resolutions.
+Routine upstream reconciliation uses rebase, not upstream merge commits. Batch
+reconciliations at a justified cadence rather than rewriting `main` for every
+small upstream movement.
 
-After an explicitly authorized publication, push only to `origin`. Never open
+1. Require a clean working tree and fetch `origin`. Capture the exact
+   `origin/main` object ID as `<expected-origin-main>` and verify that it is an
+   ancestor of local `main`. Local-ahead Fidelity commits are allowed; stop if
+   the remote tip is not incorporated locally or the histories have diverged.
+2. Before rewriting `main`, inventory open pull requests that target it. Retain
+   each old merge base, head ref, and head object ID ephemerally so later updates
+   can replay only the contributor commits and can use a separate exact lease.
+3. Fetch `upstream` and inspect the new `upstream/master`. Avoid an unnecessary
+   base rewrite during active review; when a substantial pull request is close
+   to merger, the maintainer may temporarily freeze reconciliation.
+4. Rebase `main` onto `upstream/master`. Do not merge `upstream/master` into
+   `main` in the routine workflow.
+5. Resolve conflicts and repair API fallout according to this fork's
+   mathematical and API design while retaining sound upstream improvements.
+6. Run checks proportional to every affected module at the final rebased state.
+   Upstream's successful checks do not validate fork-specific conflict repairs.
+7. After explicit publication authorization, confirm that branch rules permit
+   the rewrite and push with
+   `git push --force-with-lease=refs/heads/main:<expected-origin-main> origin main:refs/heads/main`.
+   Never use bare `--force-with-lease` or plain `--force`; if the explicit lease
+   fails, stop and re-evaluate the remote changes rather than overwriting them.
+8. Verify that local `main`, `origin/main`, and the live remote ref resolve to
+   the same commit.
+
+Do not maintain a separate last-reconciled SHA file or ledger field. Git
+ancestry records the reconciled baseline. The lease and open-PR object IDs are
+ephemeral transaction state, not persistent reconciliation metadata. Never open
 or prepare an upstream pull request, and never push to `upstream`.
 
 ## Contributions and Curated External Source Intake
@@ -71,6 +94,36 @@ API, provenance, licensing, testing, and review policies. Policy compliance
 makes a contribution eligible for review; it does not guarantee merger. The
 maintainer may request revisions or decline a contribution because of scope,
 duplication, maintenance cost, or conflict with the fork's design direction.
+
+### Moving `main` and open pull requests
+
+Contributors must expect that periodic upstream reconciliation can change the
+merge base of an open pull request. Maintainers should batch those rewrites,
+avoid unnecessary churn during active review, and may freeze reconciliation
+while a substantial pull request is close to merger.
+
+Contributors own the mathematical content, original implementation, and
+responses to substantive review. Maintainers own branch maintenance and
+integration fallout caused solely by upstream reconciliation or fork-wide
+canonical API migrations. When the pull request author has granted maintainer
+access, a maintainer may prepare the rebase and resolve that repository-driven
+fallout. A force-update may be used only after verifying that the hosting
+service and branch rules permit it. This policy is not standing authorization
+to write to a contributor's branch: both the author's branch permission and
+explicit authorization for the current operation remain required. If either is
+unavailable, coordinate the update with the contributor. If maintainer edits
+also expose workflow-secret access, treat that access as security-sensitive and
+do not use it beyond the authorized integration work.
+
+When updating a pull request after `main` moves, use its retained old merge base
+to replay only the contributor range, normally with
+`git rebase --onto <new-main> <old-merge-base> <pr-head>`. Do not naively rebase
+the old-base branch in a way that replays the obsolete Fidelity stack. Before a
+permitted force-update of the pull request branch, use the retained pre-work
+head object ID as the expected value in a separate explicit force-with-lease.
+If the live head has changed, stop, incorporate the contributor's new commits,
+and begin a new update transaction with a newly captured head object ID; do not
+merely recapture the advanced head and overwrite it.
 
 External formalizations may be proposed through a pull request or selected by
 the maintainer from other repositories. A suggestion, public repository, or
@@ -270,6 +323,8 @@ and documentation checks when they remain applicable to the affected area.
 - `UPSTREAMS.md`: canonical source-repository and provenance registry.
 - `.github/CONTRIBUTING.md`: contribution requirements for pull requests to
   this fork and the separate upstream boundary.
+- `.github/PULL_REQUEST_TEMPLATE.md`: fork-specific submission prompts,
+  verification checklist, and moving-base disclosure.
 - `lakefile.lean` and `lean-toolchain`: project and Lean toolchain definitions.
 - `.agent-workbench.yaml`: human-owned desired workbench configuration.
 - `.agent-workbench.lock.json`: generated sync provenance and checksum ledger.

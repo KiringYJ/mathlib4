@@ -30,7 +30,9 @@ design contract and deferred roadmap.
 ## Branch model
 
 - `main` is the canonical personal branch, GitHub default branch, and daily
-  driver.
+  driver. It is the latest reconciled upstream baseline plus the maintained
+  Fidelity patch stack, and its history may be rewritten by periodic upstream
+  rebases.
 - `upstream/master` is the remote-tracking reference for the official mathlib
   baseline. This fork does not keep a local `master` mirror or publish
   `origin/master`.
@@ -39,10 +41,38 @@ design contract and deferred roadmap.
   branches and should not be merged wholesale into `main` merely to synchronize
   history.
 - `exp/<slug>` may be used for mathematically or API-uncertain experiments.
+- Formal releases are immutable tags and are not moved when `main` is rebased.
 
 All publication goes to this fork's `origin`; nothing in this repository
 authorizes pushes or pull requests to upstream. See
 [AI_AGENT_PROJECT.md](AI_AGENT_PROJECT.md) for the complete maintenance policy.
+
+## Upstream reconciliation
+
+`main` is intentionally rebaseable rather than append-only. Maintainers batch
+upstream reconciliation, avoid unnecessary base rewrites during active pull
+request review, and may temporarily freeze reconciliation while a substantial
+pull request is close to merger. The captured `origin/main` tip must already be
+an ancestor of local `main`; unpublished local Fidelity commits are allowed,
+but remote-only or divergent history stops the reconciliation. The routine
+publication shape is:
+
+```shell
+git fetch origin
+expected_origin_main="$(git rev-parse refs/remotes/origin/main)"
+git fetch upstream
+git rebase upstream/master
+# repair API fallout and validate
+git push --force-with-lease="refs/heads/main:${expected_origin_main}" \
+  origin main:refs/heads/main
+```
+
+These are maintainer operations and still require explicit publication
+authorization. Before rewriting `main`, maintainers inventory open pull requests
+and retain their old merge bases and head object IDs ephemerally. Bare
+`--force-with-lease` and plain `--force` are not permitted. No separate
+last-reconciled SHA is maintained; Git ancestry records the reconciled upstream
+baseline.
 
 ## Getting started
 
@@ -71,13 +101,18 @@ remains current.
 
 ## Using the fork as a dependency
 
-This fork deliberately evolves independently of upstream's public API. Pin an
-exact reviewed commit rather than a moving branch:
+This fork deliberately evolves independently of upstream's public API. For a
+durable dependency, pin an immutable formal release tag rather than the moving
+`main` branch:
 
 ```lean
 require mathlib from git
-  "https://github.com/KiringYJ/mathlib-fidelity.git" @ "<commit-sha>"
+  "https://github.com/KiringYJ/mathlib-fidelity.git" @ "<release-tag>"
 ```
+
+An exact commit from `main` is suitable for short-lived evaluation, but a later
+rebase may make an untagged old commit unreachable. Do not treat such a commit
+as a durable published release.
 
 The upstream
 [dependency guide](https://github.com/leanprover-community/mathlib4/wiki/Using-mathlib4-as-a-dependency)
@@ -91,6 +126,12 @@ in the [contribution guide](.github/CONTRIBUTING.md). Meeting those requirements
 makes a contribution eligible for review but does not guarantee merger;
 maintainers may request revisions or decline work because of scope,
 duplication, maintenance cost, or design direction.
+
+Because `main` may be periodically rebased, an open pull request may need a new
+base. Maintainers batch reconciliation and may handle repository-driven rebase
+or canonical-API fallout when the contributor grants branch access; contributors
+remain responsible for the substance of their contribution. See the contribution
+guide for the permission and security boundaries.
 
 External formalizations may arrive either through a pull request or through
 maintainer-led curated intake. Contributions to this fork are not automatically

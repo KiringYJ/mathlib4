@@ -333,6 +333,18 @@ it does not guarantee merger. The maintainer may request revisions or decline a
 contribution because of scope, duplication, maintenance cost, or conflict with
 the fork's design direction.
 
+The default branch is periodically rebased during upstream reconciliation.
+Maintainers should batch those rewrites, avoid unnecessary merge-base churn
+during active review, and may freeze reconciliation while a substantial pull
+request is close to merger. Contributors own the mathematical content, original
+implementation, and substantive review responses. Maintainers own integration
+fallout caused solely by repository-driven upstream reconciliation or
+fork-wide canonical API migrations, subject to the contributor granting branch
+access when work must be pushed to the contributor's branch. Before rewriting
+`main`, maintainers retain each open pull request's old merge base and head
+object ID ephemerally so that only contributor commits are replayed and any
+force-update uses an exact lease.
+
 External formalizations may be proposed through a pull request or selected by
 the maintainer from other repositories. A suggestion, public repository, or
 valid result does not by itself create a review deadline or permanent backlog.
@@ -437,6 +449,14 @@ migration.
 - `leanprover-community/mathlib4` is the baseline source currently tracked by
   the local remote named `upstream`; it is not the target audience for fork-only
   changes.
+- `main` is a maintained Fidelity transformation stack over the latest
+  reconciled `upstream/master`. Routine reconciliation replays that stack by
+  rebase instead of accumulating upstream merge commits.
+- Reconciliation is batched rather than triggered by every upstream commit.
+  Published release tags and `palomar/<slug>` delivery branches remain separate
+  snapshots and are not moved with `main`.
+- Git ancestry records the upstream base of the replayed stack; no separate
+  last-reconciled SHA is maintained.
 - Reuse upstream definitions and theorems when they are mathematically and
   technically sound. The fork should differ for a reason, not merely for
   novelty.
@@ -444,9 +464,10 @@ migration.
   coherent migration establishes a materially better mathematical interface.
   The cost must still be justified by downstream use, maintenance, performance,
   and verification evidence.
-- Keep changes logically separated and rebasable so upstream updates can be
-  reconciled and design decisions can be reviewed. This discipline serves the
-  fork itself; it is not preparation for upstream pull requests.
+- Keep changes logically separated and rebasable so the Fidelity stack can be
+  replayed on upstream updates and design decisions can be reviewed. This
+  discipline serves the fork itself; it is not preparation for upstream pull
+  requests.
 - Additional source repositories do not become alternate design authorities.
   Material becomes part of this library only through the same faithful,
   canonicalizing integration process.
