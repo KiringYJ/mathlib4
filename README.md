@@ -1,180 +1,106 @@
-# mathlib4
+# mathlib-fidelity
 
-> [!IMPORTANT]
-> This branch belongs to a maintainer-curated downstream distribution of
-> mathlib. It does not use an open pull-request contribution model and its
-> fork-only changes are not prepared for submission to upstream. See
-> [Fork Design Philosophy and Roadmap](FORK_DESIGN.md) for the mathematical and
-> API principles, [External Formalization Recovery Backlog](MIGRATION_BACKLOG.md)
-> for planned ports and reconstructions, and [Source Repository
-> Registry](UPSTREAMS.md) for external source, license, provenance, and
-> integration records. The upstream setup and
-> contribution information retained below describes
-> `leanprover-community/mathlib4`, not this fork's governance.
+`mathlib-fidelity` is a maintainer-curated downstream distribution of
+[mathlib](https://github.com/leanprover-community/mathlib4). It retains
+mathlib's implementation and theorem base while developing an independent,
+mathematician-facing library whose public API prioritizes mathematical fidelity
+and quality of life.
 
-![GitHub CI](https://github.com/leanprover-community/mathlib4/actions/workflows/build.yml/badge.svg?branch=master)
-[![Bors enabled](https://raw.githubusercontent.com/bors-ng/bors-ng.github.io/refs/heads/master/images/badge_small.svg)](https://mathlib-bors-ca18eefec4cb.herokuapp.com/repositories/16)
-[![project chat](https://img.shields.io/badge/zulip-join_chat-brightgreen.svg)](https://leanprover.zulipchat.com)
-[![Gitpod Ready-to-Code](https://img.shields.io/badge/Gitpod-ready--to--code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/leanprover-community/mathlib4)
+This repository does not use an open pull-request contribution model.
+Fork-only changes are developed for this distribution and are not prepared for
+submission to upstream. Upstream remains a source of sound implementation,
+theorems, and updates, but it is not the design authority for this fork.
 
-[Mathlib](https://leanprover-community.github.io) is a user maintained library for the [Lean theorem prover](https://leanprover.github.io).
-It contains both programming infrastructure and mathematics,
-as well as tactics that use the former and allow to develop the latter.
+## Design priorities
 
-## Installation
+- Represent genuinely partial mathematical operations with explicit domains or
+  explicit partiality rather than silent fallback values.
+- Prefer established mathematical vocabulary and discoverable public APIs over
+  representation-driven interfaces.
+- Treat natural formal proofs and real downstream formalizations as tests of
+  API quality.
+- Admit external formalizations through explicit mathematical, licensing,
+  provenance, and implementation review.
 
-You can find detailed instructions to install Lean, mathlib, and supporting tools on [our website](https://leanprover-community.github.io/get_started.html).
-Alternatively, click on one of the buttons below to open a GitHub Codespace or a Gitpod workspace containing the project.
+These are design commitments, not claims that every inherited interface has
+already been migrated. See [FORK_DESIGN.md](FORK_DESIGN.md) for the complete
+design contract and deferred roadmap.
 
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/leanprover-community/mathlib4)
+## Branch model
 
-[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/leanprover-community/mathlib4)
+- `main` is the canonical personal branch, GitHub default branch, and daily
+  driver.
+- `upstream/master` is the remote-tracking reference for the official mathlib
+  baseline. This fork does not keep a local `master` mirror or publish
+  `origin/master`.
+- `palomar/<slug>` branches contain separately maintained Palomar Registry
+  delivery artifacts. They are not alternative default or general development
+  branches and should not be merged wholesale into `main` merely to synchronize
+  history.
+- `exp/<slug>` may be used for mathematically or API-uncertain experiments.
 
-## Using `mathlib4` as a dependency
+All publication goes to this fork's `origin`; nothing in this repository
+authorizes pushes or pull requests to upstream. See
+[AI_AGENT_PROJECT.md](AI_AGENT_PROJECT.md) for the complete maintenance policy.
 
-Please refer to
-[https://github.com/leanprover-community/mathlib4/wiki/Using-mathlib4-as-a-dependency](https://github.com/leanprover-community/mathlib4/wiki/Using-mathlib4-as-a-dependency)
+## Getting started
 
-## Experimenting
+Install Lean and the supporting tools using the
+[upstream mathlib instructions](https://leanprover-community.github.io/get_started.html),
+then clone and build this fork:
 
-Got everything installed? Why not start with the [tutorial project](https://leanprover-community.github.io/install/project.html)?
-
-For more pointers, see [Learning Lean](https://leanprover-community.github.io/learn.html).
-
-## Documentation
-
-Besides the installation guides above and [Lean's general
-documentation](https://docs.lean-lang.org/lean4/doc/), the documentation
-of mathlib consists of:
-
-- [The mathlib4 docs](https://leanprover-community.github.io/mathlib4_docs/index.html): documentation [generated
-  automatically](https://github.com/leanprover/doc-gen4) from the source `.lean` files.
-- A description of [currently covered theories](https://leanprover-community.github.io/theories.html),
-  as well as an [overview](https://leanprover-community.github.io/mathlib-overview.html) for mathematicians.
-- Some [extra Lean documentation](https://leanprover-community.github.io/learn.html) not specific to mathlib (see "Miscellaneous topics")
-- Documentation for people who would like to [contribute to mathlib](https://leanprover-community.github.io/contribute/index.html)
-
-Much of the discussion surrounding mathlib occurs in a [Zulip chat
-room](https://leanprover.zulipchat.com/), and you are welcome to join, or read
-along without signing up.  Questions from users at all levels of expertise are
-welcome!  We also provide an [archive of the public
-discussions](https://leanprover-community.github.io/archive/), which is useful
-for quick reference.
-
-## Contributing
-
-The complete documentation for contributing to ``mathlib`` is located
-[on the community guide contribute to mathlib](https://leanprover-community.github.io/contribute/index.html)
-
-You may want to subscribe to the `mathlib4` channel on [Zulip](https://leanprover.zulipchat.com/) to introduce yourself and your plan to the community.
-Often you can find community members willing to help you get started and advise you on the fit and
-feasibility of your project.
-
-* To obtain precompiled `olean` files, run `lake exe cache get`. (Skipping this step means the next step will be very slow.)
-* To build `mathlib4` run `lake build`.
-* To build and run all tests, run `lake test`.
-* You can use `lake build Mathlib.Import.Path` to build a particular file, e.g. `lake build Mathlib.Algebra.Group.Defs`.
-* If you added a new file, run the following command to update `Mathlib.lean`
-
-  ```shell
-  lake exe mk_all
-  ```
-
-### Guidelines
-
-Mathlib has the following guidelines and conventions that must be followed
-
- - The [style guide](https://leanprover-community.github.io/contribute/style.html)
- - A guide on the [naming convention](https://leanprover-community.github.io/contribute/naming.html)
- - The [documentation style](https://leanprover-community.github.io/contribute/doc.html)
-
-### Downloading cached build files
-
-You can run `lake exe cache get` to download cached build files that are computed by `mathlib4`'s automated workflow.
-
-If something goes mysteriously wrong,
-you can try one of `lake clean` or `rm -rf .lake` before trying `lake exe cache get` again.
-In some circumstances you might try `lake exe cache get!`
-which re-downloads cached build files even if they are available locally.
-
-Call `lake exe cache` to see its help menu.
-
-### Building HTML documentation
-
-The [mathlib4_docs repository](https://github.com/leanprover-community/mathlib4_docs)
-is responsible for generating and publishing the
-[mathlib4 docs](https://leanprover-community.github.io/mathlib4_docs/index.html).
-
-That repo can be used to build the docs locally:
 ```shell
-git clone https://github.com/leanprover-community/mathlib4_docs.git
-cd mathlib4_docs
-cp ../mathlib4/lean-toolchain .
+git clone https://github.com/KiringYJ/mathlib-fidelity.git
+cd mathlib-fidelity
+git remote add upstream https://github.com/leanprover-community/mathlib4.git
+git fetch upstream
 lake exe cache get
-lake build Mathlib:docs
+lake build
 ```
-The last step may take a while (>20 minutes).
-The HTML files can then be found in `.lake/build/doc`.
 
-## Transitioning from Lean 3
+For a focused build or the test suite:
 
-For users familiar with Lean 3 who want to get up to speed in Lean 4 and migrate their existing
-Lean 3 code we have:
+```shell
+lake build Mathlib.Import.Path
+lake test
+```
 
-- A [survival guide](https://github.com/leanprover-community/mathlib4/wiki/Lean-4-survival-guide-for-Lean-3-users)
-  for Lean 3 users
-- [Instructions to run `mathport`](https://github.com/leanprover-community/mathport#running-on-a-project-other-than-mathlib)
-  on a project other than mathlib. `mathport` is the tool the community used to port the entirety
-  of `mathlib` from Lean 3 to Lean 4.
+Run `lake exe mk_all` after adding a new Mathlib module so that `Mathlib.lean`
+remains current.
 
-### Dependencies
+## Using the fork as a dependency
 
-If you are a mathlib contributor and want to update dependencies, use `lake update`,
-or `lake update batteries aesop` (or similar) to update a subset of the dependencies.
-This will update the `lake-manifest.json` file correctly.
-You will need to make a PR after committing the changes to this file.
+This fork deliberately evolves independently of upstream's public API. Pin an
+exact reviewed commit rather than a moving branch:
 
-Please do not run `lake update -Kdoc=on` as previously advised, as the documentation related
-dependencies should only be included when CI is building documentation.
+```lean
+require mathlib from git
+  "https://github.com/KiringYJ/mathlib-fidelity.git" @ "<commit-sha>"
+```
 
-## Maintainers:
+The upstream
+[dependency guide](https://github.com/leanprover-community/mathlib4/wiki/Using-mathlib4-as-a-dependency)
+still applies to the surrounding Lake project setup.
 
-For a list containing more detailed information, see https://leanprover-community.github.io/teams/maintainers.html
+## Project records
 
-* Anne Baanen (@Vierkantor): algebra, number theory, tactics
-* Matthew Robert Ballard (@mattrobball): algebra, algebraic geometry, category theory
-* Riccardo Brasca (@riccardobrasca): algebra, number theory, algebraic geometry, category theory
-* Kevin Buzzard (@kbuzzard): algebra, number theory, algebraic geometry, category theory
-* Mario Carneiro (@digama0): lean formalization, tactics, type theory, proof engineering
-* Bryan Gin-ge Chen (@bryangingechen): documentation, infrastructure
-* Johan Commelin (@jcommelin): algebra, number theory, category theory, algebraic geometry
-* Anatole Dedecker (@ADedecker): topology, functional analysis, calculus
-* Rémy Degenne (@RemyDegenne): probability, measure theory, analysis
-* Floris van Doorn (@fpvandoorn): measure theory, model theory, tactics
-* Frédéric Dupuis (@dupuisf): linear algebra, functional analysis
-* Sébastien Gouëzel (@sgouezel): topology, calculus, geometry, analysis, measure theory
-* Markus Himmel (@TwoFX): category theory
-* Yury G. Kudryashov (@urkud): analysis, topology, measure theory
-* Robert Y. Lewis (@robertylewis): tactics, documentation
-* Jireh Loreaux (@j-loreaux): analysis, topology, operator algebras
-* Heather Macbeth (@hrmacbeth): geometry, analysis
-* Patrick Massot (@patrickmassot): documentation, topology, geometry
-* Bhavik Mehta (@b-mehta): category theory, combinatorics
-* Kyle Miller (@kmill): combinatorics, tactics, metaprogramming
-* Kim Morrison (@kim-em): category theory, tactics
-* Oliver Nash (@ocfnash): algebra, geometry, topology
-* Filippo A. E. Nuccio (@faenuccio): algebra, functional analysis, homology, number theory
-* Joël Riou (@joelriou): category theory, homology, algebraic geometry
-* Michael Rothgang (@grunweg): differential geometry, analysis, topology, linters
-* Damiano Testa (@adomani): algebra, algebraic geometry, number theory, tactics, linters
-* Adam Topaz (@adamtopaz): algebra, category theory, algebraic geometry
-* Eric Wieser (@eric-wieser): algebra, infrastructure
+- [FORK_DESIGN.md](FORK_DESIGN.md) records the fork's mathematical and API
+  design philosophy.
+- [MIGRATION_BACKLOG.md](MIGRATION_BACKLOG.md) tracks selected external
+  formalization recovery and reconstruction work.
+- [UPSTREAMS.md](UPSTREAMS.md) records external source identity, licensing,
+  provenance, integration mode, and status.
+- [AI_AGENT_PROJECT.md](AI_AGENT_PROJECT.md) defines the repository workflow,
+  branch policy, and verification requirements.
 
-## Past maintainers:
+## Upstream resources
 
-* Jeremy Avigad (@avigad): analysis
-* Reid Barton (@rwbarton): category theory, topology
-* Gabriel Ebner (@gebner): tactics, infrastructure, core, formal languages
-* Johannes Hölzl (@johoelzl): measure theory, topology
-* Simon Hudon (@cipher1024): tactics
-* Chris Hughes (@ChrisHughes24): algebra
+- [mathlib repository](https://github.com/leanprover-community/mathlib4)
+- [Installation and learning resources](https://leanprover-community.github.io/get_started.html)
+- [Generated mathlib documentation](https://leanprover-community.github.io/mathlib4_docs/)
+- [Upstream contribution guide](https://leanprover-community.github.io/contribute/)
+- [Lean community Zulip](https://leanprover.zulipchat.com)
+
+## License
+
+This repository is distributed under the [Apache License 2.0](LICENSE).
