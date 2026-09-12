@@ -194,6 +194,15 @@ Apply the following priority order:
 4. Record paper titles, theorem numbers, and textbook-local names only in
    documentation or source cross-reference metadata.
 
+Do not coin an eponymous theorem label from the authors of a paper, its title,
+or its bibliography key. A statement being proved by `Author` and `Coauthor`
+does not establish "the Author--Coauthor theorem" as mathematical vocabulary.
+Without independent evidence that such a name is conventional, use a
+descriptive declaration name and write only that the result was proved by the
+authors, with the paper in the references. In particular, author attribution
+in prose must not be promoted to a bold theorem label or a named-result alias.
+Remove unsupported coined labels when encountered; source attribution remains.
+
 This is one rule for all mathematics, not a privilege reserved for a small list
 of famous results. Eponymous names, descriptive names such as monotone
 convergence, and symbolic names such as the π-λ theorem are treated alike when
@@ -287,6 +296,23 @@ The intended standard is therefore not "strict but painful" or "convenient but
 semantically loose." It is a faithful mathematical API whose routine
 well-definedness work is handled by the library and whose genuine obligations
 remain explicit.
+
+Code quality requires new formalizations to maximize semantic coupling to the
+existing library and to factor shared mechanisms at the most general natural
+abstraction supported by real consumers. Here, coupling means using the same
+canonical definitions, theorems, and proof infrastructure as related modules,
+so that improvements propagate through one dependency path; it does not mean
+introducing cyclic imports or leaking representation details. When two
+developments share a proof engine, move that engine to their weakest natural
+common abstraction and make the specialized results thin corollaries. Do not
+retain a parallel private implementation merely because it follows one source
+more literally.
+
+Mathematical faithfulness constrains public definitions and names, domains,
+hypotheses, conclusions, and theorem interfaces. It does not require proof
+scripts or dependency graphs to imitate the source proof. Once the public
+mathematics is faithful, prefer the proof with the greatest justified reuse,
+coupling, and abstraction, even when its argument differs from the source.
 
 When several proofs establish the same proposition, choose the canonical proof
 by mathematical and architectural evidence rather than source length or raw
