@@ -159,12 +159,12 @@ theorem essSup_comp_le_essSup_map_measure (hf : AEMeasurable f μ)
   exact map_mono (Measure.tendsto_ae_map hf)
 
 theorem MeasurableEmbedding.essSup_map_measure (hf : MeasurableEmbedding f)
-    (hg_co : IsCoboundedUnder (· ≤ ·) (ae (Measure.map f μ hf.measurable.aemeasurable)) g :=
-      by isBoundedDefault)
+    (hg_co : IsCoboundedUnder (· ≤ ·) (ae (Measure.map f μ hf.measurable.aemeasurable)) g := by
+      isBoundedDefault)
     (hgf : IsBoundedUnder (· ≤ ·) (ae μ) (g ∘ f) := by isBoundedDefault)
     (hgf_co : IsCoboundedUnder (· ≤ ·) (ae μ) (g ∘ f) := by isBoundedDefault)
-    (hg : IsBoundedUnder (· ≤ ·) (ae (Measure.map f μ hf.measurable.aemeasurable)) g :=
-      by isBoundedDefault) :
+    (hg : IsBoundedUnder (· ≤ ·) (ae (Measure.map f μ hf.measurable.aemeasurable)) g := by
+      isBoundedDefault) :
     essSup g (Measure.map f μ hf.measurable.aemeasurable) = essSup (g ∘ f) μ := by
   refine le_antisymm ?_ (essSup_comp_le_essSup_map_measure hf.measurable.aemeasurable hgf_co hg)
   refine limsSup_le_limsSup hg_co hgf (fun c h_le => ?_)

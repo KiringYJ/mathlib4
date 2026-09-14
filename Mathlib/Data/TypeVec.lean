@@ -72,8 +72,8 @@ def id {α : TypeVec n} : α ⟹ α := fun _ x => x
 
 
 /-- arrow composition in the category of `TypeVec` -/
-def comp (g : β ⟹ γ) (f : α ⟹ β)
-    : α ⟹ γ :=
+def comp (g : β ⟹ γ) (f : α ⟹ β) :
+    α ⟹ γ :=
   fun i x => g i (f i x)
 
 @[inherit_doc] scoped[MvFunctor] infixr:80 " ⊚ " => TypeVec.comp -- type as \oo

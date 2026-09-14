@@ -176,8 +176,7 @@ set_option backward.isDefEq.respectTransparency.types false in
 lemma opShiftFunctorEquivalence_counitIso_hom_app (X : Cᵒᵖ) (n m : ℤ) (hnm : n + m = 0 := by lia) :
     (opShiftFunctorEquivalence C n).counitIso.hom.app X =
       (shiftFunctorOpIso C n m hnm).hom.app (Opposite.op (X.unop⟦n⟧)) ≫
-        ((shiftFunctorCompIsoId C n m hnm).inv.app X.unop).op
-        := by
+        ((shiftFunctorCompIsoId C n m hnm).inv.app X.unop).op := by
   obtain rfl : m = -n := by lia
   rfl
 

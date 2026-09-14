@@ -219,7 +219,7 @@ theorem symplComp_symplComp_eq [CompleteSpace H] (S : StandardSubspace H) :
     S.symplComp.symplComp = S := toClosedSubmodule_inj.mp ClosedSubmodule.symplComp_symplComp_eq
 
 lemma involutive_symplComp [CompleteSpace H] :
-    Function.Involutive (symplComp : StandardSubspace H → StandardSubspace H)
-  := symplComp_symplComp_eq
+    Function.Involutive (symplComp : StandardSubspace H → StandardSubspace H) :=
+  symplComp_symplComp_eq
 
 end StandardSubspace

@@ -111,8 +111,8 @@ lemma dual_hull (s : Set M) : dual p (hull R s) = dual p s := by
 @[deprecated "`PointedCone.span` was renamed to `PointedCone.hull`" (since := "2026-03-22")]
 alias dual_span := dual_hull
 
-@[simp] lemma dual_sup (C D : PointedCone R M) : dual p (C ⊔ D : PointedCone R M) = dual p (C ∪ D)
-  := by simp [← dual_hull]
+@[simp] lemma dual_sup (C D : PointedCone R M) :
+    dual p (C ⊔ D : PointedCone R M) = dual p (C ∪ D) := by simp [← dual_hull]
 
 variable {M' : Type*} [AddCommMonoid M'] [Module R M']
 

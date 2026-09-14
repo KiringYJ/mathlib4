@@ -229,8 +229,8 @@ def throwNone {e pα?} (t : MetaM (Strictness zα e pα?)) : MetaM (Strictness z
   | r => pure r
 
 /-- Attempts to prove a `Strictness` result when `e` evaluates to a literal number. -/
-def normNumPositivity (pα : Q(PartialOrder $α)) (e : Q($α))
-    : MetaM (Strictness zα e (some pα)) := catchNone do
+def normNumPositivity (pα : Q(PartialOrder $α)) (e : Q($α)) :
+    MetaM (Strictness zα e (some pα)) := catchNone do
   match ← NormNum.derive e with
   | .isBool .. => failure
   | .isNat _ lit p =>
@@ -320,8 +320,8 @@ def positivityCanon (pα : Q(PartialOrder $α)) (e : Q($α)) : MetaM (Strictness
   pure (.nonnegative q(zero_le (a := $e)))
 
 /-- A variation on `assumption` when the hypothesis is `lo ≤ e` where `lo` is a numeral. -/
-def compareHypLE (pα : Q(PartialOrder $α)) (lo e : Q($α)) (p₂ : Q($lo ≤ $e))
-    : MetaM (Strictness zα e pα) := do
+def compareHypLE (pα : Q(PartialOrder $α)) (lo e : Q($α)) (p₂ : Q($lo ≤ $e)) :
+    MetaM (Strictness zα e pα) := do
   match ← normNumPositivity zα pα lo with
   | .positive p₁ => pure (.positive q(lt_of_lt_of_le $p₁ $p₂))
   | .nonnegative p₁ => pure (.nonnegative q(le_trans $p₁ $p₂))

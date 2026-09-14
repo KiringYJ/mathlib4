@@ -41,8 +41,8 @@ lemma baseChangeCompactsInside_mono {U V : Opens α} (h : U ⟶ V) :
 @[simp]
 lemma baseChangeCompactsInside_comp {U V W : Opens α} (h : U ⟶ V) (k : V ⟶ W)
     (K : U.compactsInside) :
-    baseChangeCompactsInside (h ≫ k) K = baseChangeCompactsInside k (baseChangeCompactsInside h K)
-  := by rfl
+    baseChangeCompactsInside (h ≫ k) K =
+      baseChangeCompactsInside k (baseChangeCompactsInside h K) := by rfl
 
 @[simp]
 lemma baseChangeOpenNhds_id {U : Opens α} (K : U.compactsInside) :

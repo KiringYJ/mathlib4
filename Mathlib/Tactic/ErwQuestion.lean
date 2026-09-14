@@ -138,7 +138,7 @@ elab_rules : tactic
         (do
           let g ← getMainGoal
           rewriteTarget term symm cfg
-          evalTactic (←`(tactic| try with_reducible rfl))
+          evalTactic (← `(tactic| try with_reducible rfl))
           let e := (← instantiateMVars (.mvar g)).headBeta
           let (tgt, inferred) ← withRef tk do extractRewriteEq e
           let (_, msgs) ← (logDiffs tk tgt inferred).run #[]

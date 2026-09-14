@@ -193,8 +193,8 @@ def wInd {α : TypeVec n} {C : P.W α → Sort v}
 theorem wInd_wMk {α : TypeVec n} {C : P.W α → Sort v}
     (ih : ∀ (a : P.A) (f' : P.drop.B a ⟹ α) (f : P.last.B a → P.W α),
         (∀ i, C (f i)) → C (P.wMk a f' f))
-    {a : P.drop.A} {f' : P.drop.B a ⟹ α} {f : P.last.B a → P.W α}
-    : wInd P ih (wMk P a f' f) = ih a f' f (fun i => wInd P ih (f i)) := rfl
+    {a : P.drop.A} {f' : P.drop.B a ⟹ α} {f : P.last.B a → P.W α} :
+    wInd P ih (wMk P a f' f) = ih a f' f (fun i => wInd P ih (f i)) := rfl
 
 /-- Cases lemma for `W` types -/
 @[elab_as_elim]

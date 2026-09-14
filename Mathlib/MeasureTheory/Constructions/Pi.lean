@@ -162,8 +162,7 @@ theorem tprod_nil (μ : ∀ i, Measure (X i)) [∀ i, SigmaFinite (μ i)] :
 @[simp]
 theorem tprod_cons (i : δ) (l : List δ) (μ : ∀ i, Measure (X i))
     [∀ i, SigmaFinite (μ i)] :
-    Measure.tprod (i :: l) μ = (μ i).prod (Measure.tprod l μ) :=
-  by
+    Measure.tprod (i :: l) μ = (μ i).prod (Measure.tprod l μ) := by
     unfold Measure.tprod tprodBundled
     congr
 

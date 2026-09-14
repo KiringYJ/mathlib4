@@ -111,8 +111,7 @@ lemma IndepFun.process_indepFun {𝓧 : S → Type*} {𝓨 : Type*}
   rintro - - ⟨-, ⟨I, s, hs, rfl⟩, rfl⟩ ⟨t, ht, rfl⟩
   simp only [Set.mem_pi, Set.mem_univ, Set.mem_ofPred_eq, forall_const] at hs
   have : (fun ω i ↦ X i ω) ⁻¹' .pi I s =
-      (fun ω (i : I) ↦ X i ω) ⁻¹' .pi (SetLike.coe Finset.univ) (fun i ↦ s i)
-       := by
+      (fun ω (i : I) ↦ X i ω) ⁻¹' .pi (SetLike.coe Finset.univ) (fun i ↦ s i) := by
     ext; simp
   have h1 : MeasurableSet <| .pi (SetLike.coe Finset.univ) (fun (i : I) ↦ s i) :=
     .pi (Finset.countable_toSet _) (fun _ _ ↦ hs _)

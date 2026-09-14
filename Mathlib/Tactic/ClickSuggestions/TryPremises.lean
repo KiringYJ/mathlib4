@@ -40,8 +40,9 @@ discrimination tree. -/
 def getCandidatesAux (rootExpr subExpr : Expr) (gpos : Array GrwPos) (rwKind : RwKind)
     (rflTarget? : Option Expr) (reportProgress : String → BaseIO Unit)
     (rw : Expr → MetaM (MatchResult RwLemma)) (grw : Expr → MetaM (MatchResult GrwLemma))
-    (app : Expr → MetaM (MatchResult ApplyLemma)) (appAt : Expr → MetaM (MatchResult ApplyAtLemma))
-    : ClickSuggestionsM (Array Candidates) := do
+    (app : Expr → MetaM (MatchResult ApplyLemma))
+    (appAt : Expr → MetaM (MatchResult ApplyAtLemma)) :
+    ClickSuggestionsM (Array Candidates) := do
   let mut cands : Std.TreeMap Nat (Array Candidates) := {}
   /- The order in which we show the suggestions for the same pattern for different tactics
   depends on the following insertion order.

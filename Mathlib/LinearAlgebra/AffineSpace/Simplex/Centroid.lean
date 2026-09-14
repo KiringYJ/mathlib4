@@ -472,8 +472,8 @@ theorem median_eq_line_point_centroid [CharZero k] (s : Simplex k P n) (i : Fin 
     unfold median
     apply affineSpan_pair_le_of_right_mem
     rw [faceOppositeCentroid_eq_smul_vsub_vadd_point]
-    have h : (n : k)⁻¹ • (s.centroid -ᵥ s.points i) = (-1 / n : k) • (s.points i -ᵥ s.centroid)
-        := by
+    have h : (n : k)⁻¹ • (s.centroid -ᵥ s.points i) =
+        (-1 / n : k) • (s.points i -ᵥ s.centroid) := by
       rw [← neg_vsub_eq_vsub_rev]
       have : -(s.points i -ᵥ s.centroid) = (-1 : k) • (s.points i -ᵥ s.centroid) := by simp
       rw [this, smul_smul]

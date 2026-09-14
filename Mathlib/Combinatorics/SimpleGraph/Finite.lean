@@ -233,8 +233,8 @@ theorem neighborFinset_sup_of_disjoint {G₁ G₂ : SimpleGraph V}
 @[simp] lemma neighborFinset_nonempty : (G.neighborFinset v).Nonempty ↔ ¬ G.IsIsolated v := by
   simp [nonempty_iff_ne_empty]
 
-protected alias ⟨IsIsolated.of_neighborFinset_eq_empty, IsIsolated.neighborFinset_eq_empty⟩
-    := neighborFinset_eq_empty
+protected alias ⟨IsIsolated.of_neighborFinset_eq_empty, IsIsolated.neighborFinset_eq_empty⟩ :=
+    neighborFinset_eq_empty
 
 attribute [simp] IsIsolated.neighborFinset_eq_empty
 

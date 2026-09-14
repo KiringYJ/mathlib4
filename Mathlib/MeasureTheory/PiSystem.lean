@@ -558,8 +558,7 @@ theorem ext {d₁ d₂ : DynkinSystem α} (h : ∀ s : Set α, s ∈ d₁ ↔ s 
 
 variable (d : DynkinSystem α)
 
-theorem compl_mem_iff {a} : aᶜ ∈ d ↔ a ∈ d :=
-  by
+theorem compl_mem_iff {a} : aᶜ ∈ d ↔ a ∈ d := by
     change aᶜ ∈ d.carrier ↔ a ∈ d.carrier
     exact ⟨fun h => by simpa using d.compl_mem h, d.compl_mem⟩
 

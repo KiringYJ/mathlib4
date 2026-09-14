@@ -286,8 +286,7 @@ theorem IsMultiplyPreprimitive.of_bijective_map
         exact hm x hx⟩
     let f' : SubMulAction.ofFixingSubgroup M s →ₑ[φ'] SubMulAction.ofFixingSubgroup N t :=
       { toFun := fun ⟨x, hx⟩ => ⟨f.toFun x, fun h => hx (Set.mem_preimage.mp h)⟩
-        map_smul' := fun ⟨m, hm⟩ ⟨x, hx⟩ =>
-          by
+        map_smul' := fun ⟨m, hm⟩ ⟨x, hx⟩ => by
           rw [← SetLike.coe_eq_coe]
           exact f.map_smul' m x }
     have hf' : Function.Surjective f' := by

@@ -207,8 +207,7 @@ section MeasurableFunctions
 open SigmaAlgebra
 
 theorem measurable_iff_le_map {m₁ : SigmaAlgebra α} {m₂ : SigmaAlgebra β} {f : α → β} :
-    Measurable f ↔ m₂ ≤ m₁.map f :=
-  by
+    Measurable f ↔ m₂ ≤ m₁.map f := by
     change (∀ {t : Set β}, t ∈ m₂ → f ⁻¹' t ∈ m₁) ↔
       ∀ {t : Set β}, t ∈ m₂ → f ⁻¹' t ∈ m₁
     rfl

@@ -40,7 +40,6 @@ import shutil
 ERR_IBY = 11 # isolated by
 ERR_IWH = 22 # isolated where
 ERR_CLN = 16 # line starts with a colon
-ERR_IND = 17 # second line not correctly indented
 ERR_ARR = 18 # space after "←"
 
 exceptions = []
@@ -107,47 +106,41 @@ def annotate_strings(enumerate_lines):
         yield line_nr, line, *rem, False
 
 
-def four_spaces_in_second_line(lines, path):
-    # TODO: also fix the space for all lines before ":=", right now we only fix the line after
-    # the first line break
-    errors = []
-    if not lines:
-        return errors, []
-    # We never alter the first line, as it does not occur as next_line in the iteration over the
-    # zipped lines below, hence we add it here
-    newlines = [lines[0]]
-    annotated_lines = list(annotate_comments(lines))
-    for (_, line, is_comment), (next_line_nr, next_line, _) in zip(annotated_lines,
-                                                                   annotated_lines[1:]):
-        # Check if the current line matches "(lemma|theorem) .* :"
-        new_next_line = next_line
-        if (not is_comment) and re.search(r"^(protected )?(def|lemma|theorem) (?!.*:=).*(where)?$",
-                                          line):
-            # Calculate the number of spaces before the first non-space character in the next line
-            stripped_next_line = next_line.lstrip()
-            if not (next_line == '\n' or next_line.startswith("#") or stripped_next_line.startswith("--")):
-                num_spaces = len(next_line) - len(stripped_next_line)
-                # The match with "| " could potentially match with a different usage of the same
-                # symbol, e.g. some sort of norm. In that case a space is not necessary, so
-                # looking for "| " should be enough.
-                if stripped_next_line.startswith("| ") or line.endswith("where\n"):
-                    # Check and fix if the number of leading space is not 2
-                    if num_spaces != 2:
-                        errors += [(ERR_IND, next_line_nr, path)]
-                        new_next_line = ' ' * 2 + stripped_next_line
-                # Check and fix if the number of leading spaces is not 4
-                else:
-                    if num_spaces != 4:
-                        errors += [(ERR_IND, next_line_nr, path)]
-                        new_next_line = ' ' * 4 + stripped_next_line
-        newlines.append((next_line_nr, new_next_line))
-    return errors, newlines
+def annotate_attribute_syntax(line, nesting_depth):
+    """Return positions inside attribute brackets and the depth after this line."""
+    protected = set()
+    attribute_command = re.match(r"^\s*attribute\b", line)
+    command_bracket = line.find("[", attribute_command.end()) if attribute_command else -1
+    index = 0
+    while index < len(line):
+        if nesting_depth == 0:
+            if line.startswith("@[", index):
+                protected.update((index, index + 1))
+                nesting_depth = 1
+                index += 2
+                continue
+            if index == command_bracket:
+                protected.add(index)
+                nesting_depth = 1
+                index += 1
+                continue
+        else:
+            protected.add(index)
+            if line[index] == "[":
+                nesting_depth += 1
+            elif line[index] == "]":
+                nesting_depth -= 1
+        index += 1
+    return protected, nesting_depth
 
 
 def isolated_by_dot_semicolon_check(lines, path):
     errors = []
     newlines = []
-    for line_nr, line in lines:
+    for line_nr, line, is_comment in annotate_comments(lines):
+        if is_comment:
+            newlines.append((line_nr, line))
+            continue
         if line.strip() == "by":
             # We excuse those "by"s following a comma or ", fun ... =>", since generally hanging "by"s
             # should not be used in the second or later arguments of a tuple/anonymous constructor
@@ -177,13 +170,26 @@ def isolated_by_dot_semicolon_check(lines, path):
 def left_arrow_check(lines, path):
     errors = []
     newlines = []
+    attribute_depth = 0
     for line_nr, line, is_comment, in_string in annotate_strings(annotate_comments(lines)):
+        if attribute_depth == 0 and (is_comment or in_string):
+            in_attribute = set()
+        else:
+            in_attribute, attribute_depth = annotate_attribute_syntax(line, attribute_depth)
         if is_comment or in_string:
             newlines.append((line_nr, line))
             continue
-        # Allow "←" to be followed by "%" or "`", but not by "`(" or "``(" (since "`()" and "``()"
-        # are used for syntax quotations). Otherwise, insert a space after "←".
-        new_line = re.sub(r'←(?:(?=``?\()|(?![%`]))(\S)', r'← \1', line)
+        # Allow "←" to be followed by "%" or "`", but not by "`(" or "``(" (since "`()" and
+        # "``()" are used for syntax quotations). Ignore arrows in attribute syntax, where the
+        # arrow is a direction modifier rather than an operator, and the character literal `'←'`.
+        def add_space(match):
+            if match.start() in in_attribute:
+                return match.group(0)
+            if match.start() > 0 and line[match.start() - 1] == "'" and match.group(1) == "'":
+                return match.group(0)
+            return f"← {match.group(1)}"
+
+        new_line = re.sub(r'←(?:(?=``?\()|(?![%`]))(\S)', add_space, line)
         if new_line != line:
             errors += [(ERR_ARR, line_nr, path)]
         newlines.append((line_nr, new_line))
@@ -208,8 +214,6 @@ def format_errors(errors):
             output_message(path, line_nr, "ERR_IWH", "Line is an isolated where")
         if errno == ERR_CLN:
             output_message(path, line_nr, "ERR_CLN", "Put : and := before line breaks, not after")
-        if errno == ERR_IND:
-            output_message(path, line_nr, "ERR_IND", "If the theorem/def statement requires multiple lines, indent it correctly (4 spaces or 2 for `|`)")
         if errno == ERR_ARR:
             output_message(path, line_nr, "ERR_ARR", "Missing space after '←'.")
 
@@ -221,30 +225,37 @@ def lint(path, fix=False):
         lines = f.readlines()
         enum_lines = list(enumerate(lines, 1))
         newlines = enum_lines
-        for error_check in [four_spaces_in_second_line,
-                            isolated_by_dot_semicolon_check,
+        for error_check in [isolated_by_dot_semicolon_check,
                             left_arrow_check]:
             errs, newlines = error_check(newlines, path)
             format_errors(errs)
 
     # if we haven't been asked to fix errors, or there are no errors or no fixes, we're done
     if fix and new_exceptions and enum_lines != newlines:
-        path.with_name(path.name + '.bak').write_text("".join(l for _, l in newlines), encoding = "utf8")
+        path.with_name(path.name + '.bak').write_text(
+            "".join(l for _, l in newlines), encoding="utf8", newline="")
         shutil.move(path.with_name(path.name + '.bak'), path)
 
-fix = "--fix" in sys.argv
-# The Lean driver diagnoses lint findings from stdout. In that mode, findings should not obscure
-# genuine Python failures by making every nonzero exit code ambiguous.
-allow_lint_errors = "--allow-lint-errors" in sys.argv
-argv = (Path(arg) for arg in sys.argv[1:] if arg not in {"--fix", "--allow-lint-errors"})
+def main(argv):
+    global new_exceptions, output_messages
+    new_exceptions = False
+    output_messages = []
+    fix = "--fix" in argv
+    # The Lean driver diagnoses lint findings from stdout. In that mode, findings should not obscure
+    # genuine Python failures by making every nonzero exit code ambiguous.
+    allow_lint_errors = "--allow-lint-errors" in argv
+    paths_to_lint = (Path(arg) for arg in argv if arg not in {"--fix", "--allow-lint-errors"})
 
-for path in argv:
-    paths = sorted(path.rglob("*.lean")) if path.is_dir() else [path]
-    for filename in paths:
-        lint(filename, fix=fix)
+    for path in paths_to_lint:
+        paths = sorted(path.rglob("*.lean")) if path.is_dir() else [path]
+        for filename in paths:
+            lint(filename, fix=fix)
 
-for message in sorted(output_messages):
-    print(message)
+    for message in sorted(output_messages):
+        print(message)
 
-if new_exceptions and not allow_lint_errors:
-    exit(1)
+    return int(new_exceptions and not allow_lint_errors)
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))

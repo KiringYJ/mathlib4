@@ -205,8 +205,8 @@ variable {e} in
 private theorem finrank_mod_auxTransvection_mul_fixed {f : Dual K V} {u : V}
     {hf : e.fixedSubmodule ⊔ K ∙ (e u - u) ≤ LinearMap.ker f}
     (hfu : f u = 1) (hu : u ∉ e.fixedSubmodule) :
-    finrank K (V ⧸ (auxTransvection hf * e).fixedSubmodule) + 1 = finrank K (V ⧸ e.fixedSubmodule)
-    := by
+    finrank K (V ⧸ (auxTransvection hf * e).fixedSubmodule) + 1 =
+      finrank K (V ⧸ e.fixedSubmodule) := by
   rw [auxTransvection_mul_fixed hfu]
   exact finrank_quotient_sup_span_singleton hu
 

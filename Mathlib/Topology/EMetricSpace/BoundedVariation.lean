@@ -490,7 +490,7 @@ private theorem _root_.BoundedVariationOn.of_finset {E} [PseudoMetricSpace E] (f
 the space's distances makes the total variation finite). -/
 @[simp]
 theorem _root_.BoundedVariationOn.of_finite {E} [PseudoMetricSpace E] (f : α → E) (s : Set α)
-[Finite s] : BoundedVariationOn f s := by
+    [Finite s] : BoundedVariationOn f s := by
   simpa using BoundedVariationOn.of_finset f s.toFinite.toFinset
 
 /-! ### Composition of bounded variation functions with monotone functions -/
