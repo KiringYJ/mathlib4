@@ -39,10 +39,11 @@ For every strict-partiality migration in the S--XL sections below:
   The overview now describes pushforward only along an a.e.-measurable map and no longer documents
   an invalid-domain fallback.
 
-- [ ] **Require parabolicity for `GeneralLinearGroup.parabolicEigenvalue`.**
-  `Mathlib/LinearAlgebra/Matrix/GeneralLinearGroup/FinTwo.lean:103` exposes `trace / 2` as an
-  eigenvalue for every matrix although the docstring calls the nonparabolic case junk.  Make the
-  eigenvalue operation take `m.IsParabolic`; retain half-trace under its own total name.
+- [x] **Require parabolicity for `GeneralLinearGroup.parabolicEigenvalue`.**
+  `Matrix.parabolicEigenvalue` now takes `m.IsParabolic` and requires that two be nonzero in the
+  field; `GeneralLinearGroup.parabolicEigenvalue` provides the same proof-last API directly on
+  units.  The underlying expression remains available as `halfTrace`, with simplification lemmas
+  connecting the strict operations to that proof-independent normal form.
 
 - [ ] **Make real-valued Dirichlet density conditional on existence.**
   `Mathlib/NumberTheory/NumberField/DirichletDensity.lean:90` defines
